@@ -1011,41 +1011,6 @@ func _smokeCase72() {
 	fmt.Println(workplace)
 }
 
-func _smokeCase73() {
-	i9Verification, err := client.I9Verifications.List(context.Background(), sdk.I9VerificationListParams{
-		Limit: sdk.F[string]("limit"),
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(i9Verification)
-}
-
-func _smokeCase74() {
-	i9Verification, err := client.I9Verifications.List(context.Background(), sdk.I9VerificationListParams{
-		Limit:     sdk.F[string]("limit"),
-		AfterID:   sdk.F[string]("i9v_1234"),
-		BeforeID:  sdk.F[string]("i9v_1234"),
-		Statuses:  sdk.F[[]sdk.I9VerificationListParamsStatus]([]sdk.I9VerificationListParamsStatus{"not_started"}),
-		WorkerIDs: sdk.F[[]string]([]string{"wrk_1234"}),
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(i9Verification)
-}
-
-func _smokeCase75() {
-	i9Verification, err := client.I9Verifications.Get(context.Background(), "i9v_1234")
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(i9Verification)
-}
-
 var cases = []smokeCase{
 	{
 		Operation: "list",
@@ -1606,29 +1571,6 @@ var cases = []smokeCase{
 		Path:      "/v1/workplaces/{id}",
 		Label:     "all params",
 		Run:       _smokeCase72,
-	},
-
-	{
-		Operation: "list",
-		Method:    "GET",
-		Path:      "/v1/i9-verifications",
-		Label:     "required params",
-		Run:       _smokeCase73,
-	},
-
-	{
-		Operation: "list",
-		Method:    "GET",
-		Path:      "/v1/i9-verifications",
-		Label:     "all params",
-		Run:       _smokeCase74,
-	},
-
-	{
-		Operation: "retrieve",
-		Method:    "GET",
-		Path:      "/v1/i9-verifications/{id}",
-		Run:       _smokeCase75,
 	},
 }
 

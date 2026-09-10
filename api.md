@@ -66,9 +66,6 @@ Complete reference of every operation, grouped by resource. See [the README](./R
   - [List Workplaces](#list-workplaces)
   - [Create Workplace](#create-workplace)
   - [Update Workplace](#update-workplace)
-- [`I9Verifications`](#i9verifications)
-  - [List I-9 verifications](#list-i-9-verifications)
-  - [Get I-9 verification](#get-i-9-verification)
 
 ## Setup
 
@@ -1072,45 +1069,4 @@ if err != nil {
 }
 
 fmt.Println(workplace)
-```
-
-## `I9Verifications`
-
-Read company I-9 verification metadata, including retained forms, without exposing form contents.
-
-### List I-9 verifications
-
-List current and retained company I-9 verifications in all workflow states, newest first. Requires workers:compliance read access. Filters combine with AND across parameters and OR within each array. Count covers all matches before pagination. Use either afterId or beforeId; a missing or filter-mismatched cursor returns 400, so restart pagination if a filtered cursor changes state. Only verifications linked to a canonical company worker are returned.
-
-| Direction | Type |
-| --- | --- |
-| Request | [`I9VerificationListParams`](./i9verification.go) |
-| Response | [`I9VerificationListResponse`](./i9verification.go) |
-
-```go
-i9Verification, err := client.I9Verifications.List(context.Background(), sdk.I9VerificationListParams{
-	Limit: sdk.F[string]("limit"),
-})
-if err != nil {
-	panic(err)
-}
-
-fmt.Println(i9Verification)
-```
-
-### Get I-9 verification
-
-Get a current or retained I-9 verification by its i9v_ ID. Requires workers:compliance read access. Returns the same metadata as the list endpoint. Missing verifications and verifications outside the company or without a canonical worker return 404.
-
-| Direction | Type |
-| --- | --- |
-| Response | [`I9VerificationGetResponse`](./i9verification.go) |
-
-```go
-i9Verification, err := client.I9Verifications.Get(context.Background(), "i9v_1234")
-if err != nil {
-	panic(err)
-}
-
-fmt.Println(i9Verification)
 ```
