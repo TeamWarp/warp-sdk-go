@@ -938,6 +938,17 @@ func _smokeCase66() {
 }
 
 func _smokeCase67() {
+	worker, err := client.Workers.RevealSsn(context.Background(), sdk.WorkerRevealSsnParams{
+		WorkerIDs: sdk.F[[]string]([]string{"wrk_khac8380c2Lm", "wrk_q7Vm2pR9xK4c"}),
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(worker)
+}
+
+func _smokeCase68() {
 	workplace, err := client.Workplaces.List(context.Background(), sdk.WorkplaceListParams{
 		Limit: sdk.F[string]("limit"),
 	})
@@ -948,7 +959,7 @@ func _smokeCase67() {
 	fmt.Println(workplace)
 }
 
-func _smokeCase68() {
+func _smokeCase69() {
 	workplace, err := client.Workplaces.List(context.Background(), sdk.WorkplaceListParams{
 		Limit:    sdk.F[string]("limit"),
 		AfterID:  sdk.F[string]("wkp_1234"),
@@ -961,7 +972,7 @@ func _smokeCase68() {
 	fmt.Println(workplace)
 }
 
-func _smokeCase69() {
+func _smokeCase70() {
 	workplace, err := client.Workplaces.New(context.Background(), sdk.WorkplaceNewParams{
 		Address: sdk.F[sdk.WorkplaceNewParamsAddress](sdk.WorkplaceNewParamsAddress{
 			Line1:      sdk.F[string]("x"),
@@ -980,7 +991,7 @@ func _smokeCase69() {
 	fmt.Println(workplace)
 }
 
-func _smokeCase70() {
+func _smokeCase71() {
 	workplace, err := client.Workplaces.Update(context.Background(), "wkp_1234", sdk.WorkplaceUpdateParams{})
 	if err != nil {
 		panic(err)
@@ -989,7 +1000,7 @@ func _smokeCase70() {
 	fmt.Println(workplace)
 }
 
-func _smokeCase71() {
+func _smokeCase72() {
 	workplace, err := client.Workplaces.Update(context.Background(), "wkp_1234", sdk.WorkplaceUpdateParams{
 		Name: sdk.F[string](""),
 	})
@@ -998,6 +1009,41 @@ func _smokeCase71() {
 	}
 
 	fmt.Println(workplace)
+}
+
+func _smokeCase73() {
+	i9Verification, err := client.I9Verifications.List(context.Background(), sdk.I9VerificationListParams{
+		Limit: sdk.F[string]("limit"),
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(i9Verification)
+}
+
+func _smokeCase74() {
+	i9Verification, err := client.I9Verifications.List(context.Background(), sdk.I9VerificationListParams{
+		Limit:     sdk.F[string]("limit"),
+		AfterID:   sdk.F[string]("i9v_1234"),
+		BeforeID:  sdk.F[string]("i9v_1234"),
+		Statuses:  sdk.F[[]sdk.I9VerificationListParamsStatus]([]sdk.I9VerificationListParamsStatus{"not_started"}),
+		WorkerIDs: sdk.F[[]string]([]string{"wrk_1234"}),
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(i9Verification)
+}
+
+func _smokeCase75() {
+	i9Verification, err := client.I9Verifications.Get(context.Background(), "i9v_1234")
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(i9Verification)
 }
 
 var cases = []smokeCase{
@@ -1517,10 +1563,9 @@ var cases = []smokeCase{
 	},
 
 	{
-		Operation: "list",
-		Method:    "GET",
-		Path:      "/v1/workplaces",
-		Label:     "required params",
+		Operation: "revealSsn",
+		Method:    "POST",
+		Path:      "/v1/workers/reveal_ssn",
 		Run:       _smokeCase67,
 	},
 
@@ -1528,22 +1573,22 @@ var cases = []smokeCase{
 		Operation: "list",
 		Method:    "GET",
 		Path:      "/v1/workplaces",
-		Label:     "all params",
+		Label:     "required params",
 		Run:       _smokeCase68,
+	},
+
+	{
+		Operation: "list",
+		Method:    "GET",
+		Path:      "/v1/workplaces",
+		Label:     "all params",
+		Run:       _smokeCase69,
 	},
 
 	{
 		Operation: "create",
 		Method:    "POST",
 		Path:      "/v1/workplaces",
-		Run:       _smokeCase69,
-	},
-
-	{
-		Operation: "update",
-		Method:    "PATCH",
-		Path:      "/v1/workplaces/{id}",
-		Label:     "required params",
 		Run:       _smokeCase70,
 	},
 
@@ -1551,8 +1596,39 @@ var cases = []smokeCase{
 		Operation: "update",
 		Method:    "PATCH",
 		Path:      "/v1/workplaces/{id}",
-		Label:     "all params",
+		Label:     "required params",
 		Run:       _smokeCase71,
+	},
+
+	{
+		Operation: "update",
+		Method:    "PATCH",
+		Path:      "/v1/workplaces/{id}",
+		Label:     "all params",
+		Run:       _smokeCase72,
+	},
+
+	{
+		Operation: "list",
+		Method:    "GET",
+		Path:      "/v1/i9-verifications",
+		Label:     "required params",
+		Run:       _smokeCase73,
+	},
+
+	{
+		Operation: "list",
+		Method:    "GET",
+		Path:      "/v1/i9-verifications",
+		Label:     "all params",
+		Run:       _smokeCase74,
+	},
+
+	{
+		Operation: "retrieve",
+		Method:    "GET",
+		Path:      "/v1/i9-verifications/{id}",
+		Run:       _smokeCase75,
 	},
 }
 

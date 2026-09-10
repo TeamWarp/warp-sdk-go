@@ -237,6 +237,35 @@ func (r *WorkerService) Invite(ctx context.Context, id string, opts ...option.Re
 	return res, err
 }
 
+// Reveal full Social Security numbers for up to 50 workers. Requires the workers:pii read scope. Results preserve request order and use null when a worker has no SSN on file. The request fails if any worker is not found, emits one audit event per worker, and returns Cache-Control: private, no-store.
+//
+// Parameters:
+//
+//	ctx: Context for the request.
+//	body: WorkerRevealSsnParams request parameters.
+//	opts: Options to apply to this request.
+//
+// Returns:
+//
+//	*[]PublicWorkerSsn: Success
+//
+// Example:
+//
+//	worker, err := client.Workers.RevealSsn(context.Background(), sdk.WorkerRevealSsnParams{
+//		WorkerIDs: sdk.F[[]string]([]string{"wrk_khac8380c2Lm", "wrk_q7Vm2pR9xK4c"}),
+//	})
+//	if err != nil {
+//		panic(err)
+//	}
+//
+//	fmt.Println(worker)
+func (r *WorkerService) RevealSsn(ctx context.Context, body WorkerRevealSsnParams, opts ...option.RequestOption) (res *[]PublicWorkerSsn, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "v1/workers/reveal_ssn"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return res, err
+}
+
 type PublicWorkerCompensation struct {
 	// The tag of the pay rate.
 	PayRateID string      `json:"payRateId" api:"required"`
@@ -948,6 +977,31 @@ func (r RemoteWorkLocationState) IsKnown() bool {
 	return false
 }
 
+type PublicWorkerSsn struct {
+	// The id of the worker.
+	ID string `json:"id" api:"required"`
+	// The nine-digit Social Security number, or null when the worker has no SSN on
+	// file.
+	Ssn  string              `json:"ssn" api:"required,nullable"`
+	JSON publicWorkerSsnJSON `json:"-"`
+}
+
+// publicWorkerSsnJSON contains the JSON metadata for the struct [PublicWorkerSsn]
+type publicWorkerSsnJSON struct {
+	ID          apijson.Field
+	Ssn         apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicWorkerSsn) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicWorkerSsnJSON) RawJSON() string {
+	return r.raw
+}
+
 type WorkerListParams struct {
 	Limit     param.Field[string]                   `query:"limit" api:"required"`
 	AfterID   param.Field[string]                   `query:"afterId"`
@@ -1638,6 +1692,15 @@ func (r WorkerNewContractorParamsPaySchedule) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+type WorkerRevealSsnParams struct {
+	// One to 50 unique worker ids. Results are returned in this order.
+	WorkerIDs param.Field[[]string] `json:"workerIds" api:"required"`
+}
+
+func (r WorkerRevealSsnParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 type WorkerListResponse struct {
