@@ -239,7 +239,9 @@ Create a custom worker field definition. The field type is immutable after creat
 
 ```go
 customField, err := client.CustomFields.New(context.Background(), sdk.CustomFieldNewParams{
-	Name: sdk.F[string]("x"),
+	Category: sdk.F[sdk.CustomFieldNewParamsCategory](sdk.CustomFieldNewParamsCategory("info")),
+	Name:     sdk.F[string]("x"),
+	Type:     sdk.F[sdk.CustomFieldNewParamsType](sdk.CustomFieldNewParamsType("text")),
 })
 if err != nil {
 	panic(err)
@@ -549,12 +551,15 @@ offer, err := client.Offers.New(context.Background(), sdk.OfferNewParams{
 		Email:     sdk.F[string]("john@joinwarp.com"),
 	}),
 	Compensation: sdk.F[sdk.OfferNewParamsCompensation](sdk.OfferNewParamsCompensation{
-		PayRate: sdk.F[float64](0),
+		PayBasis:    sdk.F[sdk.OfferNewParamsCompensationPayBasis](sdk.OfferNewParamsCompensationPayBasis("year")),
+		PayCurrency: sdk.F[sdk.OfferNewParamsCompensationPayCurrency](sdk.OfferNewParamsCompensationPayCurrency("USD")),
+		PayRate:     sdk.F[float64](1),
 	}),
 	Position: sdk.F[sdk.OfferNewParamsPosition](sdk.OfferNewParamsPosition{
 		Title:     sdk.F[string]("x"),
 		StartDate: sdk.F[string](""),
 	}),
+	WorkerType: sdk.F[sdk.OfferNewParamsWorkerType](sdk.OfferNewParamsWorkerType("employee")),
 })
 if err != nil {
 	panic(err)
@@ -573,7 +578,9 @@ Void a previously sent offer. Only sent offers can be voided.
 | Response | [`OfferVoidResponse`](./offer.go) |
 
 ```go
-offer, err := client.Offers.Void(context.Background(), "offr_1234", sdk.OfferVoidParams{})
+offer, err := client.Offers.Void(context.Background(), "offr_1234", sdk.OfferVoidParams{
+	VoidReason: sdk.F[sdk.OfferVoidParamsVoidReason](sdk.OfferVoidParamsVoidReason("candidate_declined")),
+})
 if err != nil {
 	panic(err)
 }
@@ -906,7 +913,8 @@ Create a new US employee. The worker will be created in draft status and must be
 ```go
 worker, err := client.Workers.NewEmployee(context.Background(), sdk.WorkerNewEmployeeParams{
 	Compensation: sdk.F[sdk.WorkerNewEmployeeParamsCompensation](sdk.WorkerNewEmployeeParamsCompensation{
-		Amount: sdk.F[float64](0),
+		Amount: sdk.F[float64](1),
+		Per:    sdk.F[sdk.WorkerNewEmployeeParamsCompensationPer](sdk.WorkerNewEmployeeParamsCompensationPer("hour")),
 	}),
 	DepartmentID: sdk.F[string]("dpt_1234"),
 	Email:        sdk.F[string]("john@joinwarp.com"),
@@ -916,6 +924,7 @@ worker, err := client.Workers.NewEmployee(context.Background(), sdk.WorkerNewEmp
 	Position:     sdk.F[string]("Software Engineer"),
 	StartDate:    sdk.F[string](""),
 	WorkLocation: sdk.F[sdk.WorkerNewEmployeeParamsWorkLocationUnion](sdk.WorkerNewEmployeeParamsWorkLocationOfficeWorkLocation{
+		Type:        sdk.F[sdk.WorkerNewEmployeeParamsWorkLocationOfficeWorkLocationType](sdk.WorkerNewEmployeeParamsWorkLocationOfficeWorkLocationType("office")),
 		WorkplaceID: sdk.F[string]("wkp_1234"),
 	}),
 })
@@ -939,11 +948,13 @@ Create a new contractor. The worker will be created in draft status and must be 
 worker, err := client.Workers.NewContractor(context.Background(), sdk.WorkerNewContractorParams{
 	DepartmentID: sdk.F[string]("dpt_1234"),
 	Email:        sdk.F[string]("john@joinwarp.com"),
+	EntityType:   sdk.F[sdk.WorkerNewContractorParamsEntityType](sdk.WorkerNewContractorParamsEntityType("individual")),
 	FirstName:    sdk.F[string]("Melissa"),
 	LastName:     sdk.F[string]("Jones"),
 	ManagerID:    sdk.F[string]("wrk_1234"),
 	Position:     sdk.F[string]("Design Consultant"),
 	StartDate:    sdk.F[string](""),
+	WorkCountry:  sdk.F[sdk.WorkerNewContractorParamsWorkCountry](sdk.WorkerNewContractorParamsWorkCountry("AD")),
 })
 if err != nil {
 	panic(err)
@@ -1008,8 +1019,11 @@ workplace, err := client.Workplaces.New(context.Background(), sdk.WorkplaceNewPa
 		Line1:      sdk.F[string]("x"),
 		City:       sdk.F[string](""),
 		PostalCode: sdk.F[string](""),
+		State:      sdk.F[sdk.WorkplaceNewParamsAddressState](sdk.WorkplaceNewParamsAddressState("AL")),
+		Country:    sdk.F[sdk.WorkplaceNewParamsAddressCountry](sdk.WorkplaceNewParamsAddressCountry("US")),
 	}),
 	Name: sdk.F[string]("x"),
+	Type: sdk.F[sdk.WorkplaceNewParamsType](sdk.WorkplaceNewParamsType("remote")),
 })
 if err != nil {
 	panic(err)
