@@ -142,7 +142,8 @@ func (r *WorkerService) Delete(ctx context.Context, id string, opts ...option.Re
 //
 //	worker, err := client.Workers.NewEmployee(context.Background(), sdk.WorkerNewEmployeeParams{
 //		Compensation: sdk.F[sdk.WorkerNewEmployeeParamsCompensation](sdk.WorkerNewEmployeeParamsCompensation{
-//			Amount: sdk.F[float64](0),
+//			Amount: sdk.F[float64](1),
+//			Per:    sdk.F[sdk.WorkerNewEmployeeParamsCompensationPer](sdk.WorkerNewEmployeeParamsCompensationPer("hour")),
 //		}),
 //		DepartmentID: sdk.F[string]("dpt_1234"),
 //		Email:        sdk.F[string]("john@joinwarp.com"),
@@ -152,6 +153,7 @@ func (r *WorkerService) Delete(ctx context.Context, id string, opts ...option.Re
 //		Position:     sdk.F[string]("Software Engineer"),
 //		StartDate:    sdk.F[string](""),
 //		WorkLocation: sdk.F[sdk.WorkerNewEmployeeParamsWorkLocationUnion](sdk.WorkerNewEmployeeParamsWorkLocationOfficeWorkLocation{
+//			Type:        sdk.F[sdk.WorkerNewEmployeeParamsWorkLocationOfficeWorkLocationType](sdk.WorkerNewEmployeeParamsWorkLocationOfficeWorkLocationType("office")),
 //			WorkplaceID: sdk.F[string]("wkp_1234"),
 //		}),
 //	})
@@ -184,11 +186,13 @@ func (r *WorkerService) NewEmployee(ctx context.Context, body WorkerNewEmployeeP
 //	worker, err := client.Workers.NewContractor(context.Background(), sdk.WorkerNewContractorParams{
 //		DepartmentID: sdk.F[string]("dpt_1234"),
 //		Email:        sdk.F[string]("john@joinwarp.com"),
+//		EntityType:   sdk.F[sdk.WorkerNewContractorParamsEntityType](sdk.WorkerNewContractorParamsEntityType("individual")),
 //		FirstName:    sdk.F[string]("Melissa"),
 //		LastName:     sdk.F[string]("Jones"),
 //		ManagerID:    sdk.F[string]("wrk_1234"),
 //		Position:     sdk.F[string]("Design Consultant"),
 //		StartDate:    sdk.F[string](""),
+//		WorkCountry:  sdk.F[sdk.WorkerNewContractorParamsWorkCountry](sdk.WorkerNewContractorParamsWorkCountry("AD")),
 //	})
 //	if err != nil {
 //		panic(err)
@@ -1710,9 +1714,10 @@ type WorkerGetResponse struct {
 	Manager WorkerGetResponseManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerGetResponseLevel    `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
-	JSON         workerGetResponseJSON     `json:"-"`
+	Level             WorkerGetResponseLevel    `json:"level" api:"nullable"`
+	I9VerificationIDs []string                  `json:"i9VerificationIds" api:"nullable"`
+	CustomFields      []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	JSON              workerGetResponseJSON     `json:"-"`
 }
 
 // workerGetResponseJSON contains the JSON metadata for the struct [WorkerGetResponse]
@@ -1745,6 +1750,7 @@ type workerGetResponseJSON struct {
 	Compensation      apijson.Field
 	Manager           apijson.Field
 	Level             apijson.Field
+	I9VerificationIDs apijson.Field
 	CustomFields      apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
@@ -1808,9 +1814,10 @@ type WorkerNewEmployeeResponse struct {
 	Manager WorkerNewEmployeeResponseManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerNewEmployeeResponseLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField      `json:"customFields" api:"nullable"`
-	JSON         workerNewEmployeeResponseJSON  `json:"-"`
+	Level             WorkerNewEmployeeResponseLevel `json:"level" api:"nullable"`
+	I9VerificationIDs []string                       `json:"i9VerificationIds" api:"nullable"`
+	CustomFields      []PublicWorkerCustomField      `json:"customFields" api:"nullable"`
+	JSON              workerNewEmployeeResponseJSON  `json:"-"`
 }
 
 // workerNewEmployeeResponseJSON contains the JSON metadata for the struct [WorkerNewEmployeeResponse]
@@ -1843,6 +1850,7 @@ type workerNewEmployeeResponseJSON struct {
 	Compensation      apijson.Field
 	Manager           apijson.Field
 	Level             apijson.Field
+	I9VerificationIDs apijson.Field
 	CustomFields      apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
@@ -1906,9 +1914,10 @@ type WorkerNewContractorResponse struct {
 	Manager WorkerNewContractorResponseManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerNewContractorResponseLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField        `json:"customFields" api:"nullable"`
-	JSON         workerNewContractorResponseJSON  `json:"-"`
+	Level             WorkerNewContractorResponseLevel `json:"level" api:"nullable"`
+	I9VerificationIDs []string                         `json:"i9VerificationIds" api:"nullable"`
+	CustomFields      []PublicWorkerCustomField        `json:"customFields" api:"nullable"`
+	JSON              workerNewContractorResponseJSON  `json:"-"`
 }
 
 // workerNewContractorResponseJSON contains the JSON metadata for the struct [WorkerNewContractorResponse]
@@ -1941,6 +1950,7 @@ type workerNewContractorResponseJSON struct {
 	Compensation      apijson.Field
 	Manager           apijson.Field
 	Level             apijson.Field
+	I9VerificationIDs apijson.Field
 	CustomFields      apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
@@ -2004,9 +2014,10 @@ type WorkerInviteResponse struct {
 	Manager WorkerInviteResponseManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerInviteResponseLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
-	JSON         workerInviteResponseJSON  `json:"-"`
+	Level             WorkerInviteResponseLevel `json:"level" api:"nullable"`
+	I9VerificationIDs []string                  `json:"i9VerificationIds" api:"nullable"`
+	CustomFields      []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	JSON              workerInviteResponseJSON  `json:"-"`
 }
 
 // workerInviteResponseJSON contains the JSON metadata for the struct [WorkerInviteResponse]
@@ -2039,6 +2050,7 @@ type workerInviteResponseJSON struct {
 	Compensation      apijson.Field
 	Manager           apijson.Field
 	Level             apijson.Field
+	I9VerificationIDs apijson.Field
 	CustomFields      apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
@@ -2228,9 +2240,10 @@ type WorkerListResponseData struct {
 	Manager WorkerListResponseDataManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerListResponseDataLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField   `json:"customFields" api:"nullable"`
-	JSON         workerListResponseDataJSON  `json:"-"`
+	Level             WorkerListResponseDataLevel `json:"level" api:"nullable"`
+	I9VerificationIDs []string                    `json:"i9VerificationIds" api:"nullable"`
+	CustomFields      []PublicWorkerCustomField   `json:"customFields" api:"nullable"`
+	JSON              workerListResponseDataJSON  `json:"-"`
 }
 
 // workerListResponseDataJSON contains the JSON metadata for the struct [WorkerListResponseData]
@@ -2263,6 +2276,7 @@ type workerListResponseDataJSON struct {
 	Compensation      apijson.Field
 	Manager           apijson.Field
 	Level             apijson.Field
+	I9VerificationIDs apijson.Field
 	CustomFields      apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field

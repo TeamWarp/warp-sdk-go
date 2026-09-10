@@ -77,7 +77,9 @@ func (r *CustomFieldService) List(ctx context.Context, opts ...option.RequestOpt
 // Example:
 //
 //	customField, err := client.CustomFields.New(context.Background(), sdk.CustomFieldNewParams{
-//		Name: sdk.F[string]("x"),
+//		Category: sdk.F[sdk.CustomFieldNewParamsCategory](sdk.CustomFieldNewParamsCategory("info")),
+//		Name:     sdk.F[string]("x"),
+//		Type:     sdk.F[sdk.CustomFieldNewParamsType](sdk.CustomFieldNewParamsType("text")),
 //	})
 //	if err != nil {
 //		panic(err)

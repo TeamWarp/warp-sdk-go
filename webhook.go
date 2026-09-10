@@ -4045,9 +4045,10 @@ type WorkerCreatedWebhookEventData struct {
 	Manager WorkerCreatedWebhookEventDataManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerCreatedWebhookEventDataLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField          `json:"customFields" api:"nullable"`
-	JSON         workerCreatedWebhookEventDataJSON  `json:"-"`
+	Level             WorkerCreatedWebhookEventDataLevel `json:"level" api:"nullable"`
+	I9VerificationIDs []string                           `json:"i9VerificationIds" api:"nullable"`
+	CustomFields      []PublicWorkerCustomField          `json:"customFields" api:"nullable"`
+	JSON              workerCreatedWebhookEventDataJSON  `json:"-"`
 }
 
 // workerCreatedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerCreatedWebhookEventData]
@@ -4080,6 +4081,7 @@ type workerCreatedWebhookEventDataJSON struct {
 	Compensation      apijson.Field
 	Manager           apijson.Field
 	Level             apijson.Field
+	I9VerificationIDs apijson.Field
 	CustomFields      apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
@@ -4678,9 +4680,10 @@ type WorkerDeletedWebhookEventData struct {
 	Manager WorkerDeletedWebhookEventDataManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerDeletedWebhookEventDataLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField          `json:"customFields" api:"nullable"`
-	JSON         workerDeletedWebhookEventDataJSON  `json:"-"`
+	Level             WorkerDeletedWebhookEventDataLevel `json:"level" api:"nullable"`
+	I9VerificationIDs []string                           `json:"i9VerificationIds" api:"nullable"`
+	CustomFields      []PublicWorkerCustomField          `json:"customFields" api:"nullable"`
+	JSON              workerDeletedWebhookEventDataJSON  `json:"-"`
 }
 
 // workerDeletedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerDeletedWebhookEventData]
@@ -4713,6 +4716,7 @@ type workerDeletedWebhookEventDataJSON struct {
 	Compensation      apijson.Field
 	Manager           apijson.Field
 	Level             apijson.Field
+	I9VerificationIDs apijson.Field
 	CustomFields      apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
@@ -5311,9 +5315,10 @@ type WorkerInviteAcceptedWebhookEventData struct {
 	Manager WorkerInviteAcceptedWebhookEventDataManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerInviteAcceptedWebhookEventDataLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField                 `json:"customFields" api:"nullable"`
-	JSON         workerInviteAcceptedWebhookEventDataJSON  `json:"-"`
+	Level             WorkerInviteAcceptedWebhookEventDataLevel `json:"level" api:"nullable"`
+	I9VerificationIDs []string                                  `json:"i9VerificationIds" api:"nullable"`
+	CustomFields      []PublicWorkerCustomField                 `json:"customFields" api:"nullable"`
+	JSON              workerInviteAcceptedWebhookEventDataJSON  `json:"-"`
 }
 
 // workerInviteAcceptedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerInviteAcceptedWebhookEventData]
@@ -5346,6 +5351,7 @@ type workerInviteAcceptedWebhookEventDataJSON struct {
 	Compensation      apijson.Field
 	Manager           apijson.Field
 	Level             apijson.Field
+	I9VerificationIDs apijson.Field
 	CustomFields      apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
@@ -5944,9 +5950,10 @@ type WorkerInviteSentWebhookEventData struct {
 	Manager WorkerInviteSentWebhookEventDataManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerInviteSentWebhookEventDataLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField             `json:"customFields" api:"nullable"`
-	JSON         workerInviteSentWebhookEventDataJSON  `json:"-"`
+	Level             WorkerInviteSentWebhookEventDataLevel `json:"level" api:"nullable"`
+	I9VerificationIDs []string                              `json:"i9VerificationIds" api:"nullable"`
+	CustomFields      []PublicWorkerCustomField             `json:"customFields" api:"nullable"`
+	JSON              workerInviteSentWebhookEventDataJSON  `json:"-"`
 }
 
 // workerInviteSentWebhookEventDataJSON contains the JSON metadata for the struct [WorkerInviteSentWebhookEventData]
@@ -5979,6 +5986,7 @@ type workerInviteSentWebhookEventDataJSON struct {
 	Compensation      apijson.Field
 	Manager           apijson.Field
 	Level             apijson.Field
+	I9VerificationIDs apijson.Field
 	CustomFields      apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
@@ -6577,9 +6585,10 @@ type WorkerOffboardedWebhookEventData struct {
 	Manager WorkerOffboardedWebhookEventDataManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerOffboardedWebhookEventDataLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField             `json:"customFields" api:"nullable"`
-	JSON         workerOffboardedWebhookEventDataJSON  `json:"-"`
+	Level             WorkerOffboardedWebhookEventDataLevel `json:"level" api:"nullable"`
+	I9VerificationIDs []string                              `json:"i9VerificationIds" api:"nullable"`
+	CustomFields      []PublicWorkerCustomField             `json:"customFields" api:"nullable"`
+	JSON              workerOffboardedWebhookEventDataJSON  `json:"-"`
 }
 
 // workerOffboardedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerOffboardedWebhookEventData]
@@ -6612,6 +6621,7 @@ type workerOffboardedWebhookEventDataJSON struct {
 	Compensation      apijson.Field
 	Manager           apijson.Field
 	Level             apijson.Field
+	I9VerificationIDs apijson.Field
 	CustomFields      apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
@@ -7210,9 +7220,10 @@ type WorkerOffboardingStartedWebhookEventData struct {
 	Manager WorkerOffboardingStartedWebhookEventDataManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerOffboardingStartedWebhookEventDataLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField                     `json:"customFields" api:"nullable"`
-	JSON         workerOffboardingStartedWebhookEventDataJSON  `json:"-"`
+	Level             WorkerOffboardingStartedWebhookEventDataLevel `json:"level" api:"nullable"`
+	I9VerificationIDs []string                                      `json:"i9VerificationIds" api:"nullable"`
+	CustomFields      []PublicWorkerCustomField                     `json:"customFields" api:"nullable"`
+	JSON              workerOffboardingStartedWebhookEventDataJSON  `json:"-"`
 }
 
 // workerOffboardingStartedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerOffboardingStartedWebhookEventData]
@@ -7245,6 +7256,7 @@ type workerOffboardingStartedWebhookEventDataJSON struct {
 	Compensation      apijson.Field
 	Manager           apijson.Field
 	Level             apijson.Field
+	I9VerificationIDs apijson.Field
 	CustomFields      apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
@@ -7843,9 +7855,10 @@ type WorkerOnboardingCompletedWebhookEventData struct {
 	Manager WorkerOnboardingCompletedWebhookEventDataManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerOnboardingCompletedWebhookEventDataLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField                      `json:"customFields" api:"nullable"`
-	JSON         workerOnboardingCompletedWebhookEventDataJSON  `json:"-"`
+	Level             WorkerOnboardingCompletedWebhookEventDataLevel `json:"level" api:"nullable"`
+	I9VerificationIDs []string                                       `json:"i9VerificationIds" api:"nullable"`
+	CustomFields      []PublicWorkerCustomField                      `json:"customFields" api:"nullable"`
+	JSON              workerOnboardingCompletedWebhookEventDataJSON  `json:"-"`
 }
 
 // workerOnboardingCompletedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerOnboardingCompletedWebhookEventData]
@@ -7878,6 +7891,7 @@ type workerOnboardingCompletedWebhookEventDataJSON struct {
 	Compensation      apijson.Field
 	Manager           apijson.Field
 	Level             apijson.Field
+	I9VerificationIDs apijson.Field
 	CustomFields      apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
@@ -8476,9 +8490,10 @@ type WorkerReactivatedWebhookEventData struct {
 	Manager WorkerReactivatedWebhookEventDataManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerReactivatedWebhookEventDataLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField              `json:"customFields" api:"nullable"`
-	JSON         workerReactivatedWebhookEventDataJSON  `json:"-"`
+	Level             WorkerReactivatedWebhookEventDataLevel `json:"level" api:"nullable"`
+	I9VerificationIDs []string                               `json:"i9VerificationIds" api:"nullable"`
+	CustomFields      []PublicWorkerCustomField              `json:"customFields" api:"nullable"`
+	JSON              workerReactivatedWebhookEventDataJSON  `json:"-"`
 }
 
 // workerReactivatedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerReactivatedWebhookEventData]
@@ -8511,6 +8526,7 @@ type workerReactivatedWebhookEventDataJSON struct {
 	Compensation      apijson.Field
 	Manager           apijson.Field
 	Level             apijson.Field
+	I9VerificationIDs apijson.Field
 	CustomFields      apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
@@ -9109,9 +9125,10 @@ type WorkerUpdatedWebhookEventData struct {
 	Manager WorkerUpdatedWebhookEventDataManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerUpdatedWebhookEventDataLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField          `json:"customFields" api:"nullable"`
-	JSON         workerUpdatedWebhookEventDataJSON  `json:"-"`
+	Level             WorkerUpdatedWebhookEventDataLevel `json:"level" api:"nullable"`
+	I9VerificationIDs []string                           `json:"i9VerificationIds" api:"nullable"`
+	CustomFields      []PublicWorkerCustomField          `json:"customFields" api:"nullable"`
+	JSON              workerUpdatedWebhookEventDataJSON  `json:"-"`
 }
 
 // workerUpdatedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerUpdatedWebhookEventData]
@@ -9144,6 +9161,7 @@ type workerUpdatedWebhookEventDataJSON struct {
 	Compensation      apijson.Field
 	Manager           apijson.Field
 	Level             apijson.Field
+	I9VerificationIDs apijson.Field
 	CustomFields      apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field

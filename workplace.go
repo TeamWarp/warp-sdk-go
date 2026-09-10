@@ -81,8 +81,11 @@ func (r *WorkplaceService) List(ctx context.Context, query WorkplaceListParams, 
 //			Line1:      sdk.F[string]("x"),
 //			City:       sdk.F[string](""),
 //			PostalCode: sdk.F[string](""),
+//			State:      sdk.F[sdk.WorkplaceNewParamsAddressState](sdk.WorkplaceNewParamsAddressState("AL")),
+//			Country:    sdk.F[sdk.WorkplaceNewParamsAddressCountry](sdk.WorkplaceNewParamsAddressCountry("US")),
 //		}),
 //		Name: sdk.F[string]("x"),
+//		Type: sdk.F[sdk.WorkplaceNewParamsType](sdk.WorkplaceNewParamsType("remote")),
 //	})
 //	if err != nil {
 //		panic(err)
