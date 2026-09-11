@@ -34,7 +34,7 @@ func NewI9VerificationService(opts ...option.RequestOption) (r *I9VerificationSe
 	return
 }
 
-// List current and retained company I-9 verifications in all workflow states, newest first. Requires workers:compliance read access. Filters combine with AND across parameters and OR within each array. Count covers all matches before pagination. Use either afterId or beforeId; a missing or filter-mismatched cursor returns 400, so restart pagination if a filtered cursor changes state. Only verifications linked to a canonical company worker are returned.
+// List current and retained company I-9 verifications in all workflow states, newest first. The API key must have workers profile and compliance read scope.
 //
 // Parameters:
 //
@@ -63,7 +63,7 @@ func (r *I9VerificationService) List(ctx context.Context, query I9VerificationLi
 	return res, err
 }
 
-// Get a current or retained I-9 verification by its i9v_ ID. Requires workers:compliance read access. Returns the same metadata as the list endpoint. Missing verifications and verifications outside the company or without a canonical worker return 404.
+// Get a specific I-9 verification by its id. The API key must have workers profile and compliance read scope.
 //
 // Parameters:
 //
@@ -73,7 +73,7 @@ func (r *I9VerificationService) List(ctx context.Context, query I9VerificationLi
 //
 // Returns:
 //
-//	*I9VerificationGetResponse: I-9 workflow metadata without document contents, identity details, or file links.
+//	*I9VerificationGetResponse
 //
 // Example:
 //
@@ -97,8 +97,8 @@ func (r *I9VerificationService) Get(ctx context.Context, id string, opts ...opti
 type PublicI9Verification struct {
 	// The tag of the i9 verification.
 	ID string `json:"id" api:"required"`
-	// The id of the worker.
-	WorkerID       string                     `json:"workerId" api:"required"`
+	// Basic identifying information for a worker associated with another resource.
+	Worker         PublicWorkerReference      `json:"worker" api:"required"`
 	Status         PublicI9VerificationStatus `json:"status" api:"required"`
 	StartDate      string                     `json:"startDate" api:"required"`
 	VerifiedAt     time.Time                  `json:"verifiedAt" api:"required,nullable" format:"date-time"`
@@ -110,7 +110,7 @@ type PublicI9Verification struct {
 // publicI9VerificationJSON contains the JSON metadata for the struct [PublicI9Verification]
 type publicI9VerificationJSON struct {
 	ID             apijson.Field
-	WorkerID       apijson.Field
+	Worker         apijson.Field
 	Status         apijson.Field
 	StartDate      apijson.Field
 	VerifiedAt     apijson.Field
@@ -148,8 +148,8 @@ func (r PublicI9VerificationStatus) IsKnown() bool {
 type I9VerificationGetResponse struct {
 	// The tag of the i9 verification.
 	ID string `json:"id" api:"required"`
-	// The id of the worker.
-	WorkerID       string                          `json:"workerId" api:"required"`
+	// Basic identifying information for a worker associated with another resource.
+	Worker         PublicWorkerReference           `json:"worker" api:"required"`
 	Status         I9VerificationGetResponseStatus `json:"status" api:"required"`
 	StartDate      string                          `json:"startDate" api:"required"`
 	VerifiedAt     time.Time                       `json:"verifiedAt" api:"required,nullable" format:"date-time"`
@@ -161,7 +161,7 @@ type I9VerificationGetResponse struct {
 // i9VerificationGetResponseJSON contains the JSON metadata for the struct [I9VerificationGetResponse]
 type i9VerificationGetResponseJSON struct {
 	ID             apijson.Field
-	WorkerID       apijson.Field
+	Worker         apijson.Field
 	Status         apijson.Field
 	StartDate      apijson.Field
 	VerifiedAt     apijson.Field
