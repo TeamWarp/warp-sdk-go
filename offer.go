@@ -83,12 +83,15 @@ func (r *OfferService) List(ctx context.Context, query OfferListParams, opts ...
 //			Email:     sdk.F[string]("john@joinwarp.com"),
 //		}),
 //		Compensation: sdk.F[sdk.OfferNewParamsCompensation](sdk.OfferNewParamsCompensation{
-//			PayRate: sdk.F[float64](0),
+//			PayBasis:    sdk.F[sdk.OfferNewParamsCompensationPayBasis](sdk.OfferNewParamsCompensationPayBasis("year")),
+//			PayCurrency: sdk.F[sdk.OfferNewParamsCompensationPayCurrency](sdk.OfferNewParamsCompensationPayCurrency("USD")),
+//			PayRate:     sdk.F[float64](1),
 //		}),
 //		Position: sdk.F[sdk.OfferNewParamsPosition](sdk.OfferNewParamsPosition{
 //			Title:     sdk.F[string]("x"),
 //			StartDate: sdk.F[string](""),
 //		}),
+//		WorkerType: sdk.F[sdk.OfferNewParamsWorkerType](sdk.OfferNewParamsWorkerType("employee")),
 //	})
 //	if err != nil {
 //		panic(err)
@@ -117,7 +120,9 @@ func (r *OfferService) New(ctx context.Context, body OfferNewParams, opts ...opt
 //
 // Example:
 //
-//	offer, err := client.Offers.Void(context.Background(), "offr_1234", sdk.OfferVoidParams{})
+//	offer, err := client.Offers.Void(context.Background(), "offr_1234", sdk.OfferVoidParams{
+//		VoidReason: sdk.F[sdk.OfferVoidParamsVoidReason](sdk.OfferVoidParamsVoidReason("candidate_declined")),
+//	})
 //	if err != nil {
 //		panic(err)
 //	}
