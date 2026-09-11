@@ -1777,10 +1777,9 @@ type WorkerGetResponse struct {
 	Manager WorkerGetResponseManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level             WorkerGetResponseLevel    `json:"level" api:"nullable"`
-	I9VerificationIDs []string                  `json:"i9VerificationIds" api:"nullable"`
-	CustomFields      []PublicWorkerCustomField `json:"customFields" api:"nullable"`
-	JSON              workerGetResponseJSON     `json:"-"`
+	Level        WorkerGetResponseLevel    `json:"level" api:"nullable"`
+	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	JSON         workerGetResponseJSON     `json:"-"`
 }
 
 // workerGetResponseJSON contains the JSON metadata for the struct [WorkerGetResponse]
@@ -1813,7 +1812,6 @@ type workerGetResponseJSON struct {
 	Compensation      apijson.Field
 	Manager           apijson.Field
 	Level             apijson.Field
-	I9VerificationIDs apijson.Field
 	CustomFields      apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
@@ -1877,10 +1875,9 @@ type WorkerNewEmployeeResponse struct {
 	Manager WorkerNewEmployeeResponseManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level             WorkerNewEmployeeResponseLevel `json:"level" api:"nullable"`
-	I9VerificationIDs []string                       `json:"i9VerificationIds" api:"nullable"`
-	CustomFields      []PublicWorkerCustomField      `json:"customFields" api:"nullable"`
-	JSON              workerNewEmployeeResponseJSON  `json:"-"`
+	Level        WorkerNewEmployeeResponseLevel `json:"level" api:"nullable"`
+	CustomFields []PublicWorkerCustomField      `json:"customFields" api:"nullable"`
+	JSON         workerNewEmployeeResponseJSON  `json:"-"`
 }
 
 // workerNewEmployeeResponseJSON contains the JSON metadata for the struct [WorkerNewEmployeeResponse]
@@ -1913,7 +1910,6 @@ type workerNewEmployeeResponseJSON struct {
 	Compensation      apijson.Field
 	Manager           apijson.Field
 	Level             apijson.Field
-	I9VerificationIDs apijson.Field
 	CustomFields      apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
@@ -1977,10 +1973,9 @@ type WorkerNewContractorResponse struct {
 	Manager WorkerNewContractorResponseManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level             WorkerNewContractorResponseLevel `json:"level" api:"nullable"`
-	I9VerificationIDs []string                         `json:"i9VerificationIds" api:"nullable"`
-	CustomFields      []PublicWorkerCustomField        `json:"customFields" api:"nullable"`
-	JSON              workerNewContractorResponseJSON  `json:"-"`
+	Level        WorkerNewContractorResponseLevel `json:"level" api:"nullable"`
+	CustomFields []PublicWorkerCustomField        `json:"customFields" api:"nullable"`
+	JSON         workerNewContractorResponseJSON  `json:"-"`
 }
 
 // workerNewContractorResponseJSON contains the JSON metadata for the struct [WorkerNewContractorResponse]
@@ -2013,7 +2008,6 @@ type workerNewContractorResponseJSON struct {
 	Compensation      apijson.Field
 	Manager           apijson.Field
 	Level             apijson.Field
-	I9VerificationIDs apijson.Field
 	CustomFields      apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
@@ -2077,10 +2071,9 @@ type WorkerInviteResponse struct {
 	Manager WorkerInviteResponseManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level             WorkerInviteResponseLevel `json:"level" api:"nullable"`
-	I9VerificationIDs []string                  `json:"i9VerificationIds" api:"nullable"`
-	CustomFields      []PublicWorkerCustomField `json:"customFields" api:"nullable"`
-	JSON              workerInviteResponseJSON  `json:"-"`
+	Level        WorkerInviteResponseLevel `json:"level" api:"nullable"`
+	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	JSON         workerInviteResponseJSON  `json:"-"`
 }
 
 // workerInviteResponseJSON contains the JSON metadata for the struct [WorkerInviteResponse]
@@ -2113,7 +2106,6 @@ type workerInviteResponseJSON struct {
 	Compensation      apijson.Field
 	Manager           apijson.Field
 	Level             apijson.Field
-	I9VerificationIDs apijson.Field
 	CustomFields      apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
@@ -2303,10 +2295,9 @@ type WorkerListResponseData struct {
 	Manager WorkerListResponseDataManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level             WorkerListResponseDataLevel `json:"level" api:"nullable"`
-	I9VerificationIDs []string                    `json:"i9VerificationIds" api:"nullable"`
-	CustomFields      []PublicWorkerCustomField   `json:"customFields" api:"nullable"`
-	JSON              workerListResponseDataJSON  `json:"-"`
+	Level        WorkerListResponseDataLevel `json:"level" api:"nullable"`
+	CustomFields []PublicWorkerCustomField   `json:"customFields" api:"nullable"`
+	JSON         workerListResponseDataJSON  `json:"-"`
 }
 
 // workerListResponseDataJSON contains the JSON metadata for the struct [WorkerListResponseData]
@@ -2339,7 +2330,6 @@ type workerListResponseDataJSON struct {
 	Compensation      apijson.Field
 	Manager           apijson.Field
 	Level             apijson.Field
-	I9VerificationIDs apijson.Field
 	CustomFields      apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
