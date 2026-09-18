@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -164,7 +165,9 @@ func _smokeCase9() {
 
 func _smokeCase10() {
 	customField, err := client.CustomFields.New(context.Background(), sdk.CustomFieldNewParams{
-		Name: sdk.F[string]("x"),
+		Category: sdk.F[sdk.CustomFieldNewParamsCategory](sdk.CustomFieldNewParamsCategory("info")),
+		Name:     sdk.F[string]("x"),
+		Type:     sdk.F[sdk.CustomFieldNewParamsType](sdk.CustomFieldNewParamsType("text")),
 	})
 	if err != nil {
 		panic(err)
@@ -175,9 +178,13 @@ func _smokeCase10() {
 
 func _smokeCase11() {
 	customField, err := client.CustomFields.New(context.Background(), sdk.CustomFieldNewParams{
+		Category:    sdk.F[sdk.CustomFieldNewParamsCategory](sdk.CustomFieldNewParamsCategory("info")),
 		Name:        sdk.F[string]("x"),
+		Type:        sdk.F[sdk.CustomFieldNewParamsType](sdk.CustomFieldNewParamsType("text")),
+		AccessLevel: sdk.F[sdk.CustomFieldNewParamsAccessLevel](sdk.CustomFieldNewParamsAccessLevel("admins")),
 		Config:      sdk.F[interface{}](map[string]interface{}{}),
 		Description: sdk.F[string](""),
+		InputBy:     sdk.F[sdk.CustomFieldNewParamsInputBy](sdk.CustomFieldNewParamsInputBy("admin")),
 		Options: sdk.F[[]sdk.CustomFieldNewParamsOption]([]sdk.CustomFieldNewParamsOption{sdk.CustomFieldNewParamsOption{
 			Label: sdk.F[string]("x"),
 			Value: sdk.F[string]("x"),
@@ -211,8 +218,11 @@ func _smokeCase13() {
 
 func _smokeCase14() {
 	customField, err := client.CustomFields.Update(context.Background(), "cf_1234", sdk.CustomFieldUpdateParams{
+		AccessLevel: sdk.F[sdk.CustomFieldUpdateParamsAccessLevel](sdk.CustomFieldUpdateParamsAccessLevel("admins")),
+		Category:    sdk.F[sdk.CustomFieldUpdateParamsCategory](sdk.CustomFieldUpdateParamsCategory("info")),
 		Config:      sdk.F[interface{}](map[string]interface{}{}),
 		Description: sdk.F[string](""),
+		InputBy:     sdk.F[sdk.CustomFieldUpdateParamsInputBy](sdk.CustomFieldUpdateParamsInputBy("admin")),
 		Name:        sdk.F[string]("x"),
 		Required:    sdk.F[bool](false),
 	})
@@ -437,12 +447,15 @@ func _smokeCase34() {
 			Email:     sdk.F[string]("john@joinwarp.com"),
 		}),
 		Compensation: sdk.F[sdk.OfferNewParamsCompensation](sdk.OfferNewParamsCompensation{
-			PayRate: sdk.F[float64](0),
+			PayBasis:    sdk.F[sdk.OfferNewParamsCompensationPayBasis](sdk.OfferNewParamsCompensationPayBasis("year")),
+			PayCurrency: sdk.F[sdk.OfferNewParamsCompensationPayCurrency](sdk.OfferNewParamsCompensationPayCurrency("USD")),
+			PayRate:     sdk.F[float64](1),
 		}),
 		Position: sdk.F[sdk.OfferNewParamsPosition](sdk.OfferNewParamsPosition{
 			Title:     sdk.F[string]("x"),
 			StartDate: sdk.F[string](""),
 		}),
+		WorkerType: sdk.F[sdk.OfferNewParamsWorkerType](sdk.OfferNewParamsWorkerType("employee")),
 	})
 	if err != nil {
 		panic(err)
@@ -459,12 +472,15 @@ func _smokeCase35() {
 			Email:     sdk.F[string]("john@joinwarp.com"),
 		}),
 		Compensation: sdk.F[sdk.OfferNewParamsCompensation](sdk.OfferNewParamsCompensation{
-			PayRate: sdk.F[float64](0),
+			PayBasis:    sdk.F[sdk.OfferNewParamsCompensationPayBasis](sdk.OfferNewParamsCompensationPayBasis("year")),
+			PayCurrency: sdk.F[sdk.OfferNewParamsCompensationPayCurrency](sdk.OfferNewParamsCompensationPayCurrency("USD")),
+			PayRate:     sdk.F[float64](1),
 		}),
 		Position: sdk.F[sdk.OfferNewParamsPosition](sdk.OfferNewParamsPosition{
 			Title:     sdk.F[string]("x"),
 			StartDate: sdk.F[string](""),
 		}),
+		WorkerType: sdk.F[sdk.OfferNewParamsWorkerType](sdk.OfferNewParamsWorkerType("employee")),
 		BackgroundCheckWorkLocation: sdk.F[sdk.OfferNewParamsBackgroundCheckWorkLocation](sdk.OfferNewParamsBackgroundCheckWorkLocation{
 			Country: sdk.F[string](""),
 			State:   sdk.F[string](""),
@@ -484,7 +500,9 @@ func _smokeCase35() {
 }
 
 func _smokeCase36() {
-	offer, err := client.Offers.Void(context.Background(), "offr_1234", sdk.OfferVoidParams{})
+	offer, err := client.Offers.Void(context.Background(), "offr_1234", sdk.OfferVoidParams{
+		VoidReason: sdk.F[sdk.OfferVoidParamsVoidReason](sdk.OfferVoidParamsVoidReason("candidate_declined")),
+	})
 	if err != nil {
 		panic(err)
 	}
@@ -494,7 +512,8 @@ func _smokeCase36() {
 
 func _smokeCase37() {
 	offer, err := client.Offers.Void(context.Background(), "offr_1234", sdk.OfferVoidParams{
-		VoidNotes: sdk.F[string](""),
+		VoidReason: sdk.F[sdk.OfferVoidParamsVoidReason](sdk.OfferVoidParamsVoidReason("candidate_declined")),
+		VoidNotes:  sdk.F[string](""),
 	})
 	if err != nil {
 		panic(err)
@@ -539,8 +558,8 @@ func _smokeCase41() {
 		Limit:              sdk.F[string]("limit"),
 		AfterID:            sdk.F[string]("pyr_1234"),
 		BeforeID:           sdk.F[string]("pyr_1234"),
-		EffectiveBefore:    sdk.F[string](""),
-		EffectiveOnOrAfter: sdk.F[string](""),
+		EffectiveBefore:    sdk.F[string]("effectiveBefore"),
+		EffectiveOnOrAfter: sdk.F[string]("effectiveOnOrAfter"),
 		Type:               sdk.F[sdk.PublicPayRateType](sdk.PublicPayRateType("regular")),
 		WorkerID:           sdk.F[string]("wrk_1234"),
 	})
@@ -577,10 +596,10 @@ func _smokeCase44() {
 		AfterID:               sdk.F[string]("pay_1234"),
 		BeforeID:              sdk.F[string]("pay_1234"),
 		PayFrequencies:        sdk.F[[]sdk.PublicPayFrequency]([]sdk.PublicPayFrequency{"semimonthly"}),
-		PayPeriodEndBefore:    sdk.F[string](""),
-		PayPeriodEndOnOrAfter: sdk.F[string](""),
-		PaydayBefore:          sdk.F[string](""),
-		PaydayOnOrAfter:       sdk.F[string](""),
+		PayPeriodEndBefore:    sdk.F[string]("payPeriodEndBefore"),
+		PayPeriodEndOnOrAfter: sdk.F[string]("payPeriodEndOnOrAfter"),
+		PaydayBefore:          sdk.F[string]("paydayBefore"),
+		PaydayOnOrAfter:       sdk.F[string]("paydayOnOrAfter"),
 		Statuses:              sdk.F[[]sdk.PublicPayrollStatus]([]sdk.PublicPayrollStatus{"processing"}),
 		Subtypes:              sdk.F[[]sdk.PublicPayrollSubtype]([]sdk.PublicPayrollSubtype{"regular"}),
 		Types:                 sdk.F[[]sdk.PublicPayrollType]([]sdk.PublicPayrollType{"us"}),
@@ -619,8 +638,8 @@ func _smokeCase47() {
 		BeforeID:               sdk.F[string]("pyc_1234"),
 		CompensationCurrencies: sdk.F[[]sdk.PublicPayrollCurrency]([]sdk.PublicPayrollCurrency{"USD"}),
 		PayFrequencies:         sdk.F[[]sdk.PublicPayFrequency]([]sdk.PublicPayFrequency{"semimonthly"}),
-		PaydayBefore:           sdk.F[string](""),
-		PaydayOnOrAfter:        sdk.F[string](""),
+		PaydayBefore:           sdk.F[string]("paydayBefore"),
+		PaydayOnOrAfter:        sdk.F[string]("paydayOnOrAfter"),
 		PaymentMethods:         sdk.F[[]sdk.PublicPaycheckPaymentMethod]([]sdk.PublicPaycheckPaymentMethod{"direct_deposit"}),
 		PayrollIDs:             sdk.F[[]string]([]string{"pay_1234"}),
 		PayrollTypes:           sdk.F[[]sdk.PublicPayrollType]([]sdk.PublicPayrollType{"us"}),
@@ -686,9 +705,9 @@ func _smokeCase52() {
 		Limit:     sdk.F[string]("limit"),
 		AfterID:   sdk.F[string]("wrkasn_1234"),
 		BeforeID:  sdk.F[string]("wrkasn_1234"),
-		EndDate:   sdk.F[string](""),
+		EndDate:   sdk.F[string]("endDate"),
 		PolicyIDs: sdk.F[[]string]([]string{"top_1234"}),
-		StartDate: sdk.F[string](""),
+		StartDate: sdk.F[string]("startDate"),
 		WorkerIDs: sdk.F[[]string]([]string{"wrk_1234"}),
 	})
 	if err != nil {
@@ -712,13 +731,13 @@ func _smokeCase53() {
 func _smokeCase54() {
 	timeOff, err := client.TimeOff.ListRequests(context.Background(), sdk.TimeOffListRequestsParams{
 		Limit:           sdk.F[string]("limit"),
-		AfterID:         sdk.F[string](""),
-		BeforeID:        sdk.F[string](""),
-		EndsBefore:      sdk.F[string](""),
-		EndsOnOrAfter:   sdk.F[string](""),
+		AfterID:         sdk.F[string]("afterId"),
+		BeforeID:        sdk.F[string]("beforeId"),
+		EndsBefore:      sdk.F[string]("endsBefore"),
+		EndsOnOrAfter:   sdk.F[string]("endsOnOrAfter"),
 		PolicyIDs:       sdk.F[[]string]([]string{"top_1234"}),
-		StartsBefore:    sdk.F[string](""),
-		StartsOnOrAfter: sdk.F[string](""),
+		StartsBefore:    sdk.F[string]("startsBefore"),
+		StartsOnOrAfter: sdk.F[string]("startsOnOrAfter"),
 		Statuses:        sdk.F[[]sdk.TimeOffListRequestsParamsStatus]([]sdk.TimeOffListRequestsParamsStatus{"pending"}),
 		WorkerIDs:       sdk.F[[]string]([]string{"wrk_1234"}),
 	})
@@ -780,7 +799,7 @@ func _smokeCase59() {
 		BeforeID:  sdk.F[string]("wrk_1234"),
 		Statuses:  sdk.F[[]sdk.WorkerListParamsStatus]([]sdk.WorkerListParamsStatus{"draft"}),
 		Types:     sdk.F[[]sdk.WorkerListParamsType]([]sdk.WorkerListParamsType{"employee"}),
-		WorkEmail: sdk.F[string](""),
+		WorkEmail: sdk.F[string]("workEmail"),
 	})
 	if err != nil {
 		panic(err)
@@ -808,7 +827,8 @@ func _smokeCase61() {
 func _smokeCase62() {
 	worker, err := client.Workers.NewEmployee(context.Background(), sdk.WorkerNewEmployeeParams{
 		Compensation: sdk.F[sdk.WorkerNewEmployeeParamsCompensation](sdk.WorkerNewEmployeeParamsCompensation{
-			Amount: sdk.F[float64](0),
+			Amount: sdk.F[float64](1),
+			Per:    sdk.F[sdk.WorkerNewEmployeeParamsCompensationPer](sdk.WorkerNewEmployeeParamsCompensationPer("hour")),
 		}),
 		DepartmentID: sdk.F[string]("dpt_1234"),
 		Email:        sdk.F[string]("john@joinwarp.com"),
@@ -818,6 +838,7 @@ func _smokeCase62() {
 		Position:     sdk.F[string]("Software Engineer"),
 		StartDate:    sdk.F[string](""),
 		WorkLocation: sdk.F[sdk.WorkerNewEmployeeParamsWorkLocationUnion](sdk.WorkerNewEmployeeParamsWorkLocationOfficeWorkLocation{
+			Type:        sdk.F[sdk.WorkerNewEmployeeParamsWorkLocationOfficeWorkLocationType](sdk.WorkerNewEmployeeParamsWorkLocationOfficeWorkLocationType("office")),
 			WorkplaceID: sdk.F[string]("wkp_1234"),
 		}),
 	})
@@ -831,7 +852,8 @@ func _smokeCase62() {
 func _smokeCase63() {
 	worker, err := client.Workers.NewEmployee(context.Background(), sdk.WorkerNewEmployeeParams{
 		Compensation: sdk.F[sdk.WorkerNewEmployeeParamsCompensation](sdk.WorkerNewEmployeeParamsCompensation{
-			Amount: sdk.F[float64](0),
+			Amount: sdk.F[float64](1),
+			Per:    sdk.F[sdk.WorkerNewEmployeeParamsCompensationPer](sdk.WorkerNewEmployeeParamsCompensationPer("hour")),
 		}),
 		DepartmentID: sdk.F[string]("dpt_1234"),
 		Email:        sdk.F[string]("john@joinwarp.com"),
@@ -841,12 +863,15 @@ func _smokeCase63() {
 		Position:     sdk.F[string]("Software Engineer"),
 		StartDate:    sdk.F[string](""),
 		WorkLocation: sdk.F[sdk.WorkerNewEmployeeParamsWorkLocationUnion](sdk.WorkerNewEmployeeParamsWorkLocationOfficeWorkLocation{
+			Type:        sdk.F[sdk.WorkerNewEmployeeParamsWorkLocationOfficeWorkLocationType](sdk.WorkerNewEmployeeParamsWorkLocationOfficeWorkLocationType("office")),
 			WorkplaceID: sdk.F[string]("wkp_1234"),
 		}),
-		LevelID:      sdk.F[string]("jlvl_1234"),
-		RequireI9:    sdk.F[bool](false),
-		StockOptions: sdk.F[interface{}](0),
-		WorkEmail:    sdk.F[string]("john@joinwarp.com"),
+		LevelID:           sdk.F[string]("jlvl_1234"),
+		PaySchedule:       sdk.F[sdk.WorkerNewEmployeeParamsPaySchedule](sdk.WorkerNewEmployeeParamsPaySchedule("weekly")),
+		RequireI9:         sdk.F[bool](false),
+		StateRegistration: sdk.F[sdk.WorkerNewEmployeeParamsStateRegistration](sdk.WorkerNewEmployeeParamsStateRegistration("self_managed")),
+		StockOptions:      sdk.F[interface{}](0),
+		WorkEmail:         sdk.F[string]("john@joinwarp.com"),
 	})
 	if err != nil {
 		panic(err)
@@ -859,11 +884,13 @@ func _smokeCase64() {
 	worker, err := client.Workers.NewContractor(context.Background(), sdk.WorkerNewContractorParams{
 		DepartmentID: sdk.F[string]("dpt_1234"),
 		Email:        sdk.F[string]("john@joinwarp.com"),
+		EntityType:   sdk.F[sdk.WorkerNewContractorParamsEntityType](sdk.WorkerNewContractorParamsEntityType("individual")),
 		FirstName:    sdk.F[string]("Melissa"),
 		LastName:     sdk.F[string]("Jones"),
 		ManagerID:    sdk.F[string]("wrk_1234"),
 		Position:     sdk.F[string]("Design Consultant"),
 		StartDate:    sdk.F[string](""),
+		WorkCountry:  sdk.F[sdk.WorkerNewContractorParamsWorkCountry](sdk.WorkerNewContractorParamsWorkCountry("AD")),
 	})
 	if err != nil {
 		panic(err)
@@ -876,16 +903,21 @@ func _smokeCase65() {
 	worker, err := client.Workers.NewContractor(context.Background(), sdk.WorkerNewContractorParams{
 		DepartmentID: sdk.F[string]("dpt_1234"),
 		Email:        sdk.F[string]("john@joinwarp.com"),
+		EntityType:   sdk.F[sdk.WorkerNewContractorParamsEntityType](sdk.WorkerNewContractorParamsEntityType("individual")),
 		FirstName:    sdk.F[string]("Melissa"),
 		LastName:     sdk.F[string]("Jones"),
 		ManagerID:    sdk.F[string]("wrk_1234"),
 		Position:     sdk.F[string]("Design Consultant"),
 		StartDate:    sdk.F[string](""),
+		WorkCountry:  sdk.F[sdk.WorkerNewContractorParamsWorkCountry](sdk.WorkerNewContractorParamsWorkCountry("AD")),
 		BusinessName: sdk.F[string]("Galt Enterprises, LLC"),
 		Compensation: sdk.F[sdk.WorkerNewContractorParamsCompensation](sdk.WorkerNewContractorParamsCompensation{
-			Amount: sdk.F[float64](0),
+			Currency: sdk.F[sdk.WorkerNewContractorParamsCompensationCurrency](sdk.WorkerNewContractorParamsCompensationCurrency("USD")),
+			Amount:   sdk.F[float64](1),
+			Per:      sdk.F[sdk.WorkerNewContractorParamsCompensationPer](sdk.WorkerNewContractorParamsCompensationPer("year")),
 		}),
 		LevelID:     sdk.F[string]("jlvl_1234"),
+		PaySchedule: sdk.F[sdk.WorkerNewContractorParamsPaySchedule](sdk.WorkerNewContractorParamsPaySchedule("weekly")),
 		ScopeOfWork: sdk.F[string](""),
 		WorkEmail:   sdk.F[string]("john@joinwarp.com"),
 	})
@@ -906,6 +938,17 @@ func _smokeCase66() {
 }
 
 func _smokeCase67() {
+	worker, err := client.Workers.RevealSsn(context.Background(), sdk.WorkerRevealSsnParams{
+		WorkerIDs: sdk.F[[]string]([]string{"wrk_khac8380c2Lm", "wrk_q7Vm2pR9xK4c"}),
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(worker)
+}
+
+func _smokeCase68() {
 	workplace, err := client.Workplaces.List(context.Background(), sdk.WorkplaceListParams{
 		Limit: sdk.F[string]("limit"),
 	})
@@ -916,7 +959,7 @@ func _smokeCase67() {
 	fmt.Println(workplace)
 }
 
-func _smokeCase68() {
+func _smokeCase69() {
 	workplace, err := client.Workplaces.List(context.Background(), sdk.WorkplaceListParams{
 		Limit:    sdk.F[string]("limit"),
 		AfterID:  sdk.F[string]("wkp_1234"),
@@ -929,24 +972,18 @@ func _smokeCase68() {
 	fmt.Println(workplace)
 }
 
-func _smokeCase69() {
+func _smokeCase70() {
 	workplace, err := client.Workplaces.New(context.Background(), sdk.WorkplaceNewParams{
 		Address: sdk.F[sdk.WorkplaceNewParamsAddress](sdk.WorkplaceNewParamsAddress{
 			Line1:      sdk.F[string]("x"),
 			City:       sdk.F[string](""),
 			PostalCode: sdk.F[string](""),
+			State:      sdk.F[sdk.WorkplaceNewParamsAddressState](sdk.WorkplaceNewParamsAddressState("AL")),
+			Country:    sdk.F[sdk.WorkplaceNewParamsAddressCountry](sdk.WorkplaceNewParamsAddressCountry("US")),
 		}),
 		Name: sdk.F[string]("x"),
+		Type: sdk.F[sdk.WorkplaceNewParamsType](sdk.WorkplaceNewParamsType("remote")),
 	})
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(workplace)
-}
-
-func _smokeCase70() {
-	workplace, err := client.Workplaces.Update(context.Background(), "wkp_1234", sdk.WorkplaceUpdateParams{})
 	if err != nil {
 		panic(err)
 	}
@@ -955,6 +992,15 @@ func _smokeCase70() {
 }
 
 func _smokeCase71() {
+	workplace, err := client.Workplaces.Update(context.Background(), "wkp_1234", sdk.WorkplaceUpdateParams{})
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(workplace)
+}
+
+func _smokeCase72() {
 	workplace, err := client.Workplaces.Update(context.Background(), "wkp_1234", sdk.WorkplaceUpdateParams{
 		Name: sdk.F[string](""),
 	})
@@ -963,6 +1009,41 @@ func _smokeCase71() {
 	}
 
 	fmt.Println(workplace)
+}
+
+func _smokeCase73() {
+	i9Verification, err := client.I9Verifications.List(context.Background(), sdk.I9VerificationListParams{
+		Limit: sdk.F[string]("limit"),
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(i9Verification)
+}
+
+func _smokeCase74() {
+	i9Verification, err := client.I9Verifications.List(context.Background(), sdk.I9VerificationListParams{
+		Limit:     sdk.F[string]("limit"),
+		AfterID:   sdk.F[string]("i9v_1234"),
+		BeforeID:  sdk.F[string]("i9v_1234"),
+		Statuses:  sdk.F[[]sdk.I9VerificationListParamsStatus]([]sdk.I9VerificationListParamsStatus{"not_started"}),
+		WorkerIDs: sdk.F[[]string]([]string{"wrk_1234"}),
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(i9Verification)
+}
+
+func _smokeCase75() {
+	i9Verification, err := client.I9Verifications.Get(context.Background(), "i9v_1234")
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(i9Verification)
 }
 
 var cases = []smokeCase{
@@ -1482,10 +1563,9 @@ var cases = []smokeCase{
 	},
 
 	{
-		Operation: "list",
-		Method:    "GET",
-		Path:      "/v1/workplaces",
-		Label:     "required params",
+		Operation: "revealSsn",
+		Method:    "POST",
+		Path:      "/v1/workers/reveal_ssn",
 		Run:       _smokeCase67,
 	},
 
@@ -1493,22 +1573,22 @@ var cases = []smokeCase{
 		Operation: "list",
 		Method:    "GET",
 		Path:      "/v1/workplaces",
-		Label:     "all params",
+		Label:     "required params",
 		Run:       _smokeCase68,
+	},
+
+	{
+		Operation: "list",
+		Method:    "GET",
+		Path:      "/v1/workplaces",
+		Label:     "all params",
+		Run:       _smokeCase69,
 	},
 
 	{
 		Operation: "create",
 		Method:    "POST",
 		Path:      "/v1/workplaces",
-		Run:       _smokeCase69,
-	},
-
-	{
-		Operation: "update",
-		Method:    "PATCH",
-		Path:      "/v1/workplaces/{id}",
-		Label:     "required params",
 		Run:       _smokeCase70,
 	},
 
@@ -1516,8 +1596,39 @@ var cases = []smokeCase{
 		Operation: "update",
 		Method:    "PATCH",
 		Path:      "/v1/workplaces/{id}",
-		Label:     "all params",
+		Label:     "required params",
 		Run:       _smokeCase71,
+	},
+
+	{
+		Operation: "update",
+		Method:    "PATCH",
+		Path:      "/v1/workplaces/{id}",
+		Label:     "all params",
+		Run:       _smokeCase72,
+	},
+
+	{
+		Operation: "list",
+		Method:    "GET",
+		Path:      "/v1/i9_verifications",
+		Label:     "required params",
+		Run:       _smokeCase73,
+	},
+
+	{
+		Operation: "list",
+		Method:    "GET",
+		Path:      "/v1/i9_verifications",
+		Label:     "all params",
+		Run:       _smokeCase74,
+	},
+
+	{
+		Operation: "retrieve",
+		Method:    "GET",
+		Path:      "/v1/i9_verifications/{id}",
+		Run:       _smokeCase75,
 	},
 }
 
@@ -1541,6 +1652,20 @@ func selectedCases() []smokeCase {
 		}
 	}
 	return selected
+}
+
+// How many cases run at once. A large SDK has hundreds of operations, and one goroutine per case
+// puts more requests in flight than the client's transport pools connections for. SCALAR_SMOKE_CONCURRENCY
+// overrides the cap; anything unparseable falls back to the default.
+func smokeConcurrency(caseCount int) int {
+	limit := 32
+	if override, err := strconv.Atoi(os.Getenv("SCALAR_SMOKE_CONCURRENCY")); err == nil && override > 0 {
+		limit = override
+	}
+	if caseCount < limit {
+		return caseCount
+	}
+	return limit
 }
 
 func runCase(testCase smokeCase) (result smokeResult) {
@@ -1567,10 +1692,15 @@ func main() {
 	selected := selectedCases()
 	results := make([]smokeResult, len(selected))
 	var wg sync.WaitGroup
+	// Buffered channel as a counting semaphore: every goroutine still starts, but only
+	// smokeConcurrency of them hold a slot — and so have a request in flight — at a time.
+	semaphore := make(chan struct{}, smokeConcurrency(len(selected)))
 	for index, testCase := range selected {
 		wg.Add(1)
 		go func(index int, testCase smokeCase) {
 			defer wg.Done()
+			semaphore <- struct{}{}
+			defer func() { <-semaphore }()
 			results[index] = runCase(testCase)
 		}(index, testCase)
 	}
