@@ -1003,8 +1003,10 @@ func (r publicWorkerSsnJSON) RawJSON() string {
 }
 
 type WorkerListParams struct {
-	Limit     param.Field[string]                   `query:"limit" api:"required"`
-	AfterID   param.Field[string]                   `query:"afterId"`
+	Limit param.Field[string] `query:"limit" api:"required"`
+	// The id of the worker.
+	AfterID param.Field[string] `query:"afterId"`
+	// The id of the worker.
 	BeforeID  param.Field[string]                   `query:"beforeId"`
 	Statuses  param.Field[[]WorkerListParamsStatus] `query:"statuses"`
 	Types     param.Field[[]WorkerListParamsType]   `query:"types"`
@@ -1072,12 +1074,22 @@ type WorkerNewEmployeeParams struct {
 	WorkLocation param.Field[WorkerNewEmployeeParamsWorkLocationUnion] `json:"workLocation" api:"required"`
 	// The job level to assign this employee to, or null to leave unassigned. Omit this
 	// field when job levels are not enabled.
-	LevelID           param.Field[string]                                   `json:"levelId"`
-	PaySchedule       param.Field[WorkerNewEmployeeParamsPaySchedule]       `json:"paySchedule"`
-	RequireI9         param.Field[bool]                                     `json:"requireI9"`
+	LevelID param.Field[string] `json:"levelId"`
+	// The employee's pay schedule. Must be a pay schedule that the company has
+	// configured.
+	PaySchedule param.Field[WorkerNewEmployeeParamsPaySchedule] `json:"paySchedule"`
+	// Whether the employee is required to complete I-9 work authorization. Set to
+	// false if the employee has already been verified off-platform. Defaults to true.
+	RequireI9 param.Field[bool] `json:"requireI9"`
+	// How state tax registration is handled for this employee's work state. Required
+	// when hiring in a state where your company doesn't have an existing registration.
+	// Use 'self_managed' if you've already registered in this state, or 'warp_managed'
+	// for Warp to handle registration on your behalf.
 	StateRegistration param.Field[WorkerNewEmployeeParamsStateRegistration] `json:"stateRegistration"`
-	StockOptions      param.Field[interface{}]                              `json:"stockOptions"`
-	WorkEmail         param.Field[string]                                   `json:"workEmail" format:"email"`
+	// Number of stock options granted to this employee.
+	StockOptions param.Field[interface{}] `json:"stockOptions"`
+	// Company-issued email address, if applicable.
+	WorkEmail param.Field[string] `json:"workEmail" format:"email"`
 }
 
 func (r WorkerNewEmployeeParams) MarshalJSON() (data []byte, err error) {
@@ -1278,17 +1290,24 @@ type WorkerNewContractorParams struct {
 	// The worker id of this contractor's direct manager.
 	ManagerID param.Field[string] `json:"managerId" api:"required"`
 	// The contractor's role or job title.
-	Position     param.Field[string]                                `json:"position" api:"required"`
-	StartDate    param.Field[string]                                `json:"startDate" api:"required"`
-	WorkCountry  param.Field[WorkerNewContractorParamsWorkCountry]  `json:"workCountry" api:"required"`
-	BusinessName param.Field[string]                                `json:"businessName"`
+	Position    param.Field[string]                               `json:"position" api:"required"`
+	StartDate   param.Field[string]                               `json:"startDate" api:"required"`
+	WorkCountry param.Field[WorkerNewContractorParamsWorkCountry] `json:"workCountry" api:"required"`
+	// Required when entityType is "business". The legal name of the contractor's
+	// business.
+	BusinessName param.Field[string] `json:"businessName"`
+	// The contractor's pay rate. Omit if you'd like to pay on-demand or via invoicing.
 	Compensation param.Field[WorkerNewContractorParamsCompensation] `json:"compensation"`
 	// The job level to assign this contractor to, or null to leave unassigned. Omit
 	// this field when job levels are not enabled.
-	LevelID     param.Field[string]                               `json:"levelId"`
+	LevelID param.Field[string] `json:"levelId"`
+	// The contractor's pay schedule. Must be a pay schedule that the company has
+	// configured.
 	PaySchedule param.Field[WorkerNewContractorParamsPaySchedule] `json:"paySchedule"`
-	ScopeOfWork param.Field[string]                               `json:"scopeOfWork"`
-	WorkEmail   param.Field[string]                               `json:"workEmail" format:"email"`
+	// A description of the work the contractor will perform.
+	ScopeOfWork param.Field[string] `json:"scopeOfWork"`
+	// Company-issued email address, if applicable.
+	WorkEmail param.Field[string] `json:"workEmail" format:"email"`
 }
 
 func (r WorkerNewContractorParams) MarshalJSON() (data []byte, err error) {
@@ -1740,7 +1759,8 @@ type WorkerGetResponse struct {
 	FirstName    string                  `json:"firstName" api:"required"`
 	LastName     string                  `json:"lastName" api:"required"`
 	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
-	Email         string `json:"email" api:"required" format:"email"`
+	Email string `json:"email" api:"required" format:"email"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
 	WorkEmail     string `json:"workEmail" api:"required,nullable" format:"email"`
 	PreferredName string `json:"preferredName" api:"required,nullable"`
 	// The worker's biological sex, or null when unavailable.
@@ -1777,7 +1797,11 @@ type WorkerGetResponse struct {
 	Manager WorkerGetResponseManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerGetResponseLevel    `json:"level" api:"nullable"`
+	Level WorkerGetResponseLevel `json:"level" api:"nullable"`
+	// The worker's custom field values. Every active company custom field appears;
+	// fields outside this API key's permission scopes are redacted (value null,
+	// redacted true) rather than omitted, so the list is identical across keys. Empty
+	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
 	JSON         workerGetResponseJSON     `json:"-"`
 }
@@ -1838,7 +1862,8 @@ type WorkerNewEmployeeResponse struct {
 	FirstName    string                          `json:"firstName" api:"required"`
 	LastName     string                          `json:"lastName" api:"required"`
 	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
-	Email         string `json:"email" api:"required" format:"email"`
+	Email string `json:"email" api:"required" format:"email"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
 	WorkEmail     string `json:"workEmail" api:"required,nullable" format:"email"`
 	PreferredName string `json:"preferredName" api:"required,nullable"`
 	// The worker's biological sex, or null when unavailable.
@@ -1875,9 +1900,13 @@ type WorkerNewEmployeeResponse struct {
 	Manager WorkerNewEmployeeResponseManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerNewEmployeeResponseLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField      `json:"customFields" api:"nullable"`
-	JSON         workerNewEmployeeResponseJSON  `json:"-"`
+	Level WorkerNewEmployeeResponseLevel `json:"level" api:"nullable"`
+	// The worker's custom field values. Every active company custom field appears;
+	// fields outside this API key's permission scopes are redacted (value null,
+	// redacted true) rather than omitted, so the list is identical across keys. Empty
+	// when the company has no custom fields.
+	CustomFields []PublicWorkerCustomField     `json:"customFields" api:"nullable"`
+	JSON         workerNewEmployeeResponseJSON `json:"-"`
 }
 
 // workerNewEmployeeResponseJSON contains the JSON metadata for the struct [WorkerNewEmployeeResponse]
@@ -1936,7 +1965,8 @@ type WorkerNewContractorResponse struct {
 	FirstName    string                            `json:"firstName" api:"required"`
 	LastName     string                            `json:"lastName" api:"required"`
 	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
-	Email         string `json:"email" api:"required" format:"email"`
+	Email string `json:"email" api:"required" format:"email"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
 	WorkEmail     string `json:"workEmail" api:"required,nullable" format:"email"`
 	PreferredName string `json:"preferredName" api:"required,nullable"`
 	// The worker's biological sex, or null when unavailable.
@@ -1973,9 +2003,13 @@ type WorkerNewContractorResponse struct {
 	Manager WorkerNewContractorResponseManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerNewContractorResponseLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField        `json:"customFields" api:"nullable"`
-	JSON         workerNewContractorResponseJSON  `json:"-"`
+	Level WorkerNewContractorResponseLevel `json:"level" api:"nullable"`
+	// The worker's custom field values. Every active company custom field appears;
+	// fields outside this API key's permission scopes are redacted (value null,
+	// redacted true) rather than omitted, so the list is identical across keys. Empty
+	// when the company has no custom fields.
+	CustomFields []PublicWorkerCustomField       `json:"customFields" api:"nullable"`
+	JSON         workerNewContractorResponseJSON `json:"-"`
 }
 
 // workerNewContractorResponseJSON contains the JSON metadata for the struct [WorkerNewContractorResponse]
@@ -2034,7 +2068,8 @@ type WorkerInviteResponse struct {
 	FirstName    string                     `json:"firstName" api:"required"`
 	LastName     string                     `json:"lastName" api:"required"`
 	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
-	Email         string `json:"email" api:"required" format:"email"`
+	Email string `json:"email" api:"required" format:"email"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
 	WorkEmail     string `json:"workEmail" api:"required,nullable" format:"email"`
 	PreferredName string `json:"preferredName" api:"required,nullable"`
 	// The worker's biological sex, or null when unavailable.
@@ -2071,7 +2106,11 @@ type WorkerInviteResponse struct {
 	Manager WorkerInviteResponseManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerInviteResponseLevel `json:"level" api:"nullable"`
+	Level WorkerInviteResponseLevel `json:"level" api:"nullable"`
+	// The worker's custom field values. Every active company custom field appears;
+	// fields outside this API key's permission scopes are redacted (value null,
+	// redacted true) rather than omitted, so the list is identical across keys. Empty
+	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
 	JSON         workerInviteResponseJSON  `json:"-"`
 }
@@ -2258,7 +2297,8 @@ type WorkerListResponseData struct {
 	FirstName    string                       `json:"firstName" api:"required"`
 	LastName     string                       `json:"lastName" api:"required"`
 	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
-	Email         string `json:"email" api:"required" format:"email"`
+	Email string `json:"email" api:"required" format:"email"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
 	WorkEmail     string `json:"workEmail" api:"required,nullable" format:"email"`
 	PreferredName string `json:"preferredName" api:"required,nullable"`
 	// The worker's biological sex, or null when unavailable.
@@ -2295,9 +2335,13 @@ type WorkerListResponseData struct {
 	Manager WorkerListResponseDataManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerListResponseDataLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField   `json:"customFields" api:"nullable"`
-	JSON         workerListResponseDataJSON  `json:"-"`
+	Level WorkerListResponseDataLevel `json:"level" api:"nullable"`
+	// The worker's custom field values. Every active company custom field appears;
+	// fields outside this API key's permission scopes are redacted (value null,
+	// redacted true) rather than omitted, so the list is identical across keys. Empty
+	// when the company has no custom fields.
+	CustomFields []PublicWorkerCustomField  `json:"customFields" api:"nullable"`
+	JSON         workerListResponseDataJSON `json:"-"`
 }
 
 // workerListResponseDataJSON contains the JSON metadata for the struct [WorkerListResponseData]

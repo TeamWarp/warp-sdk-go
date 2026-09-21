@@ -250,8 +250,10 @@ func (r PublicPayRatePer) IsKnown() bool {
 }
 
 type PayRateListParams struct {
-	Limit    param.Field[string] `query:"limit" api:"required"`
-	AfterID  param.Field[string] `query:"afterId"`
+	Limit param.Field[string] `query:"limit" api:"required"`
+	// The tag of the pay rate.
+	AfterID param.Field[string] `query:"afterId"`
+	// The tag of the pay rate.
 	BeforeID param.Field[string] `query:"beforeId"`
 	// Only return pay rates whose effective start date is before this date.
 	EffectiveBefore param.Field[string] `query:"effectiveBefore"`

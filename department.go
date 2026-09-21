@@ -124,8 +124,10 @@ func (r *DepartmentService) Update(ctx context.Context, id string, body Departme
 }
 
 type DepartmentListParams struct {
-	Limit    param.Field[string] `query:"limit" api:"required"`
-	AfterID  param.Field[string] `query:"afterId"`
+	Limit param.Field[string] `query:"limit" api:"required"`
+	// The unique public id of the department
+	AfterID param.Field[string] `query:"afterId"`
+	// The unique public id of the department
 	BeforeID param.Field[string] `query:"beforeId"`
 }
 

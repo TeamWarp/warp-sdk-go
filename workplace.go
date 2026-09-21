@@ -132,8 +132,10 @@ func (r *WorkplaceService) Update(ctx context.Context, id string, body Workplace
 }
 
 type WorkplaceListParams struct {
-	Limit    param.Field[string] `query:"limit" api:"required"`
-	AfterID  param.Field[string] `query:"afterId"`
+	Limit param.Field[string] `query:"limit" api:"required"`
+	// Public workplace identifier
+	AfterID param.Field[string] `query:"afterId"`
+	// Public workplace identifier
 	BeforeID param.Field[string] `query:"beforeId"`
 }
 

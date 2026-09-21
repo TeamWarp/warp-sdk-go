@@ -179,13 +179,14 @@ func (r publicPayrollListJSON) RawJSON() string {
 
 type PublicPayrollDetail struct {
 	// The tag of the payroll.
-	ID               string                  `json:"id" api:"required"`
-	Type             interface{}             `json:"type" api:"required"`
-	Subtype          interface{}             `json:"subtype" api:"required"`
-	Status           interface{}             `json:"status" api:"required"`
-	FundingCurrency  interface{}             `json:"fundingCurrency" api:"required"`
-	Payday           string                  `json:"payday" api:"required"`
-	PayPeriod        interface{}             `json:"payPeriod" api:"required"`
+	ID              string      `json:"id" api:"required"`
+	Type            interface{} `json:"type" api:"required"`
+	Subtype         interface{} `json:"subtype" api:"required"`
+	Status          interface{} `json:"status" api:"required"`
+	FundingCurrency interface{} `json:"fundingCurrency" api:"required"`
+	Payday          string      `json:"payday" api:"required"`
+	PayPeriod       interface{} `json:"payPeriod" api:"required"`
+	// The cadence at which workers are paid.
 	PayFrequency     PublicPayFrequency      `json:"payFrequency" api:"required,nullable"`
 	Description      string                  `json:"description" api:"required,nullable"`
 	ApprovalDeadline string                  `json:"approvalDeadline" api:"required,nullable"`
@@ -472,6 +473,8 @@ func (r PublicPayFrequency) IsKnown() bool {
 }
 
 type PublicPayrollDetailTotals struct {
+	// The provider-reported amount the employer must fund for the payroll, when
+	// available.
 	CashRequirement PublicCurrencyMoneyAmount11 `json:"cashRequirement" api:"required,nullable"`
 	// Gross earnings before worker taxes, deductions, and benefit contributions.
 	// Reimbursements are reported separately.
@@ -568,14 +571,15 @@ func (r publicPayrollTimelineJSON) RawJSON() string {
 
 type PublicPaycheckPayroll struct {
 	// The tag of the payroll.
-	ID              string                    `json:"id" api:"required"`
-	Type            interface{}               `json:"type" api:"required"`
-	Subtype         interface{}               `json:"subtype" api:"required"`
-	Status          interface{}               `json:"status" api:"required"`
-	FundingCurrency interface{}               `json:"fundingCurrency" api:"required"`
-	PayPeriod       interface{}               `json:"payPeriod" api:"required"`
-	PayFrequency    PublicPayFrequency        `json:"payFrequency" api:"required,nullable"`
-	JSON            publicPaycheckPayrollJSON `json:"-"`
+	ID              string      `json:"id" api:"required"`
+	Type            interface{} `json:"type" api:"required"`
+	Subtype         interface{} `json:"subtype" api:"required"`
+	Status          interface{} `json:"status" api:"required"`
+	FundingCurrency interface{} `json:"fundingCurrency" api:"required"`
+	PayPeriod       interface{} `json:"payPeriod" api:"required"`
+	// The cadence at which workers are paid.
+	PayFrequency PublicPayFrequency        `json:"payFrequency" api:"required,nullable"`
+	JSON         publicPaycheckPayrollJSON `json:"-"`
 }
 
 // publicPaycheckPayrollJSON contains the JSON metadata for the struct [PublicPaycheckPayroll]
@@ -636,11 +640,12 @@ const (
 	PublicPaycheckWorkerWorkerTypeUsW2             PublicPaycheckWorkerWorkerType = "us_w2"
 	PublicPaycheckWorkerWorkerTypeUs1099           PublicPaycheckWorkerWorkerType = "us_1099"
 	PublicPaycheckWorkerWorkerTypeGlobalContractor PublicPaycheckWorkerWorkerType = "global_contractor"
+	PublicPaycheckWorkerWorkerTypeGlobalEmployee   PublicPaycheckWorkerWorkerType = "global_employee"
 )
 
 func (r PublicPaycheckWorkerWorkerType) IsKnown() bool {
 	switch r {
-	case PublicPaycheckWorkerWorkerTypeUsW2, PublicPaycheckWorkerWorkerTypeUs1099, PublicPaycheckWorkerWorkerTypeGlobalContractor:
+	case PublicPaycheckWorkerWorkerTypeUsW2, PublicPaycheckWorkerWorkerTypeUs1099, PublicPaycheckWorkerWorkerTypeGlobalContractor, PublicPaycheckWorkerWorkerTypeGlobalEmployee:
 		return true
 	}
 	return false
@@ -1672,11 +1677,12 @@ const (
 	PayrollListPaychecksParamsWorkerTypeUsW2             PayrollListPaychecksParamsWorkerType = "us_w2"
 	PayrollListPaychecksParamsWorkerTypeUs1099           PayrollListPaychecksParamsWorkerType = "us_1099"
 	PayrollListPaychecksParamsWorkerTypeGlobalContractor PayrollListPaychecksParamsWorkerType = "global_contractor"
+	PayrollListPaychecksParamsWorkerTypeGlobalEmployee   PayrollListPaychecksParamsWorkerType = "global_employee"
 )
 
 func (r PayrollListPaychecksParamsWorkerType) IsKnown() bool {
 	switch r {
-	case PayrollListPaychecksParamsWorkerTypeUsW2, PayrollListPaychecksParamsWorkerTypeUs1099, PayrollListPaychecksParamsWorkerTypeGlobalContractor:
+	case PayrollListPaychecksParamsWorkerTypeUsW2, PayrollListPaychecksParamsWorkerTypeUs1099, PayrollListPaychecksParamsWorkerTypeGlobalContractor, PayrollListPaychecksParamsWorkerTypeGlobalEmployee:
 		return true
 	}
 	return false

@@ -197,8 +197,10 @@ func (r I9VerificationGetResponseStatus) IsKnown() bool {
 }
 
 type I9VerificationListParams struct {
-	Limit    param.Field[string] `query:"limit" api:"required"`
-	AfterID  param.Field[string] `query:"afterId"`
+	Limit param.Field[string] `query:"limit" api:"required"`
+	// The tag of the i9 verification.
+	AfterID param.Field[string] `query:"afterId"`
+	// The tag of the i9 verification.
 	BeforeID param.Field[string] `query:"beforeId"`
 	// Statuses to include, supplied as repeated parameters. Omit for all workflow
 	// states.

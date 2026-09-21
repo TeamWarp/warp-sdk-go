@@ -121,8 +121,10 @@ func (r *TimeOffService) ListRequests(ctx context.Context, query TimeOffListRequ
 }
 
 type TimeOffListAssignmentsParams struct {
-	Limit     param.Field[string]   `query:"limit" api:"required"`
-	AfterID   param.Field[string]   `query:"afterId"`
+	Limit param.Field[string] `query:"limit" api:"required"`
+	// The external-facing id of the worker assignment.
+	AfterID param.Field[string] `query:"afterId"`
+	// The external-facing id of the worker assignment.
 	BeforeID  param.Field[string]   `query:"beforeId"`
 	PolicyIDs param.Field[[]string] `query:"policyIds"`
 	WorkerIDs param.Field[[]string] `query:"workerIds"`
@@ -137,8 +139,10 @@ func (r TimeOffListAssignmentsParams) URLQuery() (v url.Values) {
 }
 
 type TimeOffListBalancesParams struct {
-	Limit     param.Field[string]   `query:"limit" api:"required"`
-	AfterID   param.Field[string]   `query:"afterId"`
+	Limit param.Field[string] `query:"limit" api:"required"`
+	// The external-facing id of the worker assignment.
+	AfterID param.Field[string] `query:"afterId"`
+	// The external-facing id of the worker assignment.
 	BeforeID  param.Field[string]   `query:"beforeId"`
 	EndDate   param.Field[string]   `query:"endDate"`
 	PolicyIDs param.Field[[]string] `query:"policyIds"`

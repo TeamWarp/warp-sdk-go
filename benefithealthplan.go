@@ -219,9 +219,11 @@ func (r PublicHealthPlanStatus) IsKnown() bool {
 }
 
 type BenefitHealthPlanListParams struct {
-	Limit      param.Field[string]                            `query:"limit" api:"required"`
-	Statuses   param.Field[[]PublicHealthPlanStatus]          `query:"statuses" api:"required"`
-	AfterID    param.Field[string]                            `query:"afterId"`
+	Limit    param.Field[string]                   `query:"limit" api:"required"`
+	Statuses param.Field[[]PublicHealthPlanStatus] `query:"statuses" api:"required"`
+	// The tag of a company health plan.
+	AfterID param.Field[string] `query:"afterId"`
+	// The tag of a company health plan.
 	BeforeID   param.Field[string]                            `query:"beforeId"`
 	CarrierIDs param.Field[[]string]                          `query:"carrierIds"`
 	Types      param.Field[[]BenefitHealthPlanListParamsType] `query:"types"`
