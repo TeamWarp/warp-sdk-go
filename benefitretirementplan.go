@@ -189,9 +189,11 @@ func (r PublicRetirementPlanStatus) IsKnown() bool {
 }
 
 type BenefitRetirementPlanListParams struct {
-	Limit    param.Field[string]                                `query:"limit" api:"required"`
-	Statuses param.Field[[]PublicRetirementPlanStatus]          `query:"statuses" api:"required"`
-	AfterID  param.Field[string]                                `query:"afterId"`
+	Limit    param.Field[string]                       `query:"limit" api:"required"`
+	Statuses param.Field[[]PublicRetirementPlanStatus] `query:"statuses" api:"required"`
+	// The tag of a company retirement plan.
+	AfterID param.Field[string] `query:"afterId"`
+	// The tag of a company retirement plan.
 	BeforeID param.Field[string]                                `query:"beforeId"`
 	Types    param.Field[[]BenefitRetirementPlanListParamsType] `query:"types"`
 }

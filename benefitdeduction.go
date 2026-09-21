@@ -475,9 +475,11 @@ func (r percentageContributionJSON) RawJSON() string {
 }
 
 type BenefitDeductionListParams struct {
-	Limit             param.Field[string]                           `query:"limit" api:"required"`
-	Statuses          param.Field[[]PublicBenefitDeductionStatus]   `query:"statuses" api:"required"`
-	AfterID           param.Field[string]                           `query:"afterId"`
+	Limit    param.Field[string]                         `query:"limit" api:"required"`
+	Statuses param.Field[[]PublicBenefitDeductionStatus] `query:"statuses" api:"required"`
+	// The version-group tag of a payroll benefit deduction. Stable across edits.
+	AfterID param.Field[string] `query:"afterId"`
+	// The version-group tag of a payroll benefit deduction. Stable across edits.
 	BeforeID          param.Field[string]                           `query:"beforeId"`
 	Categories        param.Field[[]PublicBenefitDeductionCategory] `query:"categories"`
 	HealthPlanIDs     param.Field[[]string]                         `query:"healthPlanIds"`

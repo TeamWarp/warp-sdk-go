@@ -19,7 +19,7 @@ import (
 // Smoke test: calls every generated operation once to confirm the SDK can reach each endpoint.
 // Run it from this repo with `go run tests/smoke-test.go`. The generator also runs this file
 // against a mock server and reads the JSON report produced via SCALAR_SMOKE_REPORT.
-var client = sdk.NewClient(option.WithAPIKey("test"), option.WithHeader("x-api-key", "test"))
+var client = sdk.NewClient(option.WithAPIKey("test"), option.WithHeader("x-api-key", "test"), option.WithMaxRetries(2), option.WithRequestTimeout(10*time.Second))
 
 type smokeResult struct {
 	Operation  string `json:"operation"`
@@ -870,7 +870,7 @@ func _smokeCase63() {
 		PaySchedule:       sdk.F[sdk.WorkerNewEmployeeParamsPaySchedule](sdk.WorkerNewEmployeeParamsPaySchedule("weekly")),
 		RequireI9:         sdk.F[bool](false),
 		StateRegistration: sdk.F[sdk.WorkerNewEmployeeParamsStateRegistration](sdk.WorkerNewEmployeeParamsStateRegistration("self_managed")),
-		StockOptions:      sdk.F[interface{}](0),
+		StockOptions:      sdk.F[interface{}](10000),
 		WorkEmail:         sdk.F[string]("john@joinwarp.com"),
 	})
 	if err != nil {
@@ -918,7 +918,7 @@ func _smokeCase65() {
 		}),
 		LevelID:     sdk.F[string]("jlvl_1234"),
 		PaySchedule: sdk.F[sdk.WorkerNewContractorParamsPaySchedule](sdk.WorkerNewContractorParamsPaySchedule("weekly")),
-		ScopeOfWork: sdk.F[string](""),
+		ScopeOfWork: sdk.F[string]("Frontend development for the customer dashboard"),
 		WorkEmail:   sdk.F[string]("john@joinwarp.com"),
 	})
 	if err != nil {
