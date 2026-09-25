@@ -266,6 +266,38 @@ func (r *WorkerService) RevealSsn(ctx context.Context, body WorkerRevealSsnParam
 	return res, err
 }
 
+// Update a worker and return the updated worker object. Omitted fields remain unchanged. Requires workers:profile write, plus read access to any referenced department, level, or workplace. See individual fields for update restrictions.
+//
+// Parameters:
+//
+//	ctx: Context for the request.
+//	id: The id of the worker.
+//	body: WorkerUpdateParams request parameters.
+//	opts: Options to apply to this request.
+//
+// Returns:
+//
+//	*WorkerUpdateResponse: A worker profile, including lifecycle, workplace, profile, and compensation fields.
+//
+// Example:
+//
+//	worker, err := client.Workers.Update(context.Background(), "wrk_1234", sdk.WorkerUpdateParams{})
+//	if err != nil {
+//		panic(err)
+//	}
+//
+//	fmt.Println(worker)
+func (r *WorkerService) Update(ctx context.Context, id string, body WorkerUpdateParams, opts ...option.RequestOption) (res *WorkerUpdateResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return nil, err
+	}
+	path := fmt.Sprintf("v1/workers/%s", url.PathEscape(id))
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, body, &res, opts...)
+	return res, err
+}
+
 type PublicWorkerCompensation struct {
 	// The tag of the pay rate.
 	PayRateID string      `json:"payRateId" api:"required"`
@@ -1722,6 +1754,82 @@ func (r WorkerRevealSsnParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
+type WorkerUpdateParams struct {
+	Address       param.Field[interface{}]                     `json:"address"`
+	BiologicalSex param.Field[WorkerUpdateParamsBiologicalSex] `json:"biologicalSex"`
+	DateOfBirth   param.Field[string]                          `json:"dateOfBirth"`
+	// The unique public id of the department
+	DepartmentID param.Field[string] `json:"departmentId"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	Email     param.Field[string] `json:"email" format:"email"`
+	FirstName param.Field[string] `json:"firstName"`
+	LastName  param.Field[string] `json:"lastName"`
+	// The unique public id of the job level
+	LevelID param.Field[string] `json:"levelId"`
+	// The id of the worker.
+	ManagerID         param.Field[string]                              `json:"managerId"`
+	MaritalStatus     param.Field[WorkerUpdateParamsMaritalStatus]     `json:"maritalStatus"`
+	Phone             param.Field[string]                              `json:"phone"`
+	Position          param.Field[string]                              `json:"position"`
+	PreferredName     param.Field[string]                              `json:"preferredName"`
+	StartDate         param.Field[string]                              `json:"startDate"`
+	StateRegistration param.Field[WorkerUpdateParamsStateRegistration] `json:"stateRegistration"`
+	TimeZone          param.Field[string]                              `json:"timeZone"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	WorkEmail param.Field[string] `json:"workEmail" format:"email"`
+	// Public workplace identifier
+	WorkplaceID param.Field[string] `json:"workplaceId"`
+}
+
+func (r WorkerUpdateParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type WorkerUpdateParamsMaritalStatus string
+
+const (
+	WorkerUpdateParamsMaritalStatusMarried    WorkerUpdateParamsMaritalStatus = "married"
+	WorkerUpdateParamsMaritalStatusNotMarried WorkerUpdateParamsMaritalStatus = "not_married"
+)
+
+func (r WorkerUpdateParamsMaritalStatus) IsKnown() bool {
+	switch r {
+	case WorkerUpdateParamsMaritalStatusMarried, WorkerUpdateParamsMaritalStatusNotMarried:
+		return true
+	}
+	return false
+}
+
+type WorkerUpdateParamsBiologicalSex string
+
+const (
+	WorkerUpdateParamsBiologicalSexMale   WorkerUpdateParamsBiologicalSex = "male"
+	WorkerUpdateParamsBiologicalSexFemale WorkerUpdateParamsBiologicalSex = "female"
+)
+
+func (r WorkerUpdateParamsBiologicalSex) IsKnown() bool {
+	switch r {
+	case WorkerUpdateParamsBiologicalSexMale, WorkerUpdateParamsBiologicalSexFemale:
+		return true
+	}
+	return false
+}
+
+type WorkerUpdateParamsStateRegistration string
+
+const (
+	WorkerUpdateParamsStateRegistrationSelfManaged WorkerUpdateParamsStateRegistration = "self_managed"
+	WorkerUpdateParamsStateRegistrationWarpManaged WorkerUpdateParamsStateRegistration = "warp_managed"
+)
+
+func (r WorkerUpdateParamsStateRegistration) IsKnown() bool {
+	switch r {
+	case WorkerUpdateParamsStateRegistrationSelfManaged, WorkerUpdateParamsStateRegistrationWarpManaged:
+		return true
+	}
+	return false
+}
+
 type WorkerListResponse struct {
 	HasMore bool                     `json:"hasMore" api:"required"`
 	Count   int64                    `json:"count" api:"required"`
@@ -2155,6 +2263,109 @@ func (r *WorkerInviteResponse) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r workerInviteResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type WorkerUpdateResponse struct {
+	// The id of the worker.
+	ID           string                     `json:"id" api:"required"`
+	Position     string                     `json:"position" api:"required"`
+	Type         WorkerUpdateResponseType   `json:"type" api:"required"`
+	Status       WorkerUpdateResponseStatus `json:"status" api:"required"`
+	StartDate    string                     `json:"startDate" api:"required"`
+	EndDate      string                     `json:"endDate" api:"required,nullable"`
+	IsBusiness   bool                       `json:"isBusiness" api:"required,nullable"`
+	BusinessName string                     `json:"businessName" api:"required,nullable"`
+	FirstName    string                     `json:"firstName" api:"required"`
+	LastName     string                     `json:"lastName" api:"required"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	Email string `json:"email" api:"required" format:"email"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	WorkEmail     string `json:"workEmail" api:"required,nullable" format:"email"`
+	PreferredName string `json:"preferredName" api:"required,nullable"`
+	// The worker's biological sex, or null when unavailable.
+	BiologicalSex WorkerUpdateResponseBiologicalSex `json:"biologicalSex" api:"required,nullable"`
+	// The worker's marital status, or null when unavailable.
+	MaritalStatus WorkerUpdateResponseMaritalStatus `json:"maritalStatus" api:"required,nullable"`
+	// The worker's date of birth, or null when unavailable.
+	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
+	// The worker's personal phone number, or null when unavailable.
+	Phone string `json:"phone" api:"required,nullable"`
+	// The worker's home address, or null when unavailable.
+	Address WorkerUpdateResponseAddress `json:"address" api:"required,nullable"`
+	// The "ui" name of a worker. If it's a business contractor business name is used.
+	// Otherwise we default to preferred name, then first-last.
+	DisplayName string `json:"displayName" api:"required"`
+	// The IANA timezone of the worker (e.g., America/New_York).
+	TimeZone string `json:"timeZone" api:"required,nullable"`
+	// The department the worker belongs to, or null if unassigned.
+	Department WorkerUpdateResponseDepartment `json:"department" api:"required,nullable"`
+	// The primary workplace the worker is assigned to, or null if unassigned.
+	PrimaryWorkplace WorkerUpdateResponsePrimaryWorkplace `json:"primaryWorkplace" api:"required,nullable"`
+	// The date the worker was most recently reactivated after an offboarding. This is
+	// distinct from startDate and is null if the worker has not been rehired.
+	LatestRehireDate string `json:"latestRehireDate" api:"required,nullable"`
+	// The reason the worker was terminated, or null when no termination reason is
+	// recorded.
+	TerminationReason string `json:"terminationReason" api:"required,nullable"`
+	UpdatedAt         string `json:"updatedAt" api:"required"`
+	// The worker's current regular compensation, or the rate effective on a future
+	// start date. Null when the worker has no applicable regular pay rate or the API
+	// key lacks the corresponding compensation read scope.
+	Compensation PublicWorkerCompensation `json:"compensation" api:"required,nullable"`
+	// The worker's manager, or null if unassigned.
+	Manager WorkerUpdateResponseManager `json:"manager" api:"nullable"`
+	// The worker's assigned job level, or null if unassigned. Omitted when job levels
+	// are not enabled.
+	Level WorkerUpdateResponseLevel `json:"level" api:"nullable"`
+	// The worker's custom field values. Every active company custom field appears;
+	// fields outside this API key's permission scopes are redacted (value null,
+	// redacted true) rather than omitted, so the list is identical across keys. Empty
+	// when the company has no custom fields.
+	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	JSON         workerUpdateResponseJSON  `json:"-"`
+}
+
+// workerUpdateResponseJSON contains the JSON metadata for the struct [WorkerUpdateResponse]
+type workerUpdateResponseJSON struct {
+	ID                apijson.Field
+	Position          apijson.Field
+	Type              apijson.Field
+	Status            apijson.Field
+	StartDate         apijson.Field
+	EndDate           apijson.Field
+	IsBusiness        apijson.Field
+	BusinessName      apijson.Field
+	FirstName         apijson.Field
+	LastName          apijson.Field
+	Email             apijson.Field
+	WorkEmail         apijson.Field
+	PreferredName     apijson.Field
+	BiologicalSex     apijson.Field
+	MaritalStatus     apijson.Field
+	DateOfBirth       apijson.Field
+	Phone             apijson.Field
+	Address           apijson.Field
+	DisplayName       apijson.Field
+	TimeZone          apijson.Field
+	Department        apijson.Field
+	PrimaryWorkplace  apijson.Field
+	LatestRehireDate  apijson.Field
+	TerminationReason apijson.Field
+	UpdatedAt         apijson.Field
+	Compensation      apijson.Field
+	Manager           apijson.Field
+	Level             apijson.Field
+	CustomFields      apijson.Field
+	raw               string
+	ExtraFields       map[string]apijson.Field
+}
+
+func (r *WorkerUpdateResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workerUpdateResponseJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -3168,6 +3379,202 @@ func (r *WorkerInviteResponseLevel) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r workerInviteResponseLevelJSON) RawJSON() string {
+	return r.raw
+}
+
+type WorkerUpdateResponseType string
+
+const (
+	WorkerUpdateResponseTypeEmployee   WorkerUpdateResponseType = "employee"
+	WorkerUpdateResponseTypeContractor WorkerUpdateResponseType = "contractor"
+)
+
+func (r WorkerUpdateResponseType) IsKnown() bool {
+	switch r {
+	case WorkerUpdateResponseTypeEmployee, WorkerUpdateResponseTypeContractor:
+		return true
+	}
+	return false
+}
+
+type WorkerUpdateResponseStatus string
+
+const (
+	WorkerUpdateResponseStatusDraft       WorkerUpdateResponseStatus = "draft"
+	WorkerUpdateResponseStatusInvited     WorkerUpdateResponseStatus = "invited"
+	WorkerUpdateResponseStatusOnboarding  WorkerUpdateResponseStatus = "onboarding"
+	WorkerUpdateResponseStatusActive      WorkerUpdateResponseStatus = "active"
+	WorkerUpdateResponseStatusOffboarding WorkerUpdateResponseStatus = "offboarding"
+	WorkerUpdateResponseStatusInactive    WorkerUpdateResponseStatus = "inactive"
+)
+
+func (r WorkerUpdateResponseStatus) IsKnown() bool {
+	switch r {
+	case WorkerUpdateResponseStatusDraft, WorkerUpdateResponseStatusInvited, WorkerUpdateResponseStatusOnboarding, WorkerUpdateResponseStatusActive, WorkerUpdateResponseStatusOffboarding, WorkerUpdateResponseStatusInactive:
+		return true
+	}
+	return false
+}
+
+type WorkerUpdateResponseBiologicalSex string
+
+const (
+	WorkerUpdateResponseBiologicalSexMale   WorkerUpdateResponseBiologicalSex = "male"
+	WorkerUpdateResponseBiologicalSexFemale WorkerUpdateResponseBiologicalSex = "female"
+)
+
+func (r WorkerUpdateResponseBiologicalSex) IsKnown() bool {
+	switch r {
+	case WorkerUpdateResponseBiologicalSexMale, WorkerUpdateResponseBiologicalSexFemale:
+		return true
+	}
+	return false
+}
+
+type WorkerUpdateResponseMaritalStatus string
+
+const (
+	WorkerUpdateResponseMaritalStatusMarried    WorkerUpdateResponseMaritalStatus = "married"
+	WorkerUpdateResponseMaritalStatusNotMarried WorkerUpdateResponseMaritalStatus = "not_married"
+)
+
+func (r WorkerUpdateResponseMaritalStatus) IsKnown() bool {
+	switch r {
+	case WorkerUpdateResponseMaritalStatusMarried, WorkerUpdateResponseMaritalStatusNotMarried:
+		return true
+	}
+	return false
+}
+
+type WorkerUpdateResponseAddress struct {
+	Line1      string                             `json:"line1" api:"required"`
+	Line2      string                             `json:"line2" api:"required,nullable"`
+	City       string                             `json:"city" api:"required"`
+	State      string                             `json:"state" api:"required,nullable"`
+	PostalCode string                             `json:"postalCode" api:"required,nullable"`
+	Country    WorkerUpdateResponseAddressCountry `json:"country" api:"required"`
+	JSON       workerUpdateResponseAddressJSON    `json:"-"`
+}
+
+// workerUpdateResponseAddressJSON contains the JSON metadata for the struct [WorkerUpdateResponseAddress]
+type workerUpdateResponseAddressJSON struct {
+	Line1       apijson.Field
+	Line2       apijson.Field
+	City        apijson.Field
+	State       apijson.Field
+	PostalCode  apijson.Field
+	Country     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorkerUpdateResponseAddress) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workerUpdateResponseAddressJSON) RawJSON() string {
+	return r.raw
+}
+
+type WorkerUpdateResponseManager struct {
+	// The id of the worker.
+	ID          string                          `json:"id" api:"required"`
+	FirstName   string                          `json:"firstName" api:"required"`
+	LastName    string                          `json:"lastName" api:"required"`
+	DisplayName string                          `json:"displayName" api:"required"`
+	JSON        workerUpdateResponseManagerJSON `json:"-"`
+}
+
+// workerUpdateResponseManagerJSON contains the JSON metadata for the struct [WorkerUpdateResponseManager]
+type workerUpdateResponseManagerJSON struct {
+	ID          apijson.Field
+	FirstName   apijson.Field
+	LastName    apijson.Field
+	DisplayName apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorkerUpdateResponseManager) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workerUpdateResponseManagerJSON) RawJSON() string {
+	return r.raw
+}
+
+type WorkerUpdateResponseDepartment struct {
+	// The unique public id of the department
+	ID   string                             `json:"id" api:"required"`
+	Name string                             `json:"name" api:"required"`
+	JSON workerUpdateResponseDepartmentJSON `json:"-"`
+}
+
+// workerUpdateResponseDepartmentJSON contains the JSON metadata for the struct [WorkerUpdateResponseDepartment]
+type workerUpdateResponseDepartmentJSON struct {
+	ID          apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorkerUpdateResponseDepartment) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workerUpdateResponseDepartmentJSON) RawJSON() string {
+	return r.raw
+}
+
+type WorkerUpdateResponsePrimaryWorkplace struct {
+	// Public workplace identifier
+	ID   string                                   `json:"id" api:"required"`
+	Name string                                   `json:"name" api:"required"`
+	Type WorkerUpdateResponsePrimaryWorkplaceType `json:"type" api:"required"`
+	JSON workerUpdateResponsePrimaryWorkplaceJSON `json:"-"`
+}
+
+// workerUpdateResponsePrimaryWorkplaceJSON contains the JSON metadata for the struct [WorkerUpdateResponsePrimaryWorkplace]
+type workerUpdateResponsePrimaryWorkplaceJSON struct {
+	ID          apijson.Field
+	Name        apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorkerUpdateResponsePrimaryWorkplace) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workerUpdateResponsePrimaryWorkplaceJSON) RawJSON() string {
+	return r.raw
+}
+
+type WorkerUpdateResponseLevel struct {
+	// The unique public id of the job level
+	ID    string                         `json:"id" api:"required"`
+	Code  string                         `json:"code" api:"required"`
+	Name  string                         `json:"name" api:"required"`
+	Track WorkerUpdateResponseLevelTrack `json:"track" api:"required"`
+	JSON  workerUpdateResponseLevelJSON  `json:"-"`
+}
+
+// workerUpdateResponseLevelJSON contains the JSON metadata for the struct [WorkerUpdateResponseLevel]
+type workerUpdateResponseLevelJSON struct {
+	ID          apijson.Field
+	Code        apijson.Field
+	Name        apijson.Field
+	Track       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorkerUpdateResponseLevel) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workerUpdateResponseLevelJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -4714,6 +5121,300 @@ const (
 func (r WorkerInviteResponseLevelTrack) IsKnown() bool {
 	switch r {
 	case WorkerInviteResponseLevelTrackIc, WorkerInviteResponseLevelTrackManager, WorkerInviteResponseLevelTrackExecutive:
+		return true
+	}
+	return false
+}
+
+type WorkerUpdateResponseAddressCountry string
+
+const (
+	WorkerUpdateResponseAddressCountryAd WorkerUpdateResponseAddressCountry = "AD"
+	WorkerUpdateResponseAddressCountryAe WorkerUpdateResponseAddressCountry = "AE"
+	WorkerUpdateResponseAddressCountryAf WorkerUpdateResponseAddressCountry = "AF"
+	WorkerUpdateResponseAddressCountryAg WorkerUpdateResponseAddressCountry = "AG"
+	WorkerUpdateResponseAddressCountryAI WorkerUpdateResponseAddressCountry = "AI"
+	WorkerUpdateResponseAddressCountryAl WorkerUpdateResponseAddressCountry = "AL"
+	WorkerUpdateResponseAddressCountryAm WorkerUpdateResponseAddressCountry = "AM"
+	WorkerUpdateResponseAddressCountryAo WorkerUpdateResponseAddressCountry = "AO"
+	WorkerUpdateResponseAddressCountryAq WorkerUpdateResponseAddressCountry = "AQ"
+	WorkerUpdateResponseAddressCountryAr WorkerUpdateResponseAddressCountry = "AR"
+	WorkerUpdateResponseAddressCountryAs WorkerUpdateResponseAddressCountry = "AS"
+	WorkerUpdateResponseAddressCountryAt WorkerUpdateResponseAddressCountry = "AT"
+	WorkerUpdateResponseAddressCountryAu WorkerUpdateResponseAddressCountry = "AU"
+	WorkerUpdateResponseAddressCountryAw WorkerUpdateResponseAddressCountry = "AW"
+	WorkerUpdateResponseAddressCountryAx WorkerUpdateResponseAddressCountry = "AX"
+	WorkerUpdateResponseAddressCountryAz WorkerUpdateResponseAddressCountry = "AZ"
+	WorkerUpdateResponseAddressCountryBa WorkerUpdateResponseAddressCountry = "BA"
+	WorkerUpdateResponseAddressCountryBb WorkerUpdateResponseAddressCountry = "BB"
+	WorkerUpdateResponseAddressCountryBd WorkerUpdateResponseAddressCountry = "BD"
+	WorkerUpdateResponseAddressCountryBe WorkerUpdateResponseAddressCountry = "BE"
+	WorkerUpdateResponseAddressCountryBf WorkerUpdateResponseAddressCountry = "BF"
+	WorkerUpdateResponseAddressCountryBg WorkerUpdateResponseAddressCountry = "BG"
+	WorkerUpdateResponseAddressCountryBh WorkerUpdateResponseAddressCountry = "BH"
+	WorkerUpdateResponseAddressCountryBi WorkerUpdateResponseAddressCountry = "BI"
+	WorkerUpdateResponseAddressCountryBj WorkerUpdateResponseAddressCountry = "BJ"
+	WorkerUpdateResponseAddressCountryBl WorkerUpdateResponseAddressCountry = "BL"
+	WorkerUpdateResponseAddressCountryBm WorkerUpdateResponseAddressCountry = "BM"
+	WorkerUpdateResponseAddressCountryBn WorkerUpdateResponseAddressCountry = "BN"
+	WorkerUpdateResponseAddressCountryBo WorkerUpdateResponseAddressCountry = "BO"
+	WorkerUpdateResponseAddressCountryBq WorkerUpdateResponseAddressCountry = "BQ"
+	WorkerUpdateResponseAddressCountryBr WorkerUpdateResponseAddressCountry = "BR"
+	WorkerUpdateResponseAddressCountryBs WorkerUpdateResponseAddressCountry = "BS"
+	WorkerUpdateResponseAddressCountryBt WorkerUpdateResponseAddressCountry = "BT"
+	WorkerUpdateResponseAddressCountryBv WorkerUpdateResponseAddressCountry = "BV"
+	WorkerUpdateResponseAddressCountryBw WorkerUpdateResponseAddressCountry = "BW"
+	WorkerUpdateResponseAddressCountryBy WorkerUpdateResponseAddressCountry = "BY"
+	WorkerUpdateResponseAddressCountryBz WorkerUpdateResponseAddressCountry = "BZ"
+	WorkerUpdateResponseAddressCountryCa WorkerUpdateResponseAddressCountry = "CA"
+	WorkerUpdateResponseAddressCountryCc WorkerUpdateResponseAddressCountry = "CC"
+	WorkerUpdateResponseAddressCountryCd WorkerUpdateResponseAddressCountry = "CD"
+	WorkerUpdateResponseAddressCountryCf WorkerUpdateResponseAddressCountry = "CF"
+	WorkerUpdateResponseAddressCountryCg WorkerUpdateResponseAddressCountry = "CG"
+	WorkerUpdateResponseAddressCountryCh WorkerUpdateResponseAddressCountry = "CH"
+	WorkerUpdateResponseAddressCountryCi WorkerUpdateResponseAddressCountry = "CI"
+	WorkerUpdateResponseAddressCountryCk WorkerUpdateResponseAddressCountry = "CK"
+	WorkerUpdateResponseAddressCountryCl WorkerUpdateResponseAddressCountry = "CL"
+	WorkerUpdateResponseAddressCountryCm WorkerUpdateResponseAddressCountry = "CM"
+	WorkerUpdateResponseAddressCountryCn WorkerUpdateResponseAddressCountry = "CN"
+	WorkerUpdateResponseAddressCountryCo WorkerUpdateResponseAddressCountry = "CO"
+	WorkerUpdateResponseAddressCountryCr WorkerUpdateResponseAddressCountry = "CR"
+	WorkerUpdateResponseAddressCountryCu WorkerUpdateResponseAddressCountry = "CU"
+	WorkerUpdateResponseAddressCountryCv WorkerUpdateResponseAddressCountry = "CV"
+	WorkerUpdateResponseAddressCountryCw WorkerUpdateResponseAddressCountry = "CW"
+	WorkerUpdateResponseAddressCountryCx WorkerUpdateResponseAddressCountry = "CX"
+	WorkerUpdateResponseAddressCountryCy WorkerUpdateResponseAddressCountry = "CY"
+	WorkerUpdateResponseAddressCountryCz WorkerUpdateResponseAddressCountry = "CZ"
+	WorkerUpdateResponseAddressCountryDe WorkerUpdateResponseAddressCountry = "DE"
+	WorkerUpdateResponseAddressCountryDj WorkerUpdateResponseAddressCountry = "DJ"
+	WorkerUpdateResponseAddressCountryDk WorkerUpdateResponseAddressCountry = "DK"
+	WorkerUpdateResponseAddressCountryDm WorkerUpdateResponseAddressCountry = "DM"
+	WorkerUpdateResponseAddressCountryDo WorkerUpdateResponseAddressCountry = "DO"
+	WorkerUpdateResponseAddressCountryDz WorkerUpdateResponseAddressCountry = "DZ"
+	WorkerUpdateResponseAddressCountryEc WorkerUpdateResponseAddressCountry = "EC"
+	WorkerUpdateResponseAddressCountryEe WorkerUpdateResponseAddressCountry = "EE"
+	WorkerUpdateResponseAddressCountryEg WorkerUpdateResponseAddressCountry = "EG"
+	WorkerUpdateResponseAddressCountryEh WorkerUpdateResponseAddressCountry = "EH"
+	WorkerUpdateResponseAddressCountryEr WorkerUpdateResponseAddressCountry = "ER"
+	WorkerUpdateResponseAddressCountryEs WorkerUpdateResponseAddressCountry = "ES"
+	WorkerUpdateResponseAddressCountryEt WorkerUpdateResponseAddressCountry = "ET"
+	WorkerUpdateResponseAddressCountryFi WorkerUpdateResponseAddressCountry = "FI"
+	WorkerUpdateResponseAddressCountryFj WorkerUpdateResponseAddressCountry = "FJ"
+	WorkerUpdateResponseAddressCountryFk WorkerUpdateResponseAddressCountry = "FK"
+	WorkerUpdateResponseAddressCountryFm WorkerUpdateResponseAddressCountry = "FM"
+	WorkerUpdateResponseAddressCountryFo WorkerUpdateResponseAddressCountry = "FO"
+	WorkerUpdateResponseAddressCountryFr WorkerUpdateResponseAddressCountry = "FR"
+	WorkerUpdateResponseAddressCountryGa WorkerUpdateResponseAddressCountry = "GA"
+	WorkerUpdateResponseAddressCountryGB WorkerUpdateResponseAddressCountry = "GB"
+	WorkerUpdateResponseAddressCountryGd WorkerUpdateResponseAddressCountry = "GD"
+	WorkerUpdateResponseAddressCountryGe WorkerUpdateResponseAddressCountry = "GE"
+	WorkerUpdateResponseAddressCountryGf WorkerUpdateResponseAddressCountry = "GF"
+	WorkerUpdateResponseAddressCountryGg WorkerUpdateResponseAddressCountry = "GG"
+	WorkerUpdateResponseAddressCountryGh WorkerUpdateResponseAddressCountry = "GH"
+	WorkerUpdateResponseAddressCountryGi WorkerUpdateResponseAddressCountry = "GI"
+	WorkerUpdateResponseAddressCountryGl WorkerUpdateResponseAddressCountry = "GL"
+	WorkerUpdateResponseAddressCountryGm WorkerUpdateResponseAddressCountry = "GM"
+	WorkerUpdateResponseAddressCountryGn WorkerUpdateResponseAddressCountry = "GN"
+	WorkerUpdateResponseAddressCountryGp WorkerUpdateResponseAddressCountry = "GP"
+	WorkerUpdateResponseAddressCountryGq WorkerUpdateResponseAddressCountry = "GQ"
+	WorkerUpdateResponseAddressCountryGr WorkerUpdateResponseAddressCountry = "GR"
+	WorkerUpdateResponseAddressCountryGs WorkerUpdateResponseAddressCountry = "GS"
+	WorkerUpdateResponseAddressCountryGt WorkerUpdateResponseAddressCountry = "GT"
+	WorkerUpdateResponseAddressCountryGu WorkerUpdateResponseAddressCountry = "GU"
+	WorkerUpdateResponseAddressCountryGw WorkerUpdateResponseAddressCountry = "GW"
+	WorkerUpdateResponseAddressCountryGy WorkerUpdateResponseAddressCountry = "GY"
+	WorkerUpdateResponseAddressCountryHk WorkerUpdateResponseAddressCountry = "HK"
+	WorkerUpdateResponseAddressCountryHm WorkerUpdateResponseAddressCountry = "HM"
+	WorkerUpdateResponseAddressCountryHn WorkerUpdateResponseAddressCountry = "HN"
+	WorkerUpdateResponseAddressCountryHr WorkerUpdateResponseAddressCountry = "HR"
+	WorkerUpdateResponseAddressCountryHt WorkerUpdateResponseAddressCountry = "HT"
+	WorkerUpdateResponseAddressCountryHu WorkerUpdateResponseAddressCountry = "HU"
+	WorkerUpdateResponseAddressCountryID WorkerUpdateResponseAddressCountry = "ID"
+	WorkerUpdateResponseAddressCountryIe WorkerUpdateResponseAddressCountry = "IE"
+	WorkerUpdateResponseAddressCountryIl WorkerUpdateResponseAddressCountry = "IL"
+	WorkerUpdateResponseAddressCountryIm WorkerUpdateResponseAddressCountry = "IM"
+	WorkerUpdateResponseAddressCountryIn WorkerUpdateResponseAddressCountry = "IN"
+	WorkerUpdateResponseAddressCountryIo WorkerUpdateResponseAddressCountry = "IO"
+	WorkerUpdateResponseAddressCountryIq WorkerUpdateResponseAddressCountry = "IQ"
+	WorkerUpdateResponseAddressCountryIr WorkerUpdateResponseAddressCountry = "IR"
+	WorkerUpdateResponseAddressCountryIs WorkerUpdateResponseAddressCountry = "IS"
+	WorkerUpdateResponseAddressCountryIt WorkerUpdateResponseAddressCountry = "IT"
+	WorkerUpdateResponseAddressCountryJe WorkerUpdateResponseAddressCountry = "JE"
+	WorkerUpdateResponseAddressCountryJm WorkerUpdateResponseAddressCountry = "JM"
+	WorkerUpdateResponseAddressCountryJo WorkerUpdateResponseAddressCountry = "JO"
+	WorkerUpdateResponseAddressCountryJp WorkerUpdateResponseAddressCountry = "JP"
+	WorkerUpdateResponseAddressCountryKe WorkerUpdateResponseAddressCountry = "KE"
+	WorkerUpdateResponseAddressCountryKg WorkerUpdateResponseAddressCountry = "KG"
+	WorkerUpdateResponseAddressCountryKh WorkerUpdateResponseAddressCountry = "KH"
+	WorkerUpdateResponseAddressCountryKi WorkerUpdateResponseAddressCountry = "KI"
+	WorkerUpdateResponseAddressCountryKm WorkerUpdateResponseAddressCountry = "KM"
+	WorkerUpdateResponseAddressCountryKn WorkerUpdateResponseAddressCountry = "KN"
+	WorkerUpdateResponseAddressCountryKp WorkerUpdateResponseAddressCountry = "KP"
+	WorkerUpdateResponseAddressCountryKr WorkerUpdateResponseAddressCountry = "KR"
+	WorkerUpdateResponseAddressCountryKw WorkerUpdateResponseAddressCountry = "KW"
+	WorkerUpdateResponseAddressCountryKy WorkerUpdateResponseAddressCountry = "KY"
+	WorkerUpdateResponseAddressCountryKz WorkerUpdateResponseAddressCountry = "KZ"
+	WorkerUpdateResponseAddressCountryLa WorkerUpdateResponseAddressCountry = "LA"
+	WorkerUpdateResponseAddressCountryLb WorkerUpdateResponseAddressCountry = "LB"
+	WorkerUpdateResponseAddressCountryLc WorkerUpdateResponseAddressCountry = "LC"
+	WorkerUpdateResponseAddressCountryLi WorkerUpdateResponseAddressCountry = "LI"
+	WorkerUpdateResponseAddressCountryLk WorkerUpdateResponseAddressCountry = "LK"
+	WorkerUpdateResponseAddressCountryLr WorkerUpdateResponseAddressCountry = "LR"
+	WorkerUpdateResponseAddressCountryLs WorkerUpdateResponseAddressCountry = "LS"
+	WorkerUpdateResponseAddressCountryLt WorkerUpdateResponseAddressCountry = "LT"
+	WorkerUpdateResponseAddressCountryLu WorkerUpdateResponseAddressCountry = "LU"
+	WorkerUpdateResponseAddressCountryLv WorkerUpdateResponseAddressCountry = "LV"
+	WorkerUpdateResponseAddressCountryLy WorkerUpdateResponseAddressCountry = "LY"
+	WorkerUpdateResponseAddressCountryMa WorkerUpdateResponseAddressCountry = "MA"
+	WorkerUpdateResponseAddressCountryMc WorkerUpdateResponseAddressCountry = "MC"
+	WorkerUpdateResponseAddressCountryMd WorkerUpdateResponseAddressCountry = "MD"
+	WorkerUpdateResponseAddressCountryMe WorkerUpdateResponseAddressCountry = "ME"
+	WorkerUpdateResponseAddressCountryMf WorkerUpdateResponseAddressCountry = "MF"
+	WorkerUpdateResponseAddressCountryMg WorkerUpdateResponseAddressCountry = "MG"
+	WorkerUpdateResponseAddressCountryMh WorkerUpdateResponseAddressCountry = "MH"
+	WorkerUpdateResponseAddressCountryMk WorkerUpdateResponseAddressCountry = "MK"
+	WorkerUpdateResponseAddressCountryMl WorkerUpdateResponseAddressCountry = "ML"
+	WorkerUpdateResponseAddressCountryMm WorkerUpdateResponseAddressCountry = "MM"
+	WorkerUpdateResponseAddressCountryMn WorkerUpdateResponseAddressCountry = "MN"
+	WorkerUpdateResponseAddressCountryMo WorkerUpdateResponseAddressCountry = "MO"
+	WorkerUpdateResponseAddressCountryMp WorkerUpdateResponseAddressCountry = "MP"
+	WorkerUpdateResponseAddressCountryMq WorkerUpdateResponseAddressCountry = "MQ"
+	WorkerUpdateResponseAddressCountryMr WorkerUpdateResponseAddressCountry = "MR"
+	WorkerUpdateResponseAddressCountryMs WorkerUpdateResponseAddressCountry = "MS"
+	WorkerUpdateResponseAddressCountryMt WorkerUpdateResponseAddressCountry = "MT"
+	WorkerUpdateResponseAddressCountryMu WorkerUpdateResponseAddressCountry = "MU"
+	WorkerUpdateResponseAddressCountryMv WorkerUpdateResponseAddressCountry = "MV"
+	WorkerUpdateResponseAddressCountryMw WorkerUpdateResponseAddressCountry = "MW"
+	WorkerUpdateResponseAddressCountryMx WorkerUpdateResponseAddressCountry = "MX"
+	WorkerUpdateResponseAddressCountryMy WorkerUpdateResponseAddressCountry = "MY"
+	WorkerUpdateResponseAddressCountryMz WorkerUpdateResponseAddressCountry = "MZ"
+	WorkerUpdateResponseAddressCountryNa WorkerUpdateResponseAddressCountry = "NA"
+	WorkerUpdateResponseAddressCountryNc WorkerUpdateResponseAddressCountry = "NC"
+	WorkerUpdateResponseAddressCountryNe WorkerUpdateResponseAddressCountry = "NE"
+	WorkerUpdateResponseAddressCountryNf WorkerUpdateResponseAddressCountry = "NF"
+	WorkerUpdateResponseAddressCountryNg WorkerUpdateResponseAddressCountry = "NG"
+	WorkerUpdateResponseAddressCountryNi WorkerUpdateResponseAddressCountry = "NI"
+	WorkerUpdateResponseAddressCountryNl WorkerUpdateResponseAddressCountry = "NL"
+	WorkerUpdateResponseAddressCountryNo WorkerUpdateResponseAddressCountry = "NO"
+	WorkerUpdateResponseAddressCountryNp WorkerUpdateResponseAddressCountry = "NP"
+	WorkerUpdateResponseAddressCountryNr WorkerUpdateResponseAddressCountry = "NR"
+	WorkerUpdateResponseAddressCountryNu WorkerUpdateResponseAddressCountry = "NU"
+	WorkerUpdateResponseAddressCountryNz WorkerUpdateResponseAddressCountry = "NZ"
+	WorkerUpdateResponseAddressCountryOm WorkerUpdateResponseAddressCountry = "OM"
+	WorkerUpdateResponseAddressCountryPa WorkerUpdateResponseAddressCountry = "PA"
+	WorkerUpdateResponseAddressCountryPe WorkerUpdateResponseAddressCountry = "PE"
+	WorkerUpdateResponseAddressCountryPf WorkerUpdateResponseAddressCountry = "PF"
+	WorkerUpdateResponseAddressCountryPg WorkerUpdateResponseAddressCountry = "PG"
+	WorkerUpdateResponseAddressCountryPh WorkerUpdateResponseAddressCountry = "PH"
+	WorkerUpdateResponseAddressCountryPk WorkerUpdateResponseAddressCountry = "PK"
+	WorkerUpdateResponseAddressCountryPl WorkerUpdateResponseAddressCountry = "PL"
+	WorkerUpdateResponseAddressCountryPm WorkerUpdateResponseAddressCountry = "PM"
+	WorkerUpdateResponseAddressCountryPn WorkerUpdateResponseAddressCountry = "PN"
+	WorkerUpdateResponseAddressCountryPr WorkerUpdateResponseAddressCountry = "PR"
+	WorkerUpdateResponseAddressCountryPs WorkerUpdateResponseAddressCountry = "PS"
+	WorkerUpdateResponseAddressCountryPt WorkerUpdateResponseAddressCountry = "PT"
+	WorkerUpdateResponseAddressCountryPw WorkerUpdateResponseAddressCountry = "PW"
+	WorkerUpdateResponseAddressCountryPy WorkerUpdateResponseAddressCountry = "PY"
+	WorkerUpdateResponseAddressCountryQa WorkerUpdateResponseAddressCountry = "QA"
+	WorkerUpdateResponseAddressCountryRe WorkerUpdateResponseAddressCountry = "RE"
+	WorkerUpdateResponseAddressCountryRo WorkerUpdateResponseAddressCountry = "RO"
+	WorkerUpdateResponseAddressCountryRs WorkerUpdateResponseAddressCountry = "RS"
+	WorkerUpdateResponseAddressCountryRu WorkerUpdateResponseAddressCountry = "RU"
+	WorkerUpdateResponseAddressCountryRw WorkerUpdateResponseAddressCountry = "RW"
+	WorkerUpdateResponseAddressCountrySa WorkerUpdateResponseAddressCountry = "SA"
+	WorkerUpdateResponseAddressCountrySb WorkerUpdateResponseAddressCountry = "SB"
+	WorkerUpdateResponseAddressCountrySc WorkerUpdateResponseAddressCountry = "SC"
+	WorkerUpdateResponseAddressCountrySd WorkerUpdateResponseAddressCountry = "SD"
+	WorkerUpdateResponseAddressCountrySe WorkerUpdateResponseAddressCountry = "SE"
+	WorkerUpdateResponseAddressCountrySg WorkerUpdateResponseAddressCountry = "SG"
+	WorkerUpdateResponseAddressCountrySh WorkerUpdateResponseAddressCountry = "SH"
+	WorkerUpdateResponseAddressCountrySi WorkerUpdateResponseAddressCountry = "SI"
+	WorkerUpdateResponseAddressCountrySj WorkerUpdateResponseAddressCountry = "SJ"
+	WorkerUpdateResponseAddressCountrySk WorkerUpdateResponseAddressCountry = "SK"
+	WorkerUpdateResponseAddressCountrySl WorkerUpdateResponseAddressCountry = "SL"
+	WorkerUpdateResponseAddressCountrySm WorkerUpdateResponseAddressCountry = "SM"
+	WorkerUpdateResponseAddressCountrySn WorkerUpdateResponseAddressCountry = "SN"
+	WorkerUpdateResponseAddressCountrySo WorkerUpdateResponseAddressCountry = "SO"
+	WorkerUpdateResponseAddressCountrySr WorkerUpdateResponseAddressCountry = "SR"
+	WorkerUpdateResponseAddressCountrySS WorkerUpdateResponseAddressCountry = "SS"
+	WorkerUpdateResponseAddressCountrySt WorkerUpdateResponseAddressCountry = "ST"
+	WorkerUpdateResponseAddressCountrySv WorkerUpdateResponseAddressCountry = "SV"
+	WorkerUpdateResponseAddressCountrySx WorkerUpdateResponseAddressCountry = "SX"
+	WorkerUpdateResponseAddressCountrySy WorkerUpdateResponseAddressCountry = "SY"
+	WorkerUpdateResponseAddressCountrySz WorkerUpdateResponseAddressCountry = "SZ"
+	WorkerUpdateResponseAddressCountryTc WorkerUpdateResponseAddressCountry = "TC"
+	WorkerUpdateResponseAddressCountryTd WorkerUpdateResponseAddressCountry = "TD"
+	WorkerUpdateResponseAddressCountryTf WorkerUpdateResponseAddressCountry = "TF"
+	WorkerUpdateResponseAddressCountryTg WorkerUpdateResponseAddressCountry = "TG"
+	WorkerUpdateResponseAddressCountryTh WorkerUpdateResponseAddressCountry = "TH"
+	WorkerUpdateResponseAddressCountryTj WorkerUpdateResponseAddressCountry = "TJ"
+	WorkerUpdateResponseAddressCountryTk WorkerUpdateResponseAddressCountry = "TK"
+	WorkerUpdateResponseAddressCountryTl WorkerUpdateResponseAddressCountry = "TL"
+	WorkerUpdateResponseAddressCountryTm WorkerUpdateResponseAddressCountry = "TM"
+	WorkerUpdateResponseAddressCountryTn WorkerUpdateResponseAddressCountry = "TN"
+	WorkerUpdateResponseAddressCountryTo WorkerUpdateResponseAddressCountry = "TO"
+	WorkerUpdateResponseAddressCountryTr WorkerUpdateResponseAddressCountry = "TR"
+	WorkerUpdateResponseAddressCountryTt WorkerUpdateResponseAddressCountry = "TT"
+	WorkerUpdateResponseAddressCountryTv WorkerUpdateResponseAddressCountry = "TV"
+	WorkerUpdateResponseAddressCountryTw WorkerUpdateResponseAddressCountry = "TW"
+	WorkerUpdateResponseAddressCountryTz WorkerUpdateResponseAddressCountry = "TZ"
+	WorkerUpdateResponseAddressCountryUa WorkerUpdateResponseAddressCountry = "UA"
+	WorkerUpdateResponseAddressCountryUg WorkerUpdateResponseAddressCountry = "UG"
+	WorkerUpdateResponseAddressCountryUm WorkerUpdateResponseAddressCountry = "UM"
+	WorkerUpdateResponseAddressCountryUs WorkerUpdateResponseAddressCountry = "US"
+	WorkerUpdateResponseAddressCountryUy WorkerUpdateResponseAddressCountry = "UY"
+	WorkerUpdateResponseAddressCountryUz WorkerUpdateResponseAddressCountry = "UZ"
+	WorkerUpdateResponseAddressCountryVa WorkerUpdateResponseAddressCountry = "VA"
+	WorkerUpdateResponseAddressCountryVc WorkerUpdateResponseAddressCountry = "VC"
+	WorkerUpdateResponseAddressCountryVe WorkerUpdateResponseAddressCountry = "VE"
+	WorkerUpdateResponseAddressCountryVg WorkerUpdateResponseAddressCountry = "VG"
+	WorkerUpdateResponseAddressCountryVi WorkerUpdateResponseAddressCountry = "VI"
+	WorkerUpdateResponseAddressCountryVn WorkerUpdateResponseAddressCountry = "VN"
+	WorkerUpdateResponseAddressCountryVu WorkerUpdateResponseAddressCountry = "VU"
+	WorkerUpdateResponseAddressCountryWf WorkerUpdateResponseAddressCountry = "WF"
+	WorkerUpdateResponseAddressCountryWs WorkerUpdateResponseAddressCountry = "WS"
+	WorkerUpdateResponseAddressCountryXk WorkerUpdateResponseAddressCountry = "XK"
+	WorkerUpdateResponseAddressCountryYe WorkerUpdateResponseAddressCountry = "YE"
+	WorkerUpdateResponseAddressCountryYt WorkerUpdateResponseAddressCountry = "YT"
+	WorkerUpdateResponseAddressCountryZa WorkerUpdateResponseAddressCountry = "ZA"
+	WorkerUpdateResponseAddressCountryZm WorkerUpdateResponseAddressCountry = "ZM"
+	WorkerUpdateResponseAddressCountryZw WorkerUpdateResponseAddressCountry = "ZW"
+)
+
+func (r WorkerUpdateResponseAddressCountry) IsKnown() bool {
+	switch r {
+	case WorkerUpdateResponseAddressCountryAd, WorkerUpdateResponseAddressCountryAe, WorkerUpdateResponseAddressCountryAf, WorkerUpdateResponseAddressCountryAg, WorkerUpdateResponseAddressCountryAI, WorkerUpdateResponseAddressCountryAl, WorkerUpdateResponseAddressCountryAm, WorkerUpdateResponseAddressCountryAo, WorkerUpdateResponseAddressCountryAq, WorkerUpdateResponseAddressCountryAr, WorkerUpdateResponseAddressCountryAs, WorkerUpdateResponseAddressCountryAt, WorkerUpdateResponseAddressCountryAu, WorkerUpdateResponseAddressCountryAw, WorkerUpdateResponseAddressCountryAx, WorkerUpdateResponseAddressCountryAz, WorkerUpdateResponseAddressCountryBa, WorkerUpdateResponseAddressCountryBb, WorkerUpdateResponseAddressCountryBd, WorkerUpdateResponseAddressCountryBe, WorkerUpdateResponseAddressCountryBf, WorkerUpdateResponseAddressCountryBg, WorkerUpdateResponseAddressCountryBh, WorkerUpdateResponseAddressCountryBi, WorkerUpdateResponseAddressCountryBj, WorkerUpdateResponseAddressCountryBl, WorkerUpdateResponseAddressCountryBm, WorkerUpdateResponseAddressCountryBn, WorkerUpdateResponseAddressCountryBo, WorkerUpdateResponseAddressCountryBq, WorkerUpdateResponseAddressCountryBr, WorkerUpdateResponseAddressCountryBs, WorkerUpdateResponseAddressCountryBt, WorkerUpdateResponseAddressCountryBv, WorkerUpdateResponseAddressCountryBw, WorkerUpdateResponseAddressCountryBy, WorkerUpdateResponseAddressCountryBz, WorkerUpdateResponseAddressCountryCa, WorkerUpdateResponseAddressCountryCc, WorkerUpdateResponseAddressCountryCd, WorkerUpdateResponseAddressCountryCf, WorkerUpdateResponseAddressCountryCg, WorkerUpdateResponseAddressCountryCh, WorkerUpdateResponseAddressCountryCi, WorkerUpdateResponseAddressCountryCk, WorkerUpdateResponseAddressCountryCl, WorkerUpdateResponseAddressCountryCm, WorkerUpdateResponseAddressCountryCn, WorkerUpdateResponseAddressCountryCo, WorkerUpdateResponseAddressCountryCr, WorkerUpdateResponseAddressCountryCu, WorkerUpdateResponseAddressCountryCv, WorkerUpdateResponseAddressCountryCw, WorkerUpdateResponseAddressCountryCx, WorkerUpdateResponseAddressCountryCy, WorkerUpdateResponseAddressCountryCz, WorkerUpdateResponseAddressCountryDe, WorkerUpdateResponseAddressCountryDj, WorkerUpdateResponseAddressCountryDk, WorkerUpdateResponseAddressCountryDm, WorkerUpdateResponseAddressCountryDo, WorkerUpdateResponseAddressCountryDz, WorkerUpdateResponseAddressCountryEc, WorkerUpdateResponseAddressCountryEe, WorkerUpdateResponseAddressCountryEg, WorkerUpdateResponseAddressCountryEh, WorkerUpdateResponseAddressCountryEr, WorkerUpdateResponseAddressCountryEs, WorkerUpdateResponseAddressCountryEt, WorkerUpdateResponseAddressCountryFi, WorkerUpdateResponseAddressCountryFj, WorkerUpdateResponseAddressCountryFk, WorkerUpdateResponseAddressCountryFm, WorkerUpdateResponseAddressCountryFo, WorkerUpdateResponseAddressCountryFr, WorkerUpdateResponseAddressCountryGa, WorkerUpdateResponseAddressCountryGB, WorkerUpdateResponseAddressCountryGd, WorkerUpdateResponseAddressCountryGe, WorkerUpdateResponseAddressCountryGf, WorkerUpdateResponseAddressCountryGg, WorkerUpdateResponseAddressCountryGh, WorkerUpdateResponseAddressCountryGi, WorkerUpdateResponseAddressCountryGl, WorkerUpdateResponseAddressCountryGm, WorkerUpdateResponseAddressCountryGn, WorkerUpdateResponseAddressCountryGp, WorkerUpdateResponseAddressCountryGq, WorkerUpdateResponseAddressCountryGr, WorkerUpdateResponseAddressCountryGs, WorkerUpdateResponseAddressCountryGt, WorkerUpdateResponseAddressCountryGu, WorkerUpdateResponseAddressCountryGw, WorkerUpdateResponseAddressCountryGy, WorkerUpdateResponseAddressCountryHk, WorkerUpdateResponseAddressCountryHm, WorkerUpdateResponseAddressCountryHn, WorkerUpdateResponseAddressCountryHr, WorkerUpdateResponseAddressCountryHt, WorkerUpdateResponseAddressCountryHu, WorkerUpdateResponseAddressCountryID, WorkerUpdateResponseAddressCountryIe, WorkerUpdateResponseAddressCountryIl, WorkerUpdateResponseAddressCountryIm, WorkerUpdateResponseAddressCountryIn, WorkerUpdateResponseAddressCountryIo, WorkerUpdateResponseAddressCountryIq, WorkerUpdateResponseAddressCountryIr, WorkerUpdateResponseAddressCountryIs, WorkerUpdateResponseAddressCountryIt, WorkerUpdateResponseAddressCountryJe, WorkerUpdateResponseAddressCountryJm, WorkerUpdateResponseAddressCountryJo, WorkerUpdateResponseAddressCountryJp, WorkerUpdateResponseAddressCountryKe, WorkerUpdateResponseAddressCountryKg, WorkerUpdateResponseAddressCountryKh, WorkerUpdateResponseAddressCountryKi, WorkerUpdateResponseAddressCountryKm, WorkerUpdateResponseAddressCountryKn, WorkerUpdateResponseAddressCountryKp, WorkerUpdateResponseAddressCountryKr, WorkerUpdateResponseAddressCountryKw, WorkerUpdateResponseAddressCountryKy, WorkerUpdateResponseAddressCountryKz, WorkerUpdateResponseAddressCountryLa, WorkerUpdateResponseAddressCountryLb, WorkerUpdateResponseAddressCountryLc, WorkerUpdateResponseAddressCountryLi, WorkerUpdateResponseAddressCountryLk, WorkerUpdateResponseAddressCountryLr, WorkerUpdateResponseAddressCountryLs, WorkerUpdateResponseAddressCountryLt, WorkerUpdateResponseAddressCountryLu, WorkerUpdateResponseAddressCountryLv, WorkerUpdateResponseAddressCountryLy, WorkerUpdateResponseAddressCountryMa, WorkerUpdateResponseAddressCountryMc, WorkerUpdateResponseAddressCountryMd, WorkerUpdateResponseAddressCountryMe, WorkerUpdateResponseAddressCountryMf, WorkerUpdateResponseAddressCountryMg, WorkerUpdateResponseAddressCountryMh, WorkerUpdateResponseAddressCountryMk, WorkerUpdateResponseAddressCountryMl, WorkerUpdateResponseAddressCountryMm, WorkerUpdateResponseAddressCountryMn, WorkerUpdateResponseAddressCountryMo, WorkerUpdateResponseAddressCountryMp, WorkerUpdateResponseAddressCountryMq, WorkerUpdateResponseAddressCountryMr, WorkerUpdateResponseAddressCountryMs, WorkerUpdateResponseAddressCountryMt, WorkerUpdateResponseAddressCountryMu, WorkerUpdateResponseAddressCountryMv, WorkerUpdateResponseAddressCountryMw, WorkerUpdateResponseAddressCountryMx, WorkerUpdateResponseAddressCountryMy, WorkerUpdateResponseAddressCountryMz, WorkerUpdateResponseAddressCountryNa, WorkerUpdateResponseAddressCountryNc, WorkerUpdateResponseAddressCountryNe, WorkerUpdateResponseAddressCountryNf, WorkerUpdateResponseAddressCountryNg, WorkerUpdateResponseAddressCountryNi, WorkerUpdateResponseAddressCountryNl, WorkerUpdateResponseAddressCountryNo, WorkerUpdateResponseAddressCountryNp, WorkerUpdateResponseAddressCountryNr, WorkerUpdateResponseAddressCountryNu, WorkerUpdateResponseAddressCountryNz, WorkerUpdateResponseAddressCountryOm, WorkerUpdateResponseAddressCountryPa, WorkerUpdateResponseAddressCountryPe, WorkerUpdateResponseAddressCountryPf, WorkerUpdateResponseAddressCountryPg, WorkerUpdateResponseAddressCountryPh, WorkerUpdateResponseAddressCountryPk, WorkerUpdateResponseAddressCountryPl, WorkerUpdateResponseAddressCountryPm, WorkerUpdateResponseAddressCountryPn, WorkerUpdateResponseAddressCountryPr, WorkerUpdateResponseAddressCountryPs, WorkerUpdateResponseAddressCountryPt, WorkerUpdateResponseAddressCountryPw, WorkerUpdateResponseAddressCountryPy, WorkerUpdateResponseAddressCountryQa, WorkerUpdateResponseAddressCountryRe, WorkerUpdateResponseAddressCountryRo, WorkerUpdateResponseAddressCountryRs, WorkerUpdateResponseAddressCountryRu, WorkerUpdateResponseAddressCountryRw, WorkerUpdateResponseAddressCountrySa, WorkerUpdateResponseAddressCountrySb, WorkerUpdateResponseAddressCountrySc, WorkerUpdateResponseAddressCountrySd, WorkerUpdateResponseAddressCountrySe, WorkerUpdateResponseAddressCountrySg, WorkerUpdateResponseAddressCountrySh, WorkerUpdateResponseAddressCountrySi, WorkerUpdateResponseAddressCountrySj, WorkerUpdateResponseAddressCountrySk, WorkerUpdateResponseAddressCountrySl, WorkerUpdateResponseAddressCountrySm, WorkerUpdateResponseAddressCountrySn, WorkerUpdateResponseAddressCountrySo, WorkerUpdateResponseAddressCountrySr, WorkerUpdateResponseAddressCountrySS, WorkerUpdateResponseAddressCountrySt, WorkerUpdateResponseAddressCountrySv, WorkerUpdateResponseAddressCountrySx, WorkerUpdateResponseAddressCountrySy, WorkerUpdateResponseAddressCountrySz, WorkerUpdateResponseAddressCountryTc, WorkerUpdateResponseAddressCountryTd, WorkerUpdateResponseAddressCountryTf, WorkerUpdateResponseAddressCountryTg, WorkerUpdateResponseAddressCountryTh, WorkerUpdateResponseAddressCountryTj, WorkerUpdateResponseAddressCountryTk, WorkerUpdateResponseAddressCountryTl, WorkerUpdateResponseAddressCountryTm, WorkerUpdateResponseAddressCountryTn, WorkerUpdateResponseAddressCountryTo, WorkerUpdateResponseAddressCountryTr, WorkerUpdateResponseAddressCountryTt, WorkerUpdateResponseAddressCountryTv, WorkerUpdateResponseAddressCountryTw, WorkerUpdateResponseAddressCountryTz, WorkerUpdateResponseAddressCountryUa, WorkerUpdateResponseAddressCountryUg, WorkerUpdateResponseAddressCountryUm, WorkerUpdateResponseAddressCountryUs, WorkerUpdateResponseAddressCountryUy, WorkerUpdateResponseAddressCountryUz, WorkerUpdateResponseAddressCountryVa, WorkerUpdateResponseAddressCountryVc, WorkerUpdateResponseAddressCountryVe, WorkerUpdateResponseAddressCountryVg, WorkerUpdateResponseAddressCountryVi, WorkerUpdateResponseAddressCountryVn, WorkerUpdateResponseAddressCountryVu, WorkerUpdateResponseAddressCountryWf, WorkerUpdateResponseAddressCountryWs, WorkerUpdateResponseAddressCountryXk, WorkerUpdateResponseAddressCountryYe, WorkerUpdateResponseAddressCountryYt, WorkerUpdateResponseAddressCountryZa, WorkerUpdateResponseAddressCountryZm, WorkerUpdateResponseAddressCountryZw:
+		return true
+	}
+	return false
+}
+
+type WorkerUpdateResponsePrimaryWorkplaceType string
+
+const (
+	WorkerUpdateResponsePrimaryWorkplaceTypeRemote WorkerUpdateResponsePrimaryWorkplaceType = "remote"
+	WorkerUpdateResponsePrimaryWorkplaceTypeOffice WorkerUpdateResponsePrimaryWorkplaceType = "office"
+)
+
+func (r WorkerUpdateResponsePrimaryWorkplaceType) IsKnown() bool {
+	switch r {
+	case WorkerUpdateResponsePrimaryWorkplaceTypeRemote, WorkerUpdateResponsePrimaryWorkplaceTypeOffice:
+		return true
+	}
+	return false
+}
+
+type WorkerUpdateResponseLevelTrack string
+
+const (
+	WorkerUpdateResponseLevelTrackIc        WorkerUpdateResponseLevelTrack = "ic"
+	WorkerUpdateResponseLevelTrackManager   WorkerUpdateResponseLevelTrack = "manager"
+	WorkerUpdateResponseLevelTrackExecutive WorkerUpdateResponseLevelTrack = "executive"
+)
+
+func (r WorkerUpdateResponseLevelTrack) IsKnown() bool {
+	switch r {
+	case WorkerUpdateResponseLevelTrackIc, WorkerUpdateResponseLevelTrackManager, WorkerUpdateResponseLevelTrackExecutive:
 		return true
 	}
 	return false

@@ -5,6 +5,10 @@ Complete reference of every operation, grouped by resource. See [the README](./R
 ## Contents
 
 - [`Benefits`](#benefits)
+  - [Create Benefit Deduction](#create-benefit-deduction)
+  - [Update Benefit Deduction](#update-benefit-deduction)
+  - [Create Retirement Plan](#create-retirement-plan)
+  - [Update Retirement Plan](#update-retirement-plan)
   - [`Benefits HealthPlans`](#benefits-healthplans)
     - [List Health Plans](#list-health-plans)
     - [Get Health Plan](#get-health-plan)
@@ -62,6 +66,7 @@ Complete reference of every operation, grouped by resource. See [the README](./R
   - [Create Contractor](#create-contractor)
   - [Invite Worker](#invite-worker)
   - [Reveal Worker SSNs](#reveal-worker-ssns)
+  - [Update Worker](#update-worker)
 - [`Workplaces`](#workplaces)
   - [List Workplaces](#list-workplaces)
   - [Create Workplace](#create-workplace)
@@ -84,6 +89,98 @@ client := sdk.NewClient()
 ```
 
 ## `Benefits`
+
+Health plan reads and retirement plan and payroll benefit deduction management.
+
+### Create Benefit Deduction
+
+Create a benefit deduction for a worker.
+
+| Direction | Type |
+| --- | --- |
+| Request | [`BenefitNewDeductionParams`](./benefit.go) |
+| Response | [`BenefitNewDeductionResponse`](./benefit.go) |
+
+```go
+benefit, err := client.Benefits.NewDeduction(context.Background(), sdk.BenefitNewDeductionParams{
+	Calculation: sdk.F[sdk.BenefitNewDeductionParamsCalculationUnion](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInput{
+		EmployeeContribution: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContribution](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContribution{
+			Amount:   sdk.F[int64](0),
+			Currency: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency("USD")),
+		}),
+		EmployerContribution: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContribution](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContribution{
+			Amount:   sdk.F[int64](0),
+			Currency: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency("USD")),
+		}),
+	}),
+	EffectiveStartDate: sdk.F[string](""),
+	Type:               sdk.F[sdk.BenefitNewDeductionParamsType](sdk.BenefitNewDeductionParamsType("medical")),
+	WorkerID:           sdk.F[string]("wrk_1234"),
+})
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(benefit)
+```
+
+### Update Benefit Deduction
+
+Update a benefit deduction. The calculation type cannot change.
+
+| Direction | Type |
+| --- | --- |
+| Request | [`BenefitUpdateDeductionParams`](./benefit.go) |
+| Response | [`PublicBenefitDeduction`](./benefitdeduction.go) |
+
+```go
+benefit, err := client.Benefits.UpdateDeduction(context.Background(), "pbdg_1234", sdk.BenefitUpdateDeductionParams{})
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(benefit)
+```
+
+### Create Retirement Plan
+
+Create a retirement plan for a company on the manual retirement channel.
+
+| Direction | Type |
+| --- | --- |
+| Request | [`BenefitNewRetirementPlanParams`](./benefit.go) |
+| Response | [`BenefitNewRetirementPlanResponse`](./benefit.go) |
+
+```go
+benefit, err := client.Benefits.NewRetirementPlan(context.Background(), sdk.BenefitNewRetirementPlanParams{
+	EffectiveStartDate: sdk.F[string](""),
+	Name:               sdk.F[string]("x"),
+	Type:               sdk.F[sdk.BenefitNewRetirementPlanParamsType](sdk.BenefitNewRetirementPlanParamsType("401k")),
+})
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(benefit)
+```
+
+### Update Retirement Plan
+
+Update a retirement plan for a company on the manual retirement channel.
+
+| Direction | Type |
+| --- | --- |
+| Request | [`BenefitUpdateRetirementPlanParams`](./benefit.go) |
+| Response | [`PublicRetirementPlan`](./benefitretirementplan.go) |
+
+```go
+benefit, err := client.Benefits.UpdateRetirementPlan(context.Background(), "crpl_1234", sdk.BenefitUpdateRetirementPlanParams{})
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(benefit)
+```
 
 ### `Benefits HealthPlans`
 
@@ -997,6 +1094,24 @@ Reveal full Social Security numbers for up to 50 workers. Requires the workers:p
 worker, err := client.Workers.RevealSsn(context.Background(), sdk.WorkerRevealSsnParams{
 	WorkerIDs: sdk.F[[]string]([]string{"wrk_khac8380c2Lm", "wrk_q7Vm2pR9xK4c"}),
 })
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(worker)
+```
+
+### Update Worker
+
+Update a worker and return the updated worker object. Omitted fields remain unchanged. Requires workers:profile write, plus read access to any referenced department, level, or workplace. See individual fields for update restrictions.
+
+| Direction | Type |
+| --- | --- |
+| Request | [`WorkerUpdateParams`](./worker.go) |
+| Response | [`WorkerUpdateResponse`](./worker.go) |
+
+```go
+worker, err := client.Workers.Update(context.Background(), "wrk_1234", sdk.WorkerUpdateParams{})
 if err != nil {
 	panic(err)
 }
