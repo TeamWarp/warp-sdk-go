@@ -81,8 +81,11 @@ func (r *WorkplaceService) List(ctx context.Context, query WorkplaceListParams, 
 //			Line1:      sdk.F[string]("x"),
 //			City:       sdk.F[string](""),
 //			PostalCode: sdk.F[string](""),
+//			State:      sdk.F[sdk.WorkplaceNewParamsAddressState](sdk.WorkplaceNewParamsAddressState("AL")),
+//			Country:    sdk.F[sdk.WorkplaceNewParamsAddressCountry](sdk.WorkplaceNewParamsAddressCountry("US")),
 //		}),
 //		Name: sdk.F[string]("x"),
+//		Type: sdk.F[sdk.WorkplaceNewParamsType](sdk.WorkplaceNewParamsType("remote")),
 //	})
 //	if err != nil {
 //		panic(err)
@@ -129,8 +132,10 @@ func (r *WorkplaceService) Update(ctx context.Context, id string, body Workplace
 }
 
 type WorkplaceListParams struct {
-	Limit    param.Field[string] `query:"limit" api:"required"`
-	AfterID  param.Field[string] `query:"afterId"`
+	Limit param.Field[string] `query:"limit" api:"required"`
+	// Public workplace identifier
+	AfterID param.Field[string] `query:"afterId"`
+	// Public workplace identifier
 	BeforeID param.Field[string] `query:"beforeId"`
 }
 

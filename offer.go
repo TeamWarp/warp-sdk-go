@@ -83,12 +83,15 @@ func (r *OfferService) List(ctx context.Context, query OfferListParams, opts ...
 //			Email:     sdk.F[string]("john@joinwarp.com"),
 //		}),
 //		Compensation: sdk.F[sdk.OfferNewParamsCompensation](sdk.OfferNewParamsCompensation{
-//			PayRate: sdk.F[float64](0),
+//			PayBasis:    sdk.F[sdk.OfferNewParamsCompensationPayBasis](sdk.OfferNewParamsCompensationPayBasis("year")),
+//			PayCurrency: sdk.F[sdk.OfferNewParamsCompensationPayCurrency](sdk.OfferNewParamsCompensationPayCurrency("USD")),
+//			PayRate:     sdk.F[float64](1),
 //		}),
 //		Position: sdk.F[sdk.OfferNewParamsPosition](sdk.OfferNewParamsPosition{
 //			Title:     sdk.F[string]("x"),
 //			StartDate: sdk.F[string](""),
 //		}),
+//		WorkerType: sdk.F[sdk.OfferNewParamsWorkerType](sdk.OfferNewParamsWorkerType("employee")),
 //	})
 //	if err != nil {
 //		panic(err)
@@ -117,7 +120,9 @@ func (r *OfferService) New(ctx context.Context, body OfferNewParams, opts ...opt
 //
 // Example:
 //
-//	offer, err := client.Offers.Void(context.Background(), "offr_1234", sdk.OfferVoidParams{})
+//	offer, err := client.Offers.Void(context.Background(), "offr_1234", sdk.OfferVoidParams{
+//		VoidReason: sdk.F[sdk.OfferVoidParamsVoidReason](sdk.OfferVoidParamsVoidReason("candidate_declined")),
+//	})
 //	if err != nil {
 //		panic(err)
 //	}
@@ -300,9 +305,12 @@ func (r PublicMoneyAmountCurrency) IsKnown() bool {
 }
 
 type OfferListParams struct {
-	Limit          param.Field[string]                      `query:"limit" api:"required"`
-	AfterID        param.Field[string]                      `query:"afterId"`
-	BeforeID       param.Field[string]                      `query:"beforeId"`
+	Limit param.Field[string] `query:"limit" api:"required"`
+	// The tag of the offer.
+	AfterID param.Field[string] `query:"afterId"`
+	// The tag of the offer.
+	BeforeID param.Field[string] `query:"beforeId"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
 	CandidateEmail param.Field[string]                      `query:"candidateEmail" format:"email"`
 	Statuses       param.Field[[]OfferListParamsStatus]     `query:"statuses"`
 	WorkerTypes    param.Field[[]OfferListParamsWorkerType] `query:"workerTypes"`
@@ -355,11 +363,15 @@ type OfferNewParams struct {
 	Position                    param.Field[OfferNewParamsPosition]                    `json:"position" api:"required"`
 	WorkerType                  param.Field[OfferNewParamsWorkerType]                  `json:"workerType" api:"required"`
 	BackgroundCheckWorkLocation param.Field[OfferNewParamsBackgroundCheckWorkLocation] `json:"backgroundCheckWorkLocation"`
-	DepartmentID                param.Field[string]                                    `json:"departmentId"`
-	ExpirationTime              param.Field[string]                                    `json:"expirationTime"`
-	LevelID                     param.Field[string]                                    `json:"levelId"`
-	ManagerID                   param.Field[string]                                    `json:"managerId"`
-	WorkplaceID                 param.Field[string]                                    `json:"workplaceId"`
+	// The unique public id of the department
+	DepartmentID   param.Field[string] `json:"departmentId"`
+	ExpirationTime param.Field[string] `json:"expirationTime"`
+	// The unique public id of the job level
+	LevelID param.Field[string] `json:"levelId"`
+	// The id of the worker.
+	ManagerID param.Field[string] `json:"managerId"`
+	// Public workplace identifier
+	WorkplaceID param.Field[string] `json:"workplaceId"`
 }
 
 func (r OfferNewParams) MarshalJSON() (data []byte, err error) {
@@ -388,8 +400,10 @@ func (r OfferNewParamsCandidateContractorDetails) MarshalJSON() (data []byte, er
 }
 
 type OfferNewParamsPosition struct {
-	StartDate   param.Field[string]                        `json:"startDate" api:"required"`
-	Title       param.Field[string]                        `json:"title" api:"required"`
+	StartDate param.Field[string] `json:"startDate" api:"required"`
+	Title     param.Field[string] `json:"title" api:"required"`
+	// Required when workerType is global_contractor. Ignored for employee and
+	// us_contractor offers.
 	Country     param.Field[OfferNewParamsPositionCountry] `json:"country"`
 	ScopeOfWork param.Field[string]                        `json:"scopeOfWork"`
 }
@@ -1320,11 +1334,13 @@ func (r offerNewResponseLevelJSON) RawJSON() string {
 }
 
 type OfferNewResponseCompensation struct {
-	BasePay         OfferNewResponseCompensationBasePay `json:"basePay" api:"required"`
-	SignOnBonus     PublicMoneyAmount                   `json:"signOnBonus" api:"required,nullable"`
-	RelocationBonus PublicMoneyAmount                   `json:"relocationBonus" api:"required,nullable"`
-	Stock           OfferNewResponseCompensationStock   `json:"stock" api:"required,nullable"`
-	JSON            offerNewResponseCompensationJSON    `json:"-"`
+	BasePay OfferNewResponseCompensationBasePay `json:"basePay" api:"required"`
+	// A monetary amount with its currency and server-formatted display value.
+	SignOnBonus PublicMoneyAmount `json:"signOnBonus" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	RelocationBonus PublicMoneyAmount                 `json:"relocationBonus" api:"required,nullable"`
+	Stock           OfferNewResponseCompensationStock `json:"stock" api:"required,nullable"`
+	JSON            offerNewResponseCompensationJSON  `json:"-"`
 }
 
 // offerNewResponseCompensationJSON contains the JSON metadata for the struct [OfferNewResponseCompensation]
@@ -1528,11 +1544,13 @@ func (r offerVoidResponseLevelJSON) RawJSON() string {
 }
 
 type OfferVoidResponseCompensation struct {
-	BasePay         OfferVoidResponseCompensationBasePay `json:"basePay" api:"required"`
-	SignOnBonus     PublicMoneyAmount                    `json:"signOnBonus" api:"required,nullable"`
-	RelocationBonus PublicMoneyAmount                    `json:"relocationBonus" api:"required,nullable"`
-	Stock           OfferVoidResponseCompensationStock   `json:"stock" api:"required,nullable"`
-	JSON            offerVoidResponseCompensationJSON    `json:"-"`
+	BasePay OfferVoidResponseCompensationBasePay `json:"basePay" api:"required"`
+	// A monetary amount with its currency and server-formatted display value.
+	SignOnBonus PublicMoneyAmount `json:"signOnBonus" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	RelocationBonus PublicMoneyAmount                  `json:"relocationBonus" api:"required,nullable"`
+	Stock           OfferVoidResponseCompensationStock `json:"stock" api:"required,nullable"`
+	JSON            offerVoidResponseCompensationJSON  `json:"-"`
 }
 
 // offerVoidResponseCompensationJSON contains the JSON metadata for the struct [OfferVoidResponseCompensation]
@@ -1736,11 +1754,13 @@ func (r offerExtendDeadlineResponseLevelJSON) RawJSON() string {
 }
 
 type OfferExtendDeadlineResponseCompensation struct {
-	BasePay         OfferExtendDeadlineResponseCompensationBasePay `json:"basePay" api:"required"`
-	SignOnBonus     PublicMoneyAmount                              `json:"signOnBonus" api:"required,nullable"`
-	RelocationBonus PublicMoneyAmount                              `json:"relocationBonus" api:"required,nullable"`
-	Stock           OfferExtendDeadlineResponseCompensationStock   `json:"stock" api:"required,nullable"`
-	JSON            offerExtendDeadlineResponseCompensationJSON    `json:"-"`
+	BasePay OfferExtendDeadlineResponseCompensationBasePay `json:"basePay" api:"required"`
+	// A monetary amount with its currency and server-formatted display value.
+	SignOnBonus PublicMoneyAmount `json:"signOnBonus" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	RelocationBonus PublicMoneyAmount                            `json:"relocationBonus" api:"required,nullable"`
+	Stock           OfferExtendDeadlineResponseCompensationStock `json:"stock" api:"required,nullable"`
+	JSON            offerExtendDeadlineResponseCompensationJSON  `json:"-"`
 }
 
 // offerExtendDeadlineResponseCompensationJSON contains the JSON metadata for the struct [OfferExtendDeadlineResponseCompensation]
@@ -1944,11 +1964,13 @@ func (r offerResendResponseLevelJSON) RawJSON() string {
 }
 
 type OfferResendResponseCompensation struct {
-	BasePay         OfferResendResponseCompensationBasePay `json:"basePay" api:"required"`
-	SignOnBonus     PublicMoneyAmount                      `json:"signOnBonus" api:"required,nullable"`
-	RelocationBonus PublicMoneyAmount                      `json:"relocationBonus" api:"required,nullable"`
-	Stock           OfferResendResponseCompensationStock   `json:"stock" api:"required,nullable"`
-	JSON            offerResendResponseCompensationJSON    `json:"-"`
+	BasePay OfferResendResponseCompensationBasePay `json:"basePay" api:"required"`
+	// A monetary amount with its currency and server-formatted display value.
+	SignOnBonus PublicMoneyAmount `json:"signOnBonus" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	RelocationBonus PublicMoneyAmount                    `json:"relocationBonus" api:"required,nullable"`
+	Stock           OfferResendResponseCompensationStock `json:"stock" api:"required,nullable"`
+	JSON            offerResendResponseCompensationJSON  `json:"-"`
 }
 
 // offerResendResponseCompensationJSON contains the JSON metadata for the struct [OfferResendResponseCompensation]
@@ -2152,11 +2174,13 @@ func (r offerListResponseDataLevelJSON) RawJSON() string {
 }
 
 type OfferListResponseDataCompensation struct {
-	BasePay         OfferListResponseDataCompensationBasePay `json:"basePay" api:"required"`
-	SignOnBonus     PublicMoneyAmount                        `json:"signOnBonus" api:"required,nullable"`
-	RelocationBonus PublicMoneyAmount                        `json:"relocationBonus" api:"required,nullable"`
-	Stock           OfferListResponseDataCompensationStock   `json:"stock" api:"required,nullable"`
-	JSON            offerListResponseDataCompensationJSON    `json:"-"`
+	BasePay OfferListResponseDataCompensationBasePay `json:"basePay" api:"required"`
+	// A monetary amount with its currency and server-formatted display value.
+	SignOnBonus PublicMoneyAmount `json:"signOnBonus" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	RelocationBonus PublicMoneyAmount                      `json:"relocationBonus" api:"required,nullable"`
+	Stock           OfferListResponseDataCompensationStock `json:"stock" api:"required,nullable"`
+	JSON            offerListResponseDataCompensationJSON  `json:"-"`
 }
 
 // offerListResponseDataCompensationJSON contains the JSON metadata for the struct [OfferListResponseDataCompensation]
@@ -2480,11 +2504,12 @@ func (r OfferNewResponseLevelTrack) IsKnown() bool {
 
 type OfferNewResponseCompensationBasePay struct {
 	// A monetary amount with its currency and server-formatted display value.
-	Amount       PublicMoneyAmount                        `json:"amount" api:"required"`
-	Basis        OfferNewResponseCompensationBasePayBasis `json:"basis" api:"required"`
-	Type         OfferNewResponseCompensationBasePayType  `json:"type" api:"required,nullable"`
-	VariableRate PublicMoneyAmount                        `json:"variableRate" api:"required,nullable"`
-	JSON         offerNewResponseCompensationBasePayJSON  `json:"-"`
+	Amount PublicMoneyAmount                        `json:"amount" api:"required"`
+	Basis  OfferNewResponseCompensationBasePayBasis `json:"basis" api:"required"`
+	Type   OfferNewResponseCompensationBasePayType  `json:"type" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	VariableRate PublicMoneyAmount                       `json:"variableRate" api:"required,nullable"`
+	JSON         offerNewResponseCompensationBasePayJSON `json:"-"`
 }
 
 // offerNewResponseCompensationBasePayJSON contains the JSON metadata for the struct [OfferNewResponseCompensationBasePay]
@@ -2832,11 +2857,12 @@ func (r OfferVoidResponseLevelTrack) IsKnown() bool {
 
 type OfferVoidResponseCompensationBasePay struct {
 	// A monetary amount with its currency and server-formatted display value.
-	Amount       PublicMoneyAmount                         `json:"amount" api:"required"`
-	Basis        OfferVoidResponseCompensationBasePayBasis `json:"basis" api:"required"`
-	Type         OfferVoidResponseCompensationBasePayType  `json:"type" api:"required,nullable"`
-	VariableRate PublicMoneyAmount                         `json:"variableRate" api:"required,nullable"`
-	JSON         offerVoidResponseCompensationBasePayJSON  `json:"-"`
+	Amount PublicMoneyAmount                         `json:"amount" api:"required"`
+	Basis  OfferVoidResponseCompensationBasePayBasis `json:"basis" api:"required"`
+	Type   OfferVoidResponseCompensationBasePayType  `json:"type" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	VariableRate PublicMoneyAmount                        `json:"variableRate" api:"required,nullable"`
+	JSON         offerVoidResponseCompensationBasePayJSON `json:"-"`
 }
 
 // offerVoidResponseCompensationBasePayJSON contains the JSON metadata for the struct [OfferVoidResponseCompensationBasePay]
@@ -3184,11 +3210,12 @@ func (r OfferExtendDeadlineResponseLevelTrack) IsKnown() bool {
 
 type OfferExtendDeadlineResponseCompensationBasePay struct {
 	// A monetary amount with its currency and server-formatted display value.
-	Amount       PublicMoneyAmount                                   `json:"amount" api:"required"`
-	Basis        OfferExtendDeadlineResponseCompensationBasePayBasis `json:"basis" api:"required"`
-	Type         OfferExtendDeadlineResponseCompensationBasePayType  `json:"type" api:"required,nullable"`
-	VariableRate PublicMoneyAmount                                   `json:"variableRate" api:"required,nullable"`
-	JSON         offerExtendDeadlineResponseCompensationBasePayJSON  `json:"-"`
+	Amount PublicMoneyAmount                                   `json:"amount" api:"required"`
+	Basis  OfferExtendDeadlineResponseCompensationBasePayBasis `json:"basis" api:"required"`
+	Type   OfferExtendDeadlineResponseCompensationBasePayType  `json:"type" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	VariableRate PublicMoneyAmount                                  `json:"variableRate" api:"required,nullable"`
+	JSON         offerExtendDeadlineResponseCompensationBasePayJSON `json:"-"`
 }
 
 // offerExtendDeadlineResponseCompensationBasePayJSON contains the JSON metadata for the struct [OfferExtendDeadlineResponseCompensationBasePay]
@@ -3536,11 +3563,12 @@ func (r OfferResendResponseLevelTrack) IsKnown() bool {
 
 type OfferResendResponseCompensationBasePay struct {
 	// A monetary amount with its currency and server-formatted display value.
-	Amount       PublicMoneyAmount                           `json:"amount" api:"required"`
-	Basis        OfferResendResponseCompensationBasePayBasis `json:"basis" api:"required"`
-	Type         OfferResendResponseCompensationBasePayType  `json:"type" api:"required,nullable"`
-	VariableRate PublicMoneyAmount                           `json:"variableRate" api:"required,nullable"`
-	JSON         offerResendResponseCompensationBasePayJSON  `json:"-"`
+	Amount PublicMoneyAmount                           `json:"amount" api:"required"`
+	Basis  OfferResendResponseCompensationBasePayBasis `json:"basis" api:"required"`
+	Type   OfferResendResponseCompensationBasePayType  `json:"type" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	VariableRate PublicMoneyAmount                          `json:"variableRate" api:"required,nullable"`
+	JSON         offerResendResponseCompensationBasePayJSON `json:"-"`
 }
 
 // offerResendResponseCompensationBasePayJSON contains the JSON metadata for the struct [OfferResendResponseCompensationBasePay]
@@ -3888,11 +3916,12 @@ func (r OfferListResponseDataLevelTrack) IsKnown() bool {
 
 type OfferListResponseDataCompensationBasePay struct {
 	// A monetary amount with its currency and server-formatted display value.
-	Amount       PublicMoneyAmount                             `json:"amount" api:"required"`
-	Basis        OfferListResponseDataCompensationBasePayBasis `json:"basis" api:"required"`
-	Type         OfferListResponseDataCompensationBasePayType  `json:"type" api:"required,nullable"`
-	VariableRate PublicMoneyAmount                             `json:"variableRate" api:"required,nullable"`
-	JSON         offerListResponseDataCompensationBasePayJSON  `json:"-"`
+	Amount PublicMoneyAmount                             `json:"amount" api:"required"`
+	Basis  OfferListResponseDataCompensationBasePayBasis `json:"basis" api:"required"`
+	Type   OfferListResponseDataCompensationBasePayType  `json:"type" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	VariableRate PublicMoneyAmount                            `json:"variableRate" api:"required,nullable"`
+	JSON         offerListResponseDataCompensationBasePayJSON `json:"-"`
 }
 
 // offerListResponseDataCompensationBasePayJSON contains the JSON metadata for the struct [OfferListResponseDataCompensationBasePay]

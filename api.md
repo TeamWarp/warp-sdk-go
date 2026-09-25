@@ -5,6 +5,10 @@ Complete reference of every operation, grouped by resource. See [the README](./R
 ## Contents
 
 - [`Benefits`](#benefits)
+  - [Create Benefit Deduction](#create-benefit-deduction)
+  - [Update Benefit Deduction](#update-benefit-deduction)
+  - [Create Retirement Plan](#create-retirement-plan)
+  - [Update Retirement Plan](#update-retirement-plan)
   - [`Benefits HealthPlans`](#benefits-healthplans)
     - [List Health Plans](#list-health-plans)
     - [Get Health Plan](#get-health-plan)
@@ -61,10 +65,15 @@ Complete reference of every operation, grouped by resource. See [the README](./R
   - [Create Employee](#create-employee)
   - [Create Contractor](#create-contractor)
   - [Invite Worker](#invite-worker)
+  - [Reveal Worker SSNs](#reveal-worker-ssns)
+  - [Update Worker](#update-worker)
 - [`Workplaces`](#workplaces)
   - [List Workplaces](#list-workplaces)
   - [Create Workplace](#create-workplace)
   - [Update Workplace](#update-workplace)
+- [`I9Verifications`](#i9verifications)
+  - [List I-9 verifications](#list-i-9-verifications)
+  - [Get I-9 verification](#get-i-9-verification)
 
 ## Setup
 
@@ -81,9 +90,101 @@ client := sdk.NewClient()
 
 ## `Benefits`
 
+Health plan reads and retirement plan and payroll benefit deduction management.
+
+### Create Benefit Deduction
+
+Create a benefit deduction for a worker.
+
+| Direction | Type |
+| --- | --- |
+| Request | [`BenefitNewDeductionParams`](./benefit.go) |
+| Response | [`BenefitNewDeductionResponse`](./benefit.go) |
+
+```go
+benefit, err := client.Benefits.NewDeduction(context.Background(), sdk.BenefitNewDeductionParams{
+	Calculation: sdk.F[sdk.BenefitNewDeductionParamsCalculationUnion](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInput{
+		EmployeeContribution: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContribution](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContribution{
+			Amount:   sdk.F[int64](0),
+			Currency: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency("USD")),
+		}),
+		EmployerContribution: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContribution](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContribution{
+			Amount:   sdk.F[int64](0),
+			Currency: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency("USD")),
+		}),
+	}),
+	EffectiveStartDate: sdk.F[string](""),
+	Type:               sdk.F[sdk.BenefitNewDeductionParamsType](sdk.BenefitNewDeductionParamsType("medical")),
+	WorkerID:           sdk.F[string]("wrk_1234"),
+})
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(benefit)
+```
+
+### Update Benefit Deduction
+
+Update a benefit deduction. The calculation type cannot change.
+
+| Direction | Type |
+| --- | --- |
+| Request | [`BenefitUpdateDeductionParams`](./benefit.go) |
+| Response | [`PublicBenefitDeduction`](./benefitdeduction.go) |
+
+```go
+benefit, err := client.Benefits.UpdateDeduction(context.Background(), "pbdg_1234", sdk.BenefitUpdateDeductionParams{})
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(benefit)
+```
+
+### Create Retirement Plan
+
+Create a retirement plan for a company on the manual retirement channel.
+
+| Direction | Type |
+| --- | --- |
+| Request | [`BenefitNewRetirementPlanParams`](./benefit.go) |
+| Response | [`BenefitNewRetirementPlanResponse`](./benefit.go) |
+
+```go
+benefit, err := client.Benefits.NewRetirementPlan(context.Background(), sdk.BenefitNewRetirementPlanParams{
+	EffectiveStartDate: sdk.F[string](""),
+	Name:               sdk.F[string]("x"),
+	Type:               sdk.F[sdk.BenefitNewRetirementPlanParamsType](sdk.BenefitNewRetirementPlanParamsType("401k")),
+})
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(benefit)
+```
+
+### Update Retirement Plan
+
+Update a retirement plan for a company on the manual retirement channel.
+
+| Direction | Type |
+| --- | --- |
+| Request | [`BenefitUpdateRetirementPlanParams`](./benefit.go) |
+| Response | [`PublicRetirementPlan`](./benefitretirementplan.go) |
+
+```go
+benefit, err := client.Benefits.UpdateRetirementPlan(context.Background(), "crpl_1234", sdk.BenefitUpdateRetirementPlanParams{})
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(benefit)
+```
+
 ### `Benefits HealthPlans`
 
-Read-only health plans, retirement plans, and payroll benefit deductions.
+Health plan reads and retirement plan and payroll benefit deduction management.
 
 #### List Health Plans
 
@@ -125,7 +226,7 @@ fmt.Println(healthPlan)
 
 ### `Benefits RetirementPlans`
 
-Read-only health plans, retirement plans, and payroll benefit deductions.
+Health plan reads and retirement plan and payroll benefit deduction management.
 
 #### List Retirement Plans
 
@@ -167,7 +268,7 @@ fmt.Println(retirementPlan)
 
 ### `Benefits Deductions`
 
-Read-only health plans, retirement plans, and payroll benefit deductions.
+Health plan reads and retirement plan and payroll benefit deduction management.
 
 #### List Benefit Deductions
 
@@ -239,7 +340,9 @@ Create a custom worker field definition. The field type is immutable after creat
 
 ```go
 customField, err := client.CustomFields.New(context.Background(), sdk.CustomFieldNewParams{
-	Name: sdk.F[string]("x"),
+	Category: sdk.F[sdk.CustomFieldNewParamsCategory](sdk.CustomFieldNewParamsCategory("info")),
+	Name:     sdk.F[string]("x"),
+	Type:     sdk.F[sdk.CustomFieldNewParamsType](sdk.CustomFieldNewParamsType("text")),
 })
 if err != nil {
 	panic(err)
@@ -549,12 +652,15 @@ offer, err := client.Offers.New(context.Background(), sdk.OfferNewParams{
 		Email:     sdk.F[string]("john@joinwarp.com"),
 	}),
 	Compensation: sdk.F[sdk.OfferNewParamsCompensation](sdk.OfferNewParamsCompensation{
-		PayRate: sdk.F[float64](0),
+		PayBasis:    sdk.F[sdk.OfferNewParamsCompensationPayBasis](sdk.OfferNewParamsCompensationPayBasis("year")),
+		PayCurrency: sdk.F[sdk.OfferNewParamsCompensationPayCurrency](sdk.OfferNewParamsCompensationPayCurrency("USD")),
+		PayRate:     sdk.F[float64](1),
 	}),
 	Position: sdk.F[sdk.OfferNewParamsPosition](sdk.OfferNewParamsPosition{
 		Title:     sdk.F[string]("x"),
 		StartDate: sdk.F[string](""),
 	}),
+	WorkerType: sdk.F[sdk.OfferNewParamsWorkerType](sdk.OfferNewParamsWorkerType("employee")),
 })
 if err != nil {
 	panic(err)
@@ -573,7 +679,9 @@ Void a previously sent offer. Only sent offers can be voided.
 | Response | [`OfferVoidResponse`](./offer.go) |
 
 ```go
-offer, err := client.Offers.Void(context.Background(), "offr_1234", sdk.OfferVoidParams{})
+offer, err := client.Offers.Void(context.Background(), "offr_1234", sdk.OfferVoidParams{
+	VoidReason: sdk.F[sdk.OfferVoidParamsVoidReason](sdk.OfferVoidParamsVoidReason("candidate_declined")),
+})
 if err != nil {
 	panic(err)
 }
@@ -906,7 +1014,8 @@ Create a new US employee. The worker will be created in draft status and must be
 ```go
 worker, err := client.Workers.NewEmployee(context.Background(), sdk.WorkerNewEmployeeParams{
 	Compensation: sdk.F[sdk.WorkerNewEmployeeParamsCompensation](sdk.WorkerNewEmployeeParamsCompensation{
-		Amount: sdk.F[float64](0),
+		Amount: sdk.F[float64](1),
+		Per:    sdk.F[sdk.WorkerNewEmployeeParamsCompensationPer](sdk.WorkerNewEmployeeParamsCompensationPer("hour")),
 	}),
 	DepartmentID: sdk.F[string]("dpt_1234"),
 	Email:        sdk.F[string]("john@joinwarp.com"),
@@ -916,6 +1025,7 @@ worker, err := client.Workers.NewEmployee(context.Background(), sdk.WorkerNewEmp
 	Position:     sdk.F[string]("Software Engineer"),
 	StartDate:    sdk.F[string](""),
 	WorkLocation: sdk.F[sdk.WorkerNewEmployeeParamsWorkLocationUnion](sdk.WorkerNewEmployeeParamsWorkLocationOfficeWorkLocation{
+		Type:        sdk.F[sdk.WorkerNewEmployeeParamsWorkLocationOfficeWorkLocationType](sdk.WorkerNewEmployeeParamsWorkLocationOfficeWorkLocationType("office")),
 		WorkplaceID: sdk.F[string]("wkp_1234"),
 	}),
 })
@@ -939,11 +1049,13 @@ Create a new contractor. The worker will be created in draft status and must be 
 worker, err := client.Workers.NewContractor(context.Background(), sdk.WorkerNewContractorParams{
 	DepartmentID: sdk.F[string]("dpt_1234"),
 	Email:        sdk.F[string]("john@joinwarp.com"),
+	EntityType:   sdk.F[sdk.WorkerNewContractorParamsEntityType](sdk.WorkerNewContractorParamsEntityType("individual")),
 	FirstName:    sdk.F[string]("Melissa"),
 	LastName:     sdk.F[string]("Jones"),
 	ManagerID:    sdk.F[string]("wrk_1234"),
 	Position:     sdk.F[string]("Design Consultant"),
 	StartDate:    sdk.F[string](""),
+	WorkCountry:  sdk.F[sdk.WorkerNewContractorParamsWorkCountry](sdk.WorkerNewContractorParamsWorkCountry("AD")),
 })
 if err != nil {
 	panic(err)
@@ -962,6 +1074,44 @@ Send or resend the worker invite so they can accept and complete onboarding to W
 
 ```go
 worker, err := client.Workers.Invite(context.Background(), "wrk_1234")
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(worker)
+```
+
+### Reveal Worker SSNs
+
+Reveal full Social Security numbers for up to 50 workers. Requires the workers:pii read scope. Results preserve request order and use null when a worker has no SSN on file. The request fails if any worker is not found, emits one audit event per worker, and returns Cache-Control: private, no-store.
+
+| Direction | Type |
+| --- | --- |
+| Request | [`WorkerRevealSsnParams`](./worker.go) |
+| Response | [`[]PublicWorkerSsn`](./worker.go) |
+
+```go
+worker, err := client.Workers.RevealSsn(context.Background(), sdk.WorkerRevealSsnParams{
+	WorkerIDs: sdk.F[[]string]([]string{"wrk_khac8380c2Lm", "wrk_q7Vm2pR9xK4c"}),
+})
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(worker)
+```
+
+### Update Worker
+
+Update a worker and return the updated worker object. Omitted fields remain unchanged. Requires workers:profile write, plus read access to any referenced department, level, or workplace. See individual fields for update restrictions.
+
+| Direction | Type |
+| --- | --- |
+| Request | [`WorkerUpdateParams`](./worker.go) |
+| Response | [`WorkerUpdateResponse`](./worker.go) |
+
+```go
+worker, err := client.Workers.Update(context.Background(), "wrk_1234", sdk.WorkerUpdateParams{})
 if err != nil {
 	panic(err)
 }
@@ -1008,8 +1158,11 @@ workplace, err := client.Workplaces.New(context.Background(), sdk.WorkplaceNewPa
 		Line1:      sdk.F[string]("x"),
 		City:       sdk.F[string](""),
 		PostalCode: sdk.F[string](""),
+		State:      sdk.F[sdk.WorkplaceNewParamsAddressState](sdk.WorkplaceNewParamsAddressState("AL")),
+		Country:    sdk.F[sdk.WorkplaceNewParamsAddressCountry](sdk.WorkplaceNewParamsAddressCountry("US")),
 	}),
 	Name: sdk.F[string]("x"),
+	Type: sdk.F[sdk.WorkplaceNewParamsType](sdk.WorkplaceNewParamsType("remote")),
 })
 if err != nil {
 	panic(err)
@@ -1034,4 +1187,45 @@ if err != nil {
 }
 
 fmt.Println(workplace)
+```
+
+## `I9Verifications`
+
+Read company I-9 verification metadata, including retained forms, without exposing form contents.
+
+### List I-9 verifications
+
+List current and retained company I-9 verifications in all workflow states, newest first. The API key must have workers profile and compliance read scope.
+
+| Direction | Type |
+| --- | --- |
+| Request | [`I9VerificationListParams`](./i9verification.go) |
+| Response | [`I9VerificationListResponse`](./i9verification.go) |
+
+```go
+i9Verification, err := client.I9Verifications.List(context.Background(), sdk.I9VerificationListParams{
+	Limit: sdk.F[string]("limit"),
+})
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(i9Verification)
+```
+
+### Get I-9 verification
+
+Get a specific I-9 verification by its id. The API key must have workers profile and compliance read scope.
+
+| Direction | Type |
+| --- | --- |
+| Response | [`I9VerificationGetResponse`](./i9verification.go) |
+
+```go
+i9Verification, err := client.I9Verifications.Get(context.Background(), "i9v_1234")
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(i9Verification)
 ```

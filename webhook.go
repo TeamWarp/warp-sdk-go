@@ -639,11 +639,13 @@ func (r OfferAcceptedWebhookEventDataLevelTrack) IsKnown() bool {
 }
 
 type OfferAcceptedWebhookEventDataCompensation struct {
-	BasePay         OfferAcceptedWebhookEventDataCompensationBasePay `json:"basePay" api:"required"`
-	SignOnBonus     PublicMoneyAmount                                `json:"signOnBonus" api:"required,nullable"`
-	RelocationBonus PublicMoneyAmount                                `json:"relocationBonus" api:"required,nullable"`
-	Stock           OfferAcceptedWebhookEventDataCompensationStock   `json:"stock" api:"required,nullable"`
-	JSON            offerAcceptedWebhookEventDataCompensationJSON    `json:"-"`
+	BasePay OfferAcceptedWebhookEventDataCompensationBasePay `json:"basePay" api:"required"`
+	// A monetary amount with its currency and server-formatted display value.
+	SignOnBonus PublicMoneyAmount `json:"signOnBonus" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	RelocationBonus PublicMoneyAmount                              `json:"relocationBonus" api:"required,nullable"`
+	Stock           OfferAcceptedWebhookEventDataCompensationStock `json:"stock" api:"required,nullable"`
+	JSON            offerAcceptedWebhookEventDataCompensationJSON  `json:"-"`
 }
 
 // offerAcceptedWebhookEventDataCompensationJSON contains the JSON metadata for the struct [OfferAcceptedWebhookEventDataCompensation]
@@ -666,11 +668,12 @@ func (r offerAcceptedWebhookEventDataCompensationJSON) RawJSON() string {
 
 type OfferAcceptedWebhookEventDataCompensationBasePay struct {
 	// A monetary amount with its currency and server-formatted display value.
-	Amount       PublicMoneyAmount                                     `json:"amount" api:"required"`
-	Basis        OfferAcceptedWebhookEventDataCompensationBasePayBasis `json:"basis" api:"required"`
-	Type         OfferAcceptedWebhookEventDataCompensationBasePayType  `json:"type" api:"required,nullable"`
-	VariableRate PublicMoneyAmount                                     `json:"variableRate" api:"required,nullable"`
-	JSON         offerAcceptedWebhookEventDataCompensationBasePayJSON  `json:"-"`
+	Amount PublicMoneyAmount                                     `json:"amount" api:"required"`
+	Basis  OfferAcceptedWebhookEventDataCompensationBasePayBasis `json:"basis" api:"required"`
+	Type   OfferAcceptedWebhookEventDataCompensationBasePayType  `json:"type" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	VariableRate PublicMoneyAmount                                    `json:"variableRate" api:"required,nullable"`
+	JSON         offerAcceptedWebhookEventDataCompensationBasePayJSON `json:"-"`
 }
 
 // offerAcceptedWebhookEventDataCompensationBasePayJSON contains the JSON metadata for the struct [OfferAcceptedWebhookEventDataCompensationBasePay]
@@ -1329,11 +1332,13 @@ func (r OfferCreatedWebhookEventDataLevelTrack) IsKnown() bool {
 }
 
 type OfferCreatedWebhookEventDataCompensation struct {
-	BasePay         OfferCreatedWebhookEventDataCompensationBasePay `json:"basePay" api:"required"`
-	SignOnBonus     PublicMoneyAmount                               `json:"signOnBonus" api:"required,nullable"`
-	RelocationBonus PublicMoneyAmount                               `json:"relocationBonus" api:"required,nullable"`
-	Stock           OfferCreatedWebhookEventDataCompensationStock   `json:"stock" api:"required,nullable"`
-	JSON            offerCreatedWebhookEventDataCompensationJSON    `json:"-"`
+	BasePay OfferCreatedWebhookEventDataCompensationBasePay `json:"basePay" api:"required"`
+	// A monetary amount with its currency and server-formatted display value.
+	SignOnBonus PublicMoneyAmount `json:"signOnBonus" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	RelocationBonus PublicMoneyAmount                             `json:"relocationBonus" api:"required,nullable"`
+	Stock           OfferCreatedWebhookEventDataCompensationStock `json:"stock" api:"required,nullable"`
+	JSON            offerCreatedWebhookEventDataCompensationJSON  `json:"-"`
 }
 
 // offerCreatedWebhookEventDataCompensationJSON contains the JSON metadata for the struct [OfferCreatedWebhookEventDataCompensation]
@@ -1356,11 +1361,12 @@ func (r offerCreatedWebhookEventDataCompensationJSON) RawJSON() string {
 
 type OfferCreatedWebhookEventDataCompensationBasePay struct {
 	// A monetary amount with its currency and server-formatted display value.
-	Amount       PublicMoneyAmount                                    `json:"amount" api:"required"`
-	Basis        OfferCreatedWebhookEventDataCompensationBasePayBasis `json:"basis" api:"required"`
-	Type         OfferCreatedWebhookEventDataCompensationBasePayType  `json:"type" api:"required,nullable"`
-	VariableRate PublicMoneyAmount                                    `json:"variableRate" api:"required,nullable"`
-	JSON         offerCreatedWebhookEventDataCompensationBasePayJSON  `json:"-"`
+	Amount PublicMoneyAmount                                    `json:"amount" api:"required"`
+	Basis  OfferCreatedWebhookEventDataCompensationBasePayBasis `json:"basis" api:"required"`
+	Type   OfferCreatedWebhookEventDataCompensationBasePayType  `json:"type" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	VariableRate PublicMoneyAmount                                   `json:"variableRate" api:"required,nullable"`
+	JSON         offerCreatedWebhookEventDataCompensationBasePayJSON `json:"-"`
 }
 
 // offerCreatedWebhookEventDataCompensationBasePayJSON contains the JSON metadata for the struct [OfferCreatedWebhookEventDataCompensationBasePay]
@@ -2019,11 +2025,13 @@ func (r OfferSentWebhookEventDataLevelTrack) IsKnown() bool {
 }
 
 type OfferSentWebhookEventDataCompensation struct {
-	BasePay         OfferSentWebhookEventDataCompensationBasePay `json:"basePay" api:"required"`
-	SignOnBonus     PublicMoneyAmount                            `json:"signOnBonus" api:"required,nullable"`
-	RelocationBonus PublicMoneyAmount                            `json:"relocationBonus" api:"required,nullable"`
-	Stock           OfferSentWebhookEventDataCompensationStock   `json:"stock" api:"required,nullable"`
-	JSON            offerSentWebhookEventDataCompensationJSON    `json:"-"`
+	BasePay OfferSentWebhookEventDataCompensationBasePay `json:"basePay" api:"required"`
+	// A monetary amount with its currency and server-formatted display value.
+	SignOnBonus PublicMoneyAmount `json:"signOnBonus" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	RelocationBonus PublicMoneyAmount                          `json:"relocationBonus" api:"required,nullable"`
+	Stock           OfferSentWebhookEventDataCompensationStock `json:"stock" api:"required,nullable"`
+	JSON            offerSentWebhookEventDataCompensationJSON  `json:"-"`
 }
 
 // offerSentWebhookEventDataCompensationJSON contains the JSON metadata for the struct [OfferSentWebhookEventDataCompensation]
@@ -2046,11 +2054,12 @@ func (r offerSentWebhookEventDataCompensationJSON) RawJSON() string {
 
 type OfferSentWebhookEventDataCompensationBasePay struct {
 	// A monetary amount with its currency and server-formatted display value.
-	Amount       PublicMoneyAmount                                 `json:"amount" api:"required"`
-	Basis        OfferSentWebhookEventDataCompensationBasePayBasis `json:"basis" api:"required"`
-	Type         OfferSentWebhookEventDataCompensationBasePayType  `json:"type" api:"required,nullable"`
-	VariableRate PublicMoneyAmount                                 `json:"variableRate" api:"required,nullable"`
-	JSON         offerSentWebhookEventDataCompensationBasePayJSON  `json:"-"`
+	Amount PublicMoneyAmount                                 `json:"amount" api:"required"`
+	Basis  OfferSentWebhookEventDataCompensationBasePayBasis `json:"basis" api:"required"`
+	Type   OfferSentWebhookEventDataCompensationBasePayType  `json:"type" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	VariableRate PublicMoneyAmount                                `json:"variableRate" api:"required,nullable"`
+	JSON         offerSentWebhookEventDataCompensationBasePayJSON `json:"-"`
 }
 
 // offerSentWebhookEventDataCompensationBasePayJSON contains the JSON metadata for the struct [OfferSentWebhookEventDataCompensationBasePay]
@@ -2709,11 +2718,13 @@ func (r OfferViewedWebhookEventDataLevelTrack) IsKnown() bool {
 }
 
 type OfferViewedWebhookEventDataCompensation struct {
-	BasePay         OfferViewedWebhookEventDataCompensationBasePay `json:"basePay" api:"required"`
-	SignOnBonus     PublicMoneyAmount                              `json:"signOnBonus" api:"required,nullable"`
-	RelocationBonus PublicMoneyAmount                              `json:"relocationBonus" api:"required,nullable"`
-	Stock           OfferViewedWebhookEventDataCompensationStock   `json:"stock" api:"required,nullable"`
-	JSON            offerViewedWebhookEventDataCompensationJSON    `json:"-"`
+	BasePay OfferViewedWebhookEventDataCompensationBasePay `json:"basePay" api:"required"`
+	// A monetary amount with its currency and server-formatted display value.
+	SignOnBonus PublicMoneyAmount `json:"signOnBonus" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	RelocationBonus PublicMoneyAmount                            `json:"relocationBonus" api:"required,nullable"`
+	Stock           OfferViewedWebhookEventDataCompensationStock `json:"stock" api:"required,nullable"`
+	JSON            offerViewedWebhookEventDataCompensationJSON  `json:"-"`
 }
 
 // offerViewedWebhookEventDataCompensationJSON contains the JSON metadata for the struct [OfferViewedWebhookEventDataCompensation]
@@ -2736,11 +2747,12 @@ func (r offerViewedWebhookEventDataCompensationJSON) RawJSON() string {
 
 type OfferViewedWebhookEventDataCompensationBasePay struct {
 	// A monetary amount with its currency and server-formatted display value.
-	Amount       PublicMoneyAmount                                   `json:"amount" api:"required"`
-	Basis        OfferViewedWebhookEventDataCompensationBasePayBasis `json:"basis" api:"required"`
-	Type         OfferViewedWebhookEventDataCompensationBasePayType  `json:"type" api:"required,nullable"`
-	VariableRate PublicMoneyAmount                                   `json:"variableRate" api:"required,nullable"`
-	JSON         offerViewedWebhookEventDataCompensationBasePayJSON  `json:"-"`
+	Amount PublicMoneyAmount                                   `json:"amount" api:"required"`
+	Basis  OfferViewedWebhookEventDataCompensationBasePayBasis `json:"basis" api:"required"`
+	Type   OfferViewedWebhookEventDataCompensationBasePayType  `json:"type" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	VariableRate PublicMoneyAmount                                  `json:"variableRate" api:"required,nullable"`
+	JSON         offerViewedWebhookEventDataCompensationBasePayJSON `json:"-"`
 }
 
 // offerViewedWebhookEventDataCompensationBasePayJSON contains the JSON metadata for the struct [OfferViewedWebhookEventDataCompensationBasePay]
@@ -3399,11 +3411,13 @@ func (r OfferVoidedWebhookEventDataLevelTrack) IsKnown() bool {
 }
 
 type OfferVoidedWebhookEventDataCompensation struct {
-	BasePay         OfferVoidedWebhookEventDataCompensationBasePay `json:"basePay" api:"required"`
-	SignOnBonus     PublicMoneyAmount                              `json:"signOnBonus" api:"required,nullable"`
-	RelocationBonus PublicMoneyAmount                              `json:"relocationBonus" api:"required,nullable"`
-	Stock           OfferVoidedWebhookEventDataCompensationStock   `json:"stock" api:"required,nullable"`
-	JSON            offerVoidedWebhookEventDataCompensationJSON    `json:"-"`
+	BasePay OfferVoidedWebhookEventDataCompensationBasePay `json:"basePay" api:"required"`
+	// A monetary amount with its currency and server-formatted display value.
+	SignOnBonus PublicMoneyAmount `json:"signOnBonus" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	RelocationBonus PublicMoneyAmount                            `json:"relocationBonus" api:"required,nullable"`
+	Stock           OfferVoidedWebhookEventDataCompensationStock `json:"stock" api:"required,nullable"`
+	JSON            offerVoidedWebhookEventDataCompensationJSON  `json:"-"`
 }
 
 // offerVoidedWebhookEventDataCompensationJSON contains the JSON metadata for the struct [OfferVoidedWebhookEventDataCompensation]
@@ -3426,11 +3440,12 @@ func (r offerVoidedWebhookEventDataCompensationJSON) RawJSON() string {
 
 type OfferVoidedWebhookEventDataCompensationBasePay struct {
 	// A monetary amount with its currency and server-formatted display value.
-	Amount       PublicMoneyAmount                                   `json:"amount" api:"required"`
-	Basis        OfferVoidedWebhookEventDataCompensationBasePayBasis `json:"basis" api:"required"`
-	Type         OfferVoidedWebhookEventDataCompensationBasePayType  `json:"type" api:"required,nullable"`
-	VariableRate PublicMoneyAmount                                   `json:"variableRate" api:"required,nullable"`
-	JSON         offerVoidedWebhookEventDataCompensationBasePayJSON  `json:"-"`
+	Amount PublicMoneyAmount                                   `json:"amount" api:"required"`
+	Basis  OfferVoidedWebhookEventDataCompensationBasePayBasis `json:"basis" api:"required"`
+	Type   OfferVoidedWebhookEventDataCompensationBasePayType  `json:"type" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	VariableRate PublicMoneyAmount                                  `json:"variableRate" api:"required,nullable"`
+	JSON         offerVoidedWebhookEventDataCompensationBasePayJSON `json:"-"`
 }
 
 // offerVoidedWebhookEventDataCompensationBasePayJSON contains the JSON metadata for the struct [OfferVoidedWebhookEventDataCompensationBasePay]
@@ -4008,7 +4023,8 @@ type WorkerCreatedWebhookEventData struct {
 	FirstName    string                              `json:"firstName" api:"required"`
 	LastName     string                              `json:"lastName" api:"required"`
 	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
-	Email         string `json:"email" api:"required" format:"email"`
+	Email string `json:"email" api:"required" format:"email"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
 	WorkEmail     string `json:"workEmail" api:"required,nullable" format:"email"`
 	PreferredName string `json:"preferredName" api:"required,nullable"`
 	// The worker's biological sex, or null when unavailable.
@@ -4041,11 +4057,17 @@ type WorkerCreatedWebhookEventData struct {
 	// start date. Null when the worker has no applicable regular pay rate or the API
 	// key lacks the corresponding compensation read scope.
 	Compensation PublicWorkerCompensation `json:"compensation" api:"required,nullable"`
+	// The worker's manager, or null if unassigned.
+	Manager WorkerCreatedWebhookEventDataManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerCreatedWebhookEventDataLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField          `json:"customFields" api:"nullable"`
-	JSON         workerCreatedWebhookEventDataJSON  `json:"-"`
+	Level WorkerCreatedWebhookEventDataLevel `json:"level" api:"nullable"`
+	// The worker's custom field values. Every active company custom field appears;
+	// fields outside this API key's permission scopes are redacted (value null,
+	// redacted true) rather than omitted, so the list is identical across keys. Empty
+	// when the company has no custom fields.
+	CustomFields []PublicWorkerCustomField         `json:"customFields" api:"nullable"`
+	JSON         workerCreatedWebhookEventDataJSON `json:"-"`
 }
 
 // workerCreatedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerCreatedWebhookEventData]
@@ -4076,6 +4098,7 @@ type workerCreatedWebhookEventDataJSON struct {
 	TerminationReason apijson.Field
 	UpdatedAt         apijson.Field
 	Compensation      apijson.Field
+	Manager           apijson.Field
 	Level             apijson.Field
 	CustomFields      apijson.Field
 	raw               string
@@ -4447,6 +4470,33 @@ func (r WorkerCreatedWebhookEventDataAddressCountry) IsKnown() bool {
 	return false
 }
 
+type WorkerCreatedWebhookEventDataManager struct {
+	// The id of the worker.
+	ID          string                                   `json:"id" api:"required"`
+	FirstName   string                                   `json:"firstName" api:"required"`
+	LastName    string                                   `json:"lastName" api:"required"`
+	DisplayName string                                   `json:"displayName" api:"required"`
+	JSON        workerCreatedWebhookEventDataManagerJSON `json:"-"`
+}
+
+// workerCreatedWebhookEventDataManagerJSON contains the JSON metadata for the struct [WorkerCreatedWebhookEventDataManager]
+type workerCreatedWebhookEventDataManagerJSON struct {
+	ID          apijson.Field
+	FirstName   apijson.Field
+	LastName    apijson.Field
+	DisplayName apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorkerCreatedWebhookEventDataManager) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workerCreatedWebhookEventDataManagerJSON) RawJSON() string {
+	return r.raw
+}
+
 type WorkerCreatedWebhookEventDataDepartment struct {
 	// The unique public id of the department
 	ID   string                                      `json:"id" api:"required"`
@@ -4611,7 +4661,8 @@ type WorkerDeletedWebhookEventData struct {
 	FirstName    string                              `json:"firstName" api:"required"`
 	LastName     string                              `json:"lastName" api:"required"`
 	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
-	Email         string `json:"email" api:"required" format:"email"`
+	Email string `json:"email" api:"required" format:"email"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
 	WorkEmail     string `json:"workEmail" api:"required,nullable" format:"email"`
 	PreferredName string `json:"preferredName" api:"required,nullable"`
 	// The worker's biological sex, or null when unavailable.
@@ -4644,11 +4695,17 @@ type WorkerDeletedWebhookEventData struct {
 	// start date. Null when the worker has no applicable regular pay rate or the API
 	// key lacks the corresponding compensation read scope.
 	Compensation PublicWorkerCompensation `json:"compensation" api:"required,nullable"`
+	// The worker's manager, or null if unassigned.
+	Manager WorkerDeletedWebhookEventDataManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerDeletedWebhookEventDataLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField          `json:"customFields" api:"nullable"`
-	JSON         workerDeletedWebhookEventDataJSON  `json:"-"`
+	Level WorkerDeletedWebhookEventDataLevel `json:"level" api:"nullable"`
+	// The worker's custom field values. Every active company custom field appears;
+	// fields outside this API key's permission scopes are redacted (value null,
+	// redacted true) rather than omitted, so the list is identical across keys. Empty
+	// when the company has no custom fields.
+	CustomFields []PublicWorkerCustomField         `json:"customFields" api:"nullable"`
+	JSON         workerDeletedWebhookEventDataJSON `json:"-"`
 }
 
 // workerDeletedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerDeletedWebhookEventData]
@@ -4679,6 +4736,7 @@ type workerDeletedWebhookEventDataJSON struct {
 	TerminationReason apijson.Field
 	UpdatedAt         apijson.Field
 	Compensation      apijson.Field
+	Manager           apijson.Field
 	Level             apijson.Field
 	CustomFields      apijson.Field
 	raw               string
@@ -5050,6 +5108,33 @@ func (r WorkerDeletedWebhookEventDataAddressCountry) IsKnown() bool {
 	return false
 }
 
+type WorkerDeletedWebhookEventDataManager struct {
+	// The id of the worker.
+	ID          string                                   `json:"id" api:"required"`
+	FirstName   string                                   `json:"firstName" api:"required"`
+	LastName    string                                   `json:"lastName" api:"required"`
+	DisplayName string                                   `json:"displayName" api:"required"`
+	JSON        workerDeletedWebhookEventDataManagerJSON `json:"-"`
+}
+
+// workerDeletedWebhookEventDataManagerJSON contains the JSON metadata for the struct [WorkerDeletedWebhookEventDataManager]
+type workerDeletedWebhookEventDataManagerJSON struct {
+	ID          apijson.Field
+	FirstName   apijson.Field
+	LastName    apijson.Field
+	DisplayName apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorkerDeletedWebhookEventDataManager) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workerDeletedWebhookEventDataManagerJSON) RawJSON() string {
+	return r.raw
+}
+
 type WorkerDeletedWebhookEventDataDepartment struct {
 	// The unique public id of the department
 	ID   string                                      `json:"id" api:"required"`
@@ -5214,7 +5299,8 @@ type WorkerInviteAcceptedWebhookEventData struct {
 	FirstName    string                                     `json:"firstName" api:"required"`
 	LastName     string                                     `json:"lastName" api:"required"`
 	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
-	Email         string `json:"email" api:"required" format:"email"`
+	Email string `json:"email" api:"required" format:"email"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
 	WorkEmail     string `json:"workEmail" api:"required,nullable" format:"email"`
 	PreferredName string `json:"preferredName" api:"required,nullable"`
 	// The worker's biological sex, or null when unavailable.
@@ -5247,11 +5333,17 @@ type WorkerInviteAcceptedWebhookEventData struct {
 	// start date. Null when the worker has no applicable regular pay rate or the API
 	// key lacks the corresponding compensation read scope.
 	Compensation PublicWorkerCompensation `json:"compensation" api:"required,nullable"`
+	// The worker's manager, or null if unassigned.
+	Manager WorkerInviteAcceptedWebhookEventDataManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerInviteAcceptedWebhookEventDataLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField                 `json:"customFields" api:"nullable"`
-	JSON         workerInviteAcceptedWebhookEventDataJSON  `json:"-"`
+	Level WorkerInviteAcceptedWebhookEventDataLevel `json:"level" api:"nullable"`
+	// The worker's custom field values. Every active company custom field appears;
+	// fields outside this API key's permission scopes are redacted (value null,
+	// redacted true) rather than omitted, so the list is identical across keys. Empty
+	// when the company has no custom fields.
+	CustomFields []PublicWorkerCustomField                `json:"customFields" api:"nullable"`
+	JSON         workerInviteAcceptedWebhookEventDataJSON `json:"-"`
 }
 
 // workerInviteAcceptedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerInviteAcceptedWebhookEventData]
@@ -5282,6 +5374,7 @@ type workerInviteAcceptedWebhookEventDataJSON struct {
 	TerminationReason apijson.Field
 	UpdatedAt         apijson.Field
 	Compensation      apijson.Field
+	Manager           apijson.Field
 	Level             apijson.Field
 	CustomFields      apijson.Field
 	raw               string
@@ -5653,6 +5746,33 @@ func (r WorkerInviteAcceptedWebhookEventDataAddressCountry) IsKnown() bool {
 	return false
 }
 
+type WorkerInviteAcceptedWebhookEventDataManager struct {
+	// The id of the worker.
+	ID          string                                          `json:"id" api:"required"`
+	FirstName   string                                          `json:"firstName" api:"required"`
+	LastName    string                                          `json:"lastName" api:"required"`
+	DisplayName string                                          `json:"displayName" api:"required"`
+	JSON        workerInviteAcceptedWebhookEventDataManagerJSON `json:"-"`
+}
+
+// workerInviteAcceptedWebhookEventDataManagerJSON contains the JSON metadata for the struct [WorkerInviteAcceptedWebhookEventDataManager]
+type workerInviteAcceptedWebhookEventDataManagerJSON struct {
+	ID          apijson.Field
+	FirstName   apijson.Field
+	LastName    apijson.Field
+	DisplayName apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorkerInviteAcceptedWebhookEventDataManager) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workerInviteAcceptedWebhookEventDataManagerJSON) RawJSON() string {
+	return r.raw
+}
+
 type WorkerInviteAcceptedWebhookEventDataDepartment struct {
 	// The unique public id of the department
 	ID   string                                             `json:"id" api:"required"`
@@ -5817,7 +5937,8 @@ type WorkerInviteSentWebhookEventData struct {
 	FirstName    string                                 `json:"firstName" api:"required"`
 	LastName     string                                 `json:"lastName" api:"required"`
 	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
-	Email         string `json:"email" api:"required" format:"email"`
+	Email string `json:"email" api:"required" format:"email"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
 	WorkEmail     string `json:"workEmail" api:"required,nullable" format:"email"`
 	PreferredName string `json:"preferredName" api:"required,nullable"`
 	// The worker's biological sex, or null when unavailable.
@@ -5850,11 +5971,17 @@ type WorkerInviteSentWebhookEventData struct {
 	// start date. Null when the worker has no applicable regular pay rate or the API
 	// key lacks the corresponding compensation read scope.
 	Compensation PublicWorkerCompensation `json:"compensation" api:"required,nullable"`
+	// The worker's manager, or null if unassigned.
+	Manager WorkerInviteSentWebhookEventDataManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerInviteSentWebhookEventDataLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField             `json:"customFields" api:"nullable"`
-	JSON         workerInviteSentWebhookEventDataJSON  `json:"-"`
+	Level WorkerInviteSentWebhookEventDataLevel `json:"level" api:"nullable"`
+	// The worker's custom field values. Every active company custom field appears;
+	// fields outside this API key's permission scopes are redacted (value null,
+	// redacted true) rather than omitted, so the list is identical across keys. Empty
+	// when the company has no custom fields.
+	CustomFields []PublicWorkerCustomField            `json:"customFields" api:"nullable"`
+	JSON         workerInviteSentWebhookEventDataJSON `json:"-"`
 }
 
 // workerInviteSentWebhookEventDataJSON contains the JSON metadata for the struct [WorkerInviteSentWebhookEventData]
@@ -5885,6 +6012,7 @@ type workerInviteSentWebhookEventDataJSON struct {
 	TerminationReason apijson.Field
 	UpdatedAt         apijson.Field
 	Compensation      apijson.Field
+	Manager           apijson.Field
 	Level             apijson.Field
 	CustomFields      apijson.Field
 	raw               string
@@ -6256,6 +6384,33 @@ func (r WorkerInviteSentWebhookEventDataAddressCountry) IsKnown() bool {
 	return false
 }
 
+type WorkerInviteSentWebhookEventDataManager struct {
+	// The id of the worker.
+	ID          string                                      `json:"id" api:"required"`
+	FirstName   string                                      `json:"firstName" api:"required"`
+	LastName    string                                      `json:"lastName" api:"required"`
+	DisplayName string                                      `json:"displayName" api:"required"`
+	JSON        workerInviteSentWebhookEventDataManagerJSON `json:"-"`
+}
+
+// workerInviteSentWebhookEventDataManagerJSON contains the JSON metadata for the struct [WorkerInviteSentWebhookEventDataManager]
+type workerInviteSentWebhookEventDataManagerJSON struct {
+	ID          apijson.Field
+	FirstName   apijson.Field
+	LastName    apijson.Field
+	DisplayName apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorkerInviteSentWebhookEventDataManager) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workerInviteSentWebhookEventDataManagerJSON) RawJSON() string {
+	return r.raw
+}
+
 type WorkerInviteSentWebhookEventDataDepartment struct {
 	// The unique public id of the department
 	ID   string                                         `json:"id" api:"required"`
@@ -6420,7 +6575,8 @@ type WorkerOffboardedWebhookEventData struct {
 	FirstName    string                                 `json:"firstName" api:"required"`
 	LastName     string                                 `json:"lastName" api:"required"`
 	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
-	Email         string `json:"email" api:"required" format:"email"`
+	Email string `json:"email" api:"required" format:"email"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
 	WorkEmail     string `json:"workEmail" api:"required,nullable" format:"email"`
 	PreferredName string `json:"preferredName" api:"required,nullable"`
 	// The worker's biological sex, or null when unavailable.
@@ -6453,11 +6609,17 @@ type WorkerOffboardedWebhookEventData struct {
 	// start date. Null when the worker has no applicable regular pay rate or the API
 	// key lacks the corresponding compensation read scope.
 	Compensation PublicWorkerCompensation `json:"compensation" api:"required,nullable"`
+	// The worker's manager, or null if unassigned.
+	Manager WorkerOffboardedWebhookEventDataManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerOffboardedWebhookEventDataLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField             `json:"customFields" api:"nullable"`
-	JSON         workerOffboardedWebhookEventDataJSON  `json:"-"`
+	Level WorkerOffboardedWebhookEventDataLevel `json:"level" api:"nullable"`
+	// The worker's custom field values. Every active company custom field appears;
+	// fields outside this API key's permission scopes are redacted (value null,
+	// redacted true) rather than omitted, so the list is identical across keys. Empty
+	// when the company has no custom fields.
+	CustomFields []PublicWorkerCustomField            `json:"customFields" api:"nullable"`
+	JSON         workerOffboardedWebhookEventDataJSON `json:"-"`
 }
 
 // workerOffboardedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerOffboardedWebhookEventData]
@@ -6488,6 +6650,7 @@ type workerOffboardedWebhookEventDataJSON struct {
 	TerminationReason apijson.Field
 	UpdatedAt         apijson.Field
 	Compensation      apijson.Field
+	Manager           apijson.Field
 	Level             apijson.Field
 	CustomFields      apijson.Field
 	raw               string
@@ -6859,6 +7022,33 @@ func (r WorkerOffboardedWebhookEventDataAddressCountry) IsKnown() bool {
 	return false
 }
 
+type WorkerOffboardedWebhookEventDataManager struct {
+	// The id of the worker.
+	ID          string                                      `json:"id" api:"required"`
+	FirstName   string                                      `json:"firstName" api:"required"`
+	LastName    string                                      `json:"lastName" api:"required"`
+	DisplayName string                                      `json:"displayName" api:"required"`
+	JSON        workerOffboardedWebhookEventDataManagerJSON `json:"-"`
+}
+
+// workerOffboardedWebhookEventDataManagerJSON contains the JSON metadata for the struct [WorkerOffboardedWebhookEventDataManager]
+type workerOffboardedWebhookEventDataManagerJSON struct {
+	ID          apijson.Field
+	FirstName   apijson.Field
+	LastName    apijson.Field
+	DisplayName apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorkerOffboardedWebhookEventDataManager) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workerOffboardedWebhookEventDataManagerJSON) RawJSON() string {
+	return r.raw
+}
+
 type WorkerOffboardedWebhookEventDataDepartment struct {
 	// The unique public id of the department
 	ID   string                                         `json:"id" api:"required"`
@@ -7023,7 +7213,8 @@ type WorkerOffboardingStartedWebhookEventData struct {
 	FirstName    string                                         `json:"firstName" api:"required"`
 	LastName     string                                         `json:"lastName" api:"required"`
 	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
-	Email         string `json:"email" api:"required" format:"email"`
+	Email string `json:"email" api:"required" format:"email"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
 	WorkEmail     string `json:"workEmail" api:"required,nullable" format:"email"`
 	PreferredName string `json:"preferredName" api:"required,nullable"`
 	// The worker's biological sex, or null when unavailable.
@@ -7056,11 +7247,17 @@ type WorkerOffboardingStartedWebhookEventData struct {
 	// start date. Null when the worker has no applicable regular pay rate or the API
 	// key lacks the corresponding compensation read scope.
 	Compensation PublicWorkerCompensation `json:"compensation" api:"required,nullable"`
+	// The worker's manager, or null if unassigned.
+	Manager WorkerOffboardingStartedWebhookEventDataManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerOffboardingStartedWebhookEventDataLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField                     `json:"customFields" api:"nullable"`
-	JSON         workerOffboardingStartedWebhookEventDataJSON  `json:"-"`
+	Level WorkerOffboardingStartedWebhookEventDataLevel `json:"level" api:"nullable"`
+	// The worker's custom field values. Every active company custom field appears;
+	// fields outside this API key's permission scopes are redacted (value null,
+	// redacted true) rather than omitted, so the list is identical across keys. Empty
+	// when the company has no custom fields.
+	CustomFields []PublicWorkerCustomField                    `json:"customFields" api:"nullable"`
+	JSON         workerOffboardingStartedWebhookEventDataJSON `json:"-"`
 }
 
 // workerOffboardingStartedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerOffboardingStartedWebhookEventData]
@@ -7091,6 +7288,7 @@ type workerOffboardingStartedWebhookEventDataJSON struct {
 	TerminationReason apijson.Field
 	UpdatedAt         apijson.Field
 	Compensation      apijson.Field
+	Manager           apijson.Field
 	Level             apijson.Field
 	CustomFields      apijson.Field
 	raw               string
@@ -7462,6 +7660,33 @@ func (r WorkerOffboardingStartedWebhookEventDataAddressCountry) IsKnown() bool {
 	return false
 }
 
+type WorkerOffboardingStartedWebhookEventDataManager struct {
+	// The id of the worker.
+	ID          string                                              `json:"id" api:"required"`
+	FirstName   string                                              `json:"firstName" api:"required"`
+	LastName    string                                              `json:"lastName" api:"required"`
+	DisplayName string                                              `json:"displayName" api:"required"`
+	JSON        workerOffboardingStartedWebhookEventDataManagerJSON `json:"-"`
+}
+
+// workerOffboardingStartedWebhookEventDataManagerJSON contains the JSON metadata for the struct [WorkerOffboardingStartedWebhookEventDataManager]
+type workerOffboardingStartedWebhookEventDataManagerJSON struct {
+	ID          apijson.Field
+	FirstName   apijson.Field
+	LastName    apijson.Field
+	DisplayName apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorkerOffboardingStartedWebhookEventDataManager) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workerOffboardingStartedWebhookEventDataManagerJSON) RawJSON() string {
+	return r.raw
+}
+
 type WorkerOffboardingStartedWebhookEventDataDepartment struct {
 	// The unique public id of the department
 	ID   string                                                 `json:"id" api:"required"`
@@ -7626,7 +7851,8 @@ type WorkerOnboardingCompletedWebhookEventData struct {
 	FirstName    string                                          `json:"firstName" api:"required"`
 	LastName     string                                          `json:"lastName" api:"required"`
 	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
-	Email         string `json:"email" api:"required" format:"email"`
+	Email string `json:"email" api:"required" format:"email"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
 	WorkEmail     string `json:"workEmail" api:"required,nullable" format:"email"`
 	PreferredName string `json:"preferredName" api:"required,nullable"`
 	// The worker's biological sex, or null when unavailable.
@@ -7659,11 +7885,17 @@ type WorkerOnboardingCompletedWebhookEventData struct {
 	// start date. Null when the worker has no applicable regular pay rate or the API
 	// key lacks the corresponding compensation read scope.
 	Compensation PublicWorkerCompensation `json:"compensation" api:"required,nullable"`
+	// The worker's manager, or null if unassigned.
+	Manager WorkerOnboardingCompletedWebhookEventDataManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerOnboardingCompletedWebhookEventDataLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField                      `json:"customFields" api:"nullable"`
-	JSON         workerOnboardingCompletedWebhookEventDataJSON  `json:"-"`
+	Level WorkerOnboardingCompletedWebhookEventDataLevel `json:"level" api:"nullable"`
+	// The worker's custom field values. Every active company custom field appears;
+	// fields outside this API key's permission scopes are redacted (value null,
+	// redacted true) rather than omitted, so the list is identical across keys. Empty
+	// when the company has no custom fields.
+	CustomFields []PublicWorkerCustomField                     `json:"customFields" api:"nullable"`
+	JSON         workerOnboardingCompletedWebhookEventDataJSON `json:"-"`
 }
 
 // workerOnboardingCompletedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerOnboardingCompletedWebhookEventData]
@@ -7694,6 +7926,7 @@ type workerOnboardingCompletedWebhookEventDataJSON struct {
 	TerminationReason apijson.Field
 	UpdatedAt         apijson.Field
 	Compensation      apijson.Field
+	Manager           apijson.Field
 	Level             apijson.Field
 	CustomFields      apijson.Field
 	raw               string
@@ -8065,6 +8298,33 @@ func (r WorkerOnboardingCompletedWebhookEventDataAddressCountry) IsKnown() bool 
 	return false
 }
 
+type WorkerOnboardingCompletedWebhookEventDataManager struct {
+	// The id of the worker.
+	ID          string                                               `json:"id" api:"required"`
+	FirstName   string                                               `json:"firstName" api:"required"`
+	LastName    string                                               `json:"lastName" api:"required"`
+	DisplayName string                                               `json:"displayName" api:"required"`
+	JSON        workerOnboardingCompletedWebhookEventDataManagerJSON `json:"-"`
+}
+
+// workerOnboardingCompletedWebhookEventDataManagerJSON contains the JSON metadata for the struct [WorkerOnboardingCompletedWebhookEventDataManager]
+type workerOnboardingCompletedWebhookEventDataManagerJSON struct {
+	ID          apijson.Field
+	FirstName   apijson.Field
+	LastName    apijson.Field
+	DisplayName apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorkerOnboardingCompletedWebhookEventDataManager) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workerOnboardingCompletedWebhookEventDataManagerJSON) RawJSON() string {
+	return r.raw
+}
+
 type WorkerOnboardingCompletedWebhookEventDataDepartment struct {
 	// The unique public id of the department
 	ID   string                                                  `json:"id" api:"required"`
@@ -8229,7 +8489,8 @@ type WorkerReactivatedWebhookEventData struct {
 	FirstName    string                                  `json:"firstName" api:"required"`
 	LastName     string                                  `json:"lastName" api:"required"`
 	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
-	Email         string `json:"email" api:"required" format:"email"`
+	Email string `json:"email" api:"required" format:"email"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
 	WorkEmail     string `json:"workEmail" api:"required,nullable" format:"email"`
 	PreferredName string `json:"preferredName" api:"required,nullable"`
 	// The worker's biological sex, or null when unavailable.
@@ -8262,11 +8523,17 @@ type WorkerReactivatedWebhookEventData struct {
 	// start date. Null when the worker has no applicable regular pay rate or the API
 	// key lacks the corresponding compensation read scope.
 	Compensation PublicWorkerCompensation `json:"compensation" api:"required,nullable"`
+	// The worker's manager, or null if unassigned.
+	Manager WorkerReactivatedWebhookEventDataManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerReactivatedWebhookEventDataLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField              `json:"customFields" api:"nullable"`
-	JSON         workerReactivatedWebhookEventDataJSON  `json:"-"`
+	Level WorkerReactivatedWebhookEventDataLevel `json:"level" api:"nullable"`
+	// The worker's custom field values. Every active company custom field appears;
+	// fields outside this API key's permission scopes are redacted (value null,
+	// redacted true) rather than omitted, so the list is identical across keys. Empty
+	// when the company has no custom fields.
+	CustomFields []PublicWorkerCustomField             `json:"customFields" api:"nullable"`
+	JSON         workerReactivatedWebhookEventDataJSON `json:"-"`
 }
 
 // workerReactivatedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerReactivatedWebhookEventData]
@@ -8297,6 +8564,7 @@ type workerReactivatedWebhookEventDataJSON struct {
 	TerminationReason apijson.Field
 	UpdatedAt         apijson.Field
 	Compensation      apijson.Field
+	Manager           apijson.Field
 	Level             apijson.Field
 	CustomFields      apijson.Field
 	raw               string
@@ -8668,6 +8936,33 @@ func (r WorkerReactivatedWebhookEventDataAddressCountry) IsKnown() bool {
 	return false
 }
 
+type WorkerReactivatedWebhookEventDataManager struct {
+	// The id of the worker.
+	ID          string                                       `json:"id" api:"required"`
+	FirstName   string                                       `json:"firstName" api:"required"`
+	LastName    string                                       `json:"lastName" api:"required"`
+	DisplayName string                                       `json:"displayName" api:"required"`
+	JSON        workerReactivatedWebhookEventDataManagerJSON `json:"-"`
+}
+
+// workerReactivatedWebhookEventDataManagerJSON contains the JSON metadata for the struct [WorkerReactivatedWebhookEventDataManager]
+type workerReactivatedWebhookEventDataManagerJSON struct {
+	ID          apijson.Field
+	FirstName   apijson.Field
+	LastName    apijson.Field
+	DisplayName apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorkerReactivatedWebhookEventDataManager) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workerReactivatedWebhookEventDataManagerJSON) RawJSON() string {
+	return r.raw
+}
+
 type WorkerReactivatedWebhookEventDataDepartment struct {
 	// The unique public id of the department
 	ID   string                                          `json:"id" api:"required"`
@@ -8832,7 +9127,8 @@ type WorkerUpdatedWebhookEventData struct {
 	FirstName    string                              `json:"firstName" api:"required"`
 	LastName     string                              `json:"lastName" api:"required"`
 	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
-	Email         string `json:"email" api:"required" format:"email"`
+	Email string `json:"email" api:"required" format:"email"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
 	WorkEmail     string `json:"workEmail" api:"required,nullable" format:"email"`
 	PreferredName string `json:"preferredName" api:"required,nullable"`
 	// The worker's biological sex, or null when unavailable.
@@ -8865,11 +9161,17 @@ type WorkerUpdatedWebhookEventData struct {
 	// start date. Null when the worker has no applicable regular pay rate or the API
 	// key lacks the corresponding compensation read scope.
 	Compensation PublicWorkerCompensation `json:"compensation" api:"required,nullable"`
+	// The worker's manager, or null if unassigned.
+	Manager WorkerUpdatedWebhookEventDataManager `json:"manager" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerUpdatedWebhookEventDataLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField          `json:"customFields" api:"nullable"`
-	JSON         workerUpdatedWebhookEventDataJSON  `json:"-"`
+	Level WorkerUpdatedWebhookEventDataLevel `json:"level" api:"nullable"`
+	// The worker's custom field values. Every active company custom field appears;
+	// fields outside this API key's permission scopes are redacted (value null,
+	// redacted true) rather than omitted, so the list is identical across keys. Empty
+	// when the company has no custom fields.
+	CustomFields []PublicWorkerCustomField         `json:"customFields" api:"nullable"`
+	JSON         workerUpdatedWebhookEventDataJSON `json:"-"`
 }
 
 // workerUpdatedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerUpdatedWebhookEventData]
@@ -8900,6 +9202,7 @@ type workerUpdatedWebhookEventDataJSON struct {
 	TerminationReason apijson.Field
 	UpdatedAt         apijson.Field
 	Compensation      apijson.Field
+	Manager           apijson.Field
 	Level             apijson.Field
 	CustomFields      apijson.Field
 	raw               string
@@ -9269,6 +9572,33 @@ func (r WorkerUpdatedWebhookEventDataAddressCountry) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+type WorkerUpdatedWebhookEventDataManager struct {
+	// The id of the worker.
+	ID          string                                   `json:"id" api:"required"`
+	FirstName   string                                   `json:"firstName" api:"required"`
+	LastName    string                                   `json:"lastName" api:"required"`
+	DisplayName string                                   `json:"displayName" api:"required"`
+	JSON        workerUpdatedWebhookEventDataManagerJSON `json:"-"`
+}
+
+// workerUpdatedWebhookEventDataManagerJSON contains the JSON metadata for the struct [WorkerUpdatedWebhookEventDataManager]
+type workerUpdatedWebhookEventDataManagerJSON struct {
+	ID          apijson.Field
+	FirstName   apijson.Field
+	LastName    apijson.Field
+	DisplayName apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorkerUpdatedWebhookEventDataManager) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workerUpdatedWebhookEventDataManagerJSON) RawJSON() string {
+	return r.raw
 }
 
 type WorkerUpdatedWebhookEventDataDepartment struct {
