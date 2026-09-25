@@ -87,7 +87,7 @@ client := sdk.NewClient()
 
 ### `Benefits HealthPlans`
 
-Read-only health plans, retirement plans, and payroll benefit deductions.
+Health plan reads and retirement plan and payroll benefit deduction management.
 
 #### List Health Plans
 
@@ -129,7 +129,7 @@ fmt.Println(healthPlan)
 
 ### `Benefits RetirementPlans`
 
-Read-only health plans, retirement plans, and payroll benefit deductions.
+Health plan reads and retirement plan and payroll benefit deduction management.
 
 #### List Retirement Plans
 
@@ -171,7 +171,7 @@ fmt.Println(retirementPlan)
 
 ### `Benefits Deductions`
 
-Read-only health plans, retirement plans, and payroll benefit deductions.
+Health plan reads and retirement plan and payroll benefit deduction management.
 
 #### List Benefit Deductions
 
