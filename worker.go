@@ -302,7 +302,7 @@ type PublicWorkerCompensation struct {
 	// The tag of the pay rate.
 	PayRateID string      `json:"payRateId" api:"required"`
 	Per       interface{} `json:"per" api:"required"`
-	// Amount in the currency base unit, e.g. cents for USD.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount   int64                            `json:"amount" api:"required"`
 	Currency PublicWorkerCompensationCurrency `json:"currency" api:"required"`
 	// The server-formatted pay rate, including its period.

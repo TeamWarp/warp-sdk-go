@@ -205,7 +205,7 @@ func (r *OfferService) Resend(ctx context.Context, id string, opts ...option.Req
 }
 
 type PublicMoneyAmount struct {
-	// Amount in the currency base unit, e.g. cents for USD.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount   int64                     `json:"amount" api:"required"`
 	Currency PublicMoneyAmountCurrency `json:"currency" api:"required"`
 	// The server-formatted display string for the amount in its currency.
