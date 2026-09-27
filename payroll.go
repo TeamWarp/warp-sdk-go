@@ -769,7 +769,7 @@ func (r publicFundingPayrollTotalsJSON) RawJSON() string {
 }
 
 type PublicCurrencyMoneyAmount11 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount int64 `json:"amount" api:"required"`
 	// The server-formatted display string for the amount in its currency.
 	Display string                          `json:"display" api:"required"`
@@ -793,7 +793,7 @@ func (r publicCurrencyMoneyAmount11JSON) RawJSON() string {
 }
 
 type PublicCurrencyMoneyAmount struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount int64 `json:"amount" api:"required"`
 	// The server-formatted display string for the amount in its currency.
 	Display string                        `json:"display" api:"required"`
@@ -817,7 +817,7 @@ func (r publicCurrencyMoneyAmountJSON) RawJSON() string {
 }
 
 type PublicCurrencyMoneyAmount1 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount int64 `json:"amount" api:"required"`
 	// The server-formatted display string for the amount in its currency.
 	Display string                         `json:"display" api:"required"`
@@ -841,7 +841,7 @@ func (r publicCurrencyMoneyAmount1JSON) RawJSON() string {
 }
 
 type PublicCurrencyMoneyAmount2 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount int64 `json:"amount" api:"required"`
 	// The server-formatted display string for the amount in its currency.
 	Display string                         `json:"display" api:"required"`
@@ -865,7 +865,7 @@ func (r publicCurrencyMoneyAmount2JSON) RawJSON() string {
 }
 
 type PublicCurrencyMoneyAmount3 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount int64 `json:"amount" api:"required"`
 	// The server-formatted display string for the amount in its currency.
 	Display string                         `json:"display" api:"required"`
@@ -889,7 +889,7 @@ func (r publicCurrencyMoneyAmount3JSON) RawJSON() string {
 }
 
 type PublicCurrencyMoneyAmount4 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount int64 `json:"amount" api:"required"`
 	// The server-formatted display string for the amount in its currency.
 	Display string                         `json:"display" api:"required"`
@@ -913,7 +913,7 @@ func (r publicCurrencyMoneyAmount4JSON) RawJSON() string {
 }
 
 type PublicCurrencyMoneyAmount5 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount int64 `json:"amount" api:"required"`
 	// The server-formatted display string for the amount in its currency.
 	Display string                         `json:"display" api:"required"`
@@ -937,7 +937,7 @@ func (r publicCurrencyMoneyAmount5JSON) RawJSON() string {
 }
 
 type PublicCurrencyMoneyAmount6 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount int64 `json:"amount" api:"required"`
 	// The server-formatted display string for the amount in its currency.
 	Display string                         `json:"display" api:"required"`
@@ -961,7 +961,7 @@ func (r publicCurrencyMoneyAmount6JSON) RawJSON() string {
 }
 
 type PublicCurrencyMoneyAmount7 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount int64 `json:"amount" api:"required"`
 	// The server-formatted display string for the amount in its currency.
 	Display string                         `json:"display" api:"required"`
@@ -985,7 +985,7 @@ func (r publicCurrencyMoneyAmount7JSON) RawJSON() string {
 }
 
 type PublicCurrencyMoneyAmount8 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount int64 `json:"amount" api:"required"`
 	// The server-formatted display string for the amount in its currency.
 	Display string                         `json:"display" api:"required"`
@@ -1009,7 +1009,7 @@ func (r publicCurrencyMoneyAmount8JSON) RawJSON() string {
 }
 
 type PublicCurrencyMoneyAmount9 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount int64 `json:"amount" api:"required"`
 	// The server-formatted display string for the amount in its currency.
 	Display string                         `json:"display" api:"required"`
@@ -1033,7 +1033,7 @@ func (r publicCurrencyMoneyAmount9JSON) RawJSON() string {
 }
 
 type PublicCurrencyMoneyAmount10 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount int64 `json:"amount" api:"required"`
 	// The server-formatted display string for the amount in its currency.
 	Display string                          `json:"display" api:"required"`
@@ -1132,7 +1132,7 @@ func (r publicPaycheckCurrencyTotalsJSON) RawJSON() string {
 }
 
 type PublicPayrollMoneyAmount struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount   int64       `json:"amount" api:"required"`
 	Currency interface{} `json:"currency" api:"required"`
 	// The server-formatted display string for the amount in its currency.
@@ -1196,7 +1196,7 @@ func (r PublicHourlyRatePer) IsKnown() bool {
 }
 
 type PublicPayrollMoneyAmount1 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount   int64       `json:"amount" api:"required"`
 	Currency interface{} `json:"currency" api:"required"`
 	// The server-formatted display string for the amount in its currency.
@@ -1237,7 +1237,7 @@ func (r PublicPaycheckDeductionTaxTreatment) IsKnown() bool {
 }
 
 type PublicPayrollMoneyAmount2 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount   int64       `json:"amount" api:"required"`
 	Currency interface{} `json:"currency" api:"required"`
 	// The server-formatted display string for the amount in its currency.
@@ -1263,7 +1263,7 @@ func (r publicPayrollMoneyAmount2JSON) RawJSON() string {
 }
 
 type PublicPayrollMoneyAmount3 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount   int64       `json:"amount" api:"required"`
 	Currency interface{} `json:"currency" api:"required"`
 	// The server-formatted display string for the amount in its currency.
@@ -1289,7 +1289,7 @@ func (r publicPayrollMoneyAmount3JSON) RawJSON() string {
 }
 
 type PublicPayrollMoneyAmount4 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount   int64       `json:"amount" api:"required"`
 	Currency interface{} `json:"currency" api:"required"`
 	// The server-formatted display string for the amount in its currency.
@@ -1330,7 +1330,7 @@ func (r PublicTaxPayer) IsKnown() bool {
 }
 
 type PublicPayrollMoneyAmount5 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount   int64       `json:"amount" api:"required"`
 	Currency interface{} `json:"currency" api:"required"`
 	// The server-formatted display string for the amount in its currency.
@@ -1381,7 +1381,7 @@ func (r publicPaycheckSummaryCurrencyTotalsJSON) RawJSON() string {
 }
 
 type PublicCurrencyMoneyAmount13 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount int64 `json:"amount" api:"required"`
 	// The server-formatted display string for the amount in its currency.
 	Display string                          `json:"display" api:"required"`
@@ -1405,7 +1405,7 @@ func (r publicCurrencyMoneyAmount13JSON) RawJSON() string {
 }
 
 type PublicCurrencyMoneyAmount12 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount int64 `json:"amount" api:"required"`
 	// The server-formatted display string for the amount in its currency.
 	Display string                          `json:"display" api:"required"`
@@ -1429,7 +1429,7 @@ func (r publicCurrencyMoneyAmount12JSON) RawJSON() string {
 }
 
 type PublicCurrencyMoneyAmount14 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount int64 `json:"amount" api:"required"`
 	// The server-formatted display string for the amount in its currency.
 	Display string                          `json:"display" api:"required"`
@@ -1453,7 +1453,7 @@ func (r publicCurrencyMoneyAmount14JSON) RawJSON() string {
 }
 
 type PublicCurrencyMoneyAmount15 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount int64 `json:"amount" api:"required"`
 	// The server-formatted display string for the amount in its currency.
 	Display string                          `json:"display" api:"required"`
@@ -1477,7 +1477,7 @@ func (r publicCurrencyMoneyAmount15JSON) RawJSON() string {
 }
 
 type PublicCurrencyMoneyAmount16 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount int64 `json:"amount" api:"required"`
 	// The server-formatted display string for the amount in its currency.
 	Display string                          `json:"display" api:"required"`
@@ -1501,7 +1501,7 @@ func (r publicCurrencyMoneyAmount16JSON) RawJSON() string {
 }
 
 type PublicCurrencyMoneyAmount17 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount int64 `json:"amount" api:"required"`
 	// The server-formatted display string for the amount in its currency.
 	Display string                          `json:"display" api:"required"`
@@ -1525,7 +1525,7 @@ func (r publicCurrencyMoneyAmount17JSON) RawJSON() string {
 }
 
 type PublicCurrencyMoneyAmount18 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount int64 `json:"amount" api:"required"`
 	// The server-formatted display string for the amount in its currency.
 	Display string                          `json:"display" api:"required"`
@@ -1549,7 +1549,7 @@ func (r publicCurrencyMoneyAmount18JSON) RawJSON() string {
 }
 
 type PublicCurrencyMoneyAmount19 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount int64 `json:"amount" api:"required"`
 	// The server-formatted display string for the amount in its currency.
 	Display string                          `json:"display" api:"required"`
@@ -1573,7 +1573,7 @@ func (r publicCurrencyMoneyAmount19JSON) RawJSON() string {
 }
 
 type PublicCurrencyMoneyAmount20 struct {
-	// The amount in ISO 4217 minor units. For USD, 300000 represents $3,000.00.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount int64 `json:"amount" api:"required"`
 	// The server-formatted display string for the amount in its currency.
 	Display string                          `json:"display" api:"required"`

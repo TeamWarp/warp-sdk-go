@@ -103,7 +103,7 @@ type PublicPayRate struct {
 	Type PublicPayRateType `json:"type" api:"required"`
 	// The period represented by the pay rate amount.
 	Per PublicPayRatePer `json:"per" api:"required"`
-	// Amount in the currency base unit, e.g. cents for USD.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount   int64                 `json:"amount" api:"required"`
 	Currency PublicPayRateCurrency `json:"currency" api:"required"`
 	// The server-formatted pay rate, including its period.

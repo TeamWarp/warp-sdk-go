@@ -712,7 +712,7 @@ func (r BenefitNewDeductionParamsCalculationFixedAmountBenefitInputFrequency) Is
 }
 
 type BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContribution struct {
-	// Amount in the currency base unit, e.g. cents for USD.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount   param.Field[int64]                                                                                   `json:"amount" api:"required"`
 	Currency param.Field[BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency] `json:"currency" api:"required"`
 }
@@ -796,7 +796,7 @@ func (r BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContr
 }
 
 type BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContribution struct {
-	// Amount in the currency base unit, e.g. cents for USD.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount   param.Field[int64]                                                                                   `json:"amount" api:"required"`
 	Currency param.Field[BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency] `json:"currency" api:"required"`
 }
@@ -1045,7 +1045,7 @@ func (r BenefitUpdateDeductionParamsCalculationFixedAmountBenefitInputFrequency)
 }
 
 type BenefitUpdateDeductionParamsCalculationFixedAmountBenefitInputEmployeeContribution struct {
-	// Amount in the currency base unit, e.g. cents for USD.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount   param.Field[int64]                                                                                   `json:"amount" api:"required"`
 	Currency param.Field[BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency] `json:"currency" api:"required"`
 }
@@ -1129,7 +1129,7 @@ func (r BenefitUpdateDeductionParamsCalculationFixedAmountBenefitInputEmployeeCo
 }
 
 type BenefitUpdateDeductionParamsCalculationFixedAmountBenefitInputEmployerContribution struct {
-	// Amount in the currency base unit, e.g. cents for USD.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount   param.Field[int64]                                                                                   `json:"amount" api:"required"`
 	Currency param.Field[BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency] `json:"currency" api:"required"`
 }
@@ -1390,7 +1390,7 @@ func (r HealthPlanReference) implementsBenefitNewDeductionResponsePlan() {}
 func (r RetirementPlanReference) implementsBenefitNewDeductionResponsePlan() {}
 
 type BenefitMoneyInputParam struct {
-	// Amount in the currency base unit, e.g. cents for USD.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount   param.Field[int64]                     `json:"amount" api:"required"`
 	Currency param.Field[BenefitMoneyInputCurrency] `json:"currency" api:"required"`
 }
