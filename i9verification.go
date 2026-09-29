@@ -96,26 +96,26 @@ func (r *I9VerificationService) Get(ctx context.Context, id string, opts ...opti
 
 type PublicI9Verification struct {
 	// The tag of the i9 verification.
-	ID string `json:"id" api:"required"`
-	// Basic identifying information for a worker associated with another resource.
-	Worker         PublicWorkerReference      `json:"worker" api:"required"`
-	Status         PublicI9VerificationStatus `json:"status" api:"required"`
-	StartDate      string                     `json:"startDate" api:"required"`
-	VerifiedAt     time.Time                  `json:"verifiedAt" api:"required,nullable" format:"date-time"`
-	RetentionUntil string                     `json:"retentionUntil" api:"required,nullable"`
+	ID             string                     `json:"id" api:"required"`
 	DueDate        string                     `json:"dueDate" api:"required,nullable"`
-	JSON           publicI9VerificationJSON   `json:"-"`
+	RetentionUntil string                     `json:"retentionUntil" api:"required,nullable"`
+	StartDate      string                     `json:"startDate" api:"required"`
+	Status         PublicI9VerificationStatus `json:"status" api:"required"`
+	VerifiedAt     time.Time                  `json:"verifiedAt" api:"required,nullable" format:"date-time"`
+	// Basic identifying information for a worker associated with another resource.
+	Worker PublicWorkerReference    `json:"worker" api:"required"`
+	JSON   publicI9VerificationJSON `json:"-"`
 }
 
 // publicI9VerificationJSON contains the JSON metadata for the struct [PublicI9Verification]
 type publicI9VerificationJSON struct {
 	ID             apijson.Field
-	Worker         apijson.Field
-	Status         apijson.Field
-	StartDate      apijson.Field
-	VerifiedAt     apijson.Field
-	RetentionUntil apijson.Field
 	DueDate        apijson.Field
+	RetentionUntil apijson.Field
+	StartDate      apijson.Field
+	Status         apijson.Field
+	VerifiedAt     apijson.Field
+	Worker         apijson.Field
 	raw            string
 	ExtraFields    map[string]apijson.Field
 }
@@ -147,26 +147,26 @@ func (r PublicI9VerificationStatus) IsKnown() bool {
 
 type I9VerificationGetResponse struct {
 	// The tag of the i9 verification.
-	ID string `json:"id" api:"required"`
-	// Basic identifying information for a worker associated with another resource.
-	Worker         PublicWorkerReference           `json:"worker" api:"required"`
-	Status         I9VerificationGetResponseStatus `json:"status" api:"required"`
-	StartDate      string                          `json:"startDate" api:"required"`
-	VerifiedAt     time.Time                       `json:"verifiedAt" api:"required,nullable" format:"date-time"`
-	RetentionUntil string                          `json:"retentionUntil" api:"required,nullable"`
+	ID             string                          `json:"id" api:"required"`
 	DueDate        string                          `json:"dueDate" api:"required,nullable"`
-	JSON           i9VerificationGetResponseJSON   `json:"-"`
+	RetentionUntil string                          `json:"retentionUntil" api:"required,nullable"`
+	StartDate      string                          `json:"startDate" api:"required"`
+	Status         I9VerificationGetResponseStatus `json:"status" api:"required"`
+	VerifiedAt     time.Time                       `json:"verifiedAt" api:"required,nullable" format:"date-time"`
+	// Basic identifying information for a worker associated with another resource.
+	Worker PublicWorkerReference         `json:"worker" api:"required"`
+	JSON   i9VerificationGetResponseJSON `json:"-"`
 }
 
 // i9VerificationGetResponseJSON contains the JSON metadata for the struct [I9VerificationGetResponse]
 type i9VerificationGetResponseJSON struct {
 	ID             apijson.Field
-	Worker         apijson.Field
-	Status         apijson.Field
-	StartDate      apijson.Field
-	VerifiedAt     apijson.Field
-	RetentionUntil apijson.Field
 	DueDate        apijson.Field
+	RetentionUntil apijson.Field
+	StartDate      apijson.Field
+	Status         apijson.Field
+	VerifiedAt     apijson.Field
+	Worker         apijson.Field
 	raw            string
 	ExtraFields    map[string]apijson.Field
 }
@@ -236,17 +236,17 @@ func (r I9VerificationListParamsStatus) IsKnown() bool {
 }
 
 type I9VerificationListResponse struct {
-	HasMore bool                           `json:"hasMore" api:"required"`
 	Count   int64                          `json:"count" api:"required"`
 	Data    []PublicI9Verification         `json:"data" api:"required"`
+	HasMore bool                           `json:"hasMore" api:"required"`
 	JSON    i9VerificationListResponseJSON `json:"-"`
 }
 
 // i9VerificationListResponseJSON contains the JSON metadata for the struct [I9VerificationListResponse]
 type i9VerificationListResponseJSON struct {
-	HasMore     apijson.Field
 	Count       apijson.Field
 	Data        apijson.Field
+	HasMore     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }

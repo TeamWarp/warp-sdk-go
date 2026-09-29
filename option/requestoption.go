@@ -271,7 +271,7 @@ func WithEnvironmentProduction() RequestOption {
 // WithAPIKey returns a RequestOption that sets the client setting "apiKey".
 func WithAPIKey(value string) RequestOption {
 	return requestconfig.RequestOptionFunc(func(r *requestconfig.RequestConfig) error {
-		r.Request.Header.Set("x-api-key", value)
-		return nil
+		r.APIKey = value
+		return r.Apply(WithHeader("x-api-key", r.APIKey))
 	})
 }

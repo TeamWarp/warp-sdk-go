@@ -154,17 +154,17 @@ func (r *PayrollService) GetPaycheck(ctx context.Context, id string, opts ...opt
 }
 
 type PublicPayrollList struct {
-	HasMore bool                  `json:"hasMore" api:"required"`
 	Count   int64                 `json:"count" api:"required"`
 	Data    interface{}           `json:"data" api:"required"`
+	HasMore bool                  `json:"hasMore" api:"required"`
 	JSON    publicPayrollListJSON `json:"-"`
 }
 
 // publicPayrollListJSON contains the JSON metadata for the struct [PublicPayrollList]
 type publicPayrollListJSON struct {
-	HasMore     apijson.Field
 	Count       apijson.Field
 	Data        apijson.Field
+	HasMore     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -179,42 +179,42 @@ func (r publicPayrollListJSON) RawJSON() string {
 
 type PublicPayrollDetail struct {
 	// The tag of the payroll.
-	ID              string      `json:"id" api:"required"`
-	Type            interface{} `json:"type" api:"required"`
-	Subtype         interface{} `json:"subtype" api:"required"`
-	Status          interface{} `json:"status" api:"required"`
-	FundingCurrency interface{} `json:"fundingCurrency" api:"required"`
-	Payday          string      `json:"payday" api:"required"`
-	PayPeriod       interface{} `json:"payPeriod" api:"required"`
+	ID               string      `json:"id" api:"required"`
+	ApprovalDeadline string      `json:"approvalDeadline" api:"required,nullable"`
+	Description      string      `json:"description" api:"required,nullable"`
+	FundingCurrency  interface{} `json:"fundingCurrency" api:"required"`
+	FundingMethod    interface{} `json:"fundingMethod" api:"required"`
 	// The cadence at which workers are paid.
-	PayFrequency     PublicPayFrequency      `json:"payFrequency" api:"required,nullable"`
-	Description      string                  `json:"description" api:"required,nullable"`
-	ApprovalDeadline string                  `json:"approvalDeadline" api:"required,nullable"`
-	PaycheckCount    int64                   `json:"paycheckCount" api:"required"`
-	Totals           interface{}             `json:"totals" api:"required"`
-	FundingMethod    interface{}             `json:"fundingMethod" api:"required"`
-	ReopenDeadline   string                  `json:"reopenDeadline" api:"required,nullable"`
-	Timeline         interface{}             `json:"timeline" api:"required"`
-	JSON             publicPayrollDetailJSON `json:"-"`
+	PayFrequency   PublicPayFrequency      `json:"payFrequency" api:"required,nullable"`
+	PayPeriod      interface{}             `json:"payPeriod" api:"required"`
+	PaycheckCount  int64                   `json:"paycheckCount" api:"required"`
+	Payday         string                  `json:"payday" api:"required"`
+	ReopenDeadline string                  `json:"reopenDeadline" api:"required,nullable"`
+	Status         interface{}             `json:"status" api:"required"`
+	Subtype        interface{}             `json:"subtype" api:"required"`
+	Timeline       interface{}             `json:"timeline" api:"required"`
+	Totals         interface{}             `json:"totals" api:"required"`
+	Type           interface{}             `json:"type" api:"required"`
+	JSON           publicPayrollDetailJSON `json:"-"`
 }
 
 // publicPayrollDetailJSON contains the JSON metadata for the struct [PublicPayrollDetail]
 type publicPayrollDetailJSON struct {
 	ID               apijson.Field
-	Type             apijson.Field
-	Subtype          apijson.Field
-	Status           apijson.Field
-	FundingCurrency  apijson.Field
-	Payday           apijson.Field
-	PayPeriod        apijson.Field
-	PayFrequency     apijson.Field
-	Description      apijson.Field
 	ApprovalDeadline apijson.Field
-	PaycheckCount    apijson.Field
-	Totals           apijson.Field
+	Description      apijson.Field
+	FundingCurrency  apijson.Field
 	FundingMethod    apijson.Field
+	PayFrequency     apijson.Field
+	PayPeriod        apijson.Field
+	PaycheckCount    apijson.Field
+	Payday           apijson.Field
 	ReopenDeadline   apijson.Field
+	Status           apijson.Field
+	Subtype          apijson.Field
 	Timeline         apijson.Field
+	Totals           apijson.Field
+	Type             apijson.Field
 	raw              string
 	ExtraFields      map[string]apijson.Field
 }
@@ -228,17 +228,17 @@ func (r publicPayrollDetailJSON) RawJSON() string {
 }
 
 type PublicPaycheckList struct {
-	HasMore bool                   `json:"hasMore" api:"required"`
 	Count   int64                  `json:"count" api:"required"`
 	Data    string                 `json:"data" api:"required"`
+	HasMore bool                   `json:"hasMore" api:"required"`
 	JSON    publicPaycheckListJSON `json:"-"`
 }
 
 // publicPaycheckListJSON contains the JSON metadata for the struct [PublicPaycheckList]
 type publicPaycheckListJSON struct {
-	HasMore     apijson.Field
 	Count       apijson.Field
 	Data        apijson.Field
+	HasMore     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -254,40 +254,40 @@ func (r publicPaycheckListJSON) RawJSON() string {
 type PublicPaycheckDetail struct {
 	// The tag of the paycheck.
 	ID             string                   `json:"id" api:"required"`
-	Payroll        interface{}              `json:"payroll" api:"required"`
-	Worker         interface{}              `json:"worker" api:"required"`
-	Status         interface{}              `json:"status" api:"required"`
+	Benefits       string                   `json:"benefits" api:"required"`
+	Deductions     string                   `json:"deductions" api:"required"`
+	Description    string                   `json:"description" api:"required,nullable"`
+	Earnings       string                   `json:"earnings" api:"required"`
+	ExchangeRates  string                   `json:"exchangeRates" api:"required"`
 	Payday         string                   `json:"payday" api:"required"`
 	PaymentMethod  interface{}              `json:"paymentMethod" api:"required"`
-	Totals         interface{}              `json:"totals" api:"required"`
-	Description    string                   `json:"description" api:"required,nullable"`
-	ExchangeRates  string                   `json:"exchangeRates" api:"required"`
-	ReportedHours  float64                  `json:"reportedHours" api:"required,nullable"`
-	Earnings       string                   `json:"earnings" api:"required"`
+	Payroll        interface{}              `json:"payroll" api:"required"`
 	Reimbursements string                   `json:"reimbursements" api:"required"`
-	Deductions     string                   `json:"deductions" api:"required"`
-	Benefits       string                   `json:"benefits" api:"required"`
+	ReportedHours  float64                  `json:"reportedHours" api:"required,nullable"`
+	Status         interface{}              `json:"status" api:"required"`
 	Taxes          string                   `json:"taxes" api:"required"`
+	Totals         interface{}              `json:"totals" api:"required"`
+	Worker         interface{}              `json:"worker" api:"required"`
 	JSON           publicPaycheckDetailJSON `json:"-"`
 }
 
 // publicPaycheckDetailJSON contains the JSON metadata for the struct [PublicPaycheckDetail]
 type publicPaycheckDetailJSON struct {
 	ID             apijson.Field
-	Payroll        apijson.Field
-	Worker         apijson.Field
-	Status         apijson.Field
+	Benefits       apijson.Field
+	Deductions     apijson.Field
+	Description    apijson.Field
+	Earnings       apijson.Field
+	ExchangeRates  apijson.Field
 	Payday         apijson.Field
 	PaymentMethod  apijson.Field
-	Totals         apijson.Field
-	Description    apijson.Field
-	ExchangeRates  apijson.Field
-	ReportedHours  apijson.Field
-	Earnings       apijson.Field
+	Payroll        apijson.Field
 	Reimbursements apijson.Field
-	Deductions     apijson.Field
-	Benefits       apijson.Field
+	ReportedHours  apijson.Field
+	Status         apijson.Field
 	Taxes          apijson.Field
+	Totals         apijson.Field
+	Worker         apijson.Field
 	raw            string
 	ExtraFields    map[string]apijson.Field
 }
@@ -432,15 +432,15 @@ func (r PublicPayrollCurrency) IsKnown() bool {
 }
 
 type PublicPayPeriod struct {
-	StartDate string              `json:"startDate" api:"required"`
 	EndDate   string              `json:"endDate" api:"required"`
+	StartDate string              `json:"startDate" api:"required"`
 	JSON      publicPayPeriodJSON `json:"-"`
 }
 
 // publicPayPeriodJSON contains the JSON metadata for the struct [PublicPayPeriod]
 type publicPayPeriodJSON struct {
-	StartDate   apijson.Field
 	EndDate     apijson.Field
+	StartDate   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -476,6 +476,10 @@ type PublicPayrollDetailTotals struct {
 	// The provider-reported amount the employer must fund for the payroll, when
 	// available.
 	CashRequirement PublicCurrencyMoneyAmount11 `json:"cashRequirement" api:"required,nullable"`
+	// Amounts the employer pays toward worker benefits in addition to gross pay.
+	EmployerBenefitContributions PublicCurrencyMoneyAmount8 `json:"employerBenefitContributions" api:"required"`
+	// Payroll taxes paid by the employer in addition to gross pay.
+	EmployerTaxes PublicCurrencyMoneyAmount4 `json:"employerTaxes" api:"required"`
 	// Gross earnings before worker taxes, deductions, and benefit contributions.
 	// Reimbursements are reported separately.
 	GrossPay PublicCurrencyMoneyAmount `json:"grossPay" api:"required"`
@@ -484,44 +488,40 @@ type PublicPayrollDetailTotals struct {
 	// excludes payment execution fees and may differ from recomputed totals because of
 	// provider and FX rounding.
 	NetPay PublicCurrencyMoneyAmount1 `json:"netPay" api:"required"`
-	// Amounts reimbursed to workers in addition to gross pay. Reimbursements increase
-	// net pay and employer cost.
-	Reimbursements PublicCurrencyMoneyAmount2 `json:"reimbursements" api:"required"`
-	// Payroll taxes withheld from worker pay, reducing net pay.
-	WorkerTaxes PublicCurrencyMoneyAmount3 `json:"workerTaxes" api:"required"`
-	// Payroll taxes paid by the employer in addition to gross pay.
-	EmployerTaxes PublicCurrencyMoneyAmount4 `json:"employerTaxes" api:"required"`
+	// Non-benefit amounts deducted from worker pay after taxes, reducing net pay.
+	PostTaxDeductions PublicCurrencyMoneyAmount6 `json:"postTaxDeductions" api:"required"`
 	// Non-benefit amounts deducted from worker pay before taxes, reducing taxable pay
 	// and net pay.
 	PreTaxDeductions PublicCurrencyMoneyAmount5 `json:"preTaxDeductions" api:"required"`
-	// Non-benefit amounts deducted from worker pay after taxes, reducing net pay.
-	PostTaxDeductions PublicCurrencyMoneyAmount6 `json:"postTaxDeductions" api:"required"`
-	// Amounts workers pay toward benefits, deducted from their pay.
-	WorkerBenefitContributions PublicCurrencyMoneyAmount7 `json:"workerBenefitContributions" api:"required"`
-	// Amounts the employer pays toward worker benefits in addition to gross pay.
-	EmployerBenefitContributions PublicCurrencyMoneyAmount8 `json:"employerBenefitContributions" api:"required"`
-	// Banking and transaction fees paid by the employer to fund and pay the payroll.
-	TransactionFees PublicCurrencyMoneyAmount9 `json:"transactionFees" api:"required"`
+	// Amounts reimbursed to workers in addition to gross pay. Reimbursements increase
+	// net pay and employer cost.
+	Reimbursements PublicCurrencyMoneyAmount2 `json:"reimbursements" api:"required"`
 	// The employer's total payroll cost: gross pay, reimbursements, employer taxes,
 	// employer benefit contributions, and transaction fees.
-	TotalCost PublicCurrencyMoneyAmount10   `json:"totalCost" api:"required"`
-	JSON      publicPayrollDetailTotalsJSON `json:"-"`
+	TotalCost PublicCurrencyMoneyAmount10 `json:"totalCost" api:"required"`
+	// Banking and transaction fees paid by the employer to fund and pay the payroll.
+	TransactionFees PublicCurrencyMoneyAmount9 `json:"transactionFees" api:"required"`
+	// Amounts workers pay toward benefits, deducted from their pay.
+	WorkerBenefitContributions PublicCurrencyMoneyAmount7 `json:"workerBenefitContributions" api:"required"`
+	// Payroll taxes withheld from worker pay, reducing net pay.
+	WorkerTaxes PublicCurrencyMoneyAmount3    `json:"workerTaxes" api:"required"`
+	JSON        publicPayrollDetailTotalsJSON `json:"-"`
 }
 
 // publicPayrollDetailTotalsJSON contains the JSON metadata for the struct [PublicPayrollDetailTotals]
 type publicPayrollDetailTotalsJSON struct {
 	CashRequirement              apijson.Field
+	EmployerBenefitContributions apijson.Field
+	EmployerTaxes                apijson.Field
 	GrossPay                     apijson.Field
 	NetPay                       apijson.Field
-	Reimbursements               apijson.Field
-	WorkerTaxes                  apijson.Field
-	EmployerTaxes                apijson.Field
-	PreTaxDeductions             apijson.Field
 	PostTaxDeductions            apijson.Field
-	WorkerBenefitContributions   apijson.Field
-	EmployerBenefitContributions apijson.Field
-	TransactionFees              apijson.Field
+	PreTaxDeductions             apijson.Field
+	Reimbursements               apijson.Field
 	TotalCost                    apijson.Field
+	TransactionFees              apijson.Field
+	WorkerBenefitContributions   apijson.Field
+	WorkerTaxes                  apijson.Field
 	raw                          string
 	ExtraFields                  map[string]apijson.Field
 }
@@ -572,25 +572,25 @@ func (r publicPayrollTimelineJSON) RawJSON() string {
 type PublicPaycheckPayroll struct {
 	// The tag of the payroll.
 	ID              string      `json:"id" api:"required"`
-	Type            interface{} `json:"type" api:"required"`
-	Subtype         interface{} `json:"subtype" api:"required"`
-	Status          interface{} `json:"status" api:"required"`
 	FundingCurrency interface{} `json:"fundingCurrency" api:"required"`
-	PayPeriod       interface{} `json:"payPeriod" api:"required"`
 	// The cadence at which workers are paid.
 	PayFrequency PublicPayFrequency        `json:"payFrequency" api:"required,nullable"`
+	PayPeriod    interface{}               `json:"payPeriod" api:"required"`
+	Status       interface{}               `json:"status" api:"required"`
+	Subtype      interface{}               `json:"subtype" api:"required"`
+	Type         interface{}               `json:"type" api:"required"`
 	JSON         publicPaycheckPayrollJSON `json:"-"`
 }
 
 // publicPaycheckPayrollJSON contains the JSON metadata for the struct [PublicPaycheckPayroll]
 type publicPaycheckPayrollJSON struct {
 	ID              apijson.Field
-	Type            apijson.Field
-	Subtype         apijson.Field
-	Status          apijson.Field
 	FundingCurrency apijson.Field
-	PayPeriod       apijson.Field
 	PayFrequency    apijson.Field
+	PayPeriod       apijson.Field
+	Status          apijson.Field
+	Subtype         apijson.Field
+	Type            apijson.Field
 	raw             string
 	ExtraFields     map[string]apijson.Field
 }
@@ -605,22 +605,22 @@ func (r publicPaycheckPayrollJSON) RawJSON() string {
 
 type PublicPaycheckWorker struct {
 	// The worker id.
-	ID string `json:"id" api:"required"`
+	ID          string `json:"id" api:"required"`
+	DisplayName string `json:"displayName" api:"required"`
 	// The worker first name.
 	FirstName string `json:"firstName" api:"required"`
 	// The worker last name.
-	LastName    string                         `json:"lastName" api:"required"`
-	DisplayName string                         `json:"displayName" api:"required"`
-	WorkerType  PublicPaycheckWorkerWorkerType `json:"workerType" api:"required"`
-	JSON        publicPaycheckWorkerJSON       `json:"-"`
+	LastName   string                         `json:"lastName" api:"required"`
+	WorkerType PublicPaycheckWorkerWorkerType `json:"workerType" api:"required"`
+	JSON       publicPaycheckWorkerJSON       `json:"-"`
 }
 
 // publicPaycheckWorkerJSON contains the JSON metadata for the struct [PublicPaycheckWorker]
 type publicPaycheckWorkerJSON struct {
 	ID          apijson.Field
+	DisplayName apijson.Field
 	FirstName   apijson.Field
 	LastName    apijson.Field
-	DisplayName apijson.Field
 	WorkerType  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -711,6 +711,10 @@ func (r publicPaycheckDetailTotalsJSON) RawJSON() string {
 }
 
 type PublicFundingPayrollTotals struct {
+	// Amounts the employer pays toward worker benefits in addition to gross pay.
+	EmployerBenefitContributions PublicCurrencyMoneyAmount8 `json:"employerBenefitContributions" api:"required"`
+	// Payroll taxes paid by the employer in addition to gross pay.
+	EmployerTaxes PublicCurrencyMoneyAmount4 `json:"employerTaxes" api:"required"`
 	// Gross earnings before worker taxes, deductions, and benefit contributions.
 	// Reimbursements are reported separately.
 	GrossPay PublicCurrencyMoneyAmount `json:"grossPay" api:"required"`
@@ -719,43 +723,39 @@ type PublicFundingPayrollTotals struct {
 	// excludes payment execution fees and may differ from recomputed totals because of
 	// provider and FX rounding.
 	NetPay PublicCurrencyMoneyAmount1 `json:"netPay" api:"required"`
-	// Amounts reimbursed to workers in addition to gross pay. Reimbursements increase
-	// net pay and employer cost.
-	Reimbursements PublicCurrencyMoneyAmount2 `json:"reimbursements" api:"required"`
-	// Payroll taxes withheld from worker pay, reducing net pay.
-	WorkerTaxes PublicCurrencyMoneyAmount3 `json:"workerTaxes" api:"required"`
-	// Payroll taxes paid by the employer in addition to gross pay.
-	EmployerTaxes PublicCurrencyMoneyAmount4 `json:"employerTaxes" api:"required"`
+	// Non-benefit amounts deducted from worker pay after taxes, reducing net pay.
+	PostTaxDeductions PublicCurrencyMoneyAmount6 `json:"postTaxDeductions" api:"required"`
 	// Non-benefit amounts deducted from worker pay before taxes, reducing taxable pay
 	// and net pay.
 	PreTaxDeductions PublicCurrencyMoneyAmount5 `json:"preTaxDeductions" api:"required"`
-	// Non-benefit amounts deducted from worker pay after taxes, reducing net pay.
-	PostTaxDeductions PublicCurrencyMoneyAmount6 `json:"postTaxDeductions" api:"required"`
-	// Amounts workers pay toward benefits, deducted from their pay.
-	WorkerBenefitContributions PublicCurrencyMoneyAmount7 `json:"workerBenefitContributions" api:"required"`
-	// Amounts the employer pays toward worker benefits in addition to gross pay.
-	EmployerBenefitContributions PublicCurrencyMoneyAmount8 `json:"employerBenefitContributions" api:"required"`
-	// Banking and transaction fees paid by the employer to fund and pay the payroll.
-	TransactionFees PublicCurrencyMoneyAmount9 `json:"transactionFees" api:"required"`
+	// Amounts reimbursed to workers in addition to gross pay. Reimbursements increase
+	// net pay and employer cost.
+	Reimbursements PublicCurrencyMoneyAmount2 `json:"reimbursements" api:"required"`
 	// The employer's total payroll cost: gross pay, reimbursements, employer taxes,
 	// employer benefit contributions, and transaction fees.
-	TotalCost PublicCurrencyMoneyAmount10    `json:"totalCost" api:"required"`
-	JSON      publicFundingPayrollTotalsJSON `json:"-"`
+	TotalCost PublicCurrencyMoneyAmount10 `json:"totalCost" api:"required"`
+	// Banking and transaction fees paid by the employer to fund and pay the payroll.
+	TransactionFees PublicCurrencyMoneyAmount9 `json:"transactionFees" api:"required"`
+	// Amounts workers pay toward benefits, deducted from their pay.
+	WorkerBenefitContributions PublicCurrencyMoneyAmount7 `json:"workerBenefitContributions" api:"required"`
+	// Payroll taxes withheld from worker pay, reducing net pay.
+	WorkerTaxes PublicCurrencyMoneyAmount3     `json:"workerTaxes" api:"required"`
+	JSON        publicFundingPayrollTotalsJSON `json:"-"`
 }
 
 // publicFundingPayrollTotalsJSON contains the JSON metadata for the struct [PublicFundingPayrollTotals]
 type publicFundingPayrollTotalsJSON struct {
+	EmployerBenefitContributions apijson.Field
+	EmployerTaxes                apijson.Field
 	GrossPay                     apijson.Field
 	NetPay                       apijson.Field
-	Reimbursements               apijson.Field
-	WorkerTaxes                  apijson.Field
-	EmployerTaxes                apijson.Field
-	PreTaxDeductions             apijson.Field
 	PostTaxDeductions            apijson.Field
-	WorkerBenefitContributions   apijson.Field
-	EmployerBenefitContributions apijson.Field
-	TransactionFees              apijson.Field
+	PreTaxDeductions             apijson.Field
+	Reimbursements               apijson.Field
 	TotalCost                    apijson.Field
+	TransactionFees              apijson.Field
+	WorkerBenefitContributions   apijson.Field
+	WorkerTaxes                  apijson.Field
 	raw                          string
 	ExtraFields                  map[string]apijson.Field
 }
@@ -1080,6 +1080,10 @@ func (r publicPaycheckSummaryTotalsJSON) RawJSON() string {
 
 type PublicPaycheckCurrencyTotals struct {
 	Currency interface{} `json:"currency" api:"required"`
+	// Amounts the employer pays toward the worker's benefits in addition to gross pay.
+	EmployerBenefitContributions PublicCurrencyMoneyAmount20 `json:"employerBenefitContributions" api:"required"`
+	// Payroll taxes paid by the employer in addition to gross pay.
+	EmployerTaxes PublicCurrencyMoneyAmount16 `json:"employerTaxes" api:"required"`
 	// Gross earnings before worker taxes, deductions, and benefit contributions.
 	// Reimbursements are reported separately.
 	GrossPay PublicCurrencyMoneyAmount13 `json:"grossPay" api:"required"`
@@ -1087,38 +1091,34 @@ type PublicPaycheckCurrencyTotals struct {
 	// contributions. It excludes payment execution fees and may differ from the amount
 	// the worker ultimately receives.
 	NetPay PublicCurrencyMoneyAmount12 `json:"netPay" api:"required"`
-	// Amounts reimbursed to the worker in addition to gross pay. Reimbursements
-	// increase net pay and employer cost.
-	Reimbursements PublicCurrencyMoneyAmount14 `json:"reimbursements" api:"required"`
-	// Payroll taxes withheld from the worker's pay, reducing net pay.
-	WorkerTaxes PublicCurrencyMoneyAmount15 `json:"workerTaxes" api:"required"`
-	// Payroll taxes paid by the employer in addition to gross pay.
-	EmployerTaxes PublicCurrencyMoneyAmount16 `json:"employerTaxes" api:"required"`
-	// Non-benefit amounts deducted from the worker's pay before taxes, reducing
-	// taxable pay and net pay.
-	PreTaxDeductions PublicCurrencyMoneyAmount17 `json:"preTaxDeductions" api:"required"`
 	// Non-benefit amounts deducted from the worker's pay after taxes, reducing net
 	// pay.
 	PostTaxDeductions PublicCurrencyMoneyAmount18 `json:"postTaxDeductions" api:"required"`
+	// Non-benefit amounts deducted from the worker's pay before taxes, reducing
+	// taxable pay and net pay.
+	PreTaxDeductions PublicCurrencyMoneyAmount17 `json:"preTaxDeductions" api:"required"`
+	// Amounts reimbursed to the worker in addition to gross pay. Reimbursements
+	// increase net pay and employer cost.
+	Reimbursements PublicCurrencyMoneyAmount14 `json:"reimbursements" api:"required"`
 	// Amounts the worker pays toward benefits, deducted from their pay.
 	WorkerBenefitContributions PublicCurrencyMoneyAmount19 `json:"workerBenefitContributions" api:"required"`
-	// Amounts the employer pays toward the worker's benefits in addition to gross pay.
-	EmployerBenefitContributions PublicCurrencyMoneyAmount20      `json:"employerBenefitContributions" api:"required"`
-	JSON                         publicPaycheckCurrencyTotalsJSON `json:"-"`
+	// Payroll taxes withheld from the worker's pay, reducing net pay.
+	WorkerTaxes PublicCurrencyMoneyAmount15      `json:"workerTaxes" api:"required"`
+	JSON        publicPaycheckCurrencyTotalsJSON `json:"-"`
 }
 
 // publicPaycheckCurrencyTotalsJSON contains the JSON metadata for the struct [PublicPaycheckCurrencyTotals]
 type publicPaycheckCurrencyTotalsJSON struct {
 	Currency                     apijson.Field
+	EmployerBenefitContributions apijson.Field
+	EmployerTaxes                apijson.Field
 	GrossPay                     apijson.Field
 	NetPay                       apijson.Field
-	Reimbursements               apijson.Field
-	WorkerTaxes                  apijson.Field
-	EmployerTaxes                apijson.Field
-	PreTaxDeductions             apijson.Field
 	PostTaxDeductions            apijson.Field
+	PreTaxDeductions             apijson.Field
+	Reimbursements               apijson.Field
 	WorkerBenefitContributions   apijson.Field
-	EmployerBenefitContributions apijson.Field
+	WorkerTaxes                  apijson.Field
 	raw                          string
 	ExtraFields                  map[string]apijson.Field
 }

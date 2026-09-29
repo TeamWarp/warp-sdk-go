@@ -196,17 +196,17 @@ func (r TimeOffListRequestsParamsStatus) IsKnown() bool {
 }
 
 type TimeOffListAssignmentsResponse struct {
-	HasMore bool                                 `json:"hasMore" api:"required"`
 	Count   int64                                `json:"count" api:"required"`
 	Data    []TimeOffListAssignmentsResponseData `json:"data" api:"required"`
+	HasMore bool                                 `json:"hasMore" api:"required"`
 	JSON    timeOffListAssignmentsResponseJSON   `json:"-"`
 }
 
 // timeOffListAssignmentsResponseJSON contains the JSON metadata for the struct [TimeOffListAssignmentsResponse]
 type timeOffListAssignmentsResponseJSON struct {
-	HasMore     apijson.Field
 	Count       apijson.Field
 	Data        apijson.Field
+	HasMore     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -220,17 +220,17 @@ func (r timeOffListAssignmentsResponseJSON) RawJSON() string {
 }
 
 type TimeOffListBalancesResponse struct {
-	HasMore bool                              `json:"hasMore" api:"required"`
 	Count   int64                             `json:"count" api:"required"`
 	Data    []TimeOffListBalancesResponseData `json:"data" api:"required"`
+	HasMore bool                              `json:"hasMore" api:"required"`
 	JSON    timeOffListBalancesResponseJSON   `json:"-"`
 }
 
 // timeOffListBalancesResponseJSON contains the JSON metadata for the struct [TimeOffListBalancesResponse]
 type timeOffListBalancesResponseJSON struct {
-	HasMore     apijson.Field
 	Count       apijson.Field
 	Data        apijson.Field
+	HasMore     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -244,17 +244,17 @@ func (r timeOffListBalancesResponseJSON) RawJSON() string {
 }
 
 type TimeOffListRequestsResponse struct {
-	HasMore bool                              `json:"hasMore" api:"required"`
 	Count   int64                             `json:"count" api:"required"`
 	Data    []TimeOffListRequestsResponseData `json:"data" api:"required"`
+	HasMore bool                              `json:"hasMore" api:"required"`
 	JSON    timeOffListRequestsResponseJSON   `json:"-"`
 }
 
 // timeOffListRequestsResponseJSON contains the JSON metadata for the struct [TimeOffListRequestsResponse]
 type timeOffListRequestsResponseJSON struct {
-	HasMore     apijson.Field
 	Count       apijson.Field
 	Data        apijson.Field
+	HasMore     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -269,20 +269,20 @@ func (r timeOffListRequestsResponseJSON) RawJSON() string {
 
 type TimeOffListAssignmentsResponseData struct {
 	// The external-facing id of the worker assignment.
-	ID       string `json:"id" api:"required"`
-	PolicyID string `json:"policyId" api:"required"`
+	ID         string `json:"id" api:"required"`
+	AssignedAt string `json:"assignedAt" api:"required"`
+	PolicyID   string `json:"policyId" api:"required"`
 	// The id of the worker.
-	WorkerID   string                                 `json:"workerId" api:"required"`
-	AssignedAt string                                 `json:"assignedAt" api:"required"`
-	JSON       timeOffListAssignmentsResponseDataJSON `json:"-"`
+	WorkerID string                                 `json:"workerId" api:"required"`
+	JSON     timeOffListAssignmentsResponseDataJSON `json:"-"`
 }
 
 // timeOffListAssignmentsResponseDataJSON contains the JSON metadata for the struct [TimeOffListAssignmentsResponseData]
 type timeOffListAssignmentsResponseDataJSON struct {
 	ID          apijson.Field
+	AssignedAt  apijson.Field
 	PolicyID    apijson.Field
 	WorkerID    apijson.Field
-	AssignedAt  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -298,26 +298,26 @@ func (r timeOffListAssignmentsResponseDataJSON) RawJSON() string {
 type TimeOffListBalancesResponseData struct {
 	// The external-facing id of the worker assignment.
 	ID              string                              `json:"id" api:"required"`
-	PolicyID        string                              `json:"policyId" api:"required"`
-	LegacyWorkerID  string                              `json:"legacyWorkerId" api:"required"`
-	AccruedUnlocked interface{}                         `json:"accruedUnlocked" api:"required"`
 	AccruedLocked   interface{}                         `json:"accruedLocked" api:"required"`
-	Used            interface{}                         `json:"used" api:"required"`
-	Holds           interface{}                         `json:"holds" api:"required"`
+	AccruedUnlocked interface{}                         `json:"accruedUnlocked" api:"required"`
 	Available       interface{}                         `json:"available" api:"required"`
+	Holds           interface{}                         `json:"holds" api:"required"`
+	LegacyWorkerID  string                              `json:"legacyWorkerId" api:"required"`
+	PolicyID        string                              `json:"policyId" api:"required"`
+	Used            interface{}                         `json:"used" api:"required"`
 	JSON            timeOffListBalancesResponseDataJSON `json:"-"`
 }
 
 // timeOffListBalancesResponseDataJSON contains the JSON metadata for the struct [TimeOffListBalancesResponseData]
 type timeOffListBalancesResponseDataJSON struct {
 	ID              apijson.Field
-	PolicyID        apijson.Field
-	LegacyWorkerID  apijson.Field
-	AccruedUnlocked apijson.Field
 	AccruedLocked   apijson.Field
-	Used            apijson.Field
-	Holds           apijson.Field
+	AccruedUnlocked apijson.Field
 	Available       apijson.Field
+	Holds           apijson.Field
+	LegacyWorkerID  apijson.Field
+	PolicyID        apijson.Field
+	Used            apijson.Field
 	raw             string
 	ExtraFields     map[string]apijson.Field
 }
@@ -331,37 +331,37 @@ func (r timeOffListBalancesResponseDataJSON) RawJSON() string {
 }
 
 type TimeOffListRequestsResponseData struct {
-	ID              string `json:"id" api:"required"`
-	TimeOffPolicyID string `json:"timeOffPolicyId" api:"required"`
-	// The id of the worker.
-	WorkerID         string                                        `json:"workerId" api:"required"`
-	Status           TimeOffListRequestsResponseDataStatus         `json:"status" api:"required"`
-	StartAt          string                                        `json:"startAt" api:"required"`
-	StartRangeType   TimeOffListRequestsResponseDataStartRangeType `json:"startRangeType" api:"required"`
+	ID               string                                        `json:"id" api:"required"`
+	CreatedAt        string                                        `json:"createdAt" api:"required"`
 	EndAt            string                                        `json:"endAt" api:"required"`
 	EndRangeType     TimeOffListRequestsResponseDataEndRangeType   `json:"endRangeType" api:"required"`
 	Reason           string                                        `json:"reason" api:"required,nullable"`
-	CreatedAt        string                                        `json:"createdAt" api:"required"`
 	RequestedMinutes interface{}                                   `json:"requestedMinutes" api:"required"`
+	StartAt          string                                        `json:"startAt" api:"required"`
+	StartRangeType   TimeOffListRequestsResponseDataStartRangeType `json:"startRangeType" api:"required"`
+	Status           TimeOffListRequestsResponseDataStatus         `json:"status" api:"required"`
+	TimeOffPolicyID  string                                        `json:"timeOffPolicyId" api:"required"`
 	// The time zone that the worker is requesting time off in.
-	TimeZone string                              `json:"timeZone" api:"required,nullable"`
+	TimeZone string `json:"timeZone" api:"required,nullable"`
+	// The id of the worker.
+	WorkerID string                              `json:"workerId" api:"required"`
 	JSON     timeOffListRequestsResponseDataJSON `json:"-"`
 }
 
 // timeOffListRequestsResponseDataJSON contains the JSON metadata for the struct [TimeOffListRequestsResponseData]
 type timeOffListRequestsResponseDataJSON struct {
 	ID               apijson.Field
-	TimeOffPolicyID  apijson.Field
-	WorkerID         apijson.Field
-	Status           apijson.Field
-	StartAt          apijson.Field
-	StartRangeType   apijson.Field
+	CreatedAt        apijson.Field
 	EndAt            apijson.Field
 	EndRangeType     apijson.Field
 	Reason           apijson.Field
-	CreatedAt        apijson.Field
 	RequestedMinutes apijson.Field
+	StartAt          apijson.Field
+	StartRangeType   apijson.Field
+	Status           apijson.Field
+	TimeOffPolicyID  apijson.Field
 	TimeZone         apijson.Field
+	WorkerID         apijson.Field
 	raw              string
 	ExtraFields      map[string]apijson.Field
 }

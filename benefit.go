@@ -246,45 +246,45 @@ func (r PercentageBenefitInputType) IsKnown() bool {
 type BenefitNewDeductionResponse struct {
 	// Stable identifier shared by every internal version of this deduction.
 	ID string `json:"id" api:"required"`
-	// Basic identifying information for a worker associated with another resource.
-	Worker PublicWorkerReference `json:"worker" api:"required"`
-	// The deduction name shown in payroll and benefits surfaces.
-	Name string `json:"name" api:"required"`
+	// How the employee and employer contributions are calculated.
+	Calculation PublicBenefitDeductionCalculation `json:"calculation" api:"required"`
 	// The broad reporting category. The type field identifies the specific payroll
 	// deduction.
-	Category PublicBenefitDeductionCategory `json:"category" api:"required"`
-	// The specific payroll deduction type within the broader category.
-	Type BenefitNewDeductionResponseType `json:"type" api:"required"`
-	// Whether the deduction recurs or applies once.
-	Recurrence BenefitNewDeductionResponseRecurrence `json:"recurrence" api:"required"`
+	Category           PublicBenefitDeductionCategory `json:"category" api:"required"`
+	CreatedAt          string                         `json:"createdAt" api:"required"`
+	EffectiveEndDate   string                         `json:"effectiveEndDate" api:"required,nullable"`
+	EffectiveStartDate string                         `json:"effectiveStartDate" api:"required"`
+	// The deduction name shown in payroll and benefits surfaces.
+	Name string `json:"name" api:"required"`
 	// The associated benefit plan, or null for a planless payroll deduction.
 	Plan BenefitNewDeductionResponsePlan `json:"plan" api:"required,nullable"`
-	// How the employee and employer contributions are calculated.
-	Calculation        PublicBenefitDeductionCalculation `json:"calculation" api:"required"`
-	EffectiveStartDate string                            `json:"effectiveStartDate" api:"required"`
-	EffectiveEndDate   string                            `json:"effectiveEndDate" api:"required,nullable"`
+	// Whether the deduction recurs or applies once.
+	Recurrence BenefitNewDeductionResponseRecurrence `json:"recurrence" api:"required"`
 	// The public lifecycle status of the current deduction version.
-	Status    PublicBenefitDeductionStatus    `json:"status" api:"required"`
-	CreatedAt string                          `json:"createdAt" api:"required"`
+	Status PublicBenefitDeductionStatus `json:"status" api:"required"`
+	// The specific payroll deduction type within the broader category.
+	Type      BenefitNewDeductionResponseType `json:"type" api:"required"`
 	UpdatedAt string                          `json:"updatedAt" api:"required"`
-	JSON      benefitNewDeductionResponseJSON `json:"-"`
+	// Basic identifying information for a worker associated with another resource.
+	Worker PublicWorkerReference           `json:"worker" api:"required"`
+	JSON   benefitNewDeductionResponseJSON `json:"-"`
 }
 
 // benefitNewDeductionResponseJSON contains the JSON metadata for the struct [BenefitNewDeductionResponse]
 type benefitNewDeductionResponseJSON struct {
 	ID                 apijson.Field
-	Worker             apijson.Field
-	Name               apijson.Field
-	Category           apijson.Field
-	Type               apijson.Field
-	Recurrence         apijson.Field
-	Plan               apijson.Field
 	Calculation        apijson.Field
-	EffectiveStartDate apijson.Field
-	EffectiveEndDate   apijson.Field
-	Status             apijson.Field
+	Category           apijson.Field
 	CreatedAt          apijson.Field
+	EffectiveEndDate   apijson.Field
+	EffectiveStartDate apijson.Field
+	Name               apijson.Field
+	Plan               apijson.Field
+	Recurrence         apijson.Field
+	Status             apijson.Field
+	Type               apijson.Field
 	UpdatedAt          apijson.Field
+	Worker             apijson.Field
 	raw                string
 	ExtraFields        map[string]apijson.Field
 }
@@ -394,19 +394,19 @@ func (r BenefitNewDeductionResponseStatus) IsKnown() bool {
 
 type BenefitNewRetirementPlanResponse struct {
 	// The tag of a company retirement plan.
-	ID string `json:"id" api:"required"`
-	// The retirement plan type.
-	Type BenefitNewRetirementPlanResponseType `json:"type" api:"required"`
+	ID                 string `json:"id" api:"required"`
+	CreatedAt          string `json:"createdAt" api:"required"`
+	EffectiveEndDate   string `json:"effectiveEndDate" api:"required,nullable"`
+	EffectiveStartDate string `json:"effectiveStartDate" api:"required"`
 	// The company-facing plan name.
 	Name string `json:"name" api:"required"`
 	// The system administering the plan. Manual plans are administered by the company
 	// outside a connected provider.
-	Provider           PublicRetirementPlanProvider `json:"provider" api:"required"`
-	EffectiveStartDate string                       `json:"effectiveStartDate" api:"required"`
-	EffectiveEndDate   string                       `json:"effectiveEndDate" api:"required,nullable"`
+	Provider PublicRetirementPlanProvider `json:"provider" api:"required"`
 	// The public lifecycle status of a retirement plan.
-	Status    PublicRetirementPlanStatus           `json:"status" api:"required"`
-	CreatedAt string                               `json:"createdAt" api:"required"`
+	Status PublicRetirementPlanStatus `json:"status" api:"required"`
+	// The retirement plan type.
+	Type      BenefitNewRetirementPlanResponseType `json:"type" api:"required"`
 	UpdatedAt string                               `json:"updatedAt" api:"required"`
 	JSON      benefitNewRetirementPlanResponseJSON `json:"-"`
 }
@@ -414,13 +414,13 @@ type BenefitNewRetirementPlanResponse struct {
 // benefitNewRetirementPlanResponseJSON contains the JSON metadata for the struct [BenefitNewRetirementPlanResponse]
 type benefitNewRetirementPlanResponseJSON struct {
 	ID                 apijson.Field
-	Type               apijson.Field
+	CreatedAt          apijson.Field
+	EffectiveEndDate   apijson.Field
+	EffectiveStartDate apijson.Field
 	Name               apijson.Field
 	Provider           apijson.Field
-	EffectiveStartDate apijson.Field
-	EffectiveEndDate   apijson.Field
 	Status             apijson.Field
-	CreatedAt          apijson.Field
+	Type               apijson.Field
 	UpdatedAt          apijson.Field
 	raw                string
 	ExtraFields        map[string]apijson.Field
@@ -1314,20 +1314,20 @@ func (r BenefitUpdateRetirementPlanParams) MarshalJSON() (data []byte, err error
 }
 
 type BenefitNewDeductionResponsePlan struct {
-	Type BenefitNewDeductionResponsePlanType `json:"type" api:"required"`
 	// The tag of a company health plan.
 	ID string `json:"id" api:"required"`
 	// The associated health plan name.
 	Name  string                              `json:"name" api:"required"`
+	Type  BenefitNewDeductionResponsePlanType `json:"type" api:"required"`
 	JSON  benefitNewDeductionResponsePlanJSON `json:"-"`
 	union BenefitNewDeductionResponsePlanUnion
 }
 
 // benefitNewDeductionResponsePlanJSON contains the JSON metadata for the struct [BenefitNewDeductionResponsePlan]
 type benefitNewDeductionResponsePlanJSON struct {
-	Type        apijson.Field
 	ID          apijson.Field
 	Name        apijson.Field
+	Type        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
