@@ -96,41 +96,41 @@ func (r *PayRateService) Get(ctx context.Context, id string, opts ...option.Requ
 type PublicPayRate struct {
 	// The pay rate id.
 	ID string `json:"id" api:"required"`
-	// Basic identifying information for a worker associated with another resource.
-	Worker PublicWorkerReference `json:"worker" api:"required"`
-	// Whether the rate is the worker's regular base compensation or an additional rate
-	// such as a bonus, commission, or stipend.
-	Type PublicPayRateType `json:"type" api:"required"`
-	// The period represented by the pay rate amount.
-	Per PublicPayRatePer `json:"per" api:"required"`
 	// minor units — cents, e.g. 2345 for $23.45
 	Amount   int64                 `json:"amount" api:"required"`
 	Currency PublicPayRateCurrency `json:"currency" api:"required"`
+	// A human-readable label for the pay rate, when one is configured.
+	Description string `json:"description" api:"required,nullable"`
 	// The server-formatted pay rate, including its period.
 	Display string `json:"display" api:"required"`
-	// The first date on which the rate applies. Additional rates may have no start
-	// date.
-	EffectiveStartDate string `json:"effectiveStartDate" api:"required,nullable"`
 	// The first date on which the rate no longer applies, or null when it is
 	// open-ended.
 	EffectiveEndDate string `json:"effectiveEndDate" api:"required,nullable"`
-	// A human-readable label for the pay rate, when one is configured.
-	Description string            `json:"description" api:"required,nullable"`
-	JSON        publicPayRateJSON `json:"-"`
+	// The first date on which the rate applies. Additional rates may have no start
+	// date.
+	EffectiveStartDate string `json:"effectiveStartDate" api:"required,nullable"`
+	// The period represented by the pay rate amount.
+	Per PublicPayRatePer `json:"per" api:"required"`
+	// Whether the rate is the worker's regular base compensation or an additional rate
+	// such as a bonus, commission, or stipend.
+	Type PublicPayRateType `json:"type" api:"required"`
+	// Basic identifying information for a worker associated with another resource.
+	Worker PublicWorkerReference `json:"worker" api:"required"`
+	JSON   publicPayRateJSON     `json:"-"`
 }
 
 // publicPayRateJSON contains the JSON metadata for the struct [PublicPayRate]
 type publicPayRateJSON struct {
 	ID                 apijson.Field
-	Worker             apijson.Field
-	Type               apijson.Field
-	Per                apijson.Field
 	Amount             apijson.Field
 	Currency           apijson.Field
-	Display            apijson.Field
-	EffectiveStartDate apijson.Field
-	EffectiveEndDate   apijson.Field
 	Description        apijson.Field
+	Display            apijson.Field
+	EffectiveEndDate   apijson.Field
+	EffectiveStartDate apijson.Field
+	Per                apijson.Field
+	Type               apijson.Field
+	Worker             apijson.Field
 	raw                string
 	ExtraFields        map[string]apijson.Field
 }
@@ -274,17 +274,17 @@ func (r PayRateListParams) URLQuery() (v url.Values) {
 }
 
 type PayRateListResponse struct {
-	HasMore bool                    `json:"hasMore" api:"required"`
 	Count   int64                   `json:"count" api:"required"`
 	Data    []PublicPayRate         `json:"data" api:"required"`
+	HasMore bool                    `json:"hasMore" api:"required"`
 	JSON    payRateListResponseJSON `json:"-"`
 }
 
 // payRateListResponseJSON contains the JSON metadata for the struct [PayRateListResponse]
 type payRateListResponseJSON struct {
-	HasMore     apijson.Field
 	Count       apijson.Field
 	Data        apijson.Field
+	HasMore     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }

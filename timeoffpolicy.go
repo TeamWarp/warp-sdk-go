@@ -108,17 +108,17 @@ func (r TimeOffPolicyListParams) URLQuery() (v url.Values) {
 }
 
 type TimeOffPolicyListResponse struct {
-	HasMore bool                            `json:"hasMore" api:"required"`
 	Count   int64                           `json:"count" api:"required"`
 	Data    []TimeOffPolicyListResponseData `json:"data" api:"required"`
+	HasMore bool                            `json:"hasMore" api:"required"`
 	JSON    timeOffPolicyListResponseJSON   `json:"-"`
 }
 
 // timeOffPolicyListResponseJSON contains the JSON metadata for the struct [TimeOffPolicyListResponse]
 type timeOffPolicyListResponseJSON struct {
-	HasMore     apijson.Field
 	Count       apijson.Field
 	Data        apijson.Field
+	HasMore     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -133,34 +133,34 @@ func (r timeOffPolicyListResponseJSON) RawJSON() string {
 
 type TimeOffPolicyGetResponse struct {
 	ID                  string                           `json:"id" api:"required"`
-	TimeOffTypeID       string                           `json:"timeOffTypeId" api:"required"`
-	TimeOffTypeName     string                           `json:"timeOffTypeName" api:"required"`
-	Paid                bool                             `json:"paid" api:"required"`
-	IsUnlimited         bool                             `json:"isUnlimited" api:"required"`
-	Schedule            TimeOffPolicyGetResponseSchedule `json:"schedule" api:"required"`
-	Unit                TimeOffPolicyGetResponseUnit     `json:"unit" api:"required"`
-	Name                string                           `json:"name" api:"required"`
 	Description         string                           `json:"description" api:"required,nullable"`
 	HoursWorkedPerChunk interface{}                      `json:"hoursWorkedPerChunk" api:"required,nullable"`
+	IsUnlimited         bool                             `json:"isUnlimited" api:"required"`
 	MinutesPerChunk     interface{}                      `json:"minutesPerChunk" api:"required,nullable"`
 	MinutesPerPeriod    interface{}                      `json:"minutesPerPeriod" api:"required,nullable"`
+	Name                string                           `json:"name" api:"required"`
+	Paid                bool                             `json:"paid" api:"required"`
+	Schedule            TimeOffPolicyGetResponseSchedule `json:"schedule" api:"required"`
+	TimeOffTypeID       string                           `json:"timeOffTypeId" api:"required"`
+	TimeOffTypeName     string                           `json:"timeOffTypeName" api:"required"`
+	Unit                TimeOffPolicyGetResponseUnit     `json:"unit" api:"required"`
 	JSON                timeOffPolicyGetResponseJSON     `json:"-"`
 }
 
 // timeOffPolicyGetResponseJSON contains the JSON metadata for the struct [TimeOffPolicyGetResponse]
 type timeOffPolicyGetResponseJSON struct {
 	ID                  apijson.Field
-	TimeOffTypeID       apijson.Field
-	TimeOffTypeName     apijson.Field
-	Paid                apijson.Field
-	IsUnlimited         apijson.Field
-	Schedule            apijson.Field
-	Unit                apijson.Field
-	Name                apijson.Field
 	Description         apijson.Field
 	HoursWorkedPerChunk apijson.Field
+	IsUnlimited         apijson.Field
 	MinutesPerChunk     apijson.Field
 	MinutesPerPeriod    apijson.Field
+	Name                apijson.Field
+	Paid                apijson.Field
+	Schedule            apijson.Field
+	TimeOffTypeID       apijson.Field
+	TimeOffTypeName     apijson.Field
+	Unit                apijson.Field
 	raw                 string
 	ExtraFields         map[string]apijson.Field
 }
@@ -175,34 +175,34 @@ func (r timeOffPolicyGetResponseJSON) RawJSON() string {
 
 type TimeOffPolicyListResponseData struct {
 	ID                  string                                `json:"id" api:"required"`
-	TimeOffTypeID       string                                `json:"timeOffTypeId" api:"required"`
-	TimeOffTypeName     string                                `json:"timeOffTypeName" api:"required"`
-	Paid                bool                                  `json:"paid" api:"required"`
-	IsUnlimited         bool                                  `json:"isUnlimited" api:"required"`
-	Schedule            TimeOffPolicyListResponseDataSchedule `json:"schedule" api:"required"`
-	Unit                TimeOffPolicyListResponseDataUnit     `json:"unit" api:"required"`
-	Name                string                                `json:"name" api:"required"`
 	Description         string                                `json:"description" api:"required,nullable"`
 	HoursWorkedPerChunk interface{}                           `json:"hoursWorkedPerChunk" api:"required,nullable"`
+	IsUnlimited         bool                                  `json:"isUnlimited" api:"required"`
 	MinutesPerChunk     interface{}                           `json:"minutesPerChunk" api:"required,nullable"`
 	MinutesPerPeriod    interface{}                           `json:"minutesPerPeriod" api:"required,nullable"`
+	Name                string                                `json:"name" api:"required"`
+	Paid                bool                                  `json:"paid" api:"required"`
+	Schedule            TimeOffPolicyListResponseDataSchedule `json:"schedule" api:"required"`
+	TimeOffTypeID       string                                `json:"timeOffTypeId" api:"required"`
+	TimeOffTypeName     string                                `json:"timeOffTypeName" api:"required"`
+	Unit                TimeOffPolicyListResponseDataUnit     `json:"unit" api:"required"`
 	JSON                timeOffPolicyListResponseDataJSON     `json:"-"`
 }
 
 // timeOffPolicyListResponseDataJSON contains the JSON metadata for the struct [TimeOffPolicyListResponseData]
 type timeOffPolicyListResponseDataJSON struct {
 	ID                  apijson.Field
-	TimeOffTypeID       apijson.Field
-	TimeOffTypeName     apijson.Field
-	Paid                apijson.Field
-	IsUnlimited         apijson.Field
-	Schedule            apijson.Field
-	Unit                apijson.Field
-	Name                apijson.Field
 	Description         apijson.Field
 	HoursWorkedPerChunk apijson.Field
+	IsUnlimited         apijson.Field
 	MinutesPerChunk     apijson.Field
 	MinutesPerPeriod    apijson.Field
+	Name                apijson.Field
+	Paid                apijson.Field
+	Schedule            apijson.Field
+	TimeOffTypeID       apijson.Field
+	TimeOffTypeName     apijson.Field
+	Unit                apijson.Field
 	raw                 string
 	ExtraFields         map[string]apijson.Field
 }
