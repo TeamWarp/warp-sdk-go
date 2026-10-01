@@ -57,13 +57,15 @@ func NewBenefitService(opts ...option.RequestOption) (r *BenefitService) {
 //
 //	benefit, err := client.Benefits.NewDeduction(context.Background(), sdk.BenefitNewDeductionParams{
 //		Calculation: sdk.F[sdk.BenefitNewDeductionParamsCalculationUnion](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInput{
+//			Type:      sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputType](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputType("fixed_amount")),
+//			Frequency: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputFrequency](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputFrequency("monthly")),
 //			EmployeeContribution: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContribution](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContribution{
 //				Amount:   sdk.F[int64](0),
 //				Currency: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency("USD")),
 //			}),
 //			EmployerContribution: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContribution](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContribution{
 //				Amount:   sdk.F[int64](0),
-//				Currency: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency("USD")),
+//				Currency: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency("USD")),
 //			}),
 //		}),
 //		EffectiveStartDate: sdk.F[string](""),
@@ -663,7 +665,7 @@ type BenefitNewDeductionParamsCalculationFixedAmountBenefitInput struct {
 	// A non-negative amount in cents. Currently only USD is accepted.
 	EmployeeContribution param.Field[BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContribution] `json:"employeeContribution" api:"required"`
 	// A non-negative amount in cents. Currently only USD is accepted.
-	EmployerContribution param.Field[BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContribution] `json:"employerContribution" api:"required"`
+	EmployerContribution param.Field[BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContribution] `json:"employerContribution" api:"required"`
 	Frequency            param.Field[BenefitNewDeductionParamsCalculationFixedAmountBenefitInputFrequency]            `json:"frequency" api:"required"`
 	Type                 param.Field[BenefitNewDeductionParamsCalculationFixedAmountBenefitInputType]                 `json:"type" api:"required"`
 }
@@ -798,7 +800,7 @@ func (r BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContr
 type BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContribution struct {
 	// minor units — cents, e.g. 2345 for $23.45
 	Amount   param.Field[int64]                                                                                   `json:"amount" api:"required"`
-	Currency param.Field[BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency] `json:"currency" api:"required"`
+	Currency param.Field[BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency] `json:"currency" api:"required"`
 }
 
 func (r BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContribution) MarshalJSON() (data []byte, err error) {
@@ -994,11 +996,11 @@ func (r BenefitUpdateDeductionParamsCalculationFrequency) IsKnown() bool {
 
 type BenefitUpdateDeductionParamsCalculationFixedAmountBenefitInput struct {
 	// A non-negative amount in cents. Currently only USD is accepted.
-	EmployeeContribution param.Field[BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContribution] `json:"employeeContribution" api:"required"`
+	EmployeeContribution param.Field[BenefitUpdateDeductionParamsCalculationFixedAmountBenefitInputEmployeeContribution] `json:"employeeContribution" api:"required"`
 	// A non-negative amount in cents. Currently only USD is accepted.
-	EmployerContribution param.Field[BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContribution] `json:"employerContribution" api:"required"`
-	Frequency            param.Field[BenefitNewDeductionParamsCalculationFixedAmountBenefitInputFrequency]            `json:"frequency" api:"required"`
-	Type                 param.Field[BenefitNewDeductionParamsCalculationFixedAmountBenefitInputType]                 `json:"type" api:"required"`
+	EmployerContribution param.Field[BenefitUpdateDeductionParamsCalculationFixedAmountBenefitInputEmployerContribution] `json:"employerContribution" api:"required"`
+	Frequency            param.Field[BenefitUpdateDeductionParamsCalculationFixedAmountBenefitInputFrequency]            `json:"frequency" api:"required"`
+	Type                 param.Field[BenefitUpdateDeductionParamsCalculationFixedAmountBenefitInputType]                 `json:"type" api:"required"`
 }
 
 func (r BenefitUpdateDeductionParamsCalculationFixedAmountBenefitInput) MarshalJSON() (data []byte, err error) {
@@ -1006,9 +1008,9 @@ func (r BenefitUpdateDeductionParamsCalculationFixedAmountBenefitInput) MarshalJ
 }
 
 type BenefitUpdateDeductionParamsCalculationPercentageBenefitInput struct {
-	EmployeeContribution param.Field[BenefitNewDeductionParamsCalculationPercentageBenefitInputEmployeeContribution] `json:"employeeContribution" api:"required"`
-	EmployerContribution param.Field[BenefitNewDeductionParamsCalculationPercentageBenefitInputEmployerContribution] `json:"employerContribution" api:"required"`
-	Type                 param.Field[BenefitNewDeductionParamsCalculationPercentageBenefitInputType]                 `json:"type" api:"required"`
+	EmployeeContribution param.Field[BenefitUpdateDeductionParamsCalculationPercentageBenefitInputEmployeeContribution] `json:"employeeContribution" api:"required"`
+	EmployerContribution param.Field[BenefitUpdateDeductionParamsCalculationPercentageBenefitInputEmployerContribution] `json:"employerContribution" api:"required"`
+	Type                 param.Field[BenefitUpdateDeductionParamsCalculationPercentageBenefitInputType]                 `json:"type" api:"required"`
 }
 
 func (r BenefitUpdateDeductionParamsCalculationPercentageBenefitInput) MarshalJSON() (data []byte, err error) {
@@ -1046,8 +1048,8 @@ func (r BenefitUpdateDeductionParamsCalculationFixedAmountBenefitInputFrequency)
 
 type BenefitUpdateDeductionParamsCalculationFixedAmountBenefitInputEmployeeContribution struct {
 	// minor units — cents, e.g. 2345 for $23.45
-	Amount   param.Field[int64]                                                                                   `json:"amount" api:"required"`
-	Currency param.Field[BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency] `json:"currency" api:"required"`
+	Amount   param.Field[int64]                                                                                      `json:"amount" api:"required"`
+	Currency param.Field[BenefitUpdateDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency] `json:"currency" api:"required"`
 }
 
 func (r BenefitUpdateDeductionParamsCalculationFixedAmountBenefitInputEmployeeContribution) MarshalJSON() (data []byte, err error) {
@@ -1130,8 +1132,8 @@ func (r BenefitUpdateDeductionParamsCalculationFixedAmountBenefitInputEmployeeCo
 
 type BenefitUpdateDeductionParamsCalculationFixedAmountBenefitInputEmployerContribution struct {
 	// minor units — cents, e.g. 2345 for $23.45
-	Amount   param.Field[int64]                                                                                   `json:"amount" api:"required"`
-	Currency param.Field[BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency] `json:"currency" api:"required"`
+	Amount   param.Field[int64]                                                                                      `json:"amount" api:"required"`
+	Currency param.Field[BenefitUpdateDeductionParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency] `json:"currency" api:"required"`
 }
 
 func (r BenefitUpdateDeductionParamsCalculationFixedAmountBenefitInputEmployerContribution) MarshalJSON() (data []byte, err error) {

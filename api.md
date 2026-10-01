@@ -104,13 +104,15 @@ Create a benefit deduction for a worker.
 ```go
 benefit, err := client.Benefits.NewDeduction(context.Background(), sdk.BenefitNewDeductionParams{
 	Calculation: sdk.F[sdk.BenefitNewDeductionParamsCalculationUnion](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInput{
+		Type:      sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputType](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputType("fixed_amount")),
+		Frequency: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputFrequency](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputFrequency("monthly")),
 		EmployeeContribution: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContribution](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContribution{
 			Amount:   sdk.F[int64](0),
 			Currency: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency("USD")),
 		}),
 		EmployerContribution: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContribution](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContribution{
 			Amount:   sdk.F[int64](0),
-			Currency: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency("USD")),
+			Currency: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency("USD")),
 		}),
 	}),
 	EffectiveStartDate: sdk.F[string](""),
