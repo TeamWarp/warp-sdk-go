@@ -100,45 +100,45 @@ func (r *BenefitDeductionService) Get(ctx context.Context, id string, opts ...op
 type PublicBenefitDeduction struct {
 	// Stable identifier shared by every internal version of this deduction.
 	ID string `json:"id" api:"required"`
-	// Basic identifying information for a worker associated with another resource.
-	Worker PublicWorkerReference `json:"worker" api:"required"`
-	// The deduction name shown in payroll and benefits surfaces.
-	Name string `json:"name" api:"required"`
+	// How the employee and employer contributions are calculated.
+	Calculation PublicBenefitDeductionCalculation `json:"calculation" api:"required"`
 	// The broad reporting category. The type field identifies the specific payroll
 	// deduction.
-	Category PublicBenefitDeductionCategory `json:"category" api:"required"`
-	// The specific payroll deduction type within the broader category.
-	Type PublicBenefitDeductionType `json:"type" api:"required"`
-	// Whether the deduction recurs or applies once.
-	Recurrence PublicBenefitDeductionRecurrence `json:"recurrence" api:"required"`
+	Category           PublicBenefitDeductionCategory `json:"category" api:"required"`
+	CreatedAt          string                         `json:"createdAt" api:"required"`
+	EffectiveEndDate   string                         `json:"effectiveEndDate" api:"required,nullable"`
+	EffectiveStartDate string                         `json:"effectiveStartDate" api:"required"`
+	// The deduction name shown in payroll and benefits surfaces.
+	Name string `json:"name" api:"required"`
 	// The associated benefit plan, or null for a planless payroll deduction.
 	Plan PublicBenefitDeductionPlan2 `json:"plan" api:"required,nullable"`
-	// How the employee and employer contributions are calculated.
-	Calculation        PublicBenefitDeductionCalculation `json:"calculation" api:"required"`
-	EffectiveStartDate string                            `json:"effectiveStartDate" api:"required"`
-	EffectiveEndDate   string                            `json:"effectiveEndDate" api:"required,nullable"`
+	// Whether the deduction recurs or applies once.
+	Recurrence PublicBenefitDeductionRecurrence `json:"recurrence" api:"required"`
 	// The public lifecycle status of the current deduction version.
-	Status    PublicBenefitDeductionStatus `json:"status" api:"required"`
-	CreatedAt string                       `json:"createdAt" api:"required"`
-	UpdatedAt string                       `json:"updatedAt" api:"required"`
-	JSON      publicBenefitDeductionJSON   `json:"-"`
+	Status PublicBenefitDeductionStatus `json:"status" api:"required"`
+	// The specific payroll deduction type within the broader category.
+	Type      PublicBenefitDeductionType `json:"type" api:"required"`
+	UpdatedAt string                     `json:"updatedAt" api:"required"`
+	// Basic identifying information for a worker associated with another resource.
+	Worker PublicWorkerReference      `json:"worker" api:"required"`
+	JSON   publicBenefitDeductionJSON `json:"-"`
 }
 
 // publicBenefitDeductionJSON contains the JSON metadata for the struct [PublicBenefitDeduction]
 type publicBenefitDeductionJSON struct {
 	ID                 apijson.Field
-	Worker             apijson.Field
-	Name               apijson.Field
-	Category           apijson.Field
-	Type               apijson.Field
-	Recurrence         apijson.Field
-	Plan               apijson.Field
 	Calculation        apijson.Field
-	EffectiveStartDate apijson.Field
-	EffectiveEndDate   apijson.Field
-	Status             apijson.Field
+	Category           apijson.Field
 	CreatedAt          apijson.Field
+	EffectiveEndDate   apijson.Field
+	EffectiveStartDate apijson.Field
+	Name               apijson.Field
+	Plan               apijson.Field
+	Recurrence         apijson.Field
+	Status             apijson.Field
+	Type               apijson.Field
 	UpdatedAt          apijson.Field
+	Worker             apijson.Field
 	raw                string
 	ExtraFields        map[string]apijson.Field
 }
@@ -274,19 +274,19 @@ func (r PublicBenefitDeductionStatus) IsKnown() bool {
 }
 
 type HealthPlanReference struct {
-	Type HealthPlanReferenceType `json:"type" api:"required"`
 	// The tag of a company health plan.
 	ID string `json:"id" api:"required"`
 	// The associated health plan name.
 	Name string                  `json:"name" api:"required"`
+	Type HealthPlanReferenceType `json:"type" api:"required"`
 	JSON healthPlanReferenceJSON `json:"-"`
 }
 
 // healthPlanReferenceJSON contains the JSON metadata for the struct [HealthPlanReference]
 type healthPlanReferenceJSON struct {
-	Type        apijson.Field
 	ID          apijson.Field
 	Name        apijson.Field
+	Type        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -314,19 +314,19 @@ func (r HealthPlanReferenceType) IsKnown() bool {
 }
 
 type RetirementPlanReference struct {
-	Type RetirementPlanReferenceType `json:"type" api:"required"`
 	// The tag of a company retirement plan.
 	ID string `json:"id" api:"required"`
 	// The associated retirement plan name.
 	Name string                      `json:"name" api:"required"`
+	Type RetirementPlanReferenceType `json:"type" api:"required"`
 	JSON retirementPlanReferenceJSON `json:"-"`
 }
 
 // retirementPlanReferenceJSON contains the JSON metadata for the struct [RetirementPlanReference]
 type retirementPlanReferenceJSON struct {
-	Type        apijson.Field
 	ID          apijson.Field
 	Name        apijson.Field
+	Type        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -354,22 +354,22 @@ func (r RetirementPlanReferenceType) IsKnown() bool {
 }
 
 type FixedAmountBenefitCalculation struct {
-	Type FixedAmountBenefitCalculationType `json:"type" api:"required"`
-	// The fixed-amount expression frequency. Null for a one-time deduction.
-	Frequency FixedAmountBenefitCalculationFrequency `json:"frequency" api:"required,nullable"`
 	// A monetary amount with its currency and server-formatted display value.
 	EmployeeContribution PublicMoneyAmount `json:"employeeContribution" api:"required"`
 	// A monetary amount with its currency and server-formatted display value.
-	EmployerContribution PublicMoneyAmount                 `json:"employerContribution" api:"required"`
-	JSON                 fixedAmountBenefitCalculationJSON `json:"-"`
+	EmployerContribution PublicMoneyAmount `json:"employerContribution" api:"required"`
+	// The fixed-amount expression frequency. Null for a one-time deduction.
+	Frequency FixedAmountBenefitCalculationFrequency `json:"frequency" api:"required,nullable"`
+	Type      FixedAmountBenefitCalculationType      `json:"type" api:"required"`
+	JSON      fixedAmountBenefitCalculationJSON      `json:"-"`
 }
 
 // fixedAmountBenefitCalculationJSON contains the JSON metadata for the struct [FixedAmountBenefitCalculation]
 type fixedAmountBenefitCalculationJSON struct {
-	Type                 apijson.Field
-	Frequency            apijson.Field
 	EmployeeContribution apijson.Field
 	EmployerContribution apijson.Field
+	Frequency            apijson.Field
+	Type                 apijson.Field
 	raw                  string
 	ExtraFields          map[string]apijson.Field
 }
@@ -412,19 +412,19 @@ func (r FixedAmountBenefitCalculationFrequency) IsKnown() bool {
 }
 
 type PercentageBenefitCalculation struct {
-	Type PercentageBenefitCalculationType `json:"type" api:"required"`
 	// A contribution expressed as a percentage of eligible earnings.
 	EmployeeContribution PercentageContribution `json:"employeeContribution" api:"required"`
 	// A contribution expressed as a percentage of eligible earnings.
 	EmployerContribution PercentageContribution           `json:"employerContribution" api:"required"`
+	Type                 PercentageBenefitCalculationType `json:"type" api:"required"`
 	JSON                 percentageBenefitCalculationJSON `json:"-"`
 }
 
 // percentageBenefitCalculationJSON contains the JSON metadata for the struct [PercentageBenefitCalculation]
 type percentageBenefitCalculationJSON struct {
-	Type                 apijson.Field
 	EmployeeContribution apijson.Field
 	EmployerContribution apijson.Field
+	Type                 apijson.Field
 	raw                  string
 	ExtraFields          map[string]apijson.Field
 }
@@ -452,16 +452,16 @@ func (r PercentageBenefitCalculationType) IsKnown() bool {
 }
 
 type PercentageContribution struct {
-	Percentage interface{} `json:"percentage" api:"required"`
 	// The server-formatted percentage, for example "3%".
-	Display string                     `json:"display" api:"required"`
-	JSON    percentageContributionJSON `json:"-"`
+	Display    string                     `json:"display" api:"required"`
+	Percentage interface{}                `json:"percentage" api:"required"`
+	JSON       percentageContributionJSON `json:"-"`
 }
 
 // percentageContributionJSON contains the JSON metadata for the struct [PercentageContribution]
 type percentageContributionJSON struct {
-	Percentage  apijson.Field
 	Display     apijson.Field
+	Percentage  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -475,9 +475,11 @@ func (r percentageContributionJSON) RawJSON() string {
 }
 
 type BenefitDeductionListParams struct {
-	Limit             param.Field[string]                           `query:"limit" api:"required"`
-	Statuses          param.Field[[]PublicBenefitDeductionStatus]   `query:"statuses" api:"required"`
-	AfterID           param.Field[string]                           `query:"afterId"`
+	Limit    param.Field[string]                         `query:"limit" api:"required"`
+	Statuses param.Field[[]PublicBenefitDeductionStatus] `query:"statuses" api:"required"`
+	// The version-group tag of a payroll benefit deduction. Stable across edits.
+	AfterID param.Field[string] `query:"afterId"`
+	// The version-group tag of a payroll benefit deduction. Stable across edits.
 	BeforeID          param.Field[string]                           `query:"beforeId"`
 	Categories        param.Field[[]PublicBenefitDeductionCategory] `query:"categories"`
 	HealthPlanIDs     param.Field[[]string]                         `query:"healthPlanIds"`
@@ -538,11 +540,11 @@ func (r BenefitDeductionListParamsType) IsKnown() bool {
 }
 
 type PublicBenefitDeductionCalculation struct {
-	Type PublicBenefitDeductionCalculationType `json:"type" api:"required"`
 	// A monetary amount with its currency and server-formatted display value.
 	EmployeeContribution interface{} `json:"employeeContribution" api:"required"`
 	// A monetary amount with its currency and server-formatted display value.
-	EmployerContribution interface{} `json:"employerContribution" api:"required"`
+	EmployerContribution interface{}                           `json:"employerContribution" api:"required"`
+	Type                 PublicBenefitDeductionCalculationType `json:"type" api:"required"`
 	// The fixed-amount expression frequency. Null for a one-time deduction.
 	Frequency PublicBenefitDeductionCalculationFrequency `json:"frequency" api:"nullable"`
 	JSON      publicBenefitDeductionCalculationJSON      `json:"-"`
@@ -551,9 +553,9 @@ type PublicBenefitDeductionCalculation struct {
 
 // publicBenefitDeductionCalculationJSON contains the JSON metadata for the struct [PublicBenefitDeductionCalculation]
 type publicBenefitDeductionCalculationJSON struct {
-	Type                 apijson.Field
 	EmployeeContribution apijson.Field
 	EmployerContribution apijson.Field
+	Type                 apijson.Field
 	Frequency            apijson.Field
 	raw                  string
 	ExtraFields          map[string]apijson.Field
@@ -577,17 +579,17 @@ func (r PublicBenefitDeductionCalculation) AsUnion() PublicBenefitDeductionCalcu
 }
 
 type BenefitDeductionListResponse struct {
-	HasMore bool                             `json:"hasMore" api:"required"`
 	Count   int64                            `json:"count" api:"required"`
 	Data    []PublicBenefitDeduction         `json:"data" api:"required"`
+	HasMore bool                             `json:"hasMore" api:"required"`
 	JSON    benefitDeductionListResponseJSON `json:"-"`
 }
 
 // benefitDeductionListResponseJSON contains the JSON metadata for the struct [BenefitDeductionListResponse]
 type benefitDeductionListResponseJSON struct {
-	HasMore     apijson.Field
 	Count       apijson.Field
 	Data        apijson.Field
+	HasMore     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -601,20 +603,20 @@ func (r benefitDeductionListResponseJSON) RawJSON() string {
 }
 
 type PublicBenefitDeductionPlan2 struct {
-	Type PublicBenefitDeductionPlan2Type `json:"type" api:"required"`
 	// The tag of a company health plan.
 	ID string `json:"id" api:"required"`
 	// The associated health plan name.
 	Name  string                          `json:"name" api:"required"`
+	Type  PublicBenefitDeductionPlan2Type `json:"type" api:"required"`
 	JSON  publicBenefitDeductionPlan2JSON `json:"-"`
 	union PublicBenefitDeductionPlan2Union
 }
 
 // publicBenefitDeductionPlan2JSON contains the JSON metadata for the struct [PublicBenefitDeductionPlan2]
 type publicBenefitDeductionPlan2JSON struct {
-	Type        apijson.Field
 	ID          apijson.Field
 	Name        apijson.Field
+	Type        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }

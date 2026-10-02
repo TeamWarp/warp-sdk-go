@@ -96,33 +96,33 @@ func (r *BenefitRetirementPlanService) Get(ctx context.Context, id string, opts 
 
 type PublicRetirementPlan struct {
 	// The tag of a company retirement plan.
-	ID string `json:"id" api:"required"`
-	// The retirement plan type.
-	Type PublicRetirementPlanType `json:"type" api:"required"`
+	ID                 string `json:"id" api:"required"`
+	CreatedAt          string `json:"createdAt" api:"required"`
+	EffectiveEndDate   string `json:"effectiveEndDate" api:"required,nullable"`
+	EffectiveStartDate string `json:"effectiveStartDate" api:"required"`
 	// The company-facing plan name.
 	Name string `json:"name" api:"required"`
 	// The system administering the plan. Manual plans are administered by the company
 	// outside a connected provider.
-	Provider           PublicRetirementPlanProvider `json:"provider" api:"required"`
-	EffectiveStartDate string                       `json:"effectiveStartDate" api:"required"`
-	EffectiveEndDate   string                       `json:"effectiveEndDate" api:"required,nullable"`
+	Provider PublicRetirementPlanProvider `json:"provider" api:"required"`
 	// The public lifecycle status of a retirement plan.
-	Status    PublicRetirementPlanStatus `json:"status" api:"required"`
-	CreatedAt string                     `json:"createdAt" api:"required"`
-	UpdatedAt string                     `json:"updatedAt" api:"required"`
-	JSON      publicRetirementPlanJSON   `json:"-"`
+	Status PublicRetirementPlanStatus `json:"status" api:"required"`
+	// The retirement plan type.
+	Type      PublicRetirementPlanType `json:"type" api:"required"`
+	UpdatedAt string                   `json:"updatedAt" api:"required"`
+	JSON      publicRetirementPlanJSON `json:"-"`
 }
 
 // publicRetirementPlanJSON contains the JSON metadata for the struct [PublicRetirementPlan]
 type publicRetirementPlanJSON struct {
 	ID                 apijson.Field
-	Type               apijson.Field
+	CreatedAt          apijson.Field
+	EffectiveEndDate   apijson.Field
+	EffectiveStartDate apijson.Field
 	Name               apijson.Field
 	Provider           apijson.Field
-	EffectiveStartDate apijson.Field
-	EffectiveEndDate   apijson.Field
 	Status             apijson.Field
-	CreatedAt          apijson.Field
+	Type               apijson.Field
 	UpdatedAt          apijson.Field
 	raw                string
 	ExtraFields        map[string]apijson.Field
@@ -189,9 +189,11 @@ func (r PublicRetirementPlanStatus) IsKnown() bool {
 }
 
 type BenefitRetirementPlanListParams struct {
-	Limit    param.Field[string]                                `query:"limit" api:"required"`
-	Statuses param.Field[[]PublicRetirementPlanStatus]          `query:"statuses" api:"required"`
-	AfterID  param.Field[string]                                `query:"afterId"`
+	Limit    param.Field[string]                       `query:"limit" api:"required"`
+	Statuses param.Field[[]PublicRetirementPlanStatus] `query:"statuses" api:"required"`
+	// The tag of a company retirement plan.
+	AfterID param.Field[string] `query:"afterId"`
+	// The tag of a company retirement plan.
 	BeforeID param.Field[string]                                `query:"beforeId"`
 	Types    param.Field[[]BenefitRetirementPlanListParamsType] `query:"types"`
 }
@@ -226,17 +228,17 @@ func (r BenefitRetirementPlanListParamsType) IsKnown() bool {
 }
 
 type BenefitRetirementPlanListResponse struct {
-	HasMore bool                                  `json:"hasMore" api:"required"`
 	Count   int64                                 `json:"count" api:"required"`
 	Data    []PublicRetirementPlan                `json:"data" api:"required"`
+	HasMore bool                                  `json:"hasMore" api:"required"`
 	JSON    benefitRetirementPlanListResponseJSON `json:"-"`
 }
 
 // benefitRetirementPlanListResponseJSON contains the JSON metadata for the struct [BenefitRetirementPlanListResponse]
 type benefitRetirementPlanListResponseJSON struct {
-	HasMore     apijson.Field
 	Count       apijson.Field
 	Data        apijson.Field
+	HasMore     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }

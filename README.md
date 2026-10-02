@@ -49,15 +49,28 @@ func main() {
 		option.WithAPIKey(os.Getenv("WARP_API_KEY")),
 	)
 
-	healthPlan, err := client.Benefits.HealthPlans.List(context.Background(), sdk.BenefitHealthPlanListParams{
-		Limit:    sdk.F[string]("limit"),
-		Statuses: sdk.F[[]sdk.PublicHealthPlanStatus]([]sdk.PublicHealthPlanStatus{"active"}),
+	benefit, err := client.Benefits.NewDeduction(context.Background(), sdk.BenefitNewDeductionParams{
+		Calculation: sdk.F[sdk.BenefitNewDeductionParamsCalculationUnion](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInput{
+			Type:      sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputType](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputType("fixed_amount")),
+			Frequency: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputFrequency](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputFrequency("monthly")),
+			EmployeeContribution: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContribution](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContribution{
+				Amount:   sdk.F[int64](0),
+				Currency: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency("USD")),
+			}),
+			EmployerContribution: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContribution](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContribution{
+				Amount:   sdk.F[int64](0),
+				Currency: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency("USD")),
+			}),
+		}),
+		EffectiveStartDate: sdk.F[string](""),
+		Type:               sdk.F[sdk.BenefitNewDeductionParamsType](sdk.BenefitNewDeductionParamsType("medical")),
+		WorkerID:           sdk.F[string]("wrk_1234"),
 	})
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println(healthPlan)
+	fmt.Println(benefit)
 }
 ```
 
@@ -86,9 +99,22 @@ Declared schemes:
 Non-success responses return generated API errors. Error objects expose status, headers, response body, and request metadata where the target runtime supports it.
 
 ```go
-healthPlan, err := client.Benefits.HealthPlans.List(context.Background(), sdk.BenefitHealthPlanListParams{
-	Limit:    sdk.F[string]("limit"),
-	Statuses: sdk.F[[]sdk.PublicHealthPlanStatus]([]sdk.PublicHealthPlanStatus{"active"}),
+benefit, err := client.Benefits.NewDeduction(context.Background(), sdk.BenefitNewDeductionParams{
+	Calculation: sdk.F[sdk.BenefitNewDeductionParamsCalculationUnion](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInput{
+		Type:      sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputType](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputType("fixed_amount")),
+		Frequency: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputFrequency](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputFrequency("monthly")),
+		EmployeeContribution: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContribution](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContribution{
+			Amount:   sdk.F[int64](0),
+			Currency: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency("USD")),
+		}),
+		EmployerContribution: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContribution](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContribution{
+			Amount:   sdk.F[int64](0),
+			Currency: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency("USD")),
+		}),
+	}),
+	EffectiveStartDate: sdk.F[string](""),
+	Type:               sdk.F[sdk.BenefitNewDeductionParamsType](sdk.BenefitNewDeductionParamsType("medical")),
+	WorkerID:           sdk.F[string]("wrk_1234"),
 })
 if err != nil {
 	var apiErr *sdk.Error
