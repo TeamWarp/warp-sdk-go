@@ -2137,6 +2137,699 @@ func (r offerSentWebhookEventDataCompensationStockJSON) RawJSON() string {
 	return r.raw
 }
 
+type OfferSignatureRequestedWebhookEvent struct {
+	// Unique event identifier (format: `<objectTag>:<uuid>`). Stable across retries.
+	ID   string                                  `json:"id" api:"required"`
+	Data OfferSignatureRequestedWebhookEventData `json:"data" api:"required"`
+	// ISO 8601 timestamp of when the event occurred. Unchanged across retries.
+	Timestamp string `json:"timestamp" api:"required"`
+	// The event type.
+	Type OfferSignatureRequestedWebhookEventType `json:"type" api:"required"`
+	JSON offerSignatureRequestedWebhookEventJSON `json:"-"`
+}
+
+// offerSignatureRequestedWebhookEventJSON contains the JSON metadata for the struct [OfferSignatureRequestedWebhookEvent]
+type offerSignatureRequestedWebhookEventJSON struct {
+	ID          apijson.Field
+	Data        apijson.Field
+	Timestamp   apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *OfferSignatureRequestedWebhookEvent) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r offerSignatureRequestedWebhookEventJSON) RawJSON() string {
+	return r.raw
+}
+
+type OfferSignatureRequestedWebhookEventType string
+
+const (
+	OfferSignatureRequestedWebhookEventTypeOfferSignatureRequested OfferSignatureRequestedWebhookEventType = "offer.signature_requested"
+)
+
+func (r OfferSignatureRequestedWebhookEventType) IsKnown() bool {
+	switch r {
+	case OfferSignatureRequestedWebhookEventTypeOfferSignatureRequested:
+		return true
+	}
+	return false
+}
+
+type OfferSignatureRequestedWebhookEventData struct {
+	// The tag of the offer.
+	ID             string                                              `json:"id" api:"required"`
+	Candidate      OfferSignatureRequestedWebhookEventDataCandidate    `json:"candidate" api:"required"`
+	Compensation   OfferSignatureRequestedWebhookEventDataCompensation `json:"compensation" api:"required"`
+	CreatedAt      string                                              `json:"createdAt" api:"required"`
+	Department     OfferSignatureRequestedWebhookEventDataDepartment   `json:"department" api:"required,nullable"`
+	ExpirationTime string                                              `json:"expirationTime" api:"required,nullable"`
+	LastViewedAt   string                                              `json:"lastViewedAt" api:"required,nullable"`
+	Manager        OfferSignatureRequestedWebhookEventDataManager      `json:"manager" api:"required,nullable"`
+	// The candidate-facing offer portal URL. Null for offers that have not been sent.
+	OfferURL string                                          `json:"offerUrl" api:"required,nullable"`
+	Position OfferSignatureRequestedWebhookEventDataPosition `json:"position" api:"required"`
+	// Display name of the person or company that sent the offer. Null for offers not
+	// yet sent.
+	SentBy     string                                            `json:"sentBy" api:"required,nullable"`
+	Status     OfferSignatureRequestedWebhookEventDataStatus     `json:"status" api:"required"`
+	WorkerType OfferSignatureRequestedWebhookEventDataWorkerType `json:"workerType" api:"required"`
+	Workplace  OfferSignatureRequestedWebhookEventDataWorkplace  `json:"workplace" api:"required,nullable"`
+	// The offer's job level, or null if unassigned. Omitted when job levels are not
+	// enabled.
+	Level OfferSignatureRequestedWebhookEventDataLevel `json:"level" api:"nullable"`
+	JSON  offerSignatureRequestedWebhookEventDataJSON  `json:"-"`
+}
+
+// offerSignatureRequestedWebhookEventDataJSON contains the JSON metadata for the struct [OfferSignatureRequestedWebhookEventData]
+type offerSignatureRequestedWebhookEventDataJSON struct {
+	ID             apijson.Field
+	Candidate      apijson.Field
+	Compensation   apijson.Field
+	CreatedAt      apijson.Field
+	Department     apijson.Field
+	ExpirationTime apijson.Field
+	LastViewedAt   apijson.Field
+	Manager        apijson.Field
+	OfferURL       apijson.Field
+	Position       apijson.Field
+	SentBy         apijson.Field
+	Status         apijson.Field
+	WorkerType     apijson.Field
+	Workplace      apijson.Field
+	Level          apijson.Field
+	raw            string
+	ExtraFields    map[string]apijson.Field
+}
+
+func (r *OfferSignatureRequestedWebhookEventData) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r offerSignatureRequestedWebhookEventDataJSON) RawJSON() string {
+	return r.raw
+}
+
+type OfferSignatureRequestedWebhookEventDataStatus string
+
+const (
+	OfferSignatureRequestedWebhookEventDataStatusDraft    OfferSignatureRequestedWebhookEventDataStatus = "draft"
+	OfferSignatureRequestedWebhookEventDataStatusSent     OfferSignatureRequestedWebhookEventDataStatus = "sent"
+	OfferSignatureRequestedWebhookEventDataStatusAccepted OfferSignatureRequestedWebhookEventDataStatus = "accepted"
+	OfferSignatureRequestedWebhookEventDataStatusVoid     OfferSignatureRequestedWebhookEventDataStatus = "void"
+)
+
+func (r OfferSignatureRequestedWebhookEventDataStatus) IsKnown() bool {
+	switch r {
+	case OfferSignatureRequestedWebhookEventDataStatusDraft, OfferSignatureRequestedWebhookEventDataStatusSent, OfferSignatureRequestedWebhookEventDataStatusAccepted, OfferSignatureRequestedWebhookEventDataStatusVoid:
+		return true
+	}
+	return false
+}
+
+type OfferSignatureRequestedWebhookEventDataWorkerType string
+
+const (
+	OfferSignatureRequestedWebhookEventDataWorkerTypeEmployee         OfferSignatureRequestedWebhookEventDataWorkerType = "employee"
+	OfferSignatureRequestedWebhookEventDataWorkerTypeUsContractor     OfferSignatureRequestedWebhookEventDataWorkerType = "us_contractor"
+	OfferSignatureRequestedWebhookEventDataWorkerTypeGlobalContractor OfferSignatureRequestedWebhookEventDataWorkerType = "global_contractor"
+)
+
+func (r OfferSignatureRequestedWebhookEventDataWorkerType) IsKnown() bool {
+	switch r {
+	case OfferSignatureRequestedWebhookEventDataWorkerTypeEmployee, OfferSignatureRequestedWebhookEventDataWorkerTypeUsContractor, OfferSignatureRequestedWebhookEventDataWorkerTypeGlobalContractor:
+		return true
+	}
+	return false
+}
+
+type OfferSignatureRequestedWebhookEventDataCandidate struct {
+	ContractorDetails OfferSignatureRequestedWebhookEventDataCandidateContractorDetails `json:"contractorDetails" api:"required,nullable"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	Email     string                                               `json:"email" api:"required" format:"email"`
+	FirstName string                                               `json:"firstName" api:"required"`
+	LastName  string                                               `json:"lastName" api:"required"`
+	JSON      offerSignatureRequestedWebhookEventDataCandidateJSON `json:"-"`
+}
+
+// offerSignatureRequestedWebhookEventDataCandidateJSON contains the JSON metadata for the struct [OfferSignatureRequestedWebhookEventDataCandidate]
+type offerSignatureRequestedWebhookEventDataCandidateJSON struct {
+	ContractorDetails apijson.Field
+	Email             apijson.Field
+	FirstName         apijson.Field
+	LastName          apijson.Field
+	raw               string
+	ExtraFields       map[string]apijson.Field
+}
+
+func (r *OfferSignatureRequestedWebhookEventDataCandidate) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r offerSignatureRequestedWebhookEventDataCandidateJSON) RawJSON() string {
+	return r.raw
+}
+
+type OfferSignatureRequestedWebhookEventDataCandidateContractorDetails struct {
+	IsBusiness        bool                                                                  `json:"isBusiness" api:"required"`
+	LegalBusinessName string                                                                `json:"legalBusinessName" api:"required,nullable"`
+	JSON              offerSignatureRequestedWebhookEventDataCandidateContractorDetailsJSON `json:"-"`
+}
+
+// offerSignatureRequestedWebhookEventDataCandidateContractorDetailsJSON contains the JSON metadata for the struct [OfferSignatureRequestedWebhookEventDataCandidateContractorDetails]
+type offerSignatureRequestedWebhookEventDataCandidateContractorDetailsJSON struct {
+	IsBusiness        apijson.Field
+	LegalBusinessName apijson.Field
+	raw               string
+	ExtraFields       map[string]apijson.Field
+}
+
+func (r *OfferSignatureRequestedWebhookEventDataCandidateContractorDetails) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r offerSignatureRequestedWebhookEventDataCandidateContractorDetailsJSON) RawJSON() string {
+	return r.raw
+}
+
+type OfferSignatureRequestedWebhookEventDataPosition struct {
+	Country     OfferSignatureRequestedWebhookEventDataPositionCountry `json:"country" api:"required"`
+	ScopeOfWork string                                                 `json:"scopeOfWork" api:"required,nullable"`
+	StartDate   string                                                 `json:"startDate" api:"required"`
+	Title       string                                                 `json:"title" api:"required"`
+	JSON        offerSignatureRequestedWebhookEventDataPositionJSON    `json:"-"`
+}
+
+// offerSignatureRequestedWebhookEventDataPositionJSON contains the JSON metadata for the struct [OfferSignatureRequestedWebhookEventDataPosition]
+type offerSignatureRequestedWebhookEventDataPositionJSON struct {
+	Country     apijson.Field
+	ScopeOfWork apijson.Field
+	StartDate   apijson.Field
+	Title       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *OfferSignatureRequestedWebhookEventDataPosition) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r offerSignatureRequestedWebhookEventDataPositionJSON) RawJSON() string {
+	return r.raw
+}
+
+type OfferSignatureRequestedWebhookEventDataPositionCountry string
+
+const (
+	OfferSignatureRequestedWebhookEventDataPositionCountryAd OfferSignatureRequestedWebhookEventDataPositionCountry = "AD"
+	OfferSignatureRequestedWebhookEventDataPositionCountryAe OfferSignatureRequestedWebhookEventDataPositionCountry = "AE"
+	OfferSignatureRequestedWebhookEventDataPositionCountryAf OfferSignatureRequestedWebhookEventDataPositionCountry = "AF"
+	OfferSignatureRequestedWebhookEventDataPositionCountryAg OfferSignatureRequestedWebhookEventDataPositionCountry = "AG"
+	OfferSignatureRequestedWebhookEventDataPositionCountryAI OfferSignatureRequestedWebhookEventDataPositionCountry = "AI"
+	OfferSignatureRequestedWebhookEventDataPositionCountryAl OfferSignatureRequestedWebhookEventDataPositionCountry = "AL"
+	OfferSignatureRequestedWebhookEventDataPositionCountryAm OfferSignatureRequestedWebhookEventDataPositionCountry = "AM"
+	OfferSignatureRequestedWebhookEventDataPositionCountryAo OfferSignatureRequestedWebhookEventDataPositionCountry = "AO"
+	OfferSignatureRequestedWebhookEventDataPositionCountryAq OfferSignatureRequestedWebhookEventDataPositionCountry = "AQ"
+	OfferSignatureRequestedWebhookEventDataPositionCountryAr OfferSignatureRequestedWebhookEventDataPositionCountry = "AR"
+	OfferSignatureRequestedWebhookEventDataPositionCountryAs OfferSignatureRequestedWebhookEventDataPositionCountry = "AS"
+	OfferSignatureRequestedWebhookEventDataPositionCountryAt OfferSignatureRequestedWebhookEventDataPositionCountry = "AT"
+	OfferSignatureRequestedWebhookEventDataPositionCountryAu OfferSignatureRequestedWebhookEventDataPositionCountry = "AU"
+	OfferSignatureRequestedWebhookEventDataPositionCountryAw OfferSignatureRequestedWebhookEventDataPositionCountry = "AW"
+	OfferSignatureRequestedWebhookEventDataPositionCountryAx OfferSignatureRequestedWebhookEventDataPositionCountry = "AX"
+	OfferSignatureRequestedWebhookEventDataPositionCountryAz OfferSignatureRequestedWebhookEventDataPositionCountry = "AZ"
+	OfferSignatureRequestedWebhookEventDataPositionCountryBa OfferSignatureRequestedWebhookEventDataPositionCountry = "BA"
+	OfferSignatureRequestedWebhookEventDataPositionCountryBb OfferSignatureRequestedWebhookEventDataPositionCountry = "BB"
+	OfferSignatureRequestedWebhookEventDataPositionCountryBd OfferSignatureRequestedWebhookEventDataPositionCountry = "BD"
+	OfferSignatureRequestedWebhookEventDataPositionCountryBe OfferSignatureRequestedWebhookEventDataPositionCountry = "BE"
+	OfferSignatureRequestedWebhookEventDataPositionCountryBf OfferSignatureRequestedWebhookEventDataPositionCountry = "BF"
+	OfferSignatureRequestedWebhookEventDataPositionCountryBg OfferSignatureRequestedWebhookEventDataPositionCountry = "BG"
+	OfferSignatureRequestedWebhookEventDataPositionCountryBh OfferSignatureRequestedWebhookEventDataPositionCountry = "BH"
+	OfferSignatureRequestedWebhookEventDataPositionCountryBi OfferSignatureRequestedWebhookEventDataPositionCountry = "BI"
+	OfferSignatureRequestedWebhookEventDataPositionCountryBj OfferSignatureRequestedWebhookEventDataPositionCountry = "BJ"
+	OfferSignatureRequestedWebhookEventDataPositionCountryBl OfferSignatureRequestedWebhookEventDataPositionCountry = "BL"
+	OfferSignatureRequestedWebhookEventDataPositionCountryBm OfferSignatureRequestedWebhookEventDataPositionCountry = "BM"
+	OfferSignatureRequestedWebhookEventDataPositionCountryBn OfferSignatureRequestedWebhookEventDataPositionCountry = "BN"
+	OfferSignatureRequestedWebhookEventDataPositionCountryBo OfferSignatureRequestedWebhookEventDataPositionCountry = "BO"
+	OfferSignatureRequestedWebhookEventDataPositionCountryBq OfferSignatureRequestedWebhookEventDataPositionCountry = "BQ"
+	OfferSignatureRequestedWebhookEventDataPositionCountryBr OfferSignatureRequestedWebhookEventDataPositionCountry = "BR"
+	OfferSignatureRequestedWebhookEventDataPositionCountryBs OfferSignatureRequestedWebhookEventDataPositionCountry = "BS"
+	OfferSignatureRequestedWebhookEventDataPositionCountryBt OfferSignatureRequestedWebhookEventDataPositionCountry = "BT"
+	OfferSignatureRequestedWebhookEventDataPositionCountryBv OfferSignatureRequestedWebhookEventDataPositionCountry = "BV"
+	OfferSignatureRequestedWebhookEventDataPositionCountryBw OfferSignatureRequestedWebhookEventDataPositionCountry = "BW"
+	OfferSignatureRequestedWebhookEventDataPositionCountryBy OfferSignatureRequestedWebhookEventDataPositionCountry = "BY"
+	OfferSignatureRequestedWebhookEventDataPositionCountryBz OfferSignatureRequestedWebhookEventDataPositionCountry = "BZ"
+	OfferSignatureRequestedWebhookEventDataPositionCountryCa OfferSignatureRequestedWebhookEventDataPositionCountry = "CA"
+	OfferSignatureRequestedWebhookEventDataPositionCountryCc OfferSignatureRequestedWebhookEventDataPositionCountry = "CC"
+	OfferSignatureRequestedWebhookEventDataPositionCountryCd OfferSignatureRequestedWebhookEventDataPositionCountry = "CD"
+	OfferSignatureRequestedWebhookEventDataPositionCountryCf OfferSignatureRequestedWebhookEventDataPositionCountry = "CF"
+	OfferSignatureRequestedWebhookEventDataPositionCountryCg OfferSignatureRequestedWebhookEventDataPositionCountry = "CG"
+	OfferSignatureRequestedWebhookEventDataPositionCountryCh OfferSignatureRequestedWebhookEventDataPositionCountry = "CH"
+	OfferSignatureRequestedWebhookEventDataPositionCountryCi OfferSignatureRequestedWebhookEventDataPositionCountry = "CI"
+	OfferSignatureRequestedWebhookEventDataPositionCountryCk OfferSignatureRequestedWebhookEventDataPositionCountry = "CK"
+	OfferSignatureRequestedWebhookEventDataPositionCountryCl OfferSignatureRequestedWebhookEventDataPositionCountry = "CL"
+	OfferSignatureRequestedWebhookEventDataPositionCountryCm OfferSignatureRequestedWebhookEventDataPositionCountry = "CM"
+	OfferSignatureRequestedWebhookEventDataPositionCountryCn OfferSignatureRequestedWebhookEventDataPositionCountry = "CN"
+	OfferSignatureRequestedWebhookEventDataPositionCountryCo OfferSignatureRequestedWebhookEventDataPositionCountry = "CO"
+	OfferSignatureRequestedWebhookEventDataPositionCountryCr OfferSignatureRequestedWebhookEventDataPositionCountry = "CR"
+	OfferSignatureRequestedWebhookEventDataPositionCountryCu OfferSignatureRequestedWebhookEventDataPositionCountry = "CU"
+	OfferSignatureRequestedWebhookEventDataPositionCountryCv OfferSignatureRequestedWebhookEventDataPositionCountry = "CV"
+	OfferSignatureRequestedWebhookEventDataPositionCountryCw OfferSignatureRequestedWebhookEventDataPositionCountry = "CW"
+	OfferSignatureRequestedWebhookEventDataPositionCountryCx OfferSignatureRequestedWebhookEventDataPositionCountry = "CX"
+	OfferSignatureRequestedWebhookEventDataPositionCountryCy OfferSignatureRequestedWebhookEventDataPositionCountry = "CY"
+	OfferSignatureRequestedWebhookEventDataPositionCountryCz OfferSignatureRequestedWebhookEventDataPositionCountry = "CZ"
+	OfferSignatureRequestedWebhookEventDataPositionCountryDe OfferSignatureRequestedWebhookEventDataPositionCountry = "DE"
+	OfferSignatureRequestedWebhookEventDataPositionCountryDj OfferSignatureRequestedWebhookEventDataPositionCountry = "DJ"
+	OfferSignatureRequestedWebhookEventDataPositionCountryDk OfferSignatureRequestedWebhookEventDataPositionCountry = "DK"
+	OfferSignatureRequestedWebhookEventDataPositionCountryDm OfferSignatureRequestedWebhookEventDataPositionCountry = "DM"
+	OfferSignatureRequestedWebhookEventDataPositionCountryDo OfferSignatureRequestedWebhookEventDataPositionCountry = "DO"
+	OfferSignatureRequestedWebhookEventDataPositionCountryDz OfferSignatureRequestedWebhookEventDataPositionCountry = "DZ"
+	OfferSignatureRequestedWebhookEventDataPositionCountryEc OfferSignatureRequestedWebhookEventDataPositionCountry = "EC"
+	OfferSignatureRequestedWebhookEventDataPositionCountryEe OfferSignatureRequestedWebhookEventDataPositionCountry = "EE"
+	OfferSignatureRequestedWebhookEventDataPositionCountryEg OfferSignatureRequestedWebhookEventDataPositionCountry = "EG"
+	OfferSignatureRequestedWebhookEventDataPositionCountryEh OfferSignatureRequestedWebhookEventDataPositionCountry = "EH"
+	OfferSignatureRequestedWebhookEventDataPositionCountryEr OfferSignatureRequestedWebhookEventDataPositionCountry = "ER"
+	OfferSignatureRequestedWebhookEventDataPositionCountryEs OfferSignatureRequestedWebhookEventDataPositionCountry = "ES"
+	OfferSignatureRequestedWebhookEventDataPositionCountryEt OfferSignatureRequestedWebhookEventDataPositionCountry = "ET"
+	OfferSignatureRequestedWebhookEventDataPositionCountryFi OfferSignatureRequestedWebhookEventDataPositionCountry = "FI"
+	OfferSignatureRequestedWebhookEventDataPositionCountryFj OfferSignatureRequestedWebhookEventDataPositionCountry = "FJ"
+	OfferSignatureRequestedWebhookEventDataPositionCountryFk OfferSignatureRequestedWebhookEventDataPositionCountry = "FK"
+	OfferSignatureRequestedWebhookEventDataPositionCountryFm OfferSignatureRequestedWebhookEventDataPositionCountry = "FM"
+	OfferSignatureRequestedWebhookEventDataPositionCountryFo OfferSignatureRequestedWebhookEventDataPositionCountry = "FO"
+	OfferSignatureRequestedWebhookEventDataPositionCountryFr OfferSignatureRequestedWebhookEventDataPositionCountry = "FR"
+	OfferSignatureRequestedWebhookEventDataPositionCountryGa OfferSignatureRequestedWebhookEventDataPositionCountry = "GA"
+	OfferSignatureRequestedWebhookEventDataPositionCountryGB OfferSignatureRequestedWebhookEventDataPositionCountry = "GB"
+	OfferSignatureRequestedWebhookEventDataPositionCountryGd OfferSignatureRequestedWebhookEventDataPositionCountry = "GD"
+	OfferSignatureRequestedWebhookEventDataPositionCountryGe OfferSignatureRequestedWebhookEventDataPositionCountry = "GE"
+	OfferSignatureRequestedWebhookEventDataPositionCountryGf OfferSignatureRequestedWebhookEventDataPositionCountry = "GF"
+	OfferSignatureRequestedWebhookEventDataPositionCountryGg OfferSignatureRequestedWebhookEventDataPositionCountry = "GG"
+	OfferSignatureRequestedWebhookEventDataPositionCountryGh OfferSignatureRequestedWebhookEventDataPositionCountry = "GH"
+	OfferSignatureRequestedWebhookEventDataPositionCountryGi OfferSignatureRequestedWebhookEventDataPositionCountry = "GI"
+	OfferSignatureRequestedWebhookEventDataPositionCountryGl OfferSignatureRequestedWebhookEventDataPositionCountry = "GL"
+	OfferSignatureRequestedWebhookEventDataPositionCountryGm OfferSignatureRequestedWebhookEventDataPositionCountry = "GM"
+	OfferSignatureRequestedWebhookEventDataPositionCountryGn OfferSignatureRequestedWebhookEventDataPositionCountry = "GN"
+	OfferSignatureRequestedWebhookEventDataPositionCountryGp OfferSignatureRequestedWebhookEventDataPositionCountry = "GP"
+	OfferSignatureRequestedWebhookEventDataPositionCountryGq OfferSignatureRequestedWebhookEventDataPositionCountry = "GQ"
+	OfferSignatureRequestedWebhookEventDataPositionCountryGr OfferSignatureRequestedWebhookEventDataPositionCountry = "GR"
+	OfferSignatureRequestedWebhookEventDataPositionCountryGs OfferSignatureRequestedWebhookEventDataPositionCountry = "GS"
+	OfferSignatureRequestedWebhookEventDataPositionCountryGt OfferSignatureRequestedWebhookEventDataPositionCountry = "GT"
+	OfferSignatureRequestedWebhookEventDataPositionCountryGu OfferSignatureRequestedWebhookEventDataPositionCountry = "GU"
+	OfferSignatureRequestedWebhookEventDataPositionCountryGw OfferSignatureRequestedWebhookEventDataPositionCountry = "GW"
+	OfferSignatureRequestedWebhookEventDataPositionCountryGy OfferSignatureRequestedWebhookEventDataPositionCountry = "GY"
+	OfferSignatureRequestedWebhookEventDataPositionCountryHk OfferSignatureRequestedWebhookEventDataPositionCountry = "HK"
+	OfferSignatureRequestedWebhookEventDataPositionCountryHm OfferSignatureRequestedWebhookEventDataPositionCountry = "HM"
+	OfferSignatureRequestedWebhookEventDataPositionCountryHn OfferSignatureRequestedWebhookEventDataPositionCountry = "HN"
+	OfferSignatureRequestedWebhookEventDataPositionCountryHr OfferSignatureRequestedWebhookEventDataPositionCountry = "HR"
+	OfferSignatureRequestedWebhookEventDataPositionCountryHt OfferSignatureRequestedWebhookEventDataPositionCountry = "HT"
+	OfferSignatureRequestedWebhookEventDataPositionCountryHu OfferSignatureRequestedWebhookEventDataPositionCountry = "HU"
+	OfferSignatureRequestedWebhookEventDataPositionCountryID OfferSignatureRequestedWebhookEventDataPositionCountry = "ID"
+	OfferSignatureRequestedWebhookEventDataPositionCountryIe OfferSignatureRequestedWebhookEventDataPositionCountry = "IE"
+	OfferSignatureRequestedWebhookEventDataPositionCountryIl OfferSignatureRequestedWebhookEventDataPositionCountry = "IL"
+	OfferSignatureRequestedWebhookEventDataPositionCountryIm OfferSignatureRequestedWebhookEventDataPositionCountry = "IM"
+	OfferSignatureRequestedWebhookEventDataPositionCountryIn OfferSignatureRequestedWebhookEventDataPositionCountry = "IN"
+	OfferSignatureRequestedWebhookEventDataPositionCountryIo OfferSignatureRequestedWebhookEventDataPositionCountry = "IO"
+	OfferSignatureRequestedWebhookEventDataPositionCountryIq OfferSignatureRequestedWebhookEventDataPositionCountry = "IQ"
+	OfferSignatureRequestedWebhookEventDataPositionCountryIr OfferSignatureRequestedWebhookEventDataPositionCountry = "IR"
+	OfferSignatureRequestedWebhookEventDataPositionCountryIs OfferSignatureRequestedWebhookEventDataPositionCountry = "IS"
+	OfferSignatureRequestedWebhookEventDataPositionCountryIt OfferSignatureRequestedWebhookEventDataPositionCountry = "IT"
+	OfferSignatureRequestedWebhookEventDataPositionCountryJe OfferSignatureRequestedWebhookEventDataPositionCountry = "JE"
+	OfferSignatureRequestedWebhookEventDataPositionCountryJm OfferSignatureRequestedWebhookEventDataPositionCountry = "JM"
+	OfferSignatureRequestedWebhookEventDataPositionCountryJo OfferSignatureRequestedWebhookEventDataPositionCountry = "JO"
+	OfferSignatureRequestedWebhookEventDataPositionCountryJp OfferSignatureRequestedWebhookEventDataPositionCountry = "JP"
+	OfferSignatureRequestedWebhookEventDataPositionCountryKe OfferSignatureRequestedWebhookEventDataPositionCountry = "KE"
+	OfferSignatureRequestedWebhookEventDataPositionCountryKg OfferSignatureRequestedWebhookEventDataPositionCountry = "KG"
+	OfferSignatureRequestedWebhookEventDataPositionCountryKh OfferSignatureRequestedWebhookEventDataPositionCountry = "KH"
+	OfferSignatureRequestedWebhookEventDataPositionCountryKi OfferSignatureRequestedWebhookEventDataPositionCountry = "KI"
+	OfferSignatureRequestedWebhookEventDataPositionCountryKm OfferSignatureRequestedWebhookEventDataPositionCountry = "KM"
+	OfferSignatureRequestedWebhookEventDataPositionCountryKn OfferSignatureRequestedWebhookEventDataPositionCountry = "KN"
+	OfferSignatureRequestedWebhookEventDataPositionCountryKp OfferSignatureRequestedWebhookEventDataPositionCountry = "KP"
+	OfferSignatureRequestedWebhookEventDataPositionCountryKr OfferSignatureRequestedWebhookEventDataPositionCountry = "KR"
+	OfferSignatureRequestedWebhookEventDataPositionCountryKw OfferSignatureRequestedWebhookEventDataPositionCountry = "KW"
+	OfferSignatureRequestedWebhookEventDataPositionCountryKy OfferSignatureRequestedWebhookEventDataPositionCountry = "KY"
+	OfferSignatureRequestedWebhookEventDataPositionCountryKz OfferSignatureRequestedWebhookEventDataPositionCountry = "KZ"
+	OfferSignatureRequestedWebhookEventDataPositionCountryLa OfferSignatureRequestedWebhookEventDataPositionCountry = "LA"
+	OfferSignatureRequestedWebhookEventDataPositionCountryLb OfferSignatureRequestedWebhookEventDataPositionCountry = "LB"
+	OfferSignatureRequestedWebhookEventDataPositionCountryLc OfferSignatureRequestedWebhookEventDataPositionCountry = "LC"
+	OfferSignatureRequestedWebhookEventDataPositionCountryLi OfferSignatureRequestedWebhookEventDataPositionCountry = "LI"
+	OfferSignatureRequestedWebhookEventDataPositionCountryLk OfferSignatureRequestedWebhookEventDataPositionCountry = "LK"
+	OfferSignatureRequestedWebhookEventDataPositionCountryLr OfferSignatureRequestedWebhookEventDataPositionCountry = "LR"
+	OfferSignatureRequestedWebhookEventDataPositionCountryLs OfferSignatureRequestedWebhookEventDataPositionCountry = "LS"
+	OfferSignatureRequestedWebhookEventDataPositionCountryLt OfferSignatureRequestedWebhookEventDataPositionCountry = "LT"
+	OfferSignatureRequestedWebhookEventDataPositionCountryLu OfferSignatureRequestedWebhookEventDataPositionCountry = "LU"
+	OfferSignatureRequestedWebhookEventDataPositionCountryLv OfferSignatureRequestedWebhookEventDataPositionCountry = "LV"
+	OfferSignatureRequestedWebhookEventDataPositionCountryLy OfferSignatureRequestedWebhookEventDataPositionCountry = "LY"
+	OfferSignatureRequestedWebhookEventDataPositionCountryMa OfferSignatureRequestedWebhookEventDataPositionCountry = "MA"
+	OfferSignatureRequestedWebhookEventDataPositionCountryMc OfferSignatureRequestedWebhookEventDataPositionCountry = "MC"
+	OfferSignatureRequestedWebhookEventDataPositionCountryMd OfferSignatureRequestedWebhookEventDataPositionCountry = "MD"
+	OfferSignatureRequestedWebhookEventDataPositionCountryMe OfferSignatureRequestedWebhookEventDataPositionCountry = "ME"
+	OfferSignatureRequestedWebhookEventDataPositionCountryMf OfferSignatureRequestedWebhookEventDataPositionCountry = "MF"
+	OfferSignatureRequestedWebhookEventDataPositionCountryMg OfferSignatureRequestedWebhookEventDataPositionCountry = "MG"
+	OfferSignatureRequestedWebhookEventDataPositionCountryMh OfferSignatureRequestedWebhookEventDataPositionCountry = "MH"
+	OfferSignatureRequestedWebhookEventDataPositionCountryMk OfferSignatureRequestedWebhookEventDataPositionCountry = "MK"
+	OfferSignatureRequestedWebhookEventDataPositionCountryMl OfferSignatureRequestedWebhookEventDataPositionCountry = "ML"
+	OfferSignatureRequestedWebhookEventDataPositionCountryMm OfferSignatureRequestedWebhookEventDataPositionCountry = "MM"
+	OfferSignatureRequestedWebhookEventDataPositionCountryMn OfferSignatureRequestedWebhookEventDataPositionCountry = "MN"
+	OfferSignatureRequestedWebhookEventDataPositionCountryMo OfferSignatureRequestedWebhookEventDataPositionCountry = "MO"
+	OfferSignatureRequestedWebhookEventDataPositionCountryMp OfferSignatureRequestedWebhookEventDataPositionCountry = "MP"
+	OfferSignatureRequestedWebhookEventDataPositionCountryMq OfferSignatureRequestedWebhookEventDataPositionCountry = "MQ"
+	OfferSignatureRequestedWebhookEventDataPositionCountryMr OfferSignatureRequestedWebhookEventDataPositionCountry = "MR"
+	OfferSignatureRequestedWebhookEventDataPositionCountryMs OfferSignatureRequestedWebhookEventDataPositionCountry = "MS"
+	OfferSignatureRequestedWebhookEventDataPositionCountryMt OfferSignatureRequestedWebhookEventDataPositionCountry = "MT"
+	OfferSignatureRequestedWebhookEventDataPositionCountryMu OfferSignatureRequestedWebhookEventDataPositionCountry = "MU"
+	OfferSignatureRequestedWebhookEventDataPositionCountryMv OfferSignatureRequestedWebhookEventDataPositionCountry = "MV"
+	OfferSignatureRequestedWebhookEventDataPositionCountryMw OfferSignatureRequestedWebhookEventDataPositionCountry = "MW"
+	OfferSignatureRequestedWebhookEventDataPositionCountryMx OfferSignatureRequestedWebhookEventDataPositionCountry = "MX"
+	OfferSignatureRequestedWebhookEventDataPositionCountryMy OfferSignatureRequestedWebhookEventDataPositionCountry = "MY"
+	OfferSignatureRequestedWebhookEventDataPositionCountryMz OfferSignatureRequestedWebhookEventDataPositionCountry = "MZ"
+	OfferSignatureRequestedWebhookEventDataPositionCountryNa OfferSignatureRequestedWebhookEventDataPositionCountry = "NA"
+	OfferSignatureRequestedWebhookEventDataPositionCountryNc OfferSignatureRequestedWebhookEventDataPositionCountry = "NC"
+	OfferSignatureRequestedWebhookEventDataPositionCountryNe OfferSignatureRequestedWebhookEventDataPositionCountry = "NE"
+	OfferSignatureRequestedWebhookEventDataPositionCountryNf OfferSignatureRequestedWebhookEventDataPositionCountry = "NF"
+	OfferSignatureRequestedWebhookEventDataPositionCountryNg OfferSignatureRequestedWebhookEventDataPositionCountry = "NG"
+	OfferSignatureRequestedWebhookEventDataPositionCountryNi OfferSignatureRequestedWebhookEventDataPositionCountry = "NI"
+	OfferSignatureRequestedWebhookEventDataPositionCountryNl OfferSignatureRequestedWebhookEventDataPositionCountry = "NL"
+	OfferSignatureRequestedWebhookEventDataPositionCountryNo OfferSignatureRequestedWebhookEventDataPositionCountry = "NO"
+	OfferSignatureRequestedWebhookEventDataPositionCountryNp OfferSignatureRequestedWebhookEventDataPositionCountry = "NP"
+	OfferSignatureRequestedWebhookEventDataPositionCountryNr OfferSignatureRequestedWebhookEventDataPositionCountry = "NR"
+	OfferSignatureRequestedWebhookEventDataPositionCountryNu OfferSignatureRequestedWebhookEventDataPositionCountry = "NU"
+	OfferSignatureRequestedWebhookEventDataPositionCountryNz OfferSignatureRequestedWebhookEventDataPositionCountry = "NZ"
+	OfferSignatureRequestedWebhookEventDataPositionCountryOm OfferSignatureRequestedWebhookEventDataPositionCountry = "OM"
+	OfferSignatureRequestedWebhookEventDataPositionCountryPa OfferSignatureRequestedWebhookEventDataPositionCountry = "PA"
+	OfferSignatureRequestedWebhookEventDataPositionCountryPe OfferSignatureRequestedWebhookEventDataPositionCountry = "PE"
+	OfferSignatureRequestedWebhookEventDataPositionCountryPf OfferSignatureRequestedWebhookEventDataPositionCountry = "PF"
+	OfferSignatureRequestedWebhookEventDataPositionCountryPg OfferSignatureRequestedWebhookEventDataPositionCountry = "PG"
+	OfferSignatureRequestedWebhookEventDataPositionCountryPh OfferSignatureRequestedWebhookEventDataPositionCountry = "PH"
+	OfferSignatureRequestedWebhookEventDataPositionCountryPk OfferSignatureRequestedWebhookEventDataPositionCountry = "PK"
+	OfferSignatureRequestedWebhookEventDataPositionCountryPl OfferSignatureRequestedWebhookEventDataPositionCountry = "PL"
+	OfferSignatureRequestedWebhookEventDataPositionCountryPm OfferSignatureRequestedWebhookEventDataPositionCountry = "PM"
+	OfferSignatureRequestedWebhookEventDataPositionCountryPn OfferSignatureRequestedWebhookEventDataPositionCountry = "PN"
+	OfferSignatureRequestedWebhookEventDataPositionCountryPr OfferSignatureRequestedWebhookEventDataPositionCountry = "PR"
+	OfferSignatureRequestedWebhookEventDataPositionCountryPs OfferSignatureRequestedWebhookEventDataPositionCountry = "PS"
+	OfferSignatureRequestedWebhookEventDataPositionCountryPt OfferSignatureRequestedWebhookEventDataPositionCountry = "PT"
+	OfferSignatureRequestedWebhookEventDataPositionCountryPw OfferSignatureRequestedWebhookEventDataPositionCountry = "PW"
+	OfferSignatureRequestedWebhookEventDataPositionCountryPy OfferSignatureRequestedWebhookEventDataPositionCountry = "PY"
+	OfferSignatureRequestedWebhookEventDataPositionCountryQa OfferSignatureRequestedWebhookEventDataPositionCountry = "QA"
+	OfferSignatureRequestedWebhookEventDataPositionCountryRe OfferSignatureRequestedWebhookEventDataPositionCountry = "RE"
+	OfferSignatureRequestedWebhookEventDataPositionCountryRo OfferSignatureRequestedWebhookEventDataPositionCountry = "RO"
+	OfferSignatureRequestedWebhookEventDataPositionCountryRs OfferSignatureRequestedWebhookEventDataPositionCountry = "RS"
+	OfferSignatureRequestedWebhookEventDataPositionCountryRu OfferSignatureRequestedWebhookEventDataPositionCountry = "RU"
+	OfferSignatureRequestedWebhookEventDataPositionCountryRw OfferSignatureRequestedWebhookEventDataPositionCountry = "RW"
+	OfferSignatureRequestedWebhookEventDataPositionCountrySa OfferSignatureRequestedWebhookEventDataPositionCountry = "SA"
+	OfferSignatureRequestedWebhookEventDataPositionCountrySb OfferSignatureRequestedWebhookEventDataPositionCountry = "SB"
+	OfferSignatureRequestedWebhookEventDataPositionCountrySc OfferSignatureRequestedWebhookEventDataPositionCountry = "SC"
+	OfferSignatureRequestedWebhookEventDataPositionCountrySd OfferSignatureRequestedWebhookEventDataPositionCountry = "SD"
+	OfferSignatureRequestedWebhookEventDataPositionCountrySe OfferSignatureRequestedWebhookEventDataPositionCountry = "SE"
+	OfferSignatureRequestedWebhookEventDataPositionCountrySg OfferSignatureRequestedWebhookEventDataPositionCountry = "SG"
+	OfferSignatureRequestedWebhookEventDataPositionCountrySh OfferSignatureRequestedWebhookEventDataPositionCountry = "SH"
+	OfferSignatureRequestedWebhookEventDataPositionCountrySi OfferSignatureRequestedWebhookEventDataPositionCountry = "SI"
+	OfferSignatureRequestedWebhookEventDataPositionCountrySj OfferSignatureRequestedWebhookEventDataPositionCountry = "SJ"
+	OfferSignatureRequestedWebhookEventDataPositionCountrySk OfferSignatureRequestedWebhookEventDataPositionCountry = "SK"
+	OfferSignatureRequestedWebhookEventDataPositionCountrySl OfferSignatureRequestedWebhookEventDataPositionCountry = "SL"
+	OfferSignatureRequestedWebhookEventDataPositionCountrySm OfferSignatureRequestedWebhookEventDataPositionCountry = "SM"
+	OfferSignatureRequestedWebhookEventDataPositionCountrySn OfferSignatureRequestedWebhookEventDataPositionCountry = "SN"
+	OfferSignatureRequestedWebhookEventDataPositionCountrySo OfferSignatureRequestedWebhookEventDataPositionCountry = "SO"
+	OfferSignatureRequestedWebhookEventDataPositionCountrySr OfferSignatureRequestedWebhookEventDataPositionCountry = "SR"
+	OfferSignatureRequestedWebhookEventDataPositionCountrySS OfferSignatureRequestedWebhookEventDataPositionCountry = "SS"
+	OfferSignatureRequestedWebhookEventDataPositionCountrySt OfferSignatureRequestedWebhookEventDataPositionCountry = "ST"
+	OfferSignatureRequestedWebhookEventDataPositionCountrySv OfferSignatureRequestedWebhookEventDataPositionCountry = "SV"
+	OfferSignatureRequestedWebhookEventDataPositionCountrySx OfferSignatureRequestedWebhookEventDataPositionCountry = "SX"
+	OfferSignatureRequestedWebhookEventDataPositionCountrySy OfferSignatureRequestedWebhookEventDataPositionCountry = "SY"
+	OfferSignatureRequestedWebhookEventDataPositionCountrySz OfferSignatureRequestedWebhookEventDataPositionCountry = "SZ"
+	OfferSignatureRequestedWebhookEventDataPositionCountryTc OfferSignatureRequestedWebhookEventDataPositionCountry = "TC"
+	OfferSignatureRequestedWebhookEventDataPositionCountryTd OfferSignatureRequestedWebhookEventDataPositionCountry = "TD"
+	OfferSignatureRequestedWebhookEventDataPositionCountryTf OfferSignatureRequestedWebhookEventDataPositionCountry = "TF"
+	OfferSignatureRequestedWebhookEventDataPositionCountryTg OfferSignatureRequestedWebhookEventDataPositionCountry = "TG"
+	OfferSignatureRequestedWebhookEventDataPositionCountryTh OfferSignatureRequestedWebhookEventDataPositionCountry = "TH"
+	OfferSignatureRequestedWebhookEventDataPositionCountryTj OfferSignatureRequestedWebhookEventDataPositionCountry = "TJ"
+	OfferSignatureRequestedWebhookEventDataPositionCountryTk OfferSignatureRequestedWebhookEventDataPositionCountry = "TK"
+	OfferSignatureRequestedWebhookEventDataPositionCountryTl OfferSignatureRequestedWebhookEventDataPositionCountry = "TL"
+	OfferSignatureRequestedWebhookEventDataPositionCountryTm OfferSignatureRequestedWebhookEventDataPositionCountry = "TM"
+	OfferSignatureRequestedWebhookEventDataPositionCountryTn OfferSignatureRequestedWebhookEventDataPositionCountry = "TN"
+	OfferSignatureRequestedWebhookEventDataPositionCountryTo OfferSignatureRequestedWebhookEventDataPositionCountry = "TO"
+	OfferSignatureRequestedWebhookEventDataPositionCountryTr OfferSignatureRequestedWebhookEventDataPositionCountry = "TR"
+	OfferSignatureRequestedWebhookEventDataPositionCountryTt OfferSignatureRequestedWebhookEventDataPositionCountry = "TT"
+	OfferSignatureRequestedWebhookEventDataPositionCountryTv OfferSignatureRequestedWebhookEventDataPositionCountry = "TV"
+	OfferSignatureRequestedWebhookEventDataPositionCountryTw OfferSignatureRequestedWebhookEventDataPositionCountry = "TW"
+	OfferSignatureRequestedWebhookEventDataPositionCountryTz OfferSignatureRequestedWebhookEventDataPositionCountry = "TZ"
+	OfferSignatureRequestedWebhookEventDataPositionCountryUa OfferSignatureRequestedWebhookEventDataPositionCountry = "UA"
+	OfferSignatureRequestedWebhookEventDataPositionCountryUg OfferSignatureRequestedWebhookEventDataPositionCountry = "UG"
+	OfferSignatureRequestedWebhookEventDataPositionCountryUm OfferSignatureRequestedWebhookEventDataPositionCountry = "UM"
+	OfferSignatureRequestedWebhookEventDataPositionCountryUs OfferSignatureRequestedWebhookEventDataPositionCountry = "US"
+	OfferSignatureRequestedWebhookEventDataPositionCountryUy OfferSignatureRequestedWebhookEventDataPositionCountry = "UY"
+	OfferSignatureRequestedWebhookEventDataPositionCountryUz OfferSignatureRequestedWebhookEventDataPositionCountry = "UZ"
+	OfferSignatureRequestedWebhookEventDataPositionCountryVa OfferSignatureRequestedWebhookEventDataPositionCountry = "VA"
+	OfferSignatureRequestedWebhookEventDataPositionCountryVc OfferSignatureRequestedWebhookEventDataPositionCountry = "VC"
+	OfferSignatureRequestedWebhookEventDataPositionCountryVe OfferSignatureRequestedWebhookEventDataPositionCountry = "VE"
+	OfferSignatureRequestedWebhookEventDataPositionCountryVg OfferSignatureRequestedWebhookEventDataPositionCountry = "VG"
+	OfferSignatureRequestedWebhookEventDataPositionCountryVi OfferSignatureRequestedWebhookEventDataPositionCountry = "VI"
+	OfferSignatureRequestedWebhookEventDataPositionCountryVn OfferSignatureRequestedWebhookEventDataPositionCountry = "VN"
+	OfferSignatureRequestedWebhookEventDataPositionCountryVu OfferSignatureRequestedWebhookEventDataPositionCountry = "VU"
+	OfferSignatureRequestedWebhookEventDataPositionCountryWf OfferSignatureRequestedWebhookEventDataPositionCountry = "WF"
+	OfferSignatureRequestedWebhookEventDataPositionCountryWs OfferSignatureRequestedWebhookEventDataPositionCountry = "WS"
+	OfferSignatureRequestedWebhookEventDataPositionCountryXk OfferSignatureRequestedWebhookEventDataPositionCountry = "XK"
+	OfferSignatureRequestedWebhookEventDataPositionCountryYe OfferSignatureRequestedWebhookEventDataPositionCountry = "YE"
+	OfferSignatureRequestedWebhookEventDataPositionCountryYt OfferSignatureRequestedWebhookEventDataPositionCountry = "YT"
+	OfferSignatureRequestedWebhookEventDataPositionCountryZa OfferSignatureRequestedWebhookEventDataPositionCountry = "ZA"
+	OfferSignatureRequestedWebhookEventDataPositionCountryZm OfferSignatureRequestedWebhookEventDataPositionCountry = "ZM"
+	OfferSignatureRequestedWebhookEventDataPositionCountryZw OfferSignatureRequestedWebhookEventDataPositionCountry = "ZW"
+)
+
+func (r OfferSignatureRequestedWebhookEventDataPositionCountry) IsKnown() bool {
+	switch r {
+	case OfferSignatureRequestedWebhookEventDataPositionCountryAd, OfferSignatureRequestedWebhookEventDataPositionCountryAe, OfferSignatureRequestedWebhookEventDataPositionCountryAf, OfferSignatureRequestedWebhookEventDataPositionCountryAg, OfferSignatureRequestedWebhookEventDataPositionCountryAI, OfferSignatureRequestedWebhookEventDataPositionCountryAl, OfferSignatureRequestedWebhookEventDataPositionCountryAm, OfferSignatureRequestedWebhookEventDataPositionCountryAo, OfferSignatureRequestedWebhookEventDataPositionCountryAq, OfferSignatureRequestedWebhookEventDataPositionCountryAr, OfferSignatureRequestedWebhookEventDataPositionCountryAs, OfferSignatureRequestedWebhookEventDataPositionCountryAt, OfferSignatureRequestedWebhookEventDataPositionCountryAu, OfferSignatureRequestedWebhookEventDataPositionCountryAw, OfferSignatureRequestedWebhookEventDataPositionCountryAx, OfferSignatureRequestedWebhookEventDataPositionCountryAz, OfferSignatureRequestedWebhookEventDataPositionCountryBa, OfferSignatureRequestedWebhookEventDataPositionCountryBb, OfferSignatureRequestedWebhookEventDataPositionCountryBd, OfferSignatureRequestedWebhookEventDataPositionCountryBe, OfferSignatureRequestedWebhookEventDataPositionCountryBf, OfferSignatureRequestedWebhookEventDataPositionCountryBg, OfferSignatureRequestedWebhookEventDataPositionCountryBh, OfferSignatureRequestedWebhookEventDataPositionCountryBi, OfferSignatureRequestedWebhookEventDataPositionCountryBj, OfferSignatureRequestedWebhookEventDataPositionCountryBl, OfferSignatureRequestedWebhookEventDataPositionCountryBm, OfferSignatureRequestedWebhookEventDataPositionCountryBn, OfferSignatureRequestedWebhookEventDataPositionCountryBo, OfferSignatureRequestedWebhookEventDataPositionCountryBq, OfferSignatureRequestedWebhookEventDataPositionCountryBr, OfferSignatureRequestedWebhookEventDataPositionCountryBs, OfferSignatureRequestedWebhookEventDataPositionCountryBt, OfferSignatureRequestedWebhookEventDataPositionCountryBv, OfferSignatureRequestedWebhookEventDataPositionCountryBw, OfferSignatureRequestedWebhookEventDataPositionCountryBy, OfferSignatureRequestedWebhookEventDataPositionCountryBz, OfferSignatureRequestedWebhookEventDataPositionCountryCa, OfferSignatureRequestedWebhookEventDataPositionCountryCc, OfferSignatureRequestedWebhookEventDataPositionCountryCd, OfferSignatureRequestedWebhookEventDataPositionCountryCf, OfferSignatureRequestedWebhookEventDataPositionCountryCg, OfferSignatureRequestedWebhookEventDataPositionCountryCh, OfferSignatureRequestedWebhookEventDataPositionCountryCi, OfferSignatureRequestedWebhookEventDataPositionCountryCk, OfferSignatureRequestedWebhookEventDataPositionCountryCl, OfferSignatureRequestedWebhookEventDataPositionCountryCm, OfferSignatureRequestedWebhookEventDataPositionCountryCn, OfferSignatureRequestedWebhookEventDataPositionCountryCo, OfferSignatureRequestedWebhookEventDataPositionCountryCr, OfferSignatureRequestedWebhookEventDataPositionCountryCu, OfferSignatureRequestedWebhookEventDataPositionCountryCv, OfferSignatureRequestedWebhookEventDataPositionCountryCw, OfferSignatureRequestedWebhookEventDataPositionCountryCx, OfferSignatureRequestedWebhookEventDataPositionCountryCy, OfferSignatureRequestedWebhookEventDataPositionCountryCz, OfferSignatureRequestedWebhookEventDataPositionCountryDe, OfferSignatureRequestedWebhookEventDataPositionCountryDj, OfferSignatureRequestedWebhookEventDataPositionCountryDk, OfferSignatureRequestedWebhookEventDataPositionCountryDm, OfferSignatureRequestedWebhookEventDataPositionCountryDo, OfferSignatureRequestedWebhookEventDataPositionCountryDz, OfferSignatureRequestedWebhookEventDataPositionCountryEc, OfferSignatureRequestedWebhookEventDataPositionCountryEe, OfferSignatureRequestedWebhookEventDataPositionCountryEg, OfferSignatureRequestedWebhookEventDataPositionCountryEh, OfferSignatureRequestedWebhookEventDataPositionCountryEr, OfferSignatureRequestedWebhookEventDataPositionCountryEs, OfferSignatureRequestedWebhookEventDataPositionCountryEt, OfferSignatureRequestedWebhookEventDataPositionCountryFi, OfferSignatureRequestedWebhookEventDataPositionCountryFj, OfferSignatureRequestedWebhookEventDataPositionCountryFk, OfferSignatureRequestedWebhookEventDataPositionCountryFm, OfferSignatureRequestedWebhookEventDataPositionCountryFo, OfferSignatureRequestedWebhookEventDataPositionCountryFr, OfferSignatureRequestedWebhookEventDataPositionCountryGa, OfferSignatureRequestedWebhookEventDataPositionCountryGB, OfferSignatureRequestedWebhookEventDataPositionCountryGd, OfferSignatureRequestedWebhookEventDataPositionCountryGe, OfferSignatureRequestedWebhookEventDataPositionCountryGf, OfferSignatureRequestedWebhookEventDataPositionCountryGg, OfferSignatureRequestedWebhookEventDataPositionCountryGh, OfferSignatureRequestedWebhookEventDataPositionCountryGi, OfferSignatureRequestedWebhookEventDataPositionCountryGl, OfferSignatureRequestedWebhookEventDataPositionCountryGm, OfferSignatureRequestedWebhookEventDataPositionCountryGn, OfferSignatureRequestedWebhookEventDataPositionCountryGp, OfferSignatureRequestedWebhookEventDataPositionCountryGq, OfferSignatureRequestedWebhookEventDataPositionCountryGr, OfferSignatureRequestedWebhookEventDataPositionCountryGs, OfferSignatureRequestedWebhookEventDataPositionCountryGt, OfferSignatureRequestedWebhookEventDataPositionCountryGu, OfferSignatureRequestedWebhookEventDataPositionCountryGw, OfferSignatureRequestedWebhookEventDataPositionCountryGy, OfferSignatureRequestedWebhookEventDataPositionCountryHk, OfferSignatureRequestedWebhookEventDataPositionCountryHm, OfferSignatureRequestedWebhookEventDataPositionCountryHn, OfferSignatureRequestedWebhookEventDataPositionCountryHr, OfferSignatureRequestedWebhookEventDataPositionCountryHt, OfferSignatureRequestedWebhookEventDataPositionCountryHu, OfferSignatureRequestedWebhookEventDataPositionCountryID, OfferSignatureRequestedWebhookEventDataPositionCountryIe, OfferSignatureRequestedWebhookEventDataPositionCountryIl, OfferSignatureRequestedWebhookEventDataPositionCountryIm, OfferSignatureRequestedWebhookEventDataPositionCountryIn, OfferSignatureRequestedWebhookEventDataPositionCountryIo, OfferSignatureRequestedWebhookEventDataPositionCountryIq, OfferSignatureRequestedWebhookEventDataPositionCountryIr, OfferSignatureRequestedWebhookEventDataPositionCountryIs, OfferSignatureRequestedWebhookEventDataPositionCountryIt, OfferSignatureRequestedWebhookEventDataPositionCountryJe, OfferSignatureRequestedWebhookEventDataPositionCountryJm, OfferSignatureRequestedWebhookEventDataPositionCountryJo, OfferSignatureRequestedWebhookEventDataPositionCountryJp, OfferSignatureRequestedWebhookEventDataPositionCountryKe, OfferSignatureRequestedWebhookEventDataPositionCountryKg, OfferSignatureRequestedWebhookEventDataPositionCountryKh, OfferSignatureRequestedWebhookEventDataPositionCountryKi, OfferSignatureRequestedWebhookEventDataPositionCountryKm, OfferSignatureRequestedWebhookEventDataPositionCountryKn, OfferSignatureRequestedWebhookEventDataPositionCountryKp, OfferSignatureRequestedWebhookEventDataPositionCountryKr, OfferSignatureRequestedWebhookEventDataPositionCountryKw, OfferSignatureRequestedWebhookEventDataPositionCountryKy, OfferSignatureRequestedWebhookEventDataPositionCountryKz, OfferSignatureRequestedWebhookEventDataPositionCountryLa, OfferSignatureRequestedWebhookEventDataPositionCountryLb, OfferSignatureRequestedWebhookEventDataPositionCountryLc, OfferSignatureRequestedWebhookEventDataPositionCountryLi, OfferSignatureRequestedWebhookEventDataPositionCountryLk, OfferSignatureRequestedWebhookEventDataPositionCountryLr, OfferSignatureRequestedWebhookEventDataPositionCountryLs, OfferSignatureRequestedWebhookEventDataPositionCountryLt, OfferSignatureRequestedWebhookEventDataPositionCountryLu, OfferSignatureRequestedWebhookEventDataPositionCountryLv, OfferSignatureRequestedWebhookEventDataPositionCountryLy, OfferSignatureRequestedWebhookEventDataPositionCountryMa, OfferSignatureRequestedWebhookEventDataPositionCountryMc, OfferSignatureRequestedWebhookEventDataPositionCountryMd, OfferSignatureRequestedWebhookEventDataPositionCountryMe, OfferSignatureRequestedWebhookEventDataPositionCountryMf, OfferSignatureRequestedWebhookEventDataPositionCountryMg, OfferSignatureRequestedWebhookEventDataPositionCountryMh, OfferSignatureRequestedWebhookEventDataPositionCountryMk, OfferSignatureRequestedWebhookEventDataPositionCountryMl, OfferSignatureRequestedWebhookEventDataPositionCountryMm, OfferSignatureRequestedWebhookEventDataPositionCountryMn, OfferSignatureRequestedWebhookEventDataPositionCountryMo, OfferSignatureRequestedWebhookEventDataPositionCountryMp, OfferSignatureRequestedWebhookEventDataPositionCountryMq, OfferSignatureRequestedWebhookEventDataPositionCountryMr, OfferSignatureRequestedWebhookEventDataPositionCountryMs, OfferSignatureRequestedWebhookEventDataPositionCountryMt, OfferSignatureRequestedWebhookEventDataPositionCountryMu, OfferSignatureRequestedWebhookEventDataPositionCountryMv, OfferSignatureRequestedWebhookEventDataPositionCountryMw, OfferSignatureRequestedWebhookEventDataPositionCountryMx, OfferSignatureRequestedWebhookEventDataPositionCountryMy, OfferSignatureRequestedWebhookEventDataPositionCountryMz, OfferSignatureRequestedWebhookEventDataPositionCountryNa, OfferSignatureRequestedWebhookEventDataPositionCountryNc, OfferSignatureRequestedWebhookEventDataPositionCountryNe, OfferSignatureRequestedWebhookEventDataPositionCountryNf, OfferSignatureRequestedWebhookEventDataPositionCountryNg, OfferSignatureRequestedWebhookEventDataPositionCountryNi, OfferSignatureRequestedWebhookEventDataPositionCountryNl, OfferSignatureRequestedWebhookEventDataPositionCountryNo, OfferSignatureRequestedWebhookEventDataPositionCountryNp, OfferSignatureRequestedWebhookEventDataPositionCountryNr, OfferSignatureRequestedWebhookEventDataPositionCountryNu, OfferSignatureRequestedWebhookEventDataPositionCountryNz, OfferSignatureRequestedWebhookEventDataPositionCountryOm, OfferSignatureRequestedWebhookEventDataPositionCountryPa, OfferSignatureRequestedWebhookEventDataPositionCountryPe, OfferSignatureRequestedWebhookEventDataPositionCountryPf, OfferSignatureRequestedWebhookEventDataPositionCountryPg, OfferSignatureRequestedWebhookEventDataPositionCountryPh, OfferSignatureRequestedWebhookEventDataPositionCountryPk, OfferSignatureRequestedWebhookEventDataPositionCountryPl, OfferSignatureRequestedWebhookEventDataPositionCountryPm, OfferSignatureRequestedWebhookEventDataPositionCountryPn, OfferSignatureRequestedWebhookEventDataPositionCountryPr, OfferSignatureRequestedWebhookEventDataPositionCountryPs, OfferSignatureRequestedWebhookEventDataPositionCountryPt, OfferSignatureRequestedWebhookEventDataPositionCountryPw, OfferSignatureRequestedWebhookEventDataPositionCountryPy, OfferSignatureRequestedWebhookEventDataPositionCountryQa, OfferSignatureRequestedWebhookEventDataPositionCountryRe, OfferSignatureRequestedWebhookEventDataPositionCountryRo, OfferSignatureRequestedWebhookEventDataPositionCountryRs, OfferSignatureRequestedWebhookEventDataPositionCountryRu, OfferSignatureRequestedWebhookEventDataPositionCountryRw, OfferSignatureRequestedWebhookEventDataPositionCountrySa, OfferSignatureRequestedWebhookEventDataPositionCountrySb, OfferSignatureRequestedWebhookEventDataPositionCountrySc, OfferSignatureRequestedWebhookEventDataPositionCountrySd, OfferSignatureRequestedWebhookEventDataPositionCountrySe, OfferSignatureRequestedWebhookEventDataPositionCountrySg, OfferSignatureRequestedWebhookEventDataPositionCountrySh, OfferSignatureRequestedWebhookEventDataPositionCountrySi, OfferSignatureRequestedWebhookEventDataPositionCountrySj, OfferSignatureRequestedWebhookEventDataPositionCountrySk, OfferSignatureRequestedWebhookEventDataPositionCountrySl, OfferSignatureRequestedWebhookEventDataPositionCountrySm, OfferSignatureRequestedWebhookEventDataPositionCountrySn, OfferSignatureRequestedWebhookEventDataPositionCountrySo, OfferSignatureRequestedWebhookEventDataPositionCountrySr, OfferSignatureRequestedWebhookEventDataPositionCountrySS, OfferSignatureRequestedWebhookEventDataPositionCountrySt, OfferSignatureRequestedWebhookEventDataPositionCountrySv, OfferSignatureRequestedWebhookEventDataPositionCountrySx, OfferSignatureRequestedWebhookEventDataPositionCountrySy, OfferSignatureRequestedWebhookEventDataPositionCountrySz, OfferSignatureRequestedWebhookEventDataPositionCountryTc, OfferSignatureRequestedWebhookEventDataPositionCountryTd, OfferSignatureRequestedWebhookEventDataPositionCountryTf, OfferSignatureRequestedWebhookEventDataPositionCountryTg, OfferSignatureRequestedWebhookEventDataPositionCountryTh, OfferSignatureRequestedWebhookEventDataPositionCountryTj, OfferSignatureRequestedWebhookEventDataPositionCountryTk, OfferSignatureRequestedWebhookEventDataPositionCountryTl, OfferSignatureRequestedWebhookEventDataPositionCountryTm, OfferSignatureRequestedWebhookEventDataPositionCountryTn, OfferSignatureRequestedWebhookEventDataPositionCountryTo, OfferSignatureRequestedWebhookEventDataPositionCountryTr, OfferSignatureRequestedWebhookEventDataPositionCountryTt, OfferSignatureRequestedWebhookEventDataPositionCountryTv, OfferSignatureRequestedWebhookEventDataPositionCountryTw, OfferSignatureRequestedWebhookEventDataPositionCountryTz, OfferSignatureRequestedWebhookEventDataPositionCountryUa, OfferSignatureRequestedWebhookEventDataPositionCountryUg, OfferSignatureRequestedWebhookEventDataPositionCountryUm, OfferSignatureRequestedWebhookEventDataPositionCountryUs, OfferSignatureRequestedWebhookEventDataPositionCountryUy, OfferSignatureRequestedWebhookEventDataPositionCountryUz, OfferSignatureRequestedWebhookEventDataPositionCountryVa, OfferSignatureRequestedWebhookEventDataPositionCountryVc, OfferSignatureRequestedWebhookEventDataPositionCountryVe, OfferSignatureRequestedWebhookEventDataPositionCountryVg, OfferSignatureRequestedWebhookEventDataPositionCountryVi, OfferSignatureRequestedWebhookEventDataPositionCountryVn, OfferSignatureRequestedWebhookEventDataPositionCountryVu, OfferSignatureRequestedWebhookEventDataPositionCountryWf, OfferSignatureRequestedWebhookEventDataPositionCountryWs, OfferSignatureRequestedWebhookEventDataPositionCountryXk, OfferSignatureRequestedWebhookEventDataPositionCountryYe, OfferSignatureRequestedWebhookEventDataPositionCountryYt, OfferSignatureRequestedWebhookEventDataPositionCountryZa, OfferSignatureRequestedWebhookEventDataPositionCountryZm, OfferSignatureRequestedWebhookEventDataPositionCountryZw:
+		return true
+	}
+	return false
+}
+
+type OfferSignatureRequestedWebhookEventDataDepartment struct {
+	// The unique public id of the department
+	ID   string                                                `json:"id" api:"required"`
+	Name string                                                `json:"name" api:"required"`
+	JSON offerSignatureRequestedWebhookEventDataDepartmentJSON `json:"-"`
+}
+
+// offerSignatureRequestedWebhookEventDataDepartmentJSON contains the JSON metadata for the struct [OfferSignatureRequestedWebhookEventDataDepartment]
+type offerSignatureRequestedWebhookEventDataDepartmentJSON struct {
+	ID          apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *OfferSignatureRequestedWebhookEventDataDepartment) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r offerSignatureRequestedWebhookEventDataDepartmentJSON) RawJSON() string {
+	return r.raw
+}
+
+type OfferSignatureRequestedWebhookEventDataWorkplace struct {
+	// Public workplace identifier
+	ID   string                                               `json:"id" api:"required"`
+	Name string                                               `json:"name" api:"required"`
+	JSON offerSignatureRequestedWebhookEventDataWorkplaceJSON `json:"-"`
+}
+
+// offerSignatureRequestedWebhookEventDataWorkplaceJSON contains the JSON metadata for the struct [OfferSignatureRequestedWebhookEventDataWorkplace]
+type offerSignatureRequestedWebhookEventDataWorkplaceJSON struct {
+	ID          apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *OfferSignatureRequestedWebhookEventDataWorkplace) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r offerSignatureRequestedWebhookEventDataWorkplaceJSON) RawJSON() string {
+	return r.raw
+}
+
+type OfferSignatureRequestedWebhookEventDataManager struct {
+	// The id of the worker.
+	ID   string                                             `json:"id" api:"required"`
+	Name string                                             `json:"name" api:"required,nullable"`
+	JSON offerSignatureRequestedWebhookEventDataManagerJSON `json:"-"`
+}
+
+// offerSignatureRequestedWebhookEventDataManagerJSON contains the JSON metadata for the struct [OfferSignatureRequestedWebhookEventDataManager]
+type offerSignatureRequestedWebhookEventDataManagerJSON struct {
+	ID          apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *OfferSignatureRequestedWebhookEventDataManager) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r offerSignatureRequestedWebhookEventDataManagerJSON) RawJSON() string {
+	return r.raw
+}
+
+type OfferSignatureRequestedWebhookEventDataLevel struct {
+	// The unique public id of the job level
+	ID    string                                            `json:"id" api:"required"`
+	Code  string                                            `json:"code" api:"required"`
+	Name  string                                            `json:"name" api:"required"`
+	Track OfferSignatureRequestedWebhookEventDataLevelTrack `json:"track" api:"required"`
+	JSON  offerSignatureRequestedWebhookEventDataLevelJSON  `json:"-"`
+}
+
+// offerSignatureRequestedWebhookEventDataLevelJSON contains the JSON metadata for the struct [OfferSignatureRequestedWebhookEventDataLevel]
+type offerSignatureRequestedWebhookEventDataLevelJSON struct {
+	ID          apijson.Field
+	Code        apijson.Field
+	Name        apijson.Field
+	Track       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *OfferSignatureRequestedWebhookEventDataLevel) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r offerSignatureRequestedWebhookEventDataLevelJSON) RawJSON() string {
+	return r.raw
+}
+
+type OfferSignatureRequestedWebhookEventDataLevelTrack string
+
+const (
+	OfferSignatureRequestedWebhookEventDataLevelTrackIc        OfferSignatureRequestedWebhookEventDataLevelTrack = "ic"
+	OfferSignatureRequestedWebhookEventDataLevelTrackManager   OfferSignatureRequestedWebhookEventDataLevelTrack = "manager"
+	OfferSignatureRequestedWebhookEventDataLevelTrackExecutive OfferSignatureRequestedWebhookEventDataLevelTrack = "executive"
+)
+
+func (r OfferSignatureRequestedWebhookEventDataLevelTrack) IsKnown() bool {
+	switch r {
+	case OfferSignatureRequestedWebhookEventDataLevelTrackIc, OfferSignatureRequestedWebhookEventDataLevelTrackManager, OfferSignatureRequestedWebhookEventDataLevelTrackExecutive:
+		return true
+	}
+	return false
+}
+
+type OfferSignatureRequestedWebhookEventDataCompensation struct {
+	BasePay OfferSignatureRequestedWebhookEventDataCompensationBasePay `json:"basePay" api:"required"`
+	// A monetary amount with its currency and server-formatted display value.
+	RelocationBonus PublicMoneyAmount `json:"relocationBonus" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	SignOnBonus PublicMoneyAmount                                        `json:"signOnBonus" api:"required,nullable"`
+	Stock       OfferSignatureRequestedWebhookEventDataCompensationStock `json:"stock" api:"required,nullable"`
+	JSON        offerSignatureRequestedWebhookEventDataCompensationJSON  `json:"-"`
+}
+
+// offerSignatureRequestedWebhookEventDataCompensationJSON contains the JSON metadata for the struct [OfferSignatureRequestedWebhookEventDataCompensation]
+type offerSignatureRequestedWebhookEventDataCompensationJSON struct {
+	BasePay         apijson.Field
+	RelocationBonus apijson.Field
+	SignOnBonus     apijson.Field
+	Stock           apijson.Field
+	raw             string
+	ExtraFields     map[string]apijson.Field
+}
+
+func (r *OfferSignatureRequestedWebhookEventDataCompensation) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r offerSignatureRequestedWebhookEventDataCompensationJSON) RawJSON() string {
+	return r.raw
+}
+
+type OfferSignatureRequestedWebhookEventDataCompensationBasePay struct {
+	// A monetary amount with its currency and server-formatted display value.
+	Amount PublicMoneyAmount                                               `json:"amount" api:"required"`
+	Basis  OfferSignatureRequestedWebhookEventDataCompensationBasePayBasis `json:"basis" api:"required"`
+	Type   OfferSignatureRequestedWebhookEventDataCompensationBasePayType  `json:"type" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	VariableRate PublicMoneyAmount                                              `json:"variableRate" api:"required,nullable"`
+	JSON         offerSignatureRequestedWebhookEventDataCompensationBasePayJSON `json:"-"`
+}
+
+// offerSignatureRequestedWebhookEventDataCompensationBasePayJSON contains the JSON metadata for the struct [OfferSignatureRequestedWebhookEventDataCompensationBasePay]
+type offerSignatureRequestedWebhookEventDataCompensationBasePayJSON struct {
+	Amount       apijson.Field
+	Basis        apijson.Field
+	Type         apijson.Field
+	VariableRate apijson.Field
+	raw          string
+	ExtraFields  map[string]apijson.Field
+}
+
+func (r *OfferSignatureRequestedWebhookEventDataCompensationBasePay) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r offerSignatureRequestedWebhookEventDataCompensationBasePayJSON) RawJSON() string {
+	return r.raw
+}
+
+type OfferSignatureRequestedWebhookEventDataCompensationBasePayBasis string
+
+const (
+	OfferSignatureRequestedWebhookEventDataCompensationBasePayBasisYear     OfferSignatureRequestedWebhookEventDataCompensationBasePayBasis = "year"
+	OfferSignatureRequestedWebhookEventDataCompensationBasePayBasisMonth    OfferSignatureRequestedWebhookEventDataCompensationBasePayBasis = "month"
+	OfferSignatureRequestedWebhookEventDataCompensationBasePayBasisWeek     OfferSignatureRequestedWebhookEventDataCompensationBasePayBasis = "week"
+	OfferSignatureRequestedWebhookEventDataCompensationBasePayBasisHour     OfferSignatureRequestedWebhookEventDataCompensationBasePayBasis = "hour"
+	OfferSignatureRequestedWebhookEventDataCompensationBasePayBasisVariable OfferSignatureRequestedWebhookEventDataCompensationBasePayBasis = "variable"
+)
+
+func (r OfferSignatureRequestedWebhookEventDataCompensationBasePayBasis) IsKnown() bool {
+	switch r {
+	case OfferSignatureRequestedWebhookEventDataCompensationBasePayBasisYear, OfferSignatureRequestedWebhookEventDataCompensationBasePayBasisMonth, OfferSignatureRequestedWebhookEventDataCompensationBasePayBasisWeek, OfferSignatureRequestedWebhookEventDataCompensationBasePayBasisHour, OfferSignatureRequestedWebhookEventDataCompensationBasePayBasisVariable:
+		return true
+	}
+	return false
+}
+
+type OfferSignatureRequestedWebhookEventDataCompensationBasePayType string
+
+const (
+	OfferSignatureRequestedWebhookEventDataCompensationBasePayTypeFixed      OfferSignatureRequestedWebhookEventDataCompensationBasePayType = "fixed"
+	OfferSignatureRequestedWebhookEventDataCompensationBasePayTypePayAsYouGo OfferSignatureRequestedWebhookEventDataCompensationBasePayType = "pay_as_you_go"
+)
+
+func (r OfferSignatureRequestedWebhookEventDataCompensationBasePayType) IsKnown() bool {
+	switch r {
+	case OfferSignatureRequestedWebhookEventDataCompensationBasePayTypeFixed, OfferSignatureRequestedWebhookEventDataCompensationBasePayTypePayAsYouGo:
+		return true
+	}
+	return false
+}
+
+type OfferSignatureRequestedWebhookEventDataCompensationStock struct {
+	CliffMonths           int64                                                        `json:"cliffMonths" api:"required,nullable"`
+	Options               int64                                                        `json:"options" api:"required"`
+	VestingScheduleMonths int64                                                        `json:"vestingScheduleMonths" api:"required,nullable"`
+	JSON                  offerSignatureRequestedWebhookEventDataCompensationStockJSON `json:"-"`
+}
+
+// offerSignatureRequestedWebhookEventDataCompensationStockJSON contains the JSON metadata for the struct [OfferSignatureRequestedWebhookEventDataCompensationStock]
+type offerSignatureRequestedWebhookEventDataCompensationStockJSON struct {
+	CliffMonths           apijson.Field
+	Options               apijson.Field
+	VestingScheduleMonths apijson.Field
+	raw                   string
+	ExtraFields           map[string]apijson.Field
+}
+
+func (r *OfferSignatureRequestedWebhookEventDataCompensationStock) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r offerSignatureRequestedWebhookEventDataCompensationStockJSON) RawJSON() string {
+	return r.raw
+}
+
 type OfferViewedWebhookEvent struct {
 	// Unique event identifier (format: `<objectTag>:<uuid>`). Stable across retries.
 	ID   string                      `json:"id" api:"required"`
@@ -9742,6 +10435,7 @@ const (
 	ParsedWebhookEventTypeOfferAccepted             ParsedWebhookEventType = "offer.accepted"
 	ParsedWebhookEventTypeOfferCreated              ParsedWebhookEventType = "offer.created"
 	ParsedWebhookEventTypeOfferSent                 ParsedWebhookEventType = "offer.sent"
+	ParsedWebhookEventTypeOfferSignatureRequested   ParsedWebhookEventType = "offer.signature_requested"
 	ParsedWebhookEventTypeOfferViewed               ParsedWebhookEventType = "offer.viewed"
 	ParsedWebhookEventTypeOfferVoided               ParsedWebhookEventType = "offer.voided"
 	ParsedWebhookEventTypeTimeOffBalanceAdjusted    ParsedWebhookEventType = "time_off.balance.adjusted"
@@ -9761,7 +10455,7 @@ const (
 
 func (r ParsedWebhookEventType) IsKnown() bool {
 	switch r {
-	case ParsedWebhookEventTypeOfferAccepted, ParsedWebhookEventTypeOfferCreated, ParsedWebhookEventTypeOfferSent, ParsedWebhookEventTypeOfferViewed, ParsedWebhookEventTypeOfferVoided, ParsedWebhookEventTypeTimeOffBalanceAdjusted, ParsedWebhookEventTypeTimeOffRequestCreated, ParsedWebhookEventTypeTimeOffRequestDeleted, ParsedWebhookEventTypeTimeOffRequestReviewed, ParsedWebhookEventTypeWorkerCreated, ParsedWebhookEventTypeWorkerDeleted, ParsedWebhookEventTypeWorkerInviteAccepted, ParsedWebhookEventTypeWorkerInviteSent, ParsedWebhookEventTypeWorkerOffboarded, ParsedWebhookEventTypeWorkerOffboardingStarted, ParsedWebhookEventTypeWorkerOnboardingCompleted, ParsedWebhookEventTypeWorkerReactivated, ParsedWebhookEventTypeWorkerUpdated:
+	case ParsedWebhookEventTypeOfferAccepted, ParsedWebhookEventTypeOfferCreated, ParsedWebhookEventTypeOfferSent, ParsedWebhookEventTypeOfferSignatureRequested, ParsedWebhookEventTypeOfferViewed, ParsedWebhookEventTypeOfferVoided, ParsedWebhookEventTypeTimeOffBalanceAdjusted, ParsedWebhookEventTypeTimeOffRequestCreated, ParsedWebhookEventTypeTimeOffRequestDeleted, ParsedWebhookEventTypeTimeOffRequestReviewed, ParsedWebhookEventTypeWorkerCreated, ParsedWebhookEventTypeWorkerDeleted, ParsedWebhookEventTypeWorkerInviteAccepted, ParsedWebhookEventTypeWorkerInviteSent, ParsedWebhookEventTypeWorkerOffboarded, ParsedWebhookEventTypeWorkerOffboardingStarted, ParsedWebhookEventTypeWorkerOnboardingCompleted, ParsedWebhookEventTypeWorkerReactivated, ParsedWebhookEventTypeWorkerUpdated:
 		return true
 	}
 	return false
