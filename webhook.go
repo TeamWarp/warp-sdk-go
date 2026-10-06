@@ -4216,6 +4216,146 @@ func (r offerVoidedWebhookEventDataCompensationStockJSON) RawJSON() string {
 	return r.raw
 }
 
+type PayRateCreatedWebhookEvent struct {
+	// Unique event identifier (format: `<objectTag>:<uuid>`). Stable across retries.
+	ID   string                         `json:"id" api:"required"`
+	Data PayRateCreatedWebhookEventData `json:"data" api:"required"`
+	// ISO 8601 timestamp of when the event occurred. Unchanged across retries.
+	Timestamp string `json:"timestamp" api:"required"`
+	// The event type.
+	Type PayRateCreatedWebhookEventType `json:"type" api:"required"`
+	JSON payRateCreatedWebhookEventJSON `json:"-"`
+}
+
+// payRateCreatedWebhookEventJSON contains the JSON metadata for the struct [PayRateCreatedWebhookEvent]
+type payRateCreatedWebhookEventJSON struct {
+	ID          apijson.Field
+	Data        apijson.Field
+	Timestamp   apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PayRateCreatedWebhookEvent) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r payRateCreatedWebhookEventJSON) RawJSON() string {
+	return r.raw
+}
+
+type PayRateCreatedWebhookEventType string
+
+const (
+	PayRateCreatedWebhookEventTypePayRateCreated PayRateCreatedWebhookEventType = "pay_rate.created"
+)
+
+func (r PayRateCreatedWebhookEventType) IsKnown() bool {
+	switch r {
+	case PayRateCreatedWebhookEventTypePayRateCreated:
+		return true
+	}
+	return false
+}
+
+type PayRateCreatedWebhookEventData struct {
+	// The fixed pay-rate id, or null when the event represents a variable-pay boundary
+	// with no row.
+	ID            string `json:"id" api:"required,nullable"`
+	EffectiveDate string `json:"effectiveDate" api:"required"`
+	// The worker whose regular pay-rate timeline changed.
+	WorkerID string                             `json:"workerId" api:"required"`
+	JSON     payRateCreatedWebhookEventDataJSON `json:"-"`
+}
+
+// payRateCreatedWebhookEventDataJSON contains the JSON metadata for the struct [PayRateCreatedWebhookEventData]
+type payRateCreatedWebhookEventDataJSON struct {
+	ID            apijson.Field
+	EffectiveDate apijson.Field
+	WorkerID      apijson.Field
+	raw           string
+	ExtraFields   map[string]apijson.Field
+}
+
+func (r *PayRateCreatedWebhookEventData) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r payRateCreatedWebhookEventDataJSON) RawJSON() string {
+	return r.raw
+}
+
+type PayRateDeletedWebhookEvent struct {
+	// Unique event identifier (format: `<objectTag>:<uuid>`). Stable across retries.
+	ID   string                         `json:"id" api:"required"`
+	Data PayRateDeletedWebhookEventData `json:"data" api:"required"`
+	// ISO 8601 timestamp of when the event occurred. Unchanged across retries.
+	Timestamp string `json:"timestamp" api:"required"`
+	// The event type.
+	Type PayRateDeletedWebhookEventType `json:"type" api:"required"`
+	JSON payRateDeletedWebhookEventJSON `json:"-"`
+}
+
+// payRateDeletedWebhookEventJSON contains the JSON metadata for the struct [PayRateDeletedWebhookEvent]
+type payRateDeletedWebhookEventJSON struct {
+	ID          apijson.Field
+	Data        apijson.Field
+	Timestamp   apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PayRateDeletedWebhookEvent) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r payRateDeletedWebhookEventJSON) RawJSON() string {
+	return r.raw
+}
+
+type PayRateDeletedWebhookEventType string
+
+const (
+	PayRateDeletedWebhookEventTypePayRateDeleted PayRateDeletedWebhookEventType = "pay_rate.deleted"
+)
+
+func (r PayRateDeletedWebhookEventType) IsKnown() bool {
+	switch r {
+	case PayRateDeletedWebhookEventTypePayRateDeleted:
+		return true
+	}
+	return false
+}
+
+type PayRateDeletedWebhookEventData struct {
+	// The fixed pay-rate id, or null when the event represents a variable-pay boundary
+	// with no row.
+	ID            string `json:"id" api:"required,nullable"`
+	EffectiveDate string `json:"effectiveDate" api:"required"`
+	// The worker whose regular pay-rate timeline changed.
+	WorkerID string                             `json:"workerId" api:"required"`
+	JSON     payRateDeletedWebhookEventDataJSON `json:"-"`
+}
+
+// payRateDeletedWebhookEventDataJSON contains the JSON metadata for the struct [PayRateDeletedWebhookEventData]
+type payRateDeletedWebhookEventDataJSON struct {
+	ID            apijson.Field
+	EffectiveDate apijson.Field
+	WorkerID      apijson.Field
+	raw           string
+	ExtraFields   map[string]apijson.Field
+}
+
+func (r *PayRateDeletedWebhookEventData) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r payRateDeletedWebhookEventDataJSON) RawJSON() string {
+	return r.raw
+}
+
 type TimeOffBalanceAdjustedWebhookEvent struct {
 	// Unique event identifier (format: `<objectTag>:<uuid>`). Stable across retries.
 	ID   string                 `json:"id" api:"required"`
@@ -10438,6 +10578,8 @@ const (
 	ParsedWebhookEventTypeOfferSignatureRequested   ParsedWebhookEventType = "offer.signature_requested"
 	ParsedWebhookEventTypeOfferViewed               ParsedWebhookEventType = "offer.viewed"
 	ParsedWebhookEventTypeOfferVoided               ParsedWebhookEventType = "offer.voided"
+	ParsedWebhookEventTypePayRateCreated            ParsedWebhookEventType = "pay_rate.created"
+	ParsedWebhookEventTypePayRateDeleted            ParsedWebhookEventType = "pay_rate.deleted"
 	ParsedWebhookEventTypeTimeOffBalanceAdjusted    ParsedWebhookEventType = "time_off.balance.adjusted"
 	ParsedWebhookEventTypeTimeOffRequestCreated     ParsedWebhookEventType = "time_off.request.created"
 	ParsedWebhookEventTypeTimeOffRequestDeleted     ParsedWebhookEventType = "time_off.request.deleted"
@@ -10455,7 +10597,7 @@ const (
 
 func (r ParsedWebhookEventType) IsKnown() bool {
 	switch r {
-	case ParsedWebhookEventTypeOfferAccepted, ParsedWebhookEventTypeOfferCreated, ParsedWebhookEventTypeOfferSent, ParsedWebhookEventTypeOfferSignatureRequested, ParsedWebhookEventTypeOfferViewed, ParsedWebhookEventTypeOfferVoided, ParsedWebhookEventTypeTimeOffBalanceAdjusted, ParsedWebhookEventTypeTimeOffRequestCreated, ParsedWebhookEventTypeTimeOffRequestDeleted, ParsedWebhookEventTypeTimeOffRequestReviewed, ParsedWebhookEventTypeWorkerCreated, ParsedWebhookEventTypeWorkerDeleted, ParsedWebhookEventTypeWorkerInviteAccepted, ParsedWebhookEventTypeWorkerInviteSent, ParsedWebhookEventTypeWorkerOffboarded, ParsedWebhookEventTypeWorkerOffboardingStarted, ParsedWebhookEventTypeWorkerOnboardingCompleted, ParsedWebhookEventTypeWorkerReactivated, ParsedWebhookEventTypeWorkerUpdated:
+	case ParsedWebhookEventTypeOfferAccepted, ParsedWebhookEventTypeOfferCreated, ParsedWebhookEventTypeOfferSent, ParsedWebhookEventTypeOfferSignatureRequested, ParsedWebhookEventTypeOfferViewed, ParsedWebhookEventTypeOfferVoided, ParsedWebhookEventTypePayRateCreated, ParsedWebhookEventTypePayRateDeleted, ParsedWebhookEventTypeTimeOffBalanceAdjusted, ParsedWebhookEventTypeTimeOffRequestCreated, ParsedWebhookEventTypeTimeOffRequestDeleted, ParsedWebhookEventTypeTimeOffRequestReviewed, ParsedWebhookEventTypeWorkerCreated, ParsedWebhookEventTypeWorkerDeleted, ParsedWebhookEventTypeWorkerInviteAccepted, ParsedWebhookEventTypeWorkerInviteSent, ParsedWebhookEventTypeWorkerOffboarded, ParsedWebhookEventTypeWorkerOffboardingStarted, ParsedWebhookEventTypeWorkerOnboardingCompleted, ParsedWebhookEventTypeWorkerReactivated, ParsedWebhookEventTypeWorkerUpdated:
 		return true
 	}
 	return false

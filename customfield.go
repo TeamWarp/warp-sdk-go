@@ -1749,46 +1749,38 @@ type PublicCustomFieldValueOutputUnion interface {
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeOf((*PublicCustomFieldValueOutputUnion)(nil)).Elem(),
-		"type",
+		"",
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(TextCustomFieldValue{}),
-			DiscriminatorValue: "text",
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(TextCustomFieldValue{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(NumberCustomFieldValue{}),
-			DiscriminatorValue: "number",
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(NumberCustomFieldValue{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(DateCustomFieldValue{}),
-			DiscriminatorValue: "date",
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(DateCustomFieldValue{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(BooleanCustomFieldValue{}),
-			DiscriminatorValue: "boolean",
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(BooleanCustomFieldValue{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(CurrencyCustomFieldValue{}),
-			DiscriminatorValue: "currency",
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(CurrencyCustomFieldValue{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(PercentageCustomFieldValue{}),
-			DiscriminatorValue: "percentage",
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(PercentageCustomFieldValue{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(SelectCustomFieldValue{}),
-			DiscriminatorValue: "select",
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(SelectCustomFieldValue{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(MultiSelectCustomFieldValue{}),
-			DiscriminatorValue: "multi_select",
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(MultiSelectCustomFieldValue{}),
 		},
 	)
 }
