@@ -2502,46 +2502,38 @@ type PublicWorkerCustomFieldUnion interface {
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeOf((*PublicWorkerCustomFieldUnion)(nil)).Elem(),
-		"type",
+		"",
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(PublicTextWorkerCustomField{}),
-			DiscriminatorValue: "text",
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(PublicTextWorkerCustomField{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(PublicNumberWorkerCustomField{}),
-			DiscriminatorValue: "number",
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(PublicNumberWorkerCustomField{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(PublicDateWorkerCustomField{}),
-			DiscriminatorValue: "date",
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(PublicDateWorkerCustomField{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(PublicBooleanWorkerCustomField{}),
-			DiscriminatorValue: "boolean",
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(PublicBooleanWorkerCustomField{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(PublicCurrencyWorkerCustomField{}),
-			DiscriminatorValue: "currency",
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(PublicCurrencyWorkerCustomField{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(PublicPercentageWorkerCustomField{}),
-			DiscriminatorValue: "percentage",
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(PublicPercentageWorkerCustomField{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(PublicSelectWorkerCustomField{}),
-			DiscriminatorValue: "select",
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(PublicSelectWorkerCustomField{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(PublicMultiSelectWorkerCustomField{}),
-			DiscriminatorValue: "multi_select",
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(PublicMultiSelectWorkerCustomField{}),
 		},
 	)
 }

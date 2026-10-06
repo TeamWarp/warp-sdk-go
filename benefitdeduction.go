@@ -645,16 +645,14 @@ type PublicBenefitDeductionCalculationUnion interface {
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeOf((*PublicBenefitDeductionCalculationUnion)(nil)).Elem(),
-		"type",
+		"",
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(FixedAmountBenefitCalculation{}),
-			DiscriminatorValue: "fixed_amount",
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(FixedAmountBenefitCalculation{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(PercentageBenefitCalculation{}),
-			DiscriminatorValue: "percentage",
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(PercentageBenefitCalculation{}),
 		},
 	)
 }
@@ -696,16 +694,14 @@ type PublicBenefitDeductionPlan2Union interface {
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeOf((*PublicBenefitDeductionPlan2Union)(nil)).Elem(),
-		"type",
+		"",
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(HealthPlanReference{}),
-			DiscriminatorValue: "health_plan",
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(HealthPlanReference{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(RetirementPlanReference{}),
-			DiscriminatorValue: "retirement_plan",
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(RetirementPlanReference{}),
 		},
 	)
 }

@@ -1358,16 +1358,14 @@ type BenefitNewDeductionResponsePlanUnion interface {
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeOf((*BenefitNewDeductionResponsePlanUnion)(nil)).Elem(),
-		"type",
+		"",
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(HealthPlanReference{}),
-			DiscriminatorValue: "health_plan",
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(HealthPlanReference{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(RetirementPlanReference{}),
-			DiscriminatorValue: "retirement_plan",
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(RetirementPlanReference{}),
 		},
 	)
 }
