@@ -1922,7 +1922,8 @@ type WorkerGetResponse struct {
 	// The id of the worker.
 	ID string `json:"id" api:"required"`
 	// The worker's home address, or null when unavailable.
-	Address WorkerGetResponseAddress `json:"address" api:"required,nullable"`
+	Address         WorkerGetResponseAddress `json:"address" api:"required,nullable"`
+	BenefitEligible bool                     `json:"benefitEligible" api:"required"`
 	// The worker's biological sex, or null when unavailable.
 	BiologicalSex WorkerGetResponseBiologicalSex `json:"biologicalSex" api:"required,nullable"`
 	BusinessName  string                         `json:"businessName" api:"required,nullable"`
@@ -1982,6 +1983,7 @@ type WorkerGetResponse struct {
 type workerGetResponseJSON struct {
 	ID                apijson.Field
 	Address           apijson.Field
+	BenefitEligible   apijson.Field
 	BiologicalSex     apijson.Field
 	BusinessName      apijson.Field
 	Compensation      apijson.Field
@@ -2025,7 +2027,8 @@ type WorkerNewEmployeeResponse struct {
 	// The id of the worker.
 	ID string `json:"id" api:"required"`
 	// The worker's home address, or null when unavailable.
-	Address WorkerNewEmployeeResponseAddress `json:"address" api:"required,nullable"`
+	Address         WorkerNewEmployeeResponseAddress `json:"address" api:"required,nullable"`
+	BenefitEligible bool                             `json:"benefitEligible" api:"required"`
 	// The worker's biological sex, or null when unavailable.
 	BiologicalSex WorkerNewEmployeeResponseBiologicalSex `json:"biologicalSex" api:"required,nullable"`
 	BusinessName  string                                 `json:"businessName" api:"required,nullable"`
@@ -2085,6 +2088,7 @@ type WorkerNewEmployeeResponse struct {
 type workerNewEmployeeResponseJSON struct {
 	ID                apijson.Field
 	Address           apijson.Field
+	BenefitEligible   apijson.Field
 	BiologicalSex     apijson.Field
 	BusinessName      apijson.Field
 	Compensation      apijson.Field
@@ -2128,7 +2132,8 @@ type WorkerNewContractorResponse struct {
 	// The id of the worker.
 	ID string `json:"id" api:"required"`
 	// The worker's home address, or null when unavailable.
-	Address WorkerNewContractorResponseAddress `json:"address" api:"required,nullable"`
+	Address         WorkerNewContractorResponseAddress `json:"address" api:"required,nullable"`
+	BenefitEligible bool                               `json:"benefitEligible" api:"required"`
 	// The worker's biological sex, or null when unavailable.
 	BiologicalSex WorkerNewContractorResponseBiologicalSex `json:"biologicalSex" api:"required,nullable"`
 	BusinessName  string                                   `json:"businessName" api:"required,nullable"`
@@ -2188,6 +2193,7 @@ type WorkerNewContractorResponse struct {
 type workerNewContractorResponseJSON struct {
 	ID                apijson.Field
 	Address           apijson.Field
+	BenefitEligible   apijson.Field
 	BiologicalSex     apijson.Field
 	BusinessName      apijson.Field
 	Compensation      apijson.Field
@@ -2231,7 +2237,8 @@ type WorkerInviteResponse struct {
 	// The id of the worker.
 	ID string `json:"id" api:"required"`
 	// The worker's home address, or null when unavailable.
-	Address WorkerInviteResponseAddress `json:"address" api:"required,nullable"`
+	Address         WorkerInviteResponseAddress `json:"address" api:"required,nullable"`
+	BenefitEligible bool                        `json:"benefitEligible" api:"required"`
 	// The worker's biological sex, or null when unavailable.
 	BiologicalSex WorkerInviteResponseBiologicalSex `json:"biologicalSex" api:"required,nullable"`
 	BusinessName  string                            `json:"businessName" api:"required,nullable"`
@@ -2291,6 +2298,7 @@ type WorkerInviteResponse struct {
 type workerInviteResponseJSON struct {
 	ID                apijson.Field
 	Address           apijson.Field
+	BenefitEligible   apijson.Field
 	BiologicalSex     apijson.Field
 	BusinessName      apijson.Field
 	Compensation      apijson.Field
@@ -2334,7 +2342,8 @@ type WorkerUpdateResponse struct {
 	// The id of the worker.
 	ID string `json:"id" api:"required"`
 	// The worker's home address, or null when unavailable.
-	Address WorkerUpdateResponseAddress `json:"address" api:"required,nullable"`
+	Address         WorkerUpdateResponseAddress `json:"address" api:"required,nullable"`
+	BenefitEligible bool                        `json:"benefitEligible" api:"required"`
 	// The worker's biological sex, or null when unavailable.
 	BiologicalSex WorkerUpdateResponseBiologicalSex `json:"biologicalSex" api:"required,nullable"`
 	BusinessName  string                            `json:"businessName" api:"required,nullable"`
@@ -2394,6 +2403,7 @@ type WorkerUpdateResponse struct {
 type workerUpdateResponseJSON struct {
 	ID                apijson.Field
 	Address           apijson.Field
+	BenefitEligible   apijson.Field
 	BiologicalSex     apijson.Field
 	BusinessName      apijson.Field
 	Compensation      apijson.Field
@@ -2637,7 +2647,8 @@ type WorkerListResponseData struct {
 	// The id of the worker.
 	ID string `json:"id" api:"required"`
 	// The worker's home address, or null when unavailable.
-	Address WorkerListResponseDataAddress `json:"address" api:"required,nullable"`
+	Address         WorkerListResponseDataAddress `json:"address" api:"required,nullable"`
+	BenefitEligible bool                          `json:"benefitEligible" api:"required"`
 	// The worker's biological sex, or null when unavailable.
 	BiologicalSex WorkerListResponseDataBiologicalSex `json:"biologicalSex" api:"required,nullable"`
 	BusinessName  string                              `json:"businessName" api:"required,nullable"`
@@ -2697,6 +2708,7 @@ type WorkerListResponseData struct {
 type workerListResponseDataJSON struct {
 	ID                apijson.Field
 	Address           apijson.Field
+	BenefitEligible   apijson.Field
 	BiologicalSex     apijson.Field
 	BusinessName      apijson.Field
 	Compensation      apijson.Field

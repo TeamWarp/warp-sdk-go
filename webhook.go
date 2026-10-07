@@ -4847,7 +4847,8 @@ type WorkerCreatedWebhookEventData struct {
 	// The id of the worker.
 	ID string `json:"id" api:"required"`
 	// The worker's home address, or null when unavailable.
-	Address WorkerCreatedWebhookEventDataAddress `json:"address" api:"required,nullable"`
+	Address         WorkerCreatedWebhookEventDataAddress `json:"address" api:"required,nullable"`
+	BenefitEligible bool                                 `json:"benefitEligible" api:"required"`
 	// The worker's biological sex, or null when unavailable.
 	BiologicalSex WorkerCreatedWebhookEventDataBiologicalSex `json:"biologicalSex" api:"required,nullable"`
 	BusinessName  string                                     `json:"businessName" api:"required,nullable"`
@@ -4907,6 +4908,7 @@ type WorkerCreatedWebhookEventData struct {
 type workerCreatedWebhookEventDataJSON struct {
 	ID                apijson.Field
 	Address           apijson.Field
+	BenefitEligible   apijson.Field
 	BiologicalSex     apijson.Field
 	BusinessName      apijson.Field
 	Compensation      apijson.Field
@@ -5485,7 +5487,8 @@ type WorkerDeletedWebhookEventData struct {
 	// The id of the worker.
 	ID string `json:"id" api:"required"`
 	// The worker's home address, or null when unavailable.
-	Address WorkerDeletedWebhookEventDataAddress `json:"address" api:"required,nullable"`
+	Address         WorkerDeletedWebhookEventDataAddress `json:"address" api:"required,nullable"`
+	BenefitEligible bool                                 `json:"benefitEligible" api:"required"`
 	// The worker's biological sex, or null when unavailable.
 	BiologicalSex WorkerDeletedWebhookEventDataBiologicalSex `json:"biologicalSex" api:"required,nullable"`
 	BusinessName  string                                     `json:"businessName" api:"required,nullable"`
@@ -5545,6 +5548,7 @@ type WorkerDeletedWebhookEventData struct {
 type workerDeletedWebhookEventDataJSON struct {
 	ID                apijson.Field
 	Address           apijson.Field
+	BenefitEligible   apijson.Field
 	BiologicalSex     apijson.Field
 	BusinessName      apijson.Field
 	Compensation      apijson.Field
@@ -6123,7 +6127,8 @@ type WorkerInviteAcceptedWebhookEventData struct {
 	// The id of the worker.
 	ID string `json:"id" api:"required"`
 	// The worker's home address, or null when unavailable.
-	Address WorkerInviteAcceptedWebhookEventDataAddress `json:"address" api:"required,nullable"`
+	Address         WorkerInviteAcceptedWebhookEventDataAddress `json:"address" api:"required,nullable"`
+	BenefitEligible bool                                        `json:"benefitEligible" api:"required"`
 	// The worker's biological sex, or null when unavailable.
 	BiologicalSex WorkerInviteAcceptedWebhookEventDataBiologicalSex `json:"biologicalSex" api:"required,nullable"`
 	BusinessName  string                                            `json:"businessName" api:"required,nullable"`
@@ -6183,6 +6188,7 @@ type WorkerInviteAcceptedWebhookEventData struct {
 type workerInviteAcceptedWebhookEventDataJSON struct {
 	ID                apijson.Field
 	Address           apijson.Field
+	BenefitEligible   apijson.Field
 	BiologicalSex     apijson.Field
 	BusinessName      apijson.Field
 	Compensation      apijson.Field
@@ -6761,7 +6767,8 @@ type WorkerInviteSentWebhookEventData struct {
 	// The id of the worker.
 	ID string `json:"id" api:"required"`
 	// The worker's home address, or null when unavailable.
-	Address WorkerInviteSentWebhookEventDataAddress `json:"address" api:"required,nullable"`
+	Address         WorkerInviteSentWebhookEventDataAddress `json:"address" api:"required,nullable"`
+	BenefitEligible bool                                    `json:"benefitEligible" api:"required"`
 	// The worker's biological sex, or null when unavailable.
 	BiologicalSex WorkerInviteSentWebhookEventDataBiologicalSex `json:"biologicalSex" api:"required,nullable"`
 	BusinessName  string                                        `json:"businessName" api:"required,nullable"`
@@ -6821,6 +6828,7 @@ type WorkerInviteSentWebhookEventData struct {
 type workerInviteSentWebhookEventDataJSON struct {
 	ID                apijson.Field
 	Address           apijson.Field
+	BenefitEligible   apijson.Field
 	BiologicalSex     apijson.Field
 	BusinessName      apijson.Field
 	Compensation      apijson.Field
@@ -7399,7 +7407,8 @@ type WorkerOffboardedWebhookEventData struct {
 	// The id of the worker.
 	ID string `json:"id" api:"required"`
 	// The worker's home address, or null when unavailable.
-	Address WorkerOffboardedWebhookEventDataAddress `json:"address" api:"required,nullable"`
+	Address         WorkerOffboardedWebhookEventDataAddress `json:"address" api:"required,nullable"`
+	BenefitEligible bool                                    `json:"benefitEligible" api:"required"`
 	// The worker's biological sex, or null when unavailable.
 	BiologicalSex WorkerOffboardedWebhookEventDataBiologicalSex `json:"biologicalSex" api:"required,nullable"`
 	BusinessName  string                                        `json:"businessName" api:"required,nullable"`
@@ -7459,6 +7468,7 @@ type WorkerOffboardedWebhookEventData struct {
 type workerOffboardedWebhookEventDataJSON struct {
 	ID                apijson.Field
 	Address           apijson.Field
+	BenefitEligible   apijson.Field
 	BiologicalSex     apijson.Field
 	BusinessName      apijson.Field
 	Compensation      apijson.Field
@@ -8037,7 +8047,8 @@ type WorkerOffboardingStartedWebhookEventData struct {
 	// The id of the worker.
 	ID string `json:"id" api:"required"`
 	// The worker's home address, or null when unavailable.
-	Address WorkerOffboardingStartedWebhookEventDataAddress `json:"address" api:"required,nullable"`
+	Address         WorkerOffboardingStartedWebhookEventDataAddress `json:"address" api:"required,nullable"`
+	BenefitEligible bool                                            `json:"benefitEligible" api:"required"`
 	// The worker's biological sex, or null when unavailable.
 	BiologicalSex WorkerOffboardingStartedWebhookEventDataBiologicalSex `json:"biologicalSex" api:"required,nullable"`
 	BusinessName  string                                                `json:"businessName" api:"required,nullable"`
@@ -8097,6 +8108,7 @@ type WorkerOffboardingStartedWebhookEventData struct {
 type workerOffboardingStartedWebhookEventDataJSON struct {
 	ID                apijson.Field
 	Address           apijson.Field
+	BenefitEligible   apijson.Field
 	BiologicalSex     apijson.Field
 	BusinessName      apijson.Field
 	Compensation      apijson.Field
@@ -8675,7 +8687,8 @@ type WorkerOnboardingCompletedWebhookEventData struct {
 	// The id of the worker.
 	ID string `json:"id" api:"required"`
 	// The worker's home address, or null when unavailable.
-	Address WorkerOnboardingCompletedWebhookEventDataAddress `json:"address" api:"required,nullable"`
+	Address         WorkerOnboardingCompletedWebhookEventDataAddress `json:"address" api:"required,nullable"`
+	BenefitEligible bool                                             `json:"benefitEligible" api:"required"`
 	// The worker's biological sex, or null when unavailable.
 	BiologicalSex WorkerOnboardingCompletedWebhookEventDataBiologicalSex `json:"biologicalSex" api:"required,nullable"`
 	BusinessName  string                                                 `json:"businessName" api:"required,nullable"`
@@ -8735,6 +8748,7 @@ type WorkerOnboardingCompletedWebhookEventData struct {
 type workerOnboardingCompletedWebhookEventDataJSON struct {
 	ID                apijson.Field
 	Address           apijson.Field
+	BenefitEligible   apijson.Field
 	BiologicalSex     apijson.Field
 	BusinessName      apijson.Field
 	Compensation      apijson.Field
@@ -9313,7 +9327,8 @@ type WorkerReactivatedWebhookEventData struct {
 	// The id of the worker.
 	ID string `json:"id" api:"required"`
 	// The worker's home address, or null when unavailable.
-	Address WorkerReactivatedWebhookEventDataAddress `json:"address" api:"required,nullable"`
+	Address         WorkerReactivatedWebhookEventDataAddress `json:"address" api:"required,nullable"`
+	BenefitEligible bool                                     `json:"benefitEligible" api:"required"`
 	// The worker's biological sex, or null when unavailable.
 	BiologicalSex WorkerReactivatedWebhookEventDataBiologicalSex `json:"biologicalSex" api:"required,nullable"`
 	BusinessName  string                                         `json:"businessName" api:"required,nullable"`
@@ -9373,6 +9388,7 @@ type WorkerReactivatedWebhookEventData struct {
 type workerReactivatedWebhookEventDataJSON struct {
 	ID                apijson.Field
 	Address           apijson.Field
+	BenefitEligible   apijson.Field
 	BiologicalSex     apijson.Field
 	BusinessName      apijson.Field
 	Compensation      apijson.Field
@@ -9951,7 +9967,8 @@ type WorkerUpdatedWebhookEventData struct {
 	// The id of the worker.
 	ID string `json:"id" api:"required"`
 	// The worker's home address, or null when unavailable.
-	Address WorkerUpdatedWebhookEventDataAddress `json:"address" api:"required,nullable"`
+	Address         WorkerUpdatedWebhookEventDataAddress `json:"address" api:"required,nullable"`
+	BenefitEligible bool                                 `json:"benefitEligible" api:"required"`
 	// The worker's biological sex, or null when unavailable.
 	BiologicalSex WorkerUpdatedWebhookEventDataBiologicalSex `json:"biologicalSex" api:"required,nullable"`
 	BusinessName  string                                     `json:"businessName" api:"required,nullable"`
@@ -10011,6 +10028,7 @@ type WorkerUpdatedWebhookEventData struct {
 type workerUpdatedWebhookEventDataJSON struct {
 	ID                apijson.Field
 	Address           apijson.Field
+	BenefitEligible   apijson.Field
 	BiologicalSex     apijson.Field
 	BusinessName      apijson.Field
 	Compensation      apijson.Field
