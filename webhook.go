@@ -123,7 +123,11 @@ type OfferAcceptedWebhookEventData struct {
 	// The offer's job level, or null if unassigned. Omitted when job levels are not
 	// enabled.
 	Level OfferAcceptedWebhookEventDataLevel `json:"level" api:"nullable"`
-	JSON  offerAcceptedWebhookEventDataJSON  `json:"-"`
+	// Additional notes explaining why the offer was voided.
+	VoidNotes string `json:"voidNotes" api:"nullable"`
+	// The reason the offer was voided. Null for offers that have not been voided.
+	VoidReason OfferAcceptedWebhookEventDataVoidReason `json:"voidReason" api:"nullable"`
+	JSON       offerAcceptedWebhookEventDataJSON       `json:"-"`
 }
 
 // offerAcceptedWebhookEventDataJSON contains the JSON metadata for the struct [OfferAcceptedWebhookEventData]
@@ -143,6 +147,8 @@ type offerAcceptedWebhookEventDataJSON struct {
 	WorkerType     apijson.Field
 	Workplace      apijson.Field
 	Level          apijson.Field
+	VoidNotes      apijson.Field
+	VoidReason     apijson.Field
 	raw            string
 	ExtraFields    map[string]apijson.Field
 }
@@ -162,11 +168,28 @@ const (
 	OfferAcceptedWebhookEventDataStatusSent     OfferAcceptedWebhookEventDataStatus = "sent"
 	OfferAcceptedWebhookEventDataStatusAccepted OfferAcceptedWebhookEventDataStatus = "accepted"
 	OfferAcceptedWebhookEventDataStatusVoid     OfferAcceptedWebhookEventDataStatus = "void"
+	OfferAcceptedWebhookEventDataStatusExpired  OfferAcceptedWebhookEventDataStatus = "expired"
 )
 
 func (r OfferAcceptedWebhookEventDataStatus) IsKnown() bool {
 	switch r {
-	case OfferAcceptedWebhookEventDataStatusDraft, OfferAcceptedWebhookEventDataStatusSent, OfferAcceptedWebhookEventDataStatusAccepted, OfferAcceptedWebhookEventDataStatusVoid:
+	case OfferAcceptedWebhookEventDataStatusDraft, OfferAcceptedWebhookEventDataStatusSent, OfferAcceptedWebhookEventDataStatusAccepted, OfferAcceptedWebhookEventDataStatusVoid, OfferAcceptedWebhookEventDataStatusExpired:
+		return true
+	}
+	return false
+}
+
+type OfferAcceptedWebhookEventDataVoidReason string
+
+const (
+	OfferAcceptedWebhookEventDataVoidReasonReplaced          OfferAcceptedWebhookEventDataVoidReason = "replaced"
+	OfferAcceptedWebhookEventDataVoidReasonCandidateDeclined OfferAcceptedWebhookEventDataVoidReason = "candidate_declined"
+	OfferAcceptedWebhookEventDataVoidReasonOther             OfferAcceptedWebhookEventDataVoidReason = "other"
+)
+
+func (r OfferAcceptedWebhookEventDataVoidReason) IsKnown() bool {
+	switch r {
+	case OfferAcceptedWebhookEventDataVoidReasonReplaced, OfferAcceptedWebhookEventDataVoidReasonCandidateDeclined, OfferAcceptedWebhookEventDataVoidReasonOther:
 		return true
 	}
 	return false
@@ -816,7 +839,11 @@ type OfferCreatedWebhookEventData struct {
 	// The offer's job level, or null if unassigned. Omitted when job levels are not
 	// enabled.
 	Level OfferCreatedWebhookEventDataLevel `json:"level" api:"nullable"`
-	JSON  offerCreatedWebhookEventDataJSON  `json:"-"`
+	// Additional notes explaining why the offer was voided.
+	VoidNotes string `json:"voidNotes" api:"nullable"`
+	// The reason the offer was voided. Null for offers that have not been voided.
+	VoidReason OfferCreatedWebhookEventDataVoidReason `json:"voidReason" api:"nullable"`
+	JSON       offerCreatedWebhookEventDataJSON       `json:"-"`
 }
 
 // offerCreatedWebhookEventDataJSON contains the JSON metadata for the struct [OfferCreatedWebhookEventData]
@@ -836,6 +863,8 @@ type offerCreatedWebhookEventDataJSON struct {
 	WorkerType     apijson.Field
 	Workplace      apijson.Field
 	Level          apijson.Field
+	VoidNotes      apijson.Field
+	VoidReason     apijson.Field
 	raw            string
 	ExtraFields    map[string]apijson.Field
 }
@@ -855,11 +884,28 @@ const (
 	OfferCreatedWebhookEventDataStatusSent     OfferCreatedWebhookEventDataStatus = "sent"
 	OfferCreatedWebhookEventDataStatusAccepted OfferCreatedWebhookEventDataStatus = "accepted"
 	OfferCreatedWebhookEventDataStatusVoid     OfferCreatedWebhookEventDataStatus = "void"
+	OfferCreatedWebhookEventDataStatusExpired  OfferCreatedWebhookEventDataStatus = "expired"
 )
 
 func (r OfferCreatedWebhookEventDataStatus) IsKnown() bool {
 	switch r {
-	case OfferCreatedWebhookEventDataStatusDraft, OfferCreatedWebhookEventDataStatusSent, OfferCreatedWebhookEventDataStatusAccepted, OfferCreatedWebhookEventDataStatusVoid:
+	case OfferCreatedWebhookEventDataStatusDraft, OfferCreatedWebhookEventDataStatusSent, OfferCreatedWebhookEventDataStatusAccepted, OfferCreatedWebhookEventDataStatusVoid, OfferCreatedWebhookEventDataStatusExpired:
+		return true
+	}
+	return false
+}
+
+type OfferCreatedWebhookEventDataVoidReason string
+
+const (
+	OfferCreatedWebhookEventDataVoidReasonReplaced          OfferCreatedWebhookEventDataVoidReason = "replaced"
+	OfferCreatedWebhookEventDataVoidReasonCandidateDeclined OfferCreatedWebhookEventDataVoidReason = "candidate_declined"
+	OfferCreatedWebhookEventDataVoidReasonOther             OfferCreatedWebhookEventDataVoidReason = "other"
+)
+
+func (r OfferCreatedWebhookEventDataVoidReason) IsKnown() bool {
+	switch r {
+	case OfferCreatedWebhookEventDataVoidReasonReplaced, OfferCreatedWebhookEventDataVoidReasonCandidateDeclined, OfferCreatedWebhookEventDataVoidReasonOther:
 		return true
 	}
 	return false
@@ -1444,6 +1490,722 @@ func (r offerCreatedWebhookEventDataCompensationStockJSON) RawJSON() string {
 	return r.raw
 }
 
+type OfferExpiredWebhookEvent struct {
+	// Unique event identifier (format: `<objectTag>:<uuid>`). Stable across retries.
+	ID   string                       `json:"id" api:"required"`
+	Data OfferExpiredWebhookEventData `json:"data" api:"required"`
+	// ISO 8601 timestamp of when the event occurred. Unchanged across retries.
+	Timestamp string `json:"timestamp" api:"required"`
+	// The event type.
+	Type OfferExpiredWebhookEventType `json:"type" api:"required"`
+	JSON offerExpiredWebhookEventJSON `json:"-"`
+}
+
+// offerExpiredWebhookEventJSON contains the JSON metadata for the struct [OfferExpiredWebhookEvent]
+type offerExpiredWebhookEventJSON struct {
+	ID          apijson.Field
+	Data        apijson.Field
+	Timestamp   apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *OfferExpiredWebhookEvent) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r offerExpiredWebhookEventJSON) RawJSON() string {
+	return r.raw
+}
+
+type OfferExpiredWebhookEventType string
+
+const (
+	OfferExpiredWebhookEventTypeOfferExpired OfferExpiredWebhookEventType = "offer.expired"
+)
+
+func (r OfferExpiredWebhookEventType) IsKnown() bool {
+	switch r {
+	case OfferExpiredWebhookEventTypeOfferExpired:
+		return true
+	}
+	return false
+}
+
+type OfferExpiredWebhookEventData struct {
+	// The tag of the offer.
+	ID             string                                   `json:"id" api:"required"`
+	Candidate      OfferExpiredWebhookEventDataCandidate    `json:"candidate" api:"required"`
+	Compensation   OfferExpiredWebhookEventDataCompensation `json:"compensation" api:"required"`
+	CreatedAt      string                                   `json:"createdAt" api:"required"`
+	Department     OfferExpiredWebhookEventDataDepartment   `json:"department" api:"required,nullable"`
+	ExpirationTime string                                   `json:"expirationTime" api:"required,nullable"`
+	LastViewedAt   string                                   `json:"lastViewedAt" api:"required,nullable"`
+	Manager        OfferExpiredWebhookEventDataManager      `json:"manager" api:"required,nullable"`
+	// The candidate-facing offer portal URL. Null for offers that have not been sent.
+	OfferURL string                               `json:"offerUrl" api:"required,nullable"`
+	Position OfferExpiredWebhookEventDataPosition `json:"position" api:"required"`
+	// Display name of the person or company that sent the offer. Null for offers not
+	// yet sent.
+	SentBy     string                                 `json:"sentBy" api:"required,nullable"`
+	Status     OfferExpiredWebhookEventDataStatus     `json:"status" api:"required"`
+	WorkerType OfferExpiredWebhookEventDataWorkerType `json:"workerType" api:"required"`
+	Workplace  OfferExpiredWebhookEventDataWorkplace  `json:"workplace" api:"required,nullable"`
+	// The offer's job level, or null if unassigned. Omitted when job levels are not
+	// enabled.
+	Level OfferExpiredWebhookEventDataLevel `json:"level" api:"nullable"`
+	// Additional notes explaining why the offer was voided.
+	VoidNotes string `json:"voidNotes" api:"nullable"`
+	// The reason the offer was voided. Null for offers that have not been voided.
+	VoidReason OfferExpiredWebhookEventDataVoidReason `json:"voidReason" api:"nullable"`
+	JSON       offerExpiredWebhookEventDataJSON       `json:"-"`
+}
+
+// offerExpiredWebhookEventDataJSON contains the JSON metadata for the struct [OfferExpiredWebhookEventData]
+type offerExpiredWebhookEventDataJSON struct {
+	ID             apijson.Field
+	Candidate      apijson.Field
+	Compensation   apijson.Field
+	CreatedAt      apijson.Field
+	Department     apijson.Field
+	ExpirationTime apijson.Field
+	LastViewedAt   apijson.Field
+	Manager        apijson.Field
+	OfferURL       apijson.Field
+	Position       apijson.Field
+	SentBy         apijson.Field
+	Status         apijson.Field
+	WorkerType     apijson.Field
+	Workplace      apijson.Field
+	Level          apijson.Field
+	VoidNotes      apijson.Field
+	VoidReason     apijson.Field
+	raw            string
+	ExtraFields    map[string]apijson.Field
+}
+
+func (r *OfferExpiredWebhookEventData) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r offerExpiredWebhookEventDataJSON) RawJSON() string {
+	return r.raw
+}
+
+type OfferExpiredWebhookEventDataStatus string
+
+const (
+	OfferExpiredWebhookEventDataStatusDraft    OfferExpiredWebhookEventDataStatus = "draft"
+	OfferExpiredWebhookEventDataStatusSent     OfferExpiredWebhookEventDataStatus = "sent"
+	OfferExpiredWebhookEventDataStatusAccepted OfferExpiredWebhookEventDataStatus = "accepted"
+	OfferExpiredWebhookEventDataStatusVoid     OfferExpiredWebhookEventDataStatus = "void"
+	OfferExpiredWebhookEventDataStatusExpired  OfferExpiredWebhookEventDataStatus = "expired"
+)
+
+func (r OfferExpiredWebhookEventDataStatus) IsKnown() bool {
+	switch r {
+	case OfferExpiredWebhookEventDataStatusDraft, OfferExpiredWebhookEventDataStatusSent, OfferExpiredWebhookEventDataStatusAccepted, OfferExpiredWebhookEventDataStatusVoid, OfferExpiredWebhookEventDataStatusExpired:
+		return true
+	}
+	return false
+}
+
+type OfferExpiredWebhookEventDataVoidReason string
+
+const (
+	OfferExpiredWebhookEventDataVoidReasonReplaced          OfferExpiredWebhookEventDataVoidReason = "replaced"
+	OfferExpiredWebhookEventDataVoidReasonCandidateDeclined OfferExpiredWebhookEventDataVoidReason = "candidate_declined"
+	OfferExpiredWebhookEventDataVoidReasonOther             OfferExpiredWebhookEventDataVoidReason = "other"
+)
+
+func (r OfferExpiredWebhookEventDataVoidReason) IsKnown() bool {
+	switch r {
+	case OfferExpiredWebhookEventDataVoidReasonReplaced, OfferExpiredWebhookEventDataVoidReasonCandidateDeclined, OfferExpiredWebhookEventDataVoidReasonOther:
+		return true
+	}
+	return false
+}
+
+type OfferExpiredWebhookEventDataWorkerType string
+
+const (
+	OfferExpiredWebhookEventDataWorkerTypeEmployee         OfferExpiredWebhookEventDataWorkerType = "employee"
+	OfferExpiredWebhookEventDataWorkerTypeUsContractor     OfferExpiredWebhookEventDataWorkerType = "us_contractor"
+	OfferExpiredWebhookEventDataWorkerTypeGlobalContractor OfferExpiredWebhookEventDataWorkerType = "global_contractor"
+)
+
+func (r OfferExpiredWebhookEventDataWorkerType) IsKnown() bool {
+	switch r {
+	case OfferExpiredWebhookEventDataWorkerTypeEmployee, OfferExpiredWebhookEventDataWorkerTypeUsContractor, OfferExpiredWebhookEventDataWorkerTypeGlobalContractor:
+		return true
+	}
+	return false
+}
+
+type OfferExpiredWebhookEventDataCandidate struct {
+	ContractorDetails OfferExpiredWebhookEventDataCandidateContractorDetails `json:"contractorDetails" api:"required,nullable"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	Email     string                                    `json:"email" api:"required" format:"email"`
+	FirstName string                                    `json:"firstName" api:"required"`
+	LastName  string                                    `json:"lastName" api:"required"`
+	JSON      offerExpiredWebhookEventDataCandidateJSON `json:"-"`
+}
+
+// offerExpiredWebhookEventDataCandidateJSON contains the JSON metadata for the struct [OfferExpiredWebhookEventDataCandidate]
+type offerExpiredWebhookEventDataCandidateJSON struct {
+	ContractorDetails apijson.Field
+	Email             apijson.Field
+	FirstName         apijson.Field
+	LastName          apijson.Field
+	raw               string
+	ExtraFields       map[string]apijson.Field
+}
+
+func (r *OfferExpiredWebhookEventDataCandidate) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r offerExpiredWebhookEventDataCandidateJSON) RawJSON() string {
+	return r.raw
+}
+
+type OfferExpiredWebhookEventDataCandidateContractorDetails struct {
+	IsBusiness        bool                                                       `json:"isBusiness" api:"required"`
+	LegalBusinessName string                                                     `json:"legalBusinessName" api:"required,nullable"`
+	JSON              offerExpiredWebhookEventDataCandidateContractorDetailsJSON `json:"-"`
+}
+
+// offerExpiredWebhookEventDataCandidateContractorDetailsJSON contains the JSON metadata for the struct [OfferExpiredWebhookEventDataCandidateContractorDetails]
+type offerExpiredWebhookEventDataCandidateContractorDetailsJSON struct {
+	IsBusiness        apijson.Field
+	LegalBusinessName apijson.Field
+	raw               string
+	ExtraFields       map[string]apijson.Field
+}
+
+func (r *OfferExpiredWebhookEventDataCandidateContractorDetails) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r offerExpiredWebhookEventDataCandidateContractorDetailsJSON) RawJSON() string {
+	return r.raw
+}
+
+type OfferExpiredWebhookEventDataPosition struct {
+	Country     OfferExpiredWebhookEventDataPositionCountry `json:"country" api:"required"`
+	ScopeOfWork string                                      `json:"scopeOfWork" api:"required,nullable"`
+	StartDate   string                                      `json:"startDate" api:"required"`
+	Title       string                                      `json:"title" api:"required"`
+	JSON        offerExpiredWebhookEventDataPositionJSON    `json:"-"`
+}
+
+// offerExpiredWebhookEventDataPositionJSON contains the JSON metadata for the struct [OfferExpiredWebhookEventDataPosition]
+type offerExpiredWebhookEventDataPositionJSON struct {
+	Country     apijson.Field
+	ScopeOfWork apijson.Field
+	StartDate   apijson.Field
+	Title       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *OfferExpiredWebhookEventDataPosition) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r offerExpiredWebhookEventDataPositionJSON) RawJSON() string {
+	return r.raw
+}
+
+type OfferExpiredWebhookEventDataPositionCountry string
+
+const (
+	OfferExpiredWebhookEventDataPositionCountryAd OfferExpiredWebhookEventDataPositionCountry = "AD"
+	OfferExpiredWebhookEventDataPositionCountryAe OfferExpiredWebhookEventDataPositionCountry = "AE"
+	OfferExpiredWebhookEventDataPositionCountryAf OfferExpiredWebhookEventDataPositionCountry = "AF"
+	OfferExpiredWebhookEventDataPositionCountryAg OfferExpiredWebhookEventDataPositionCountry = "AG"
+	OfferExpiredWebhookEventDataPositionCountryAI OfferExpiredWebhookEventDataPositionCountry = "AI"
+	OfferExpiredWebhookEventDataPositionCountryAl OfferExpiredWebhookEventDataPositionCountry = "AL"
+	OfferExpiredWebhookEventDataPositionCountryAm OfferExpiredWebhookEventDataPositionCountry = "AM"
+	OfferExpiredWebhookEventDataPositionCountryAo OfferExpiredWebhookEventDataPositionCountry = "AO"
+	OfferExpiredWebhookEventDataPositionCountryAq OfferExpiredWebhookEventDataPositionCountry = "AQ"
+	OfferExpiredWebhookEventDataPositionCountryAr OfferExpiredWebhookEventDataPositionCountry = "AR"
+	OfferExpiredWebhookEventDataPositionCountryAs OfferExpiredWebhookEventDataPositionCountry = "AS"
+	OfferExpiredWebhookEventDataPositionCountryAt OfferExpiredWebhookEventDataPositionCountry = "AT"
+	OfferExpiredWebhookEventDataPositionCountryAu OfferExpiredWebhookEventDataPositionCountry = "AU"
+	OfferExpiredWebhookEventDataPositionCountryAw OfferExpiredWebhookEventDataPositionCountry = "AW"
+	OfferExpiredWebhookEventDataPositionCountryAx OfferExpiredWebhookEventDataPositionCountry = "AX"
+	OfferExpiredWebhookEventDataPositionCountryAz OfferExpiredWebhookEventDataPositionCountry = "AZ"
+	OfferExpiredWebhookEventDataPositionCountryBa OfferExpiredWebhookEventDataPositionCountry = "BA"
+	OfferExpiredWebhookEventDataPositionCountryBb OfferExpiredWebhookEventDataPositionCountry = "BB"
+	OfferExpiredWebhookEventDataPositionCountryBd OfferExpiredWebhookEventDataPositionCountry = "BD"
+	OfferExpiredWebhookEventDataPositionCountryBe OfferExpiredWebhookEventDataPositionCountry = "BE"
+	OfferExpiredWebhookEventDataPositionCountryBf OfferExpiredWebhookEventDataPositionCountry = "BF"
+	OfferExpiredWebhookEventDataPositionCountryBg OfferExpiredWebhookEventDataPositionCountry = "BG"
+	OfferExpiredWebhookEventDataPositionCountryBh OfferExpiredWebhookEventDataPositionCountry = "BH"
+	OfferExpiredWebhookEventDataPositionCountryBi OfferExpiredWebhookEventDataPositionCountry = "BI"
+	OfferExpiredWebhookEventDataPositionCountryBj OfferExpiredWebhookEventDataPositionCountry = "BJ"
+	OfferExpiredWebhookEventDataPositionCountryBl OfferExpiredWebhookEventDataPositionCountry = "BL"
+	OfferExpiredWebhookEventDataPositionCountryBm OfferExpiredWebhookEventDataPositionCountry = "BM"
+	OfferExpiredWebhookEventDataPositionCountryBn OfferExpiredWebhookEventDataPositionCountry = "BN"
+	OfferExpiredWebhookEventDataPositionCountryBo OfferExpiredWebhookEventDataPositionCountry = "BO"
+	OfferExpiredWebhookEventDataPositionCountryBq OfferExpiredWebhookEventDataPositionCountry = "BQ"
+	OfferExpiredWebhookEventDataPositionCountryBr OfferExpiredWebhookEventDataPositionCountry = "BR"
+	OfferExpiredWebhookEventDataPositionCountryBs OfferExpiredWebhookEventDataPositionCountry = "BS"
+	OfferExpiredWebhookEventDataPositionCountryBt OfferExpiredWebhookEventDataPositionCountry = "BT"
+	OfferExpiredWebhookEventDataPositionCountryBv OfferExpiredWebhookEventDataPositionCountry = "BV"
+	OfferExpiredWebhookEventDataPositionCountryBw OfferExpiredWebhookEventDataPositionCountry = "BW"
+	OfferExpiredWebhookEventDataPositionCountryBy OfferExpiredWebhookEventDataPositionCountry = "BY"
+	OfferExpiredWebhookEventDataPositionCountryBz OfferExpiredWebhookEventDataPositionCountry = "BZ"
+	OfferExpiredWebhookEventDataPositionCountryCa OfferExpiredWebhookEventDataPositionCountry = "CA"
+	OfferExpiredWebhookEventDataPositionCountryCc OfferExpiredWebhookEventDataPositionCountry = "CC"
+	OfferExpiredWebhookEventDataPositionCountryCd OfferExpiredWebhookEventDataPositionCountry = "CD"
+	OfferExpiredWebhookEventDataPositionCountryCf OfferExpiredWebhookEventDataPositionCountry = "CF"
+	OfferExpiredWebhookEventDataPositionCountryCg OfferExpiredWebhookEventDataPositionCountry = "CG"
+	OfferExpiredWebhookEventDataPositionCountryCh OfferExpiredWebhookEventDataPositionCountry = "CH"
+	OfferExpiredWebhookEventDataPositionCountryCi OfferExpiredWebhookEventDataPositionCountry = "CI"
+	OfferExpiredWebhookEventDataPositionCountryCk OfferExpiredWebhookEventDataPositionCountry = "CK"
+	OfferExpiredWebhookEventDataPositionCountryCl OfferExpiredWebhookEventDataPositionCountry = "CL"
+	OfferExpiredWebhookEventDataPositionCountryCm OfferExpiredWebhookEventDataPositionCountry = "CM"
+	OfferExpiredWebhookEventDataPositionCountryCn OfferExpiredWebhookEventDataPositionCountry = "CN"
+	OfferExpiredWebhookEventDataPositionCountryCo OfferExpiredWebhookEventDataPositionCountry = "CO"
+	OfferExpiredWebhookEventDataPositionCountryCr OfferExpiredWebhookEventDataPositionCountry = "CR"
+	OfferExpiredWebhookEventDataPositionCountryCu OfferExpiredWebhookEventDataPositionCountry = "CU"
+	OfferExpiredWebhookEventDataPositionCountryCv OfferExpiredWebhookEventDataPositionCountry = "CV"
+	OfferExpiredWebhookEventDataPositionCountryCw OfferExpiredWebhookEventDataPositionCountry = "CW"
+	OfferExpiredWebhookEventDataPositionCountryCx OfferExpiredWebhookEventDataPositionCountry = "CX"
+	OfferExpiredWebhookEventDataPositionCountryCy OfferExpiredWebhookEventDataPositionCountry = "CY"
+	OfferExpiredWebhookEventDataPositionCountryCz OfferExpiredWebhookEventDataPositionCountry = "CZ"
+	OfferExpiredWebhookEventDataPositionCountryDe OfferExpiredWebhookEventDataPositionCountry = "DE"
+	OfferExpiredWebhookEventDataPositionCountryDj OfferExpiredWebhookEventDataPositionCountry = "DJ"
+	OfferExpiredWebhookEventDataPositionCountryDk OfferExpiredWebhookEventDataPositionCountry = "DK"
+	OfferExpiredWebhookEventDataPositionCountryDm OfferExpiredWebhookEventDataPositionCountry = "DM"
+	OfferExpiredWebhookEventDataPositionCountryDo OfferExpiredWebhookEventDataPositionCountry = "DO"
+	OfferExpiredWebhookEventDataPositionCountryDz OfferExpiredWebhookEventDataPositionCountry = "DZ"
+	OfferExpiredWebhookEventDataPositionCountryEc OfferExpiredWebhookEventDataPositionCountry = "EC"
+	OfferExpiredWebhookEventDataPositionCountryEe OfferExpiredWebhookEventDataPositionCountry = "EE"
+	OfferExpiredWebhookEventDataPositionCountryEg OfferExpiredWebhookEventDataPositionCountry = "EG"
+	OfferExpiredWebhookEventDataPositionCountryEh OfferExpiredWebhookEventDataPositionCountry = "EH"
+	OfferExpiredWebhookEventDataPositionCountryEr OfferExpiredWebhookEventDataPositionCountry = "ER"
+	OfferExpiredWebhookEventDataPositionCountryEs OfferExpiredWebhookEventDataPositionCountry = "ES"
+	OfferExpiredWebhookEventDataPositionCountryEt OfferExpiredWebhookEventDataPositionCountry = "ET"
+	OfferExpiredWebhookEventDataPositionCountryFi OfferExpiredWebhookEventDataPositionCountry = "FI"
+	OfferExpiredWebhookEventDataPositionCountryFj OfferExpiredWebhookEventDataPositionCountry = "FJ"
+	OfferExpiredWebhookEventDataPositionCountryFk OfferExpiredWebhookEventDataPositionCountry = "FK"
+	OfferExpiredWebhookEventDataPositionCountryFm OfferExpiredWebhookEventDataPositionCountry = "FM"
+	OfferExpiredWebhookEventDataPositionCountryFo OfferExpiredWebhookEventDataPositionCountry = "FO"
+	OfferExpiredWebhookEventDataPositionCountryFr OfferExpiredWebhookEventDataPositionCountry = "FR"
+	OfferExpiredWebhookEventDataPositionCountryGa OfferExpiredWebhookEventDataPositionCountry = "GA"
+	OfferExpiredWebhookEventDataPositionCountryGB OfferExpiredWebhookEventDataPositionCountry = "GB"
+	OfferExpiredWebhookEventDataPositionCountryGd OfferExpiredWebhookEventDataPositionCountry = "GD"
+	OfferExpiredWebhookEventDataPositionCountryGe OfferExpiredWebhookEventDataPositionCountry = "GE"
+	OfferExpiredWebhookEventDataPositionCountryGf OfferExpiredWebhookEventDataPositionCountry = "GF"
+	OfferExpiredWebhookEventDataPositionCountryGg OfferExpiredWebhookEventDataPositionCountry = "GG"
+	OfferExpiredWebhookEventDataPositionCountryGh OfferExpiredWebhookEventDataPositionCountry = "GH"
+	OfferExpiredWebhookEventDataPositionCountryGi OfferExpiredWebhookEventDataPositionCountry = "GI"
+	OfferExpiredWebhookEventDataPositionCountryGl OfferExpiredWebhookEventDataPositionCountry = "GL"
+	OfferExpiredWebhookEventDataPositionCountryGm OfferExpiredWebhookEventDataPositionCountry = "GM"
+	OfferExpiredWebhookEventDataPositionCountryGn OfferExpiredWebhookEventDataPositionCountry = "GN"
+	OfferExpiredWebhookEventDataPositionCountryGp OfferExpiredWebhookEventDataPositionCountry = "GP"
+	OfferExpiredWebhookEventDataPositionCountryGq OfferExpiredWebhookEventDataPositionCountry = "GQ"
+	OfferExpiredWebhookEventDataPositionCountryGr OfferExpiredWebhookEventDataPositionCountry = "GR"
+	OfferExpiredWebhookEventDataPositionCountryGs OfferExpiredWebhookEventDataPositionCountry = "GS"
+	OfferExpiredWebhookEventDataPositionCountryGt OfferExpiredWebhookEventDataPositionCountry = "GT"
+	OfferExpiredWebhookEventDataPositionCountryGu OfferExpiredWebhookEventDataPositionCountry = "GU"
+	OfferExpiredWebhookEventDataPositionCountryGw OfferExpiredWebhookEventDataPositionCountry = "GW"
+	OfferExpiredWebhookEventDataPositionCountryGy OfferExpiredWebhookEventDataPositionCountry = "GY"
+	OfferExpiredWebhookEventDataPositionCountryHk OfferExpiredWebhookEventDataPositionCountry = "HK"
+	OfferExpiredWebhookEventDataPositionCountryHm OfferExpiredWebhookEventDataPositionCountry = "HM"
+	OfferExpiredWebhookEventDataPositionCountryHn OfferExpiredWebhookEventDataPositionCountry = "HN"
+	OfferExpiredWebhookEventDataPositionCountryHr OfferExpiredWebhookEventDataPositionCountry = "HR"
+	OfferExpiredWebhookEventDataPositionCountryHt OfferExpiredWebhookEventDataPositionCountry = "HT"
+	OfferExpiredWebhookEventDataPositionCountryHu OfferExpiredWebhookEventDataPositionCountry = "HU"
+	OfferExpiredWebhookEventDataPositionCountryID OfferExpiredWebhookEventDataPositionCountry = "ID"
+	OfferExpiredWebhookEventDataPositionCountryIe OfferExpiredWebhookEventDataPositionCountry = "IE"
+	OfferExpiredWebhookEventDataPositionCountryIl OfferExpiredWebhookEventDataPositionCountry = "IL"
+	OfferExpiredWebhookEventDataPositionCountryIm OfferExpiredWebhookEventDataPositionCountry = "IM"
+	OfferExpiredWebhookEventDataPositionCountryIn OfferExpiredWebhookEventDataPositionCountry = "IN"
+	OfferExpiredWebhookEventDataPositionCountryIo OfferExpiredWebhookEventDataPositionCountry = "IO"
+	OfferExpiredWebhookEventDataPositionCountryIq OfferExpiredWebhookEventDataPositionCountry = "IQ"
+	OfferExpiredWebhookEventDataPositionCountryIr OfferExpiredWebhookEventDataPositionCountry = "IR"
+	OfferExpiredWebhookEventDataPositionCountryIs OfferExpiredWebhookEventDataPositionCountry = "IS"
+	OfferExpiredWebhookEventDataPositionCountryIt OfferExpiredWebhookEventDataPositionCountry = "IT"
+	OfferExpiredWebhookEventDataPositionCountryJe OfferExpiredWebhookEventDataPositionCountry = "JE"
+	OfferExpiredWebhookEventDataPositionCountryJm OfferExpiredWebhookEventDataPositionCountry = "JM"
+	OfferExpiredWebhookEventDataPositionCountryJo OfferExpiredWebhookEventDataPositionCountry = "JO"
+	OfferExpiredWebhookEventDataPositionCountryJp OfferExpiredWebhookEventDataPositionCountry = "JP"
+	OfferExpiredWebhookEventDataPositionCountryKe OfferExpiredWebhookEventDataPositionCountry = "KE"
+	OfferExpiredWebhookEventDataPositionCountryKg OfferExpiredWebhookEventDataPositionCountry = "KG"
+	OfferExpiredWebhookEventDataPositionCountryKh OfferExpiredWebhookEventDataPositionCountry = "KH"
+	OfferExpiredWebhookEventDataPositionCountryKi OfferExpiredWebhookEventDataPositionCountry = "KI"
+	OfferExpiredWebhookEventDataPositionCountryKm OfferExpiredWebhookEventDataPositionCountry = "KM"
+	OfferExpiredWebhookEventDataPositionCountryKn OfferExpiredWebhookEventDataPositionCountry = "KN"
+	OfferExpiredWebhookEventDataPositionCountryKp OfferExpiredWebhookEventDataPositionCountry = "KP"
+	OfferExpiredWebhookEventDataPositionCountryKr OfferExpiredWebhookEventDataPositionCountry = "KR"
+	OfferExpiredWebhookEventDataPositionCountryKw OfferExpiredWebhookEventDataPositionCountry = "KW"
+	OfferExpiredWebhookEventDataPositionCountryKy OfferExpiredWebhookEventDataPositionCountry = "KY"
+	OfferExpiredWebhookEventDataPositionCountryKz OfferExpiredWebhookEventDataPositionCountry = "KZ"
+	OfferExpiredWebhookEventDataPositionCountryLa OfferExpiredWebhookEventDataPositionCountry = "LA"
+	OfferExpiredWebhookEventDataPositionCountryLb OfferExpiredWebhookEventDataPositionCountry = "LB"
+	OfferExpiredWebhookEventDataPositionCountryLc OfferExpiredWebhookEventDataPositionCountry = "LC"
+	OfferExpiredWebhookEventDataPositionCountryLi OfferExpiredWebhookEventDataPositionCountry = "LI"
+	OfferExpiredWebhookEventDataPositionCountryLk OfferExpiredWebhookEventDataPositionCountry = "LK"
+	OfferExpiredWebhookEventDataPositionCountryLr OfferExpiredWebhookEventDataPositionCountry = "LR"
+	OfferExpiredWebhookEventDataPositionCountryLs OfferExpiredWebhookEventDataPositionCountry = "LS"
+	OfferExpiredWebhookEventDataPositionCountryLt OfferExpiredWebhookEventDataPositionCountry = "LT"
+	OfferExpiredWebhookEventDataPositionCountryLu OfferExpiredWebhookEventDataPositionCountry = "LU"
+	OfferExpiredWebhookEventDataPositionCountryLv OfferExpiredWebhookEventDataPositionCountry = "LV"
+	OfferExpiredWebhookEventDataPositionCountryLy OfferExpiredWebhookEventDataPositionCountry = "LY"
+	OfferExpiredWebhookEventDataPositionCountryMa OfferExpiredWebhookEventDataPositionCountry = "MA"
+	OfferExpiredWebhookEventDataPositionCountryMc OfferExpiredWebhookEventDataPositionCountry = "MC"
+	OfferExpiredWebhookEventDataPositionCountryMd OfferExpiredWebhookEventDataPositionCountry = "MD"
+	OfferExpiredWebhookEventDataPositionCountryMe OfferExpiredWebhookEventDataPositionCountry = "ME"
+	OfferExpiredWebhookEventDataPositionCountryMf OfferExpiredWebhookEventDataPositionCountry = "MF"
+	OfferExpiredWebhookEventDataPositionCountryMg OfferExpiredWebhookEventDataPositionCountry = "MG"
+	OfferExpiredWebhookEventDataPositionCountryMh OfferExpiredWebhookEventDataPositionCountry = "MH"
+	OfferExpiredWebhookEventDataPositionCountryMk OfferExpiredWebhookEventDataPositionCountry = "MK"
+	OfferExpiredWebhookEventDataPositionCountryMl OfferExpiredWebhookEventDataPositionCountry = "ML"
+	OfferExpiredWebhookEventDataPositionCountryMm OfferExpiredWebhookEventDataPositionCountry = "MM"
+	OfferExpiredWebhookEventDataPositionCountryMn OfferExpiredWebhookEventDataPositionCountry = "MN"
+	OfferExpiredWebhookEventDataPositionCountryMo OfferExpiredWebhookEventDataPositionCountry = "MO"
+	OfferExpiredWebhookEventDataPositionCountryMp OfferExpiredWebhookEventDataPositionCountry = "MP"
+	OfferExpiredWebhookEventDataPositionCountryMq OfferExpiredWebhookEventDataPositionCountry = "MQ"
+	OfferExpiredWebhookEventDataPositionCountryMr OfferExpiredWebhookEventDataPositionCountry = "MR"
+	OfferExpiredWebhookEventDataPositionCountryMs OfferExpiredWebhookEventDataPositionCountry = "MS"
+	OfferExpiredWebhookEventDataPositionCountryMt OfferExpiredWebhookEventDataPositionCountry = "MT"
+	OfferExpiredWebhookEventDataPositionCountryMu OfferExpiredWebhookEventDataPositionCountry = "MU"
+	OfferExpiredWebhookEventDataPositionCountryMv OfferExpiredWebhookEventDataPositionCountry = "MV"
+	OfferExpiredWebhookEventDataPositionCountryMw OfferExpiredWebhookEventDataPositionCountry = "MW"
+	OfferExpiredWebhookEventDataPositionCountryMx OfferExpiredWebhookEventDataPositionCountry = "MX"
+	OfferExpiredWebhookEventDataPositionCountryMy OfferExpiredWebhookEventDataPositionCountry = "MY"
+	OfferExpiredWebhookEventDataPositionCountryMz OfferExpiredWebhookEventDataPositionCountry = "MZ"
+	OfferExpiredWebhookEventDataPositionCountryNa OfferExpiredWebhookEventDataPositionCountry = "NA"
+	OfferExpiredWebhookEventDataPositionCountryNc OfferExpiredWebhookEventDataPositionCountry = "NC"
+	OfferExpiredWebhookEventDataPositionCountryNe OfferExpiredWebhookEventDataPositionCountry = "NE"
+	OfferExpiredWebhookEventDataPositionCountryNf OfferExpiredWebhookEventDataPositionCountry = "NF"
+	OfferExpiredWebhookEventDataPositionCountryNg OfferExpiredWebhookEventDataPositionCountry = "NG"
+	OfferExpiredWebhookEventDataPositionCountryNi OfferExpiredWebhookEventDataPositionCountry = "NI"
+	OfferExpiredWebhookEventDataPositionCountryNl OfferExpiredWebhookEventDataPositionCountry = "NL"
+	OfferExpiredWebhookEventDataPositionCountryNo OfferExpiredWebhookEventDataPositionCountry = "NO"
+	OfferExpiredWebhookEventDataPositionCountryNp OfferExpiredWebhookEventDataPositionCountry = "NP"
+	OfferExpiredWebhookEventDataPositionCountryNr OfferExpiredWebhookEventDataPositionCountry = "NR"
+	OfferExpiredWebhookEventDataPositionCountryNu OfferExpiredWebhookEventDataPositionCountry = "NU"
+	OfferExpiredWebhookEventDataPositionCountryNz OfferExpiredWebhookEventDataPositionCountry = "NZ"
+	OfferExpiredWebhookEventDataPositionCountryOm OfferExpiredWebhookEventDataPositionCountry = "OM"
+	OfferExpiredWebhookEventDataPositionCountryPa OfferExpiredWebhookEventDataPositionCountry = "PA"
+	OfferExpiredWebhookEventDataPositionCountryPe OfferExpiredWebhookEventDataPositionCountry = "PE"
+	OfferExpiredWebhookEventDataPositionCountryPf OfferExpiredWebhookEventDataPositionCountry = "PF"
+	OfferExpiredWebhookEventDataPositionCountryPg OfferExpiredWebhookEventDataPositionCountry = "PG"
+	OfferExpiredWebhookEventDataPositionCountryPh OfferExpiredWebhookEventDataPositionCountry = "PH"
+	OfferExpiredWebhookEventDataPositionCountryPk OfferExpiredWebhookEventDataPositionCountry = "PK"
+	OfferExpiredWebhookEventDataPositionCountryPl OfferExpiredWebhookEventDataPositionCountry = "PL"
+	OfferExpiredWebhookEventDataPositionCountryPm OfferExpiredWebhookEventDataPositionCountry = "PM"
+	OfferExpiredWebhookEventDataPositionCountryPn OfferExpiredWebhookEventDataPositionCountry = "PN"
+	OfferExpiredWebhookEventDataPositionCountryPr OfferExpiredWebhookEventDataPositionCountry = "PR"
+	OfferExpiredWebhookEventDataPositionCountryPs OfferExpiredWebhookEventDataPositionCountry = "PS"
+	OfferExpiredWebhookEventDataPositionCountryPt OfferExpiredWebhookEventDataPositionCountry = "PT"
+	OfferExpiredWebhookEventDataPositionCountryPw OfferExpiredWebhookEventDataPositionCountry = "PW"
+	OfferExpiredWebhookEventDataPositionCountryPy OfferExpiredWebhookEventDataPositionCountry = "PY"
+	OfferExpiredWebhookEventDataPositionCountryQa OfferExpiredWebhookEventDataPositionCountry = "QA"
+	OfferExpiredWebhookEventDataPositionCountryRe OfferExpiredWebhookEventDataPositionCountry = "RE"
+	OfferExpiredWebhookEventDataPositionCountryRo OfferExpiredWebhookEventDataPositionCountry = "RO"
+	OfferExpiredWebhookEventDataPositionCountryRs OfferExpiredWebhookEventDataPositionCountry = "RS"
+	OfferExpiredWebhookEventDataPositionCountryRu OfferExpiredWebhookEventDataPositionCountry = "RU"
+	OfferExpiredWebhookEventDataPositionCountryRw OfferExpiredWebhookEventDataPositionCountry = "RW"
+	OfferExpiredWebhookEventDataPositionCountrySa OfferExpiredWebhookEventDataPositionCountry = "SA"
+	OfferExpiredWebhookEventDataPositionCountrySb OfferExpiredWebhookEventDataPositionCountry = "SB"
+	OfferExpiredWebhookEventDataPositionCountrySc OfferExpiredWebhookEventDataPositionCountry = "SC"
+	OfferExpiredWebhookEventDataPositionCountrySd OfferExpiredWebhookEventDataPositionCountry = "SD"
+	OfferExpiredWebhookEventDataPositionCountrySe OfferExpiredWebhookEventDataPositionCountry = "SE"
+	OfferExpiredWebhookEventDataPositionCountrySg OfferExpiredWebhookEventDataPositionCountry = "SG"
+	OfferExpiredWebhookEventDataPositionCountrySh OfferExpiredWebhookEventDataPositionCountry = "SH"
+	OfferExpiredWebhookEventDataPositionCountrySi OfferExpiredWebhookEventDataPositionCountry = "SI"
+	OfferExpiredWebhookEventDataPositionCountrySj OfferExpiredWebhookEventDataPositionCountry = "SJ"
+	OfferExpiredWebhookEventDataPositionCountrySk OfferExpiredWebhookEventDataPositionCountry = "SK"
+	OfferExpiredWebhookEventDataPositionCountrySl OfferExpiredWebhookEventDataPositionCountry = "SL"
+	OfferExpiredWebhookEventDataPositionCountrySm OfferExpiredWebhookEventDataPositionCountry = "SM"
+	OfferExpiredWebhookEventDataPositionCountrySn OfferExpiredWebhookEventDataPositionCountry = "SN"
+	OfferExpiredWebhookEventDataPositionCountrySo OfferExpiredWebhookEventDataPositionCountry = "SO"
+	OfferExpiredWebhookEventDataPositionCountrySr OfferExpiredWebhookEventDataPositionCountry = "SR"
+	OfferExpiredWebhookEventDataPositionCountrySS OfferExpiredWebhookEventDataPositionCountry = "SS"
+	OfferExpiredWebhookEventDataPositionCountrySt OfferExpiredWebhookEventDataPositionCountry = "ST"
+	OfferExpiredWebhookEventDataPositionCountrySv OfferExpiredWebhookEventDataPositionCountry = "SV"
+	OfferExpiredWebhookEventDataPositionCountrySx OfferExpiredWebhookEventDataPositionCountry = "SX"
+	OfferExpiredWebhookEventDataPositionCountrySy OfferExpiredWebhookEventDataPositionCountry = "SY"
+	OfferExpiredWebhookEventDataPositionCountrySz OfferExpiredWebhookEventDataPositionCountry = "SZ"
+	OfferExpiredWebhookEventDataPositionCountryTc OfferExpiredWebhookEventDataPositionCountry = "TC"
+	OfferExpiredWebhookEventDataPositionCountryTd OfferExpiredWebhookEventDataPositionCountry = "TD"
+	OfferExpiredWebhookEventDataPositionCountryTf OfferExpiredWebhookEventDataPositionCountry = "TF"
+	OfferExpiredWebhookEventDataPositionCountryTg OfferExpiredWebhookEventDataPositionCountry = "TG"
+	OfferExpiredWebhookEventDataPositionCountryTh OfferExpiredWebhookEventDataPositionCountry = "TH"
+	OfferExpiredWebhookEventDataPositionCountryTj OfferExpiredWebhookEventDataPositionCountry = "TJ"
+	OfferExpiredWebhookEventDataPositionCountryTk OfferExpiredWebhookEventDataPositionCountry = "TK"
+	OfferExpiredWebhookEventDataPositionCountryTl OfferExpiredWebhookEventDataPositionCountry = "TL"
+	OfferExpiredWebhookEventDataPositionCountryTm OfferExpiredWebhookEventDataPositionCountry = "TM"
+	OfferExpiredWebhookEventDataPositionCountryTn OfferExpiredWebhookEventDataPositionCountry = "TN"
+	OfferExpiredWebhookEventDataPositionCountryTo OfferExpiredWebhookEventDataPositionCountry = "TO"
+	OfferExpiredWebhookEventDataPositionCountryTr OfferExpiredWebhookEventDataPositionCountry = "TR"
+	OfferExpiredWebhookEventDataPositionCountryTt OfferExpiredWebhookEventDataPositionCountry = "TT"
+	OfferExpiredWebhookEventDataPositionCountryTv OfferExpiredWebhookEventDataPositionCountry = "TV"
+	OfferExpiredWebhookEventDataPositionCountryTw OfferExpiredWebhookEventDataPositionCountry = "TW"
+	OfferExpiredWebhookEventDataPositionCountryTz OfferExpiredWebhookEventDataPositionCountry = "TZ"
+	OfferExpiredWebhookEventDataPositionCountryUa OfferExpiredWebhookEventDataPositionCountry = "UA"
+	OfferExpiredWebhookEventDataPositionCountryUg OfferExpiredWebhookEventDataPositionCountry = "UG"
+	OfferExpiredWebhookEventDataPositionCountryUm OfferExpiredWebhookEventDataPositionCountry = "UM"
+	OfferExpiredWebhookEventDataPositionCountryUs OfferExpiredWebhookEventDataPositionCountry = "US"
+	OfferExpiredWebhookEventDataPositionCountryUy OfferExpiredWebhookEventDataPositionCountry = "UY"
+	OfferExpiredWebhookEventDataPositionCountryUz OfferExpiredWebhookEventDataPositionCountry = "UZ"
+	OfferExpiredWebhookEventDataPositionCountryVa OfferExpiredWebhookEventDataPositionCountry = "VA"
+	OfferExpiredWebhookEventDataPositionCountryVc OfferExpiredWebhookEventDataPositionCountry = "VC"
+	OfferExpiredWebhookEventDataPositionCountryVe OfferExpiredWebhookEventDataPositionCountry = "VE"
+	OfferExpiredWebhookEventDataPositionCountryVg OfferExpiredWebhookEventDataPositionCountry = "VG"
+	OfferExpiredWebhookEventDataPositionCountryVi OfferExpiredWebhookEventDataPositionCountry = "VI"
+	OfferExpiredWebhookEventDataPositionCountryVn OfferExpiredWebhookEventDataPositionCountry = "VN"
+	OfferExpiredWebhookEventDataPositionCountryVu OfferExpiredWebhookEventDataPositionCountry = "VU"
+	OfferExpiredWebhookEventDataPositionCountryWf OfferExpiredWebhookEventDataPositionCountry = "WF"
+	OfferExpiredWebhookEventDataPositionCountryWs OfferExpiredWebhookEventDataPositionCountry = "WS"
+	OfferExpiredWebhookEventDataPositionCountryXk OfferExpiredWebhookEventDataPositionCountry = "XK"
+	OfferExpiredWebhookEventDataPositionCountryYe OfferExpiredWebhookEventDataPositionCountry = "YE"
+	OfferExpiredWebhookEventDataPositionCountryYt OfferExpiredWebhookEventDataPositionCountry = "YT"
+	OfferExpiredWebhookEventDataPositionCountryZa OfferExpiredWebhookEventDataPositionCountry = "ZA"
+	OfferExpiredWebhookEventDataPositionCountryZm OfferExpiredWebhookEventDataPositionCountry = "ZM"
+	OfferExpiredWebhookEventDataPositionCountryZw OfferExpiredWebhookEventDataPositionCountry = "ZW"
+)
+
+func (r OfferExpiredWebhookEventDataPositionCountry) IsKnown() bool {
+	switch r {
+	case OfferExpiredWebhookEventDataPositionCountryAd, OfferExpiredWebhookEventDataPositionCountryAe, OfferExpiredWebhookEventDataPositionCountryAf, OfferExpiredWebhookEventDataPositionCountryAg, OfferExpiredWebhookEventDataPositionCountryAI, OfferExpiredWebhookEventDataPositionCountryAl, OfferExpiredWebhookEventDataPositionCountryAm, OfferExpiredWebhookEventDataPositionCountryAo, OfferExpiredWebhookEventDataPositionCountryAq, OfferExpiredWebhookEventDataPositionCountryAr, OfferExpiredWebhookEventDataPositionCountryAs, OfferExpiredWebhookEventDataPositionCountryAt, OfferExpiredWebhookEventDataPositionCountryAu, OfferExpiredWebhookEventDataPositionCountryAw, OfferExpiredWebhookEventDataPositionCountryAx, OfferExpiredWebhookEventDataPositionCountryAz, OfferExpiredWebhookEventDataPositionCountryBa, OfferExpiredWebhookEventDataPositionCountryBb, OfferExpiredWebhookEventDataPositionCountryBd, OfferExpiredWebhookEventDataPositionCountryBe, OfferExpiredWebhookEventDataPositionCountryBf, OfferExpiredWebhookEventDataPositionCountryBg, OfferExpiredWebhookEventDataPositionCountryBh, OfferExpiredWebhookEventDataPositionCountryBi, OfferExpiredWebhookEventDataPositionCountryBj, OfferExpiredWebhookEventDataPositionCountryBl, OfferExpiredWebhookEventDataPositionCountryBm, OfferExpiredWebhookEventDataPositionCountryBn, OfferExpiredWebhookEventDataPositionCountryBo, OfferExpiredWebhookEventDataPositionCountryBq, OfferExpiredWebhookEventDataPositionCountryBr, OfferExpiredWebhookEventDataPositionCountryBs, OfferExpiredWebhookEventDataPositionCountryBt, OfferExpiredWebhookEventDataPositionCountryBv, OfferExpiredWebhookEventDataPositionCountryBw, OfferExpiredWebhookEventDataPositionCountryBy, OfferExpiredWebhookEventDataPositionCountryBz, OfferExpiredWebhookEventDataPositionCountryCa, OfferExpiredWebhookEventDataPositionCountryCc, OfferExpiredWebhookEventDataPositionCountryCd, OfferExpiredWebhookEventDataPositionCountryCf, OfferExpiredWebhookEventDataPositionCountryCg, OfferExpiredWebhookEventDataPositionCountryCh, OfferExpiredWebhookEventDataPositionCountryCi, OfferExpiredWebhookEventDataPositionCountryCk, OfferExpiredWebhookEventDataPositionCountryCl, OfferExpiredWebhookEventDataPositionCountryCm, OfferExpiredWebhookEventDataPositionCountryCn, OfferExpiredWebhookEventDataPositionCountryCo, OfferExpiredWebhookEventDataPositionCountryCr, OfferExpiredWebhookEventDataPositionCountryCu, OfferExpiredWebhookEventDataPositionCountryCv, OfferExpiredWebhookEventDataPositionCountryCw, OfferExpiredWebhookEventDataPositionCountryCx, OfferExpiredWebhookEventDataPositionCountryCy, OfferExpiredWebhookEventDataPositionCountryCz, OfferExpiredWebhookEventDataPositionCountryDe, OfferExpiredWebhookEventDataPositionCountryDj, OfferExpiredWebhookEventDataPositionCountryDk, OfferExpiredWebhookEventDataPositionCountryDm, OfferExpiredWebhookEventDataPositionCountryDo, OfferExpiredWebhookEventDataPositionCountryDz, OfferExpiredWebhookEventDataPositionCountryEc, OfferExpiredWebhookEventDataPositionCountryEe, OfferExpiredWebhookEventDataPositionCountryEg, OfferExpiredWebhookEventDataPositionCountryEh, OfferExpiredWebhookEventDataPositionCountryEr, OfferExpiredWebhookEventDataPositionCountryEs, OfferExpiredWebhookEventDataPositionCountryEt, OfferExpiredWebhookEventDataPositionCountryFi, OfferExpiredWebhookEventDataPositionCountryFj, OfferExpiredWebhookEventDataPositionCountryFk, OfferExpiredWebhookEventDataPositionCountryFm, OfferExpiredWebhookEventDataPositionCountryFo, OfferExpiredWebhookEventDataPositionCountryFr, OfferExpiredWebhookEventDataPositionCountryGa, OfferExpiredWebhookEventDataPositionCountryGB, OfferExpiredWebhookEventDataPositionCountryGd, OfferExpiredWebhookEventDataPositionCountryGe, OfferExpiredWebhookEventDataPositionCountryGf, OfferExpiredWebhookEventDataPositionCountryGg, OfferExpiredWebhookEventDataPositionCountryGh, OfferExpiredWebhookEventDataPositionCountryGi, OfferExpiredWebhookEventDataPositionCountryGl, OfferExpiredWebhookEventDataPositionCountryGm, OfferExpiredWebhookEventDataPositionCountryGn, OfferExpiredWebhookEventDataPositionCountryGp, OfferExpiredWebhookEventDataPositionCountryGq, OfferExpiredWebhookEventDataPositionCountryGr, OfferExpiredWebhookEventDataPositionCountryGs, OfferExpiredWebhookEventDataPositionCountryGt, OfferExpiredWebhookEventDataPositionCountryGu, OfferExpiredWebhookEventDataPositionCountryGw, OfferExpiredWebhookEventDataPositionCountryGy, OfferExpiredWebhookEventDataPositionCountryHk, OfferExpiredWebhookEventDataPositionCountryHm, OfferExpiredWebhookEventDataPositionCountryHn, OfferExpiredWebhookEventDataPositionCountryHr, OfferExpiredWebhookEventDataPositionCountryHt, OfferExpiredWebhookEventDataPositionCountryHu, OfferExpiredWebhookEventDataPositionCountryID, OfferExpiredWebhookEventDataPositionCountryIe, OfferExpiredWebhookEventDataPositionCountryIl, OfferExpiredWebhookEventDataPositionCountryIm, OfferExpiredWebhookEventDataPositionCountryIn, OfferExpiredWebhookEventDataPositionCountryIo, OfferExpiredWebhookEventDataPositionCountryIq, OfferExpiredWebhookEventDataPositionCountryIr, OfferExpiredWebhookEventDataPositionCountryIs, OfferExpiredWebhookEventDataPositionCountryIt, OfferExpiredWebhookEventDataPositionCountryJe, OfferExpiredWebhookEventDataPositionCountryJm, OfferExpiredWebhookEventDataPositionCountryJo, OfferExpiredWebhookEventDataPositionCountryJp, OfferExpiredWebhookEventDataPositionCountryKe, OfferExpiredWebhookEventDataPositionCountryKg, OfferExpiredWebhookEventDataPositionCountryKh, OfferExpiredWebhookEventDataPositionCountryKi, OfferExpiredWebhookEventDataPositionCountryKm, OfferExpiredWebhookEventDataPositionCountryKn, OfferExpiredWebhookEventDataPositionCountryKp, OfferExpiredWebhookEventDataPositionCountryKr, OfferExpiredWebhookEventDataPositionCountryKw, OfferExpiredWebhookEventDataPositionCountryKy, OfferExpiredWebhookEventDataPositionCountryKz, OfferExpiredWebhookEventDataPositionCountryLa, OfferExpiredWebhookEventDataPositionCountryLb, OfferExpiredWebhookEventDataPositionCountryLc, OfferExpiredWebhookEventDataPositionCountryLi, OfferExpiredWebhookEventDataPositionCountryLk, OfferExpiredWebhookEventDataPositionCountryLr, OfferExpiredWebhookEventDataPositionCountryLs, OfferExpiredWebhookEventDataPositionCountryLt, OfferExpiredWebhookEventDataPositionCountryLu, OfferExpiredWebhookEventDataPositionCountryLv, OfferExpiredWebhookEventDataPositionCountryLy, OfferExpiredWebhookEventDataPositionCountryMa, OfferExpiredWebhookEventDataPositionCountryMc, OfferExpiredWebhookEventDataPositionCountryMd, OfferExpiredWebhookEventDataPositionCountryMe, OfferExpiredWebhookEventDataPositionCountryMf, OfferExpiredWebhookEventDataPositionCountryMg, OfferExpiredWebhookEventDataPositionCountryMh, OfferExpiredWebhookEventDataPositionCountryMk, OfferExpiredWebhookEventDataPositionCountryMl, OfferExpiredWebhookEventDataPositionCountryMm, OfferExpiredWebhookEventDataPositionCountryMn, OfferExpiredWebhookEventDataPositionCountryMo, OfferExpiredWebhookEventDataPositionCountryMp, OfferExpiredWebhookEventDataPositionCountryMq, OfferExpiredWebhookEventDataPositionCountryMr, OfferExpiredWebhookEventDataPositionCountryMs, OfferExpiredWebhookEventDataPositionCountryMt, OfferExpiredWebhookEventDataPositionCountryMu, OfferExpiredWebhookEventDataPositionCountryMv, OfferExpiredWebhookEventDataPositionCountryMw, OfferExpiredWebhookEventDataPositionCountryMx, OfferExpiredWebhookEventDataPositionCountryMy, OfferExpiredWebhookEventDataPositionCountryMz, OfferExpiredWebhookEventDataPositionCountryNa, OfferExpiredWebhookEventDataPositionCountryNc, OfferExpiredWebhookEventDataPositionCountryNe, OfferExpiredWebhookEventDataPositionCountryNf, OfferExpiredWebhookEventDataPositionCountryNg, OfferExpiredWebhookEventDataPositionCountryNi, OfferExpiredWebhookEventDataPositionCountryNl, OfferExpiredWebhookEventDataPositionCountryNo, OfferExpiredWebhookEventDataPositionCountryNp, OfferExpiredWebhookEventDataPositionCountryNr, OfferExpiredWebhookEventDataPositionCountryNu, OfferExpiredWebhookEventDataPositionCountryNz, OfferExpiredWebhookEventDataPositionCountryOm, OfferExpiredWebhookEventDataPositionCountryPa, OfferExpiredWebhookEventDataPositionCountryPe, OfferExpiredWebhookEventDataPositionCountryPf, OfferExpiredWebhookEventDataPositionCountryPg, OfferExpiredWebhookEventDataPositionCountryPh, OfferExpiredWebhookEventDataPositionCountryPk, OfferExpiredWebhookEventDataPositionCountryPl, OfferExpiredWebhookEventDataPositionCountryPm, OfferExpiredWebhookEventDataPositionCountryPn, OfferExpiredWebhookEventDataPositionCountryPr, OfferExpiredWebhookEventDataPositionCountryPs, OfferExpiredWebhookEventDataPositionCountryPt, OfferExpiredWebhookEventDataPositionCountryPw, OfferExpiredWebhookEventDataPositionCountryPy, OfferExpiredWebhookEventDataPositionCountryQa, OfferExpiredWebhookEventDataPositionCountryRe, OfferExpiredWebhookEventDataPositionCountryRo, OfferExpiredWebhookEventDataPositionCountryRs, OfferExpiredWebhookEventDataPositionCountryRu, OfferExpiredWebhookEventDataPositionCountryRw, OfferExpiredWebhookEventDataPositionCountrySa, OfferExpiredWebhookEventDataPositionCountrySb, OfferExpiredWebhookEventDataPositionCountrySc, OfferExpiredWebhookEventDataPositionCountrySd, OfferExpiredWebhookEventDataPositionCountrySe, OfferExpiredWebhookEventDataPositionCountrySg, OfferExpiredWebhookEventDataPositionCountrySh, OfferExpiredWebhookEventDataPositionCountrySi, OfferExpiredWebhookEventDataPositionCountrySj, OfferExpiredWebhookEventDataPositionCountrySk, OfferExpiredWebhookEventDataPositionCountrySl, OfferExpiredWebhookEventDataPositionCountrySm, OfferExpiredWebhookEventDataPositionCountrySn, OfferExpiredWebhookEventDataPositionCountrySo, OfferExpiredWebhookEventDataPositionCountrySr, OfferExpiredWebhookEventDataPositionCountrySS, OfferExpiredWebhookEventDataPositionCountrySt, OfferExpiredWebhookEventDataPositionCountrySv, OfferExpiredWebhookEventDataPositionCountrySx, OfferExpiredWebhookEventDataPositionCountrySy, OfferExpiredWebhookEventDataPositionCountrySz, OfferExpiredWebhookEventDataPositionCountryTc, OfferExpiredWebhookEventDataPositionCountryTd, OfferExpiredWebhookEventDataPositionCountryTf, OfferExpiredWebhookEventDataPositionCountryTg, OfferExpiredWebhookEventDataPositionCountryTh, OfferExpiredWebhookEventDataPositionCountryTj, OfferExpiredWebhookEventDataPositionCountryTk, OfferExpiredWebhookEventDataPositionCountryTl, OfferExpiredWebhookEventDataPositionCountryTm, OfferExpiredWebhookEventDataPositionCountryTn, OfferExpiredWebhookEventDataPositionCountryTo, OfferExpiredWebhookEventDataPositionCountryTr, OfferExpiredWebhookEventDataPositionCountryTt, OfferExpiredWebhookEventDataPositionCountryTv, OfferExpiredWebhookEventDataPositionCountryTw, OfferExpiredWebhookEventDataPositionCountryTz, OfferExpiredWebhookEventDataPositionCountryUa, OfferExpiredWebhookEventDataPositionCountryUg, OfferExpiredWebhookEventDataPositionCountryUm, OfferExpiredWebhookEventDataPositionCountryUs, OfferExpiredWebhookEventDataPositionCountryUy, OfferExpiredWebhookEventDataPositionCountryUz, OfferExpiredWebhookEventDataPositionCountryVa, OfferExpiredWebhookEventDataPositionCountryVc, OfferExpiredWebhookEventDataPositionCountryVe, OfferExpiredWebhookEventDataPositionCountryVg, OfferExpiredWebhookEventDataPositionCountryVi, OfferExpiredWebhookEventDataPositionCountryVn, OfferExpiredWebhookEventDataPositionCountryVu, OfferExpiredWebhookEventDataPositionCountryWf, OfferExpiredWebhookEventDataPositionCountryWs, OfferExpiredWebhookEventDataPositionCountryXk, OfferExpiredWebhookEventDataPositionCountryYe, OfferExpiredWebhookEventDataPositionCountryYt, OfferExpiredWebhookEventDataPositionCountryZa, OfferExpiredWebhookEventDataPositionCountryZm, OfferExpiredWebhookEventDataPositionCountryZw:
+		return true
+	}
+	return false
+}
+
+type OfferExpiredWebhookEventDataDepartment struct {
+	// The unique public id of the department
+	ID   string                                     `json:"id" api:"required"`
+	Name string                                     `json:"name" api:"required"`
+	JSON offerExpiredWebhookEventDataDepartmentJSON `json:"-"`
+}
+
+// offerExpiredWebhookEventDataDepartmentJSON contains the JSON metadata for the struct [OfferExpiredWebhookEventDataDepartment]
+type offerExpiredWebhookEventDataDepartmentJSON struct {
+	ID          apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *OfferExpiredWebhookEventDataDepartment) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r offerExpiredWebhookEventDataDepartmentJSON) RawJSON() string {
+	return r.raw
+}
+
+type OfferExpiredWebhookEventDataWorkplace struct {
+	// Public workplace identifier
+	ID   string                                    `json:"id" api:"required"`
+	Name string                                    `json:"name" api:"required"`
+	JSON offerExpiredWebhookEventDataWorkplaceJSON `json:"-"`
+}
+
+// offerExpiredWebhookEventDataWorkplaceJSON contains the JSON metadata for the struct [OfferExpiredWebhookEventDataWorkplace]
+type offerExpiredWebhookEventDataWorkplaceJSON struct {
+	ID          apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *OfferExpiredWebhookEventDataWorkplace) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r offerExpiredWebhookEventDataWorkplaceJSON) RawJSON() string {
+	return r.raw
+}
+
+type OfferExpiredWebhookEventDataManager struct {
+	// The id of the worker.
+	ID   string                                  `json:"id" api:"required"`
+	Name string                                  `json:"name" api:"required,nullable"`
+	JSON offerExpiredWebhookEventDataManagerJSON `json:"-"`
+}
+
+// offerExpiredWebhookEventDataManagerJSON contains the JSON metadata for the struct [OfferExpiredWebhookEventDataManager]
+type offerExpiredWebhookEventDataManagerJSON struct {
+	ID          apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *OfferExpiredWebhookEventDataManager) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r offerExpiredWebhookEventDataManagerJSON) RawJSON() string {
+	return r.raw
+}
+
+type OfferExpiredWebhookEventDataLevel struct {
+	// The unique public id of the job level
+	ID    string                                 `json:"id" api:"required"`
+	Code  string                                 `json:"code" api:"required"`
+	Name  string                                 `json:"name" api:"required"`
+	Track OfferExpiredWebhookEventDataLevelTrack `json:"track" api:"required"`
+	JSON  offerExpiredWebhookEventDataLevelJSON  `json:"-"`
+}
+
+// offerExpiredWebhookEventDataLevelJSON contains the JSON metadata for the struct [OfferExpiredWebhookEventDataLevel]
+type offerExpiredWebhookEventDataLevelJSON struct {
+	ID          apijson.Field
+	Code        apijson.Field
+	Name        apijson.Field
+	Track       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *OfferExpiredWebhookEventDataLevel) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r offerExpiredWebhookEventDataLevelJSON) RawJSON() string {
+	return r.raw
+}
+
+type OfferExpiredWebhookEventDataLevelTrack string
+
+const (
+	OfferExpiredWebhookEventDataLevelTrackIc        OfferExpiredWebhookEventDataLevelTrack = "ic"
+	OfferExpiredWebhookEventDataLevelTrackManager   OfferExpiredWebhookEventDataLevelTrack = "manager"
+	OfferExpiredWebhookEventDataLevelTrackExecutive OfferExpiredWebhookEventDataLevelTrack = "executive"
+)
+
+func (r OfferExpiredWebhookEventDataLevelTrack) IsKnown() bool {
+	switch r {
+	case OfferExpiredWebhookEventDataLevelTrackIc, OfferExpiredWebhookEventDataLevelTrackManager, OfferExpiredWebhookEventDataLevelTrackExecutive:
+		return true
+	}
+	return false
+}
+
+type OfferExpiredWebhookEventDataCompensation struct {
+	BasePay OfferExpiredWebhookEventDataCompensationBasePay `json:"basePay" api:"required"`
+	// A monetary amount with its currency and server-formatted display value.
+	RelocationBonus PublicMoneyAmount `json:"relocationBonus" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	SignOnBonus PublicMoneyAmount                             `json:"signOnBonus" api:"required,nullable"`
+	Stock       OfferExpiredWebhookEventDataCompensationStock `json:"stock" api:"required,nullable"`
+	JSON        offerExpiredWebhookEventDataCompensationJSON  `json:"-"`
+}
+
+// offerExpiredWebhookEventDataCompensationJSON contains the JSON metadata for the struct [OfferExpiredWebhookEventDataCompensation]
+type offerExpiredWebhookEventDataCompensationJSON struct {
+	BasePay         apijson.Field
+	RelocationBonus apijson.Field
+	SignOnBonus     apijson.Field
+	Stock           apijson.Field
+	raw             string
+	ExtraFields     map[string]apijson.Field
+}
+
+func (r *OfferExpiredWebhookEventDataCompensation) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r offerExpiredWebhookEventDataCompensationJSON) RawJSON() string {
+	return r.raw
+}
+
+type OfferExpiredWebhookEventDataCompensationBasePay struct {
+	// A monetary amount with its currency and server-formatted display value.
+	Amount PublicMoneyAmount                                    `json:"amount" api:"required"`
+	Basis  OfferExpiredWebhookEventDataCompensationBasePayBasis `json:"basis" api:"required"`
+	Type   OfferExpiredWebhookEventDataCompensationBasePayType  `json:"type" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	VariableRate PublicMoneyAmount                                   `json:"variableRate" api:"required,nullable"`
+	JSON         offerExpiredWebhookEventDataCompensationBasePayJSON `json:"-"`
+}
+
+// offerExpiredWebhookEventDataCompensationBasePayJSON contains the JSON metadata for the struct [OfferExpiredWebhookEventDataCompensationBasePay]
+type offerExpiredWebhookEventDataCompensationBasePayJSON struct {
+	Amount       apijson.Field
+	Basis        apijson.Field
+	Type         apijson.Field
+	VariableRate apijson.Field
+	raw          string
+	ExtraFields  map[string]apijson.Field
+}
+
+func (r *OfferExpiredWebhookEventDataCompensationBasePay) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r offerExpiredWebhookEventDataCompensationBasePayJSON) RawJSON() string {
+	return r.raw
+}
+
+type OfferExpiredWebhookEventDataCompensationBasePayBasis string
+
+const (
+	OfferExpiredWebhookEventDataCompensationBasePayBasisYear     OfferExpiredWebhookEventDataCompensationBasePayBasis = "year"
+	OfferExpiredWebhookEventDataCompensationBasePayBasisMonth    OfferExpiredWebhookEventDataCompensationBasePayBasis = "month"
+	OfferExpiredWebhookEventDataCompensationBasePayBasisWeek     OfferExpiredWebhookEventDataCompensationBasePayBasis = "week"
+	OfferExpiredWebhookEventDataCompensationBasePayBasisHour     OfferExpiredWebhookEventDataCompensationBasePayBasis = "hour"
+	OfferExpiredWebhookEventDataCompensationBasePayBasisVariable OfferExpiredWebhookEventDataCompensationBasePayBasis = "variable"
+)
+
+func (r OfferExpiredWebhookEventDataCompensationBasePayBasis) IsKnown() bool {
+	switch r {
+	case OfferExpiredWebhookEventDataCompensationBasePayBasisYear, OfferExpiredWebhookEventDataCompensationBasePayBasisMonth, OfferExpiredWebhookEventDataCompensationBasePayBasisWeek, OfferExpiredWebhookEventDataCompensationBasePayBasisHour, OfferExpiredWebhookEventDataCompensationBasePayBasisVariable:
+		return true
+	}
+	return false
+}
+
+type OfferExpiredWebhookEventDataCompensationBasePayType string
+
+const (
+	OfferExpiredWebhookEventDataCompensationBasePayTypeFixed      OfferExpiredWebhookEventDataCompensationBasePayType = "fixed"
+	OfferExpiredWebhookEventDataCompensationBasePayTypePayAsYouGo OfferExpiredWebhookEventDataCompensationBasePayType = "pay_as_you_go"
+)
+
+func (r OfferExpiredWebhookEventDataCompensationBasePayType) IsKnown() bool {
+	switch r {
+	case OfferExpiredWebhookEventDataCompensationBasePayTypeFixed, OfferExpiredWebhookEventDataCompensationBasePayTypePayAsYouGo:
+		return true
+	}
+	return false
+}
+
+type OfferExpiredWebhookEventDataCompensationStock struct {
+	CliffMonths           int64                                             `json:"cliffMonths" api:"required,nullable"`
+	Options               int64                                             `json:"options" api:"required"`
+	VestingScheduleMonths int64                                             `json:"vestingScheduleMonths" api:"required,nullable"`
+	JSON                  offerExpiredWebhookEventDataCompensationStockJSON `json:"-"`
+}
+
+// offerExpiredWebhookEventDataCompensationStockJSON contains the JSON metadata for the struct [OfferExpiredWebhookEventDataCompensationStock]
+type offerExpiredWebhookEventDataCompensationStockJSON struct {
+	CliffMonths           apijson.Field
+	Options               apijson.Field
+	VestingScheduleMonths apijson.Field
+	raw                   string
+	ExtraFields           map[string]apijson.Field
+}
+
+func (r *OfferExpiredWebhookEventDataCompensationStock) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r offerExpiredWebhookEventDataCompensationStockJSON) RawJSON() string {
+	return r.raw
+}
+
 type OfferSentWebhookEvent struct {
 	// Unique event identifier (format: `<objectTag>:<uuid>`). Stable across retries.
 	ID   string                    `json:"id" api:"required"`
@@ -1509,7 +2271,11 @@ type OfferSentWebhookEventData struct {
 	// The offer's job level, or null if unassigned. Omitted when job levels are not
 	// enabled.
 	Level OfferSentWebhookEventDataLevel `json:"level" api:"nullable"`
-	JSON  offerSentWebhookEventDataJSON  `json:"-"`
+	// Additional notes explaining why the offer was voided.
+	VoidNotes string `json:"voidNotes" api:"nullable"`
+	// The reason the offer was voided. Null for offers that have not been voided.
+	VoidReason OfferSentWebhookEventDataVoidReason `json:"voidReason" api:"nullable"`
+	JSON       offerSentWebhookEventDataJSON       `json:"-"`
 }
 
 // offerSentWebhookEventDataJSON contains the JSON metadata for the struct [OfferSentWebhookEventData]
@@ -1529,6 +2295,8 @@ type offerSentWebhookEventDataJSON struct {
 	WorkerType     apijson.Field
 	Workplace      apijson.Field
 	Level          apijson.Field
+	VoidNotes      apijson.Field
+	VoidReason     apijson.Field
 	raw            string
 	ExtraFields    map[string]apijson.Field
 }
@@ -1548,11 +2316,28 @@ const (
 	OfferSentWebhookEventDataStatusSent     OfferSentWebhookEventDataStatus = "sent"
 	OfferSentWebhookEventDataStatusAccepted OfferSentWebhookEventDataStatus = "accepted"
 	OfferSentWebhookEventDataStatusVoid     OfferSentWebhookEventDataStatus = "void"
+	OfferSentWebhookEventDataStatusExpired  OfferSentWebhookEventDataStatus = "expired"
 )
 
 func (r OfferSentWebhookEventDataStatus) IsKnown() bool {
 	switch r {
-	case OfferSentWebhookEventDataStatusDraft, OfferSentWebhookEventDataStatusSent, OfferSentWebhookEventDataStatusAccepted, OfferSentWebhookEventDataStatusVoid:
+	case OfferSentWebhookEventDataStatusDraft, OfferSentWebhookEventDataStatusSent, OfferSentWebhookEventDataStatusAccepted, OfferSentWebhookEventDataStatusVoid, OfferSentWebhookEventDataStatusExpired:
+		return true
+	}
+	return false
+}
+
+type OfferSentWebhookEventDataVoidReason string
+
+const (
+	OfferSentWebhookEventDataVoidReasonReplaced          OfferSentWebhookEventDataVoidReason = "replaced"
+	OfferSentWebhookEventDataVoidReasonCandidateDeclined OfferSentWebhookEventDataVoidReason = "candidate_declined"
+	OfferSentWebhookEventDataVoidReasonOther             OfferSentWebhookEventDataVoidReason = "other"
+)
+
+func (r OfferSentWebhookEventDataVoidReason) IsKnown() bool {
+	switch r {
+	case OfferSentWebhookEventDataVoidReasonReplaced, OfferSentWebhookEventDataVoidReasonCandidateDeclined, OfferSentWebhookEventDataVoidReasonOther:
 		return true
 	}
 	return false
@@ -2202,7 +2987,11 @@ type OfferSignatureRequestedWebhookEventData struct {
 	// The offer's job level, or null if unassigned. Omitted when job levels are not
 	// enabled.
 	Level OfferSignatureRequestedWebhookEventDataLevel `json:"level" api:"nullable"`
-	JSON  offerSignatureRequestedWebhookEventDataJSON  `json:"-"`
+	// Additional notes explaining why the offer was voided.
+	VoidNotes string `json:"voidNotes" api:"nullable"`
+	// The reason the offer was voided. Null for offers that have not been voided.
+	VoidReason OfferSignatureRequestedWebhookEventDataVoidReason `json:"voidReason" api:"nullable"`
+	JSON       offerSignatureRequestedWebhookEventDataJSON       `json:"-"`
 }
 
 // offerSignatureRequestedWebhookEventDataJSON contains the JSON metadata for the struct [OfferSignatureRequestedWebhookEventData]
@@ -2222,6 +3011,8 @@ type offerSignatureRequestedWebhookEventDataJSON struct {
 	WorkerType     apijson.Field
 	Workplace      apijson.Field
 	Level          apijson.Field
+	VoidNotes      apijson.Field
+	VoidReason     apijson.Field
 	raw            string
 	ExtraFields    map[string]apijson.Field
 }
@@ -2241,11 +3032,28 @@ const (
 	OfferSignatureRequestedWebhookEventDataStatusSent     OfferSignatureRequestedWebhookEventDataStatus = "sent"
 	OfferSignatureRequestedWebhookEventDataStatusAccepted OfferSignatureRequestedWebhookEventDataStatus = "accepted"
 	OfferSignatureRequestedWebhookEventDataStatusVoid     OfferSignatureRequestedWebhookEventDataStatus = "void"
+	OfferSignatureRequestedWebhookEventDataStatusExpired  OfferSignatureRequestedWebhookEventDataStatus = "expired"
 )
 
 func (r OfferSignatureRequestedWebhookEventDataStatus) IsKnown() bool {
 	switch r {
-	case OfferSignatureRequestedWebhookEventDataStatusDraft, OfferSignatureRequestedWebhookEventDataStatusSent, OfferSignatureRequestedWebhookEventDataStatusAccepted, OfferSignatureRequestedWebhookEventDataStatusVoid:
+	case OfferSignatureRequestedWebhookEventDataStatusDraft, OfferSignatureRequestedWebhookEventDataStatusSent, OfferSignatureRequestedWebhookEventDataStatusAccepted, OfferSignatureRequestedWebhookEventDataStatusVoid, OfferSignatureRequestedWebhookEventDataStatusExpired:
+		return true
+	}
+	return false
+}
+
+type OfferSignatureRequestedWebhookEventDataVoidReason string
+
+const (
+	OfferSignatureRequestedWebhookEventDataVoidReasonReplaced          OfferSignatureRequestedWebhookEventDataVoidReason = "replaced"
+	OfferSignatureRequestedWebhookEventDataVoidReasonCandidateDeclined OfferSignatureRequestedWebhookEventDataVoidReason = "candidate_declined"
+	OfferSignatureRequestedWebhookEventDataVoidReasonOther             OfferSignatureRequestedWebhookEventDataVoidReason = "other"
+)
+
+func (r OfferSignatureRequestedWebhookEventDataVoidReason) IsKnown() bool {
+	switch r {
+	case OfferSignatureRequestedWebhookEventDataVoidReasonReplaced, OfferSignatureRequestedWebhookEventDataVoidReasonCandidateDeclined, OfferSignatureRequestedWebhookEventDataVoidReasonOther:
 		return true
 	}
 	return false
@@ -2895,7 +3703,11 @@ type OfferViewedWebhookEventData struct {
 	// The offer's job level, or null if unassigned. Omitted when job levels are not
 	// enabled.
 	Level OfferViewedWebhookEventDataLevel `json:"level" api:"nullable"`
-	JSON  offerViewedWebhookEventDataJSON  `json:"-"`
+	// Additional notes explaining why the offer was voided.
+	VoidNotes string `json:"voidNotes" api:"nullable"`
+	// The reason the offer was voided. Null for offers that have not been voided.
+	VoidReason OfferViewedWebhookEventDataVoidReason `json:"voidReason" api:"nullable"`
+	JSON       offerViewedWebhookEventDataJSON       `json:"-"`
 }
 
 // offerViewedWebhookEventDataJSON contains the JSON metadata for the struct [OfferViewedWebhookEventData]
@@ -2915,6 +3727,8 @@ type offerViewedWebhookEventDataJSON struct {
 	WorkerType     apijson.Field
 	Workplace      apijson.Field
 	Level          apijson.Field
+	VoidNotes      apijson.Field
+	VoidReason     apijson.Field
 	raw            string
 	ExtraFields    map[string]apijson.Field
 }
@@ -2934,11 +3748,28 @@ const (
 	OfferViewedWebhookEventDataStatusSent     OfferViewedWebhookEventDataStatus = "sent"
 	OfferViewedWebhookEventDataStatusAccepted OfferViewedWebhookEventDataStatus = "accepted"
 	OfferViewedWebhookEventDataStatusVoid     OfferViewedWebhookEventDataStatus = "void"
+	OfferViewedWebhookEventDataStatusExpired  OfferViewedWebhookEventDataStatus = "expired"
 )
 
 func (r OfferViewedWebhookEventDataStatus) IsKnown() bool {
 	switch r {
-	case OfferViewedWebhookEventDataStatusDraft, OfferViewedWebhookEventDataStatusSent, OfferViewedWebhookEventDataStatusAccepted, OfferViewedWebhookEventDataStatusVoid:
+	case OfferViewedWebhookEventDataStatusDraft, OfferViewedWebhookEventDataStatusSent, OfferViewedWebhookEventDataStatusAccepted, OfferViewedWebhookEventDataStatusVoid, OfferViewedWebhookEventDataStatusExpired:
+		return true
+	}
+	return false
+}
+
+type OfferViewedWebhookEventDataVoidReason string
+
+const (
+	OfferViewedWebhookEventDataVoidReasonReplaced          OfferViewedWebhookEventDataVoidReason = "replaced"
+	OfferViewedWebhookEventDataVoidReasonCandidateDeclined OfferViewedWebhookEventDataVoidReason = "candidate_declined"
+	OfferViewedWebhookEventDataVoidReasonOther             OfferViewedWebhookEventDataVoidReason = "other"
+)
+
+func (r OfferViewedWebhookEventDataVoidReason) IsKnown() bool {
+	switch r {
+	case OfferViewedWebhookEventDataVoidReasonReplaced, OfferViewedWebhookEventDataVoidReasonCandidateDeclined, OfferViewedWebhookEventDataVoidReasonOther:
 		return true
 	}
 	return false
@@ -3588,7 +4419,11 @@ type OfferVoidedWebhookEventData struct {
 	// The offer's job level, or null if unassigned. Omitted when job levels are not
 	// enabled.
 	Level OfferVoidedWebhookEventDataLevel `json:"level" api:"nullable"`
-	JSON  offerVoidedWebhookEventDataJSON  `json:"-"`
+	// Additional notes explaining why the offer was voided.
+	VoidNotes string `json:"voidNotes" api:"nullable"`
+	// The reason the offer was voided. Null for offers that have not been voided.
+	VoidReason OfferVoidedWebhookEventDataVoidReason `json:"voidReason" api:"nullable"`
+	JSON       offerVoidedWebhookEventDataJSON       `json:"-"`
 }
 
 // offerVoidedWebhookEventDataJSON contains the JSON metadata for the struct [OfferVoidedWebhookEventData]
@@ -3608,6 +4443,8 @@ type offerVoidedWebhookEventDataJSON struct {
 	WorkerType     apijson.Field
 	Workplace      apijson.Field
 	Level          apijson.Field
+	VoidNotes      apijson.Field
+	VoidReason     apijson.Field
 	raw            string
 	ExtraFields    map[string]apijson.Field
 }
@@ -3627,11 +4464,28 @@ const (
 	OfferVoidedWebhookEventDataStatusSent     OfferVoidedWebhookEventDataStatus = "sent"
 	OfferVoidedWebhookEventDataStatusAccepted OfferVoidedWebhookEventDataStatus = "accepted"
 	OfferVoidedWebhookEventDataStatusVoid     OfferVoidedWebhookEventDataStatus = "void"
+	OfferVoidedWebhookEventDataStatusExpired  OfferVoidedWebhookEventDataStatus = "expired"
 )
 
 func (r OfferVoidedWebhookEventDataStatus) IsKnown() bool {
 	switch r {
-	case OfferVoidedWebhookEventDataStatusDraft, OfferVoidedWebhookEventDataStatusSent, OfferVoidedWebhookEventDataStatusAccepted, OfferVoidedWebhookEventDataStatusVoid:
+	case OfferVoidedWebhookEventDataStatusDraft, OfferVoidedWebhookEventDataStatusSent, OfferVoidedWebhookEventDataStatusAccepted, OfferVoidedWebhookEventDataStatusVoid, OfferVoidedWebhookEventDataStatusExpired:
+		return true
+	}
+	return false
+}
+
+type OfferVoidedWebhookEventDataVoidReason string
+
+const (
+	OfferVoidedWebhookEventDataVoidReasonReplaced          OfferVoidedWebhookEventDataVoidReason = "replaced"
+	OfferVoidedWebhookEventDataVoidReasonCandidateDeclined OfferVoidedWebhookEventDataVoidReason = "candidate_declined"
+	OfferVoidedWebhookEventDataVoidReasonOther             OfferVoidedWebhookEventDataVoidReason = "other"
+)
+
+func (r OfferVoidedWebhookEventDataVoidReason) IsKnown() bool {
+	switch r {
+	case OfferVoidedWebhookEventDataVoidReasonReplaced, OfferVoidedWebhookEventDataVoidReasonCandidateDeclined, OfferVoidedWebhookEventDataVoidReasonOther:
 		return true
 	}
 	return false
@@ -10592,6 +11446,7 @@ type ParsedWebhookEventType string
 const (
 	ParsedWebhookEventTypeOfferAccepted             ParsedWebhookEventType = "offer.accepted"
 	ParsedWebhookEventTypeOfferCreated              ParsedWebhookEventType = "offer.created"
+	ParsedWebhookEventTypeOfferExpired              ParsedWebhookEventType = "offer.expired"
 	ParsedWebhookEventTypeOfferSent                 ParsedWebhookEventType = "offer.sent"
 	ParsedWebhookEventTypeOfferSignatureRequested   ParsedWebhookEventType = "offer.signature_requested"
 	ParsedWebhookEventTypeOfferViewed               ParsedWebhookEventType = "offer.viewed"
@@ -10615,7 +11470,7 @@ const (
 
 func (r ParsedWebhookEventType) IsKnown() bool {
 	switch r {
-	case ParsedWebhookEventTypeOfferAccepted, ParsedWebhookEventTypeOfferCreated, ParsedWebhookEventTypeOfferSent, ParsedWebhookEventTypeOfferSignatureRequested, ParsedWebhookEventTypeOfferViewed, ParsedWebhookEventTypeOfferVoided, ParsedWebhookEventTypePayRateCreated, ParsedWebhookEventTypePayRateDeleted, ParsedWebhookEventTypeTimeOffBalanceAdjusted, ParsedWebhookEventTypeTimeOffRequestCreated, ParsedWebhookEventTypeTimeOffRequestDeleted, ParsedWebhookEventTypeTimeOffRequestReviewed, ParsedWebhookEventTypeWorkerCreated, ParsedWebhookEventTypeWorkerDeleted, ParsedWebhookEventTypeWorkerInviteAccepted, ParsedWebhookEventTypeWorkerInviteSent, ParsedWebhookEventTypeWorkerOffboarded, ParsedWebhookEventTypeWorkerOffboardingStarted, ParsedWebhookEventTypeWorkerOnboardingCompleted, ParsedWebhookEventTypeWorkerReactivated, ParsedWebhookEventTypeWorkerUpdated:
+	case ParsedWebhookEventTypeOfferAccepted, ParsedWebhookEventTypeOfferCreated, ParsedWebhookEventTypeOfferExpired, ParsedWebhookEventTypeOfferSent, ParsedWebhookEventTypeOfferSignatureRequested, ParsedWebhookEventTypeOfferViewed, ParsedWebhookEventTypeOfferVoided, ParsedWebhookEventTypePayRateCreated, ParsedWebhookEventTypePayRateDeleted, ParsedWebhookEventTypeTimeOffBalanceAdjusted, ParsedWebhookEventTypeTimeOffRequestCreated, ParsedWebhookEventTypeTimeOffRequestDeleted, ParsedWebhookEventTypeTimeOffRequestReviewed, ParsedWebhookEventTypeWorkerCreated, ParsedWebhookEventTypeWorkerDeleted, ParsedWebhookEventTypeWorkerInviteAccepted, ParsedWebhookEventTypeWorkerInviteSent, ParsedWebhookEventTypeWorkerOffboarded, ParsedWebhookEventTypeWorkerOffboardingStarted, ParsedWebhookEventTypeWorkerOnboardingCompleted, ParsedWebhookEventTypeWorkerReactivated, ParsedWebhookEventTypeWorkerUpdated:
 		return true
 	}
 	return false

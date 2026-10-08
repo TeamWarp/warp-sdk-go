@@ -331,11 +331,12 @@ const (
 	OfferListParamsStatusSent     OfferListParamsStatus = "sent"
 	OfferListParamsStatusAccepted OfferListParamsStatus = "accepted"
 	OfferListParamsStatusVoid     OfferListParamsStatus = "void"
+	OfferListParamsStatusExpired  OfferListParamsStatus = "expired"
 )
 
 func (r OfferListParamsStatus) IsKnown() bool {
 	switch r {
-	case OfferListParamsStatusDraft, OfferListParamsStatusSent, OfferListParamsStatusAccepted, OfferListParamsStatusVoid:
+	case OfferListParamsStatusDraft, OfferListParamsStatusSent, OfferListParamsStatusAccepted, OfferListParamsStatusVoid, OfferListParamsStatusExpired:
 		return true
 	}
 	return false
@@ -903,7 +904,11 @@ type OfferNewResponse struct {
 	// The offer's job level, or null if unassigned. Omitted when job levels are not
 	// enabled.
 	Level OfferNewResponseLevel `json:"level" api:"nullable"`
-	JSON  offerNewResponseJSON  `json:"-"`
+	// Additional notes explaining why the offer was voided.
+	VoidNotes string `json:"voidNotes" api:"nullable"`
+	// The reason the offer was voided. Null for offers that have not been voided.
+	VoidReason OfferNewResponseVoidReason `json:"voidReason" api:"nullable"`
+	JSON       offerNewResponseJSON       `json:"-"`
 }
 
 // offerNewResponseJSON contains the JSON metadata for the struct [OfferNewResponse]
@@ -923,6 +928,8 @@ type offerNewResponseJSON struct {
 	WorkerType     apijson.Field
 	Workplace      apijson.Field
 	Level          apijson.Field
+	VoidNotes      apijson.Field
+	VoidReason     apijson.Field
 	raw            string
 	ExtraFields    map[string]apijson.Field
 }
@@ -957,7 +964,11 @@ type OfferVoidResponse struct {
 	// The offer's job level, or null if unassigned. Omitted when job levels are not
 	// enabled.
 	Level OfferVoidResponseLevel `json:"level" api:"nullable"`
-	JSON  offerVoidResponseJSON  `json:"-"`
+	// Additional notes explaining why the offer was voided.
+	VoidNotes string `json:"voidNotes" api:"nullable"`
+	// The reason the offer was voided. Null for offers that have not been voided.
+	VoidReason OfferVoidResponseVoidReason `json:"voidReason" api:"nullable"`
+	JSON       offerVoidResponseJSON       `json:"-"`
 }
 
 // offerVoidResponseJSON contains the JSON metadata for the struct [OfferVoidResponse]
@@ -977,6 +988,8 @@ type offerVoidResponseJSON struct {
 	WorkerType     apijson.Field
 	Workplace      apijson.Field
 	Level          apijson.Field
+	VoidNotes      apijson.Field
+	VoidReason     apijson.Field
 	raw            string
 	ExtraFields    map[string]apijson.Field
 }
@@ -1011,7 +1024,11 @@ type OfferExtendDeadlineResponse struct {
 	// The offer's job level, or null if unassigned. Omitted when job levels are not
 	// enabled.
 	Level OfferExtendDeadlineResponseLevel `json:"level" api:"nullable"`
-	JSON  offerExtendDeadlineResponseJSON  `json:"-"`
+	// Additional notes explaining why the offer was voided.
+	VoidNotes string `json:"voidNotes" api:"nullable"`
+	// The reason the offer was voided. Null for offers that have not been voided.
+	VoidReason OfferExtendDeadlineResponseVoidReason `json:"voidReason" api:"nullable"`
+	JSON       offerExtendDeadlineResponseJSON       `json:"-"`
 }
 
 // offerExtendDeadlineResponseJSON contains the JSON metadata for the struct [OfferExtendDeadlineResponse]
@@ -1031,6 +1048,8 @@ type offerExtendDeadlineResponseJSON struct {
 	WorkerType     apijson.Field
 	Workplace      apijson.Field
 	Level          apijson.Field
+	VoidNotes      apijson.Field
+	VoidReason     apijson.Field
 	raw            string
 	ExtraFields    map[string]apijson.Field
 }
@@ -1065,7 +1084,11 @@ type OfferResendResponse struct {
 	// The offer's job level, or null if unassigned. Omitted when job levels are not
 	// enabled.
 	Level OfferResendResponseLevel `json:"level" api:"nullable"`
-	JSON  offerResendResponseJSON  `json:"-"`
+	// Additional notes explaining why the offer was voided.
+	VoidNotes string `json:"voidNotes" api:"nullable"`
+	// The reason the offer was voided. Null for offers that have not been voided.
+	VoidReason OfferResendResponseVoidReason `json:"voidReason" api:"nullable"`
+	JSON       offerResendResponseJSON       `json:"-"`
 }
 
 // offerResendResponseJSON contains the JSON metadata for the struct [OfferResendResponse]
@@ -1085,6 +1108,8 @@ type offerResendResponseJSON struct {
 	WorkerType     apijson.Field
 	Workplace      apijson.Field
 	Level          apijson.Field
+	VoidNotes      apijson.Field
+	VoidReason     apijson.Field
 	raw            string
 	ExtraFields    map[string]apijson.Field
 }
@@ -1119,7 +1144,11 @@ type OfferListResponseData struct {
 	// The offer's job level, or null if unassigned. Omitted when job levels are not
 	// enabled.
 	Level OfferListResponseDataLevel `json:"level" api:"nullable"`
-	JSON  offerListResponseDataJSON  `json:"-"`
+	// Additional notes explaining why the offer was voided.
+	VoidNotes string `json:"voidNotes" api:"nullable"`
+	// The reason the offer was voided. Null for offers that have not been voided.
+	VoidReason OfferListResponseDataVoidReason `json:"voidReason" api:"nullable"`
+	JSON       offerListResponseDataJSON       `json:"-"`
 }
 
 // offerListResponseDataJSON contains the JSON metadata for the struct [OfferListResponseData]
@@ -1139,6 +1168,8 @@ type offerListResponseDataJSON struct {
 	WorkerType     apijson.Field
 	Workplace      apijson.Field
 	Level          apijson.Field
+	VoidNotes      apijson.Field
+	VoidReason     apijson.Field
 	raw            string
 	ExtraFields    map[string]apijson.Field
 }
@@ -1158,11 +1189,28 @@ const (
 	OfferNewResponseStatusSent     OfferNewResponseStatus = "sent"
 	OfferNewResponseStatusAccepted OfferNewResponseStatus = "accepted"
 	OfferNewResponseStatusVoid     OfferNewResponseStatus = "void"
+	OfferNewResponseStatusExpired  OfferNewResponseStatus = "expired"
 )
 
 func (r OfferNewResponseStatus) IsKnown() bool {
 	switch r {
-	case OfferNewResponseStatusDraft, OfferNewResponseStatusSent, OfferNewResponseStatusAccepted, OfferNewResponseStatusVoid:
+	case OfferNewResponseStatusDraft, OfferNewResponseStatusSent, OfferNewResponseStatusAccepted, OfferNewResponseStatusVoid, OfferNewResponseStatusExpired:
+		return true
+	}
+	return false
+}
+
+type OfferNewResponseVoidReason string
+
+const (
+	OfferNewResponseVoidReasonReplaced          OfferNewResponseVoidReason = "replaced"
+	OfferNewResponseVoidReasonCandidateDeclined OfferNewResponseVoidReason = "candidate_declined"
+	OfferNewResponseVoidReasonOther             OfferNewResponseVoidReason = "other"
+)
+
+func (r OfferNewResponseVoidReason) IsKnown() bool {
+	switch r {
+	case OfferNewResponseVoidReasonReplaced, OfferNewResponseVoidReasonCandidateDeclined, OfferNewResponseVoidReasonOther:
 		return true
 	}
 	return false
@@ -1368,11 +1416,28 @@ const (
 	OfferVoidResponseStatusSent     OfferVoidResponseStatus = "sent"
 	OfferVoidResponseStatusAccepted OfferVoidResponseStatus = "accepted"
 	OfferVoidResponseStatusVoid     OfferVoidResponseStatus = "void"
+	OfferVoidResponseStatusExpired  OfferVoidResponseStatus = "expired"
 )
 
 func (r OfferVoidResponseStatus) IsKnown() bool {
 	switch r {
-	case OfferVoidResponseStatusDraft, OfferVoidResponseStatusSent, OfferVoidResponseStatusAccepted, OfferVoidResponseStatusVoid:
+	case OfferVoidResponseStatusDraft, OfferVoidResponseStatusSent, OfferVoidResponseStatusAccepted, OfferVoidResponseStatusVoid, OfferVoidResponseStatusExpired:
+		return true
+	}
+	return false
+}
+
+type OfferVoidResponseVoidReason string
+
+const (
+	OfferVoidResponseVoidReasonReplaced          OfferVoidResponseVoidReason = "replaced"
+	OfferVoidResponseVoidReasonCandidateDeclined OfferVoidResponseVoidReason = "candidate_declined"
+	OfferVoidResponseVoidReasonOther             OfferVoidResponseVoidReason = "other"
+)
+
+func (r OfferVoidResponseVoidReason) IsKnown() bool {
+	switch r {
+	case OfferVoidResponseVoidReasonReplaced, OfferVoidResponseVoidReasonCandidateDeclined, OfferVoidResponseVoidReasonOther:
 		return true
 	}
 	return false
@@ -1578,11 +1643,28 @@ const (
 	OfferExtendDeadlineResponseStatusSent     OfferExtendDeadlineResponseStatus = "sent"
 	OfferExtendDeadlineResponseStatusAccepted OfferExtendDeadlineResponseStatus = "accepted"
 	OfferExtendDeadlineResponseStatusVoid     OfferExtendDeadlineResponseStatus = "void"
+	OfferExtendDeadlineResponseStatusExpired  OfferExtendDeadlineResponseStatus = "expired"
 )
 
 func (r OfferExtendDeadlineResponseStatus) IsKnown() bool {
 	switch r {
-	case OfferExtendDeadlineResponseStatusDraft, OfferExtendDeadlineResponseStatusSent, OfferExtendDeadlineResponseStatusAccepted, OfferExtendDeadlineResponseStatusVoid:
+	case OfferExtendDeadlineResponseStatusDraft, OfferExtendDeadlineResponseStatusSent, OfferExtendDeadlineResponseStatusAccepted, OfferExtendDeadlineResponseStatusVoid, OfferExtendDeadlineResponseStatusExpired:
+		return true
+	}
+	return false
+}
+
+type OfferExtendDeadlineResponseVoidReason string
+
+const (
+	OfferExtendDeadlineResponseVoidReasonReplaced          OfferExtendDeadlineResponseVoidReason = "replaced"
+	OfferExtendDeadlineResponseVoidReasonCandidateDeclined OfferExtendDeadlineResponseVoidReason = "candidate_declined"
+	OfferExtendDeadlineResponseVoidReasonOther             OfferExtendDeadlineResponseVoidReason = "other"
+)
+
+func (r OfferExtendDeadlineResponseVoidReason) IsKnown() bool {
+	switch r {
+	case OfferExtendDeadlineResponseVoidReasonReplaced, OfferExtendDeadlineResponseVoidReasonCandidateDeclined, OfferExtendDeadlineResponseVoidReasonOther:
 		return true
 	}
 	return false
@@ -1788,11 +1870,28 @@ const (
 	OfferResendResponseStatusSent     OfferResendResponseStatus = "sent"
 	OfferResendResponseStatusAccepted OfferResendResponseStatus = "accepted"
 	OfferResendResponseStatusVoid     OfferResendResponseStatus = "void"
+	OfferResendResponseStatusExpired  OfferResendResponseStatus = "expired"
 )
 
 func (r OfferResendResponseStatus) IsKnown() bool {
 	switch r {
-	case OfferResendResponseStatusDraft, OfferResendResponseStatusSent, OfferResendResponseStatusAccepted, OfferResendResponseStatusVoid:
+	case OfferResendResponseStatusDraft, OfferResendResponseStatusSent, OfferResendResponseStatusAccepted, OfferResendResponseStatusVoid, OfferResendResponseStatusExpired:
+		return true
+	}
+	return false
+}
+
+type OfferResendResponseVoidReason string
+
+const (
+	OfferResendResponseVoidReasonReplaced          OfferResendResponseVoidReason = "replaced"
+	OfferResendResponseVoidReasonCandidateDeclined OfferResendResponseVoidReason = "candidate_declined"
+	OfferResendResponseVoidReasonOther             OfferResendResponseVoidReason = "other"
+)
+
+func (r OfferResendResponseVoidReason) IsKnown() bool {
+	switch r {
+	case OfferResendResponseVoidReasonReplaced, OfferResendResponseVoidReasonCandidateDeclined, OfferResendResponseVoidReasonOther:
 		return true
 	}
 	return false
@@ -1998,11 +2097,28 @@ const (
 	OfferListResponseDataStatusSent     OfferListResponseDataStatus = "sent"
 	OfferListResponseDataStatusAccepted OfferListResponseDataStatus = "accepted"
 	OfferListResponseDataStatusVoid     OfferListResponseDataStatus = "void"
+	OfferListResponseDataStatusExpired  OfferListResponseDataStatus = "expired"
 )
 
 func (r OfferListResponseDataStatus) IsKnown() bool {
 	switch r {
-	case OfferListResponseDataStatusDraft, OfferListResponseDataStatusSent, OfferListResponseDataStatusAccepted, OfferListResponseDataStatusVoid:
+	case OfferListResponseDataStatusDraft, OfferListResponseDataStatusSent, OfferListResponseDataStatusAccepted, OfferListResponseDataStatusVoid, OfferListResponseDataStatusExpired:
+		return true
+	}
+	return false
+}
+
+type OfferListResponseDataVoidReason string
+
+const (
+	OfferListResponseDataVoidReasonReplaced          OfferListResponseDataVoidReason = "replaced"
+	OfferListResponseDataVoidReasonCandidateDeclined OfferListResponseDataVoidReason = "candidate_declined"
+	OfferListResponseDataVoidReasonOther             OfferListResponseDataVoidReason = "other"
+)
+
+func (r OfferListResponseDataVoidReason) IsKnown() bool {
+	switch r {
+	case OfferListResponseDataVoidReasonReplaced, OfferListResponseDataVoidReasonCandidateDeclined, OfferListResponseDataVoidReasonOther:
 		return true
 	}
 	return false
