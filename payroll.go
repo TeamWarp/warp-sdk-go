@@ -229,7 +229,7 @@ func (r publicPayrollDetailJSON) RawJSON() string {
 
 type PublicPaycheckList struct {
 	Count   int64                  `json:"count" api:"required"`
-	Data    string                 `json:"data" api:"required"`
+	Data    interface{}            `json:"data" api:"required"`
 	HasMore bool                   `json:"hasMore" api:"required"`
 	JSON    publicPaycheckListJSON `json:"-"`
 }
@@ -254,18 +254,18 @@ func (r publicPaycheckListJSON) RawJSON() string {
 type PublicPaycheckDetail struct {
 	// The tag of the paycheck.
 	ID             string                   `json:"id" api:"required"`
-	Benefits       string                   `json:"benefits" api:"required"`
-	Deductions     string                   `json:"deductions" api:"required"`
+	Benefits       interface{}              `json:"benefits" api:"required"`
+	Deductions     interface{}              `json:"deductions" api:"required"`
 	Description    string                   `json:"description" api:"required,nullable"`
-	Earnings       string                   `json:"earnings" api:"required"`
-	ExchangeRates  string                   `json:"exchangeRates" api:"required"`
+	Earnings       interface{}              `json:"earnings" api:"required"`
+	ExchangeRates  interface{}              `json:"exchangeRates" api:"required"`
 	Payday         string                   `json:"payday" api:"required"`
 	PaymentMethod  interface{}              `json:"paymentMethod" api:"required"`
 	Payroll        interface{}              `json:"payroll" api:"required"`
-	Reimbursements string                   `json:"reimbursements" api:"required"`
+	Reimbursements interface{}              `json:"reimbursements" api:"required"`
 	ReportedHours  float64                  `json:"reportedHours" api:"required,nullable"`
 	Status         interface{}              `json:"status" api:"required"`
-	Taxes          string                   `json:"taxes" api:"required"`
+	Taxes          interface{}              `json:"taxes" api:"required"`
 	Totals         interface{}              `json:"totals" api:"required"`
 	Worker         interface{}              `json:"worker" api:"required"`
 	JSON           publicPaycheckDetailJSON `json:"-"`
@@ -689,7 +689,7 @@ func (r PublicPaycheckPaymentMethod) IsKnown() bool {
 }
 
 type PublicPaycheckDetailTotals struct {
-	ByCurrency        string                         `json:"byCurrency" api:"required"`
+	ByCurrency        interface{}                    `json:"byCurrency" api:"required"`
 	InFundingCurrency interface{}                    `json:"inFundingCurrency" api:"required"`
 	JSON              publicPaycheckDetailTotalsJSON `json:"-"`
 }
@@ -1057,7 +1057,7 @@ func (r publicCurrencyMoneyAmount10JSON) RawJSON() string {
 }
 
 type PublicPaycheckSummaryTotals struct {
-	ByCurrency        string                          `json:"byCurrency" api:"required"`
+	ByCurrency        interface{}                     `json:"byCurrency" api:"required"`
 	InFundingCurrency interface{}                     `json:"inFundingCurrency" api:"required"`
 	JSON              publicPaycheckSummaryTotalsJSON `json:"-"`
 }
