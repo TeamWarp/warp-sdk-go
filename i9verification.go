@@ -73,7 +73,7 @@ func (r *I9VerificationService) List(ctx context.Context, query I9VerificationLi
 //
 // Returns:
 //
-//	*I9VerificationGetResponse
+//	*PublicI9Verification
 //
 // Example:
 //
@@ -83,7 +83,7 @@ func (r *I9VerificationService) List(ctx context.Context, query I9VerificationLi
 //	}
 //
 //	fmt.Println(i9Verification)
-func (r *I9VerificationService) Get(ctx context.Context, id string, opts ...option.RequestOption) (res *I9VerificationGetResponse, err error) {
+func (r *I9VerificationService) Get(ctx context.Context, id string, opts ...option.RequestOption) (res *PublicI9Verification, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
@@ -140,57 +140,6 @@ const (
 func (r PublicI9VerificationStatus) IsKnown() bool {
 	switch r {
 	case PublicI9VerificationStatusNotStarted, PublicI9VerificationStatusAwaitingWorker, PublicI9VerificationStatusAwaitingAdmin, PublicI9VerificationStatusVerified:
-		return true
-	}
-	return false
-}
-
-type I9VerificationGetResponse struct {
-	// The tag of the i9 verification.
-	ID             string                          `json:"id" api:"required"`
-	DueDate        string                          `json:"dueDate" api:"required,nullable"`
-	RetentionUntil string                          `json:"retentionUntil" api:"required,nullable"`
-	StartDate      string                          `json:"startDate" api:"required"`
-	Status         I9VerificationGetResponseStatus `json:"status" api:"required"`
-	VerifiedAt     time.Time                       `json:"verifiedAt" api:"required,nullable" format:"date-time"`
-	// Basic identifying information for a worker associated with another resource.
-	Worker PublicWorkerReference         `json:"worker" api:"required"`
-	JSON   i9VerificationGetResponseJSON `json:"-"`
-}
-
-// i9VerificationGetResponseJSON contains the JSON metadata for the struct [I9VerificationGetResponse]
-type i9VerificationGetResponseJSON struct {
-	ID             apijson.Field
-	DueDate        apijson.Field
-	RetentionUntil apijson.Field
-	StartDate      apijson.Field
-	Status         apijson.Field
-	VerifiedAt     apijson.Field
-	Worker         apijson.Field
-	raw            string
-	ExtraFields    map[string]apijson.Field
-}
-
-func (r *I9VerificationGetResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r i9VerificationGetResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-type I9VerificationGetResponseStatus string
-
-const (
-	I9VerificationGetResponseStatusNotStarted     I9VerificationGetResponseStatus = "not_started"
-	I9VerificationGetResponseStatusAwaitingWorker I9VerificationGetResponseStatus = "awaiting_worker"
-	I9VerificationGetResponseStatusAwaitingAdmin  I9VerificationGetResponseStatus = "awaiting_admin"
-	I9VerificationGetResponseStatusVerified       I9VerificationGetResponseStatus = "verified"
-)
-
-func (r I9VerificationGetResponseStatus) IsKnown() bool {
-	switch r {
-	case I9VerificationGetResponseStatusNotStarted, I9VerificationGetResponseStatusAwaitingWorker, I9VerificationGetResponseStatusAwaitingAdmin, I9VerificationGetResponseStatusVerified:
 		return true
 	}
 	return false

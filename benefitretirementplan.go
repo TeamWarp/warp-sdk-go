@@ -63,6 +63,37 @@ func (r *BenefitRetirementPlanService) List(ctx context.Context, query BenefitRe
 	return res, err
 }
 
+// Create a retirement plan for a company on the manual retirement channel.
+//
+// Parameters:
+//
+//	ctx: Context for the request.
+//	body: BenefitRetirementPlanNewParams request parameters.
+//	opts: Options to apply to this request.
+//
+// Returns:
+//
+//	*BenefitRetirementPlanNewResponse: A company retirement plan available through Warp.
+//
+// Example:
+//
+//	retirementPlan, err := client.Benefits.RetirementPlans.New(context.Background(), sdk.BenefitRetirementPlanNewParams{
+//		EffectiveStartDate: sdk.F[string](""),
+//		Name:               sdk.F[string]("x"),
+//		Type:               sdk.F[sdk.BenefitRetirementPlanNewParamsType](sdk.BenefitRetirementPlanNewParamsType("401k")),
+//	})
+//	if err != nil {
+//		panic(err)
+//	}
+//
+//	fmt.Println(retirementPlan)
+func (r *BenefitRetirementPlanService) New(ctx context.Context, body BenefitRetirementPlanNewParams, opts ...option.RequestOption) (res *BenefitRetirementPlanNewResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "v1/benefits/retirement_plans"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return res, err
+}
+
 // Get a company retirement plan by id, regardless of status.
 //
 // Parameters:
@@ -91,6 +122,38 @@ func (r *BenefitRetirementPlanService) Get(ctx context.Context, id string, opts 
 	}
 	path := fmt.Sprintf("v1/benefits/retirement_plans/%s", url.PathEscape(id))
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
+	return res, err
+}
+
+// Update a retirement plan for a company on the manual retirement channel.
+//
+// Parameters:
+//
+//	ctx: Context for the request.
+//	id: The tag of a company retirement plan.
+//	body: BenefitRetirementPlanUpdateParams request parameters.
+//	opts: Options to apply to this request.
+//
+// Returns:
+//
+//	*PublicRetirementPlan: A company retirement plan available through Warp.
+//
+// Example:
+//
+//	retirementPlan, err := client.Benefits.RetirementPlans.Update(context.Background(), "crpl_1234", sdk.BenefitRetirementPlanUpdateParams{})
+//	if err != nil {
+//		panic(err)
+//	}
+//
+//	fmt.Println(retirementPlan)
+func (r *BenefitRetirementPlanService) Update(ctx context.Context, id string, body BenefitRetirementPlanUpdateParams, opts ...option.RequestOption) (res *PublicRetirementPlan, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return nil, err
+	}
+	path := fmt.Sprintf("v1/benefits/retirement_plans/%s", url.PathEscape(id))
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, body, &res, opts...)
 	return res, err
 }
 
@@ -188,6 +251,100 @@ func (r PublicRetirementPlanStatus) IsKnown() bool {
 	return false
 }
 
+type BenefitRetirementPlanNewResponse struct {
+	// The tag of a company retirement plan.
+	ID                 string `json:"id" api:"required"`
+	CreatedAt          string `json:"createdAt" api:"required"`
+	EffectiveEndDate   string `json:"effectiveEndDate" api:"required,nullable"`
+	EffectiveStartDate string `json:"effectiveStartDate" api:"required"`
+	// The company-facing plan name.
+	Name string `json:"name" api:"required"`
+	// The system administering the plan. Manual plans are administered by the company
+	// outside a connected provider.
+	Provider PublicRetirementPlanProvider `json:"provider" api:"required"`
+	// The public lifecycle status of a retirement plan.
+	Status PublicRetirementPlanStatus `json:"status" api:"required"`
+	// The retirement plan type.
+	Type      BenefitRetirementPlanNewResponseType `json:"type" api:"required"`
+	UpdatedAt string                               `json:"updatedAt" api:"required"`
+	JSON      benefitRetirementPlanNewResponseJSON `json:"-"`
+}
+
+// benefitRetirementPlanNewResponseJSON contains the JSON metadata for the struct [BenefitRetirementPlanNewResponse]
+type benefitRetirementPlanNewResponseJSON struct {
+	ID                 apijson.Field
+	CreatedAt          apijson.Field
+	EffectiveEndDate   apijson.Field
+	EffectiveStartDate apijson.Field
+	Name               apijson.Field
+	Provider           apijson.Field
+	Status             apijson.Field
+	Type               apijson.Field
+	UpdatedAt          apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
+}
+
+func (r *BenefitRetirementPlanNewResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r benefitRetirementPlanNewResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type BenefitRetirementPlanNewResponseType string
+
+const (
+	BenefitRetirementPlanNewResponseType401k          BenefitRetirementPlanNewResponseType = "401k"
+	BenefitRetirementPlanNewResponseTypeRoth401k      BenefitRetirementPlanNewResponseType = "roth_401k"
+	BenefitRetirementPlanNewResponseType403b          BenefitRetirementPlanNewResponseType = "403b"
+	BenefitRetirementPlanNewResponseTypeRoth403b      BenefitRetirementPlanNewResponseType = "roth_403b"
+	BenefitRetirementPlanNewResponseType457           BenefitRetirementPlanNewResponseType = "457"
+	BenefitRetirementPlanNewResponseTypeRoth457       BenefitRetirementPlanNewResponseType = "roth_457"
+	BenefitRetirementPlanNewResponseTypeSimpleIra     BenefitRetirementPlanNewResponseType = "simple_ira"
+	BenefitRetirementPlanNewResponseTypeRothSimpleIra BenefitRetirementPlanNewResponseType = "roth_simple_ira"
+)
+
+func (r BenefitRetirementPlanNewResponseType) IsKnown() bool {
+	switch r {
+	case BenefitRetirementPlanNewResponseType401k, BenefitRetirementPlanNewResponseTypeRoth401k, BenefitRetirementPlanNewResponseType403b, BenefitRetirementPlanNewResponseTypeRoth403b, BenefitRetirementPlanNewResponseType457, BenefitRetirementPlanNewResponseTypeRoth457, BenefitRetirementPlanNewResponseTypeSimpleIra, BenefitRetirementPlanNewResponseTypeRothSimpleIra:
+		return true
+	}
+	return false
+}
+
+type BenefitRetirementPlanNewResponseProvider string
+
+const (
+	BenefitRetirementPlanNewResponseProviderManual        BenefitRetirementPlanNewResponseProvider = "manual"
+	BenefitRetirementPlanNewResponseProviderHumanInterest BenefitRetirementPlanNewResponseProvider = "human_interest"
+	BenefitRetirementPlanNewResponseProviderAccrue        BenefitRetirementPlanNewResponseProvider = "accrue"
+)
+
+func (r BenefitRetirementPlanNewResponseProvider) IsKnown() bool {
+	switch r {
+	case BenefitRetirementPlanNewResponseProviderManual, BenefitRetirementPlanNewResponseProviderHumanInterest, BenefitRetirementPlanNewResponseProviderAccrue:
+		return true
+	}
+	return false
+}
+
+type BenefitRetirementPlanNewResponseStatus string
+
+const (
+	BenefitRetirementPlanNewResponseStatusActive     BenefitRetirementPlanNewResponseStatus = "active"
+	BenefitRetirementPlanNewResponseStatusTerminated BenefitRetirementPlanNewResponseStatus = "terminated"
+)
+
+func (r BenefitRetirementPlanNewResponseStatus) IsKnown() bool {
+	switch r {
+	case BenefitRetirementPlanNewResponseStatusActive, BenefitRetirementPlanNewResponseStatusTerminated:
+		return true
+	}
+	return false
+}
+
 type BenefitRetirementPlanListParams struct {
 	Limit    param.Field[string]                       `query:"limit" api:"required"`
 	Statuses param.Field[[]PublicRetirementPlanStatus] `query:"statuses" api:"required"`
@@ -225,6 +382,47 @@ func (r BenefitRetirementPlanListParamsType) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+type BenefitRetirementPlanNewParams struct {
+	EffectiveStartDate param.Field[string]                             `json:"effectiveStartDate" api:"required"`
+	Name               param.Field[string]                             `json:"name" api:"required"`
+	Type               param.Field[BenefitRetirementPlanNewParamsType] `json:"type" api:"required"`
+}
+
+func (r BenefitRetirementPlanNewParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type BenefitRetirementPlanNewParamsType string
+
+const (
+	BenefitRetirementPlanNewParamsType401k          BenefitRetirementPlanNewParamsType = "401k"
+	BenefitRetirementPlanNewParamsTypeRoth401k      BenefitRetirementPlanNewParamsType = "roth_401k"
+	BenefitRetirementPlanNewParamsType403b          BenefitRetirementPlanNewParamsType = "403b"
+	BenefitRetirementPlanNewParamsTypeRoth403b      BenefitRetirementPlanNewParamsType = "roth_403b"
+	BenefitRetirementPlanNewParamsType457           BenefitRetirementPlanNewParamsType = "457"
+	BenefitRetirementPlanNewParamsTypeRoth457       BenefitRetirementPlanNewParamsType = "roth_457"
+	BenefitRetirementPlanNewParamsTypeSimpleIra     BenefitRetirementPlanNewParamsType = "simple_ira"
+	BenefitRetirementPlanNewParamsTypeRothSimpleIra BenefitRetirementPlanNewParamsType = "roth_simple_ira"
+)
+
+func (r BenefitRetirementPlanNewParamsType) IsKnown() bool {
+	switch r {
+	case BenefitRetirementPlanNewParamsType401k, BenefitRetirementPlanNewParamsTypeRoth401k, BenefitRetirementPlanNewParamsType403b, BenefitRetirementPlanNewParamsTypeRoth403b, BenefitRetirementPlanNewParamsType457, BenefitRetirementPlanNewParamsTypeRoth457, BenefitRetirementPlanNewParamsTypeSimpleIra, BenefitRetirementPlanNewParamsTypeRothSimpleIra:
+		return true
+	}
+	return false
+}
+
+type BenefitRetirementPlanUpdateParams struct {
+	EffectiveEndDate   param.Field[string] `json:"effectiveEndDate"`
+	EffectiveStartDate param.Field[string] `json:"effectiveStartDate"`
+	Name               param.Field[string] `json:"name"`
+}
+
+func (r BenefitRetirementPlanUpdateParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 type BenefitRetirementPlanListResponse struct {

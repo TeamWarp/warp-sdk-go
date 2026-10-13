@@ -5,19 +5,21 @@ Complete reference of every operation, grouped by resource. See [the README](./R
 ## Contents
 
 - [`Benefits`](#benefits)
-  - [Create Benefit Deduction](#create-benefit-deduction)
-  - [Update Benefit Deduction](#update-benefit-deduction)
-  - [Create Retirement Plan](#create-retirement-plan)
-  - [Update Retirement Plan](#update-retirement-plan)
   - [`Benefits HealthPlans`](#benefits-healthplans)
     - [List Health Plans](#list-health-plans)
     - [Get Health Plan](#get-health-plan)
   - [`Benefits RetirementPlans`](#benefits-retirementplans)
     - [List Retirement Plans](#list-retirement-plans)
+    - [Create Retirement Plan](#create-retirement-plan)
     - [Get Retirement Plan](#get-retirement-plan)
+    - [Update Retirement Plan](#update-retirement-plan)
   - [`Benefits Deductions`](#benefits-deductions)
     - [List Benefit Deductions](#list-benefit-deductions)
+    - [Create Benefit Deduction](#create-benefit-deduction)
     - [Get Benefit Deduction](#get-benefit-deduction)
+    - [Update Benefit Deduction](#update-benefit-deduction)
+- [`Company`](#company)
+  - [Get company](#get-company)
 - [`CustomFields`](#customfields)
   - [List Fields](#list-fields)
   - [Create Field](#create-field)
@@ -35,6 +37,12 @@ Complete reference of every operation, grouped by resource. See [the README](./R
   - [List Departments](#list-departments)
   - [Create Department](#create-department)
   - [Update Department](#update-department)
+- [`I9Verifications`](#i9verifications)
+  - [List I-9 verifications](#list-i-9-verifications)
+  - [Get I-9 verification](#get-i-9-verification)
+- [`BankAccounts`](#bankaccounts)
+  - [List bank accounts](#list-bank-accounts)
+  - [Get bank account](#get-bank-account)
 - [`Levels`](#levels)
   - [List Job Levels](#list-job-levels)
 - [`Offers`](#offers)
@@ -46,6 +54,9 @@ Complete reference of every operation, grouped by resource. See [the README](./R
 - [`PayRates`](#payrates)
   - [List Pay Rates](#list-pay-rates)
   - [Get Pay Rate](#get-pay-rate)
+  - [`PayRates Regular`](#payrates-regular)
+    - [Create Regular Pay Rate](#create-regular-pay-rate)
+    - [Delete Future Regular Pay Rate](#delete-future-regular-pay-rate)
 - [`Payroll`](#payroll)
   - [List Payrolls](#list-payrolls)
   - [Get Payroll](#get-payroll)
@@ -59,21 +70,18 @@ Complete reference of every operation, grouped by resource. See [the README](./R
     - [List Time Off Policies](#list-time-off-policies)
     - [Get Time Off Policy](#get-time-off-policy)
 - [`Workers`](#workers)
-  - [List Workers](#list-workers)
+  - [Update Worker](#update-worker)
   - [Get Worker](#get-worker)
   - [Delete Worker](#delete-worker)
+  - [Reveal Worker SSNs](#reveal-worker-ssns)
+  - [List Workers](#list-workers)
   - [Create Employee](#create-employee)
   - [Create Contractor](#create-contractor)
   - [Invite Worker](#invite-worker)
-  - [Reveal Worker SSNs](#reveal-worker-ssns)
-  - [Update Worker](#update-worker)
 - [`Workplaces`](#workplaces)
   - [List Workplaces](#list-workplaces)
   - [Create Workplace](#create-workplace)
   - [Update Workplace](#update-workplace)
-- [`I9Verifications`](#i9verifications)
-  - [List I-9 verifications](#list-i-9-verifications)
-  - [Get I-9 verification](#get-i-9-verification)
 
 ## Setup
 
@@ -89,100 +97,6 @@ client := sdk.NewClient()
 ```
 
 ## `Benefits`
-
-Health plan reads and retirement plan and payroll benefit deduction management.
-
-### Create Benefit Deduction
-
-Create a benefit deduction for a worker.
-
-| Direction | Type |
-| --- | --- |
-| Request | [`BenefitNewDeductionParams`](./benefit.go) |
-| Response | [`BenefitNewDeductionResponse`](./benefit.go) |
-
-```go
-benefit, err := client.Benefits.NewDeduction(context.Background(), sdk.BenefitNewDeductionParams{
-	Calculation: sdk.F[sdk.BenefitNewDeductionParamsCalculationUnion](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInput{
-		Type:      sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputType](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputType("fixed_amount")),
-		Frequency: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputFrequency](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputFrequency("monthly")),
-		EmployeeContribution: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContribution](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContribution{
-			Amount:   sdk.F[int64](0),
-			Currency: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency("USD")),
-		}),
-		EmployerContribution: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContribution](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContribution{
-			Amount:   sdk.F[int64](0),
-			Currency: sdk.F[sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency](sdk.BenefitNewDeductionParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency("USD")),
-		}),
-	}),
-	EffectiveStartDate: sdk.F[string](""),
-	Type:               sdk.F[sdk.BenefitNewDeductionParamsType](sdk.BenefitNewDeductionParamsType("medical")),
-	WorkerID:           sdk.F[string]("wrk_1234"),
-})
-if err != nil {
-	panic(err)
-}
-
-fmt.Println(benefit)
-```
-
-### Update Benefit Deduction
-
-Update a benefit deduction. The calculation type cannot change.
-
-| Direction | Type |
-| --- | --- |
-| Request | [`BenefitUpdateDeductionParams`](./benefit.go) |
-| Response | [`PublicBenefitDeduction`](./benefitdeduction.go) |
-
-```go
-benefit, err := client.Benefits.UpdateDeduction(context.Background(), "pbdg_1234", sdk.BenefitUpdateDeductionParams{})
-if err != nil {
-	panic(err)
-}
-
-fmt.Println(benefit)
-```
-
-### Create Retirement Plan
-
-Create a retirement plan for a company on the manual retirement channel.
-
-| Direction | Type |
-| --- | --- |
-| Request | [`BenefitNewRetirementPlanParams`](./benefit.go) |
-| Response | [`BenefitNewRetirementPlanResponse`](./benefit.go) |
-
-```go
-benefit, err := client.Benefits.NewRetirementPlan(context.Background(), sdk.BenefitNewRetirementPlanParams{
-	EffectiveStartDate: sdk.F[string](""),
-	Name:               sdk.F[string]("x"),
-	Type:               sdk.F[sdk.BenefitNewRetirementPlanParamsType](sdk.BenefitNewRetirementPlanParamsType("401k")),
-})
-if err != nil {
-	panic(err)
-}
-
-fmt.Println(benefit)
-```
-
-### Update Retirement Plan
-
-Update a retirement plan for a company on the manual retirement channel.
-
-| Direction | Type |
-| --- | --- |
-| Request | [`BenefitUpdateRetirementPlanParams`](./benefit.go) |
-| Response | [`PublicRetirementPlan`](./benefitretirementplan.go) |
-
-```go
-benefit, err := client.Benefits.UpdateRetirementPlan(context.Background(), "crpl_1234", sdk.BenefitUpdateRetirementPlanParams{})
-if err != nil {
-	panic(err)
-}
-
-fmt.Println(benefit)
-```
 
 ### `Benefits HealthPlans`
 
@@ -251,6 +165,28 @@ if err != nil {
 fmt.Println(retirementPlan)
 ```
 
+#### Create Retirement Plan
+
+Create a retirement plan for a company on the manual retirement channel.
+
+| Direction | Type |
+| --- | --- |
+| Request | [`BenefitRetirementPlanNewParams`](./benefitretirementplan.go) |
+| Response | [`BenefitRetirementPlanNewResponse`](./benefitretirementplan.go) |
+
+```go
+retirementPlan, err := client.Benefits.RetirementPlans.New(context.Background(), sdk.BenefitRetirementPlanNewParams{
+	EffectiveStartDate: sdk.F[string](""),
+	Name:               sdk.F[string]("x"),
+	Type:               sdk.F[sdk.BenefitRetirementPlanNewParamsType](sdk.BenefitRetirementPlanNewParamsType("401k")),
+})
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(retirementPlan)
+```
+
 #### Get Retirement Plan
 
 Get a company retirement plan by id, regardless of status.
@@ -261,6 +197,24 @@ Get a company retirement plan by id, regardless of status.
 
 ```go
 retirementPlan, err := client.Benefits.RetirementPlans.Get(context.Background(), "crpl_1234")
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(retirementPlan)
+```
+
+#### Update Retirement Plan
+
+Update a retirement plan for a company on the manual retirement channel.
+
+| Direction | Type |
+| --- | --- |
+| Request | [`BenefitRetirementPlanUpdateParams`](./benefitretirementplan.go) |
+| Response | [`PublicRetirementPlan`](./benefitretirementplan.go) |
+
+```go
+retirementPlan, err := client.Benefits.RetirementPlans.Update(context.Background(), "crpl_1234", sdk.BenefitRetirementPlanUpdateParams{})
 if err != nil {
 	panic(err)
 }
@@ -293,6 +247,40 @@ if err != nil {
 fmt.Println(deduction)
 ```
 
+#### Create Benefit Deduction
+
+Create a benefit deduction for a worker.
+
+| Direction | Type |
+| --- | --- |
+| Request | [`BenefitDeductionNewParams`](./benefitdeduction.go) |
+| Response | [`BenefitDeductionNewResponse`](./benefitdeduction.go) |
+
+```go
+deduction, err := client.Benefits.Deductions.New(context.Background(), sdk.BenefitDeductionNewParams{
+	Calculation: sdk.F[sdk.BenefitDeductionNewParamsCalculationUnion](sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInput{
+		Type:      sdk.F[sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInputType](sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInputType("fixed_amount")),
+		Frequency: sdk.F[sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInputFrequency](sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInputFrequency("monthly")),
+		EmployeeContribution: sdk.F[sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContribution](sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContribution{
+			Amount:   sdk.F[int64](0),
+			Currency: sdk.F[sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency](sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency("USD")),
+		}),
+		EmployerContribution: sdk.F[sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContribution](sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContribution{
+			Amount:   sdk.F[int64](0),
+			Currency: sdk.F[sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency](sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency("USD")),
+		}),
+	}),
+	EffectiveStartDate: sdk.F[string](""),
+	Type:               sdk.F[sdk.BenefitDeductionNewParamsType](sdk.BenefitDeductionNewParamsType("medical")),
+	WorkerID:           sdk.F[string]("wrk_1234"),
+})
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(deduction)
+```
+
 #### Get Benefit Deduction
 
 Get the current version of a company benefit deduction by id.
@@ -308,6 +296,45 @@ if err != nil {
 }
 
 fmt.Println(deduction)
+```
+
+#### Update Benefit Deduction
+
+Update a benefit deduction. The calculation type cannot change.
+
+| Direction | Type |
+| --- | --- |
+| Request | [`BenefitDeductionUpdateParams`](./benefitdeduction.go) |
+| Response | [`PublicBenefitDeduction`](./benefitdeduction.go) |
+
+```go
+deduction, err := client.Benefits.Deductions.Update(context.Background(), "pbdg_1234", sdk.BenefitDeductionUpdateParams{})
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(deduction)
+```
+
+## `Company`
+
+Read basic information about the company associated with your API key.
+
+### Get company
+
+Get the company associated with your API key, including its unmasked EIN. Requires settings read permission or higher. No parameters are required. The response is the company object directly, and unavailable incorporation dates are null.
+
+| Direction | Type |
+| --- | --- |
+| Response | [`PublicCompany`](./company.go) |
+
+```go
+company, err := client.Company.List(context.Background())
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(company)
 ```
 
 ## `CustomFields`
@@ -592,6 +619,88 @@ if err != nil {
 fmt.Println(department)
 ```
 
+## `I9Verifications`
+
+Read company I-9 verification metadata, including retained forms, without exposing form contents.
+
+### List I-9 verifications
+
+List current and retained company I-9 verifications in all workflow states, newest first. The API key must have workers profile and compliance read scope.
+
+| Direction | Type |
+| --- | --- |
+| Request | [`I9VerificationListParams`](./i9verification.go) |
+| Response | [`I9VerificationListResponse`](./i9verification.go) |
+
+```go
+i9Verification, err := client.I9Verifications.List(context.Background(), sdk.I9VerificationListParams{
+	Limit: sdk.F[string]("limit"),
+})
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(i9Verification)
+```
+
+### Get I-9 verification
+
+Get a specific I-9 verification by its id. The API key must have workers profile and compliance read scope.
+
+| Direction | Type |
+| --- | --- |
+| Response | [`PublicI9Verification`](./i9verification.go) |
+
+```go
+i9Verification, err := client.I9Verifications.Get(context.Background(), "i9v_1234")
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(i9Verification)
+```
+
+## `BankAccounts`
+
+Read masked worker bank account metadata. No banking instructions or account changes are supported.
+
+### List bank accounts
+
+List stored worker bank accounts, newest first. Requires workers banking and profile read scopes.
+
+| Direction | Type |
+| --- | --- |
+| Request | [`BankAccountListParams`](./bankaccount.go) |
+| Response | [`BankAccountListResponse`](./bankaccount.go) |
+
+```go
+bankAccount, err := client.BankAccounts.List(context.Background(), sdk.BankAccountListParams{
+	Limit: sdk.F[string]("limit"),
+})
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(bankAccount)
+```
+
+### Get bank account
+
+Get a stored worker bank account. Requires workers banking and profile read scopes.
+
+| Direction | Type |
+| --- | --- |
+| Response | [`PublicBankAccount`](./bankaccount.go) |
+
+```go
+bankAccount, err := client.BankAccounts.Get(context.Background(), "bank_1234")
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(bankAccount)
+```
+
 ## `Levels`
 
 Endpoints for reading the job-level framework configured for your company.
@@ -767,6 +876,51 @@ if err != nil {
 }
 
 fmt.Println(payRate)
+```
+
+### `PayRates Regular`
+
+Read worker pay rates and create or delete effective-dated regular pay rates. No public pay-rate update operation is exposed.
+
+#### Create Regular Pay Rate
+
+Create an effective-dated regular pay rate for a worker. The API key must have the compensation write scope corresponding to the worker classification. Fixed rates require a nonnegative integer amount in minor currency units, and writes accept only currencies with exactly two ISO 4217 minor-unit digits. Amount is required except for variable pay, and requireHoursSubmission is required for hourly pay. An inactive worker’s rate must start on the worker start date; an active worker’s rate must start on or after that date. An existing future rate blocks creation except for a same-start-date replacement. Currency changes must begin at the current pay-period start, or at the worker start date when the worker is inactive, is a pay-as-you-go contractor, or has a future start date. Variable pay returns a null id and stores no fixed pay-rate row. Replacing a fixed row on the same date emits separate deleted and created webhooks; delivery order is not guaranteed. Creating a fixed rate over variable pay emits only the created webhook because no fixed row existed to delete. There is no pay-rate update event.
+
+| Direction | Type |
+| --- | --- |
+| Request | [`PayRateRegularNewParams`](./payrateregular.go) |
+| Response | [`PublicCreateRegularPayRateResponse`](./payrateregular.go) |
+
+```go
+regular, err := client.PayRates.Regular.New(context.Background(), sdk.PayRateRegularNewParams{
+	Currency:      sdk.F[sdk.PayRateRegularNewParamsCurrency](sdk.PayRateRegularNewParamsCurrency("USD")),
+	EffectiveDate: sdk.F[string](""),
+	Type:          sdk.F[sdk.PayRateRegularNewParamsType](sdk.PayRateRegularNewParamsType("salary")),
+	WorkerID:      sdk.F[string]("wrk_khac8380c2Lm"),
+})
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(regular)
+```
+
+#### Delete Future Regular Pay Rate
+
+Delete a regular pay rate or variable-pay boundary identified by worker and effective date. The effective date must be strictly after the current UTC date. The API key must have the compensation write scope corresponding to the worker classification. Deletion reopens the predecessor through the deleted range, including when deleting a variable-pay boundary. There is no public PATCH or PUT pay-rate update operation; replace a same-date rate by creating its replacement.
+
+| Direction | Type |
+| --- | --- |
+| Request | [`PayRateRegularDeleteParams`](./payrateregular.go) |
+
+```go
+err := client.PayRates.Regular.Delete(context.Background(), sdk.PayRateRegularDeleteParams{
+	EffectiveDate: sdk.F[string](""),
+	WorkerID:      sdk.F[string]("wrk_khac8380c2Lm"),
+})
+if err != nil {
+	panic(err)
+}
 ```
 
 ## `Payroll`
@@ -956,19 +1110,17 @@ fmt.Println(policy)
 
 Endpoints for worker management. "Workers" include anyone employed by your company, whether US or international, full-time employees or contractors.
 
-### List Workers
+### Update Worker
 
-List all workers. Workers include anyone employed by the company, whether US or international, full-time employees or contractors.
+Update a worker and return the updated worker object. Omitted fields remain unchanged. Requires workers:profile write, plus read access to any referenced department, level, or workplace. See individual fields for update restrictions.
 
 | Direction | Type |
 | --- | --- |
-| Request | [`WorkerListParams`](./worker.go) |
-| Response | [`WorkerListResponse`](./worker.go) |
+| Request | [`WorkerUpdateParams`](./worker.go) |
+| Response | [`WorkerUpdateResponse`](./worker.go) |
 
 ```go
-worker, err := client.Workers.List(context.Background(), sdk.WorkerListParams{
-	Limit: sdk.F[string]("limit"),
-})
+worker, err := client.Workers.Update(context.Background(), "wrk_1234", sdk.WorkerUpdateParams{})
 if err != nil {
 	panic(err)
 }
@@ -1002,6 +1154,46 @@ err := client.Workers.Delete(context.Background(), "wrk_1234")
 if err != nil {
 	panic(err)
 }
+```
+
+### Reveal Worker SSNs
+
+Reveal full Social Security numbers for up to 50 workers. Requires the workers:pii read scope. Results preserve request order and use null when a worker has no SSN on file. The request fails if any worker is not found, emits one audit event per worker, and returns Cache-Control: private, no-store.
+
+| Direction | Type |
+| --- | --- |
+| Request | [`WorkerRevealSsnParams`](./worker.go) |
+| Response | [`[]PublicWorkerSsn`](./worker.go) |
+
+```go
+worker, err := client.Workers.RevealSsn(context.Background(), sdk.WorkerRevealSsnParams{
+	WorkerIDs: sdk.F[[]string]([]string{"wrk_khac8380c2Lm", "wrk_q7Vm2pR9xK4c"}),
+})
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(worker)
+```
+
+### List Workers
+
+List all workers. Workers include anyone employed by the company, whether US or international, full-time employees or contractors.
+
+| Direction | Type |
+| --- | --- |
+| Request | [`WorkerListParams`](./worker.go) |
+| Response | [`WorkerListResponse`](./worker.go) |
+
+```go
+worker, err := client.Workers.List(context.Background(), sdk.WorkerListParams{
+	Limit: sdk.F[string]("limit"),
+})
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(worker)
 ```
 
 ### Create Employee
@@ -1083,44 +1275,6 @@ if err != nil {
 fmt.Println(worker)
 ```
 
-### Reveal Worker SSNs
-
-Reveal full Social Security numbers for up to 50 workers. Requires the workers:pii read scope. Results preserve request order and use null when a worker has no SSN on file. The request fails if any worker is not found, emits one audit event per worker, and returns Cache-Control: private, no-store.
-
-| Direction | Type |
-| --- | --- |
-| Request | [`WorkerRevealSsnParams`](./worker.go) |
-| Response | [`[]PublicWorkerSsn`](./worker.go) |
-
-```go
-worker, err := client.Workers.RevealSsn(context.Background(), sdk.WorkerRevealSsnParams{
-	WorkerIDs: sdk.F[[]string]([]string{"wrk_khac8380c2Lm", "wrk_q7Vm2pR9xK4c"}),
-})
-if err != nil {
-	panic(err)
-}
-
-fmt.Println(worker)
-```
-
-### Update Worker
-
-Update a worker and return the updated worker object. Omitted fields remain unchanged. Requires workers:profile write, plus read access to any referenced department, level, or workplace. See individual fields for update restrictions.
-
-| Direction | Type |
-| --- | --- |
-| Request | [`WorkerUpdateParams`](./worker.go) |
-| Response | [`WorkerUpdateResponse`](./worker.go) |
-
-```go
-worker, err := client.Workers.Update(context.Background(), "wrk_1234", sdk.WorkerUpdateParams{})
-if err != nil {
-	panic(err)
-}
-
-fmt.Println(worker)
-```
-
 ## `Workplaces`
 
 Endpoints for workplace management. Create, list, and update workplaces within your company.
@@ -1189,45 +1343,4 @@ if err != nil {
 }
 
 fmt.Println(workplace)
-```
-
-## `I9Verifications`
-
-Read company I-9 verification metadata, including retained forms, without exposing form contents.
-
-### List I-9 verifications
-
-List current and retained company I-9 verifications in all workflow states, newest first. The API key must have workers profile and compliance read scope.
-
-| Direction | Type |
-| --- | --- |
-| Request | [`I9VerificationListParams`](./i9verification.go) |
-| Response | [`I9VerificationListResponse`](./i9verification.go) |
-
-```go
-i9Verification, err := client.I9Verifications.List(context.Background(), sdk.I9VerificationListParams{
-	Limit: sdk.F[string]("limit"),
-})
-if err != nil {
-	panic(err)
-}
-
-fmt.Println(i9Verification)
-```
-
-### Get I-9 verification
-
-Get a specific I-9 verification by its id. The API key must have workers profile and compliance read scope.
-
-| Direction | Type |
-| --- | --- |
-| Response | [`I9VerificationGetResponse`](./i9verification.go) |
-
-```go
-i9Verification, err := client.I9Verifications.Get(context.Background(), "i9v_1234")
-if err != nil {
-	panic(err)
-}
-
-fmt.Println(i9Verification)
 ```
