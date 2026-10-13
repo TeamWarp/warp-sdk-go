@@ -22,6 +22,7 @@ import (
 // the [NewPayRateService] method instead.
 type PayRateService struct {
 	Options []option.RequestOption
+	Regular *PayRateRegularService
 }
 
 // NewPayRateService generates a new service that applies the given options to each request.
@@ -30,6 +31,7 @@ type PayRateService struct {
 func NewPayRateService(opts ...option.RequestOption) (r *PayRateService) {
 	r = &PayRateService{}
 	r.Options = opts
+	r.Regular = NewPayRateRegularService(opts...)
 	return
 }
 

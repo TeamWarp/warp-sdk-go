@@ -19,8 +19,11 @@ import (
 type Client struct {
 	Options         []option.RequestOption
 	Benefits        *BenefitService
+	Company         *CompanyService
 	CustomFields    *CustomFieldService
 	Departments     *DepartmentService
+	I9Verifications *I9VerificationService
+	BankAccounts    *BankAccountService
 	Levels          *LevelService
 	Offers          *OfferService
 	PayRates        *PayRateService
@@ -28,7 +31,6 @@ type Client struct {
 	TimeOff         *TimeOffService
 	Workers         *WorkerService
 	Workplaces      *WorkplaceService
-	I9Verifications *I9VerificationService
 	Webhooks        *WebhookService
 }
 
@@ -66,8 +68,11 @@ func NewClient(opts ...option.RequestOption) (r *Client) {
 	r = &Client{Options: opts}
 
 	r.Benefits = NewBenefitService(opts...)
+	r.Company = NewCompanyService(opts...)
 	r.CustomFields = NewCustomFieldService(opts...)
 	r.Departments = NewDepartmentService(opts...)
+	r.I9Verifications = NewI9VerificationService(opts...)
+	r.BankAccounts = NewBankAccountService(opts...)
 	r.Levels = NewLevelService(opts...)
 	r.Offers = NewOfferService(opts...)
 	r.PayRates = NewPayRateService(opts...)
@@ -75,7 +80,6 @@ func NewClient(opts ...option.RequestOption) (r *Client) {
 	r.TimeOff = NewTimeOffService(opts...)
 	r.Workers = NewWorkerService(opts...)
 	r.Workplaces = NewWorkplaceService(opts...)
-	r.I9Verifications = NewI9VerificationService(opts...)
 	r.Webhooks = NewWebhookService(opts...)
 
 	return
