@@ -27,6 +27,7 @@ type Client struct {
 	Levels          *LevelService
 	Offers          *OfferService
 	PayRates        *PayRateService
+	PaySplits       *PaySplitService
 	Payroll         *PayrollService
 	TimeOff         *TimeOffService
 	Workers         *WorkerService
@@ -76,6 +77,7 @@ func NewClient(opts ...option.RequestOption) (r *Client) {
 	r.Levels = NewLevelService(opts...)
 	r.Offers = NewOfferService(opts...)
 	r.PayRates = NewPayRateService(opts...)
+	r.PaySplits = NewPaySplitService(opts...)
 	r.Payroll = NewPayrollService(opts...)
 	r.TimeOff = NewTimeOffService(opts...)
 	r.Workers = NewWorkerService(opts...)
