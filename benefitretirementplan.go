@@ -73,7 +73,7 @@ func (r *BenefitRetirementPlanService) List(ctx context.Context, query BenefitRe
 //
 // Returns:
 //
-//	*BenefitRetirementPlanNewResponse: A company retirement plan available through Warp.
+//	*PublicRetirementPlan1: A company retirement plan available through Warp.
 //
 // Example:
 //
@@ -87,7 +87,7 @@ func (r *BenefitRetirementPlanService) List(ctx context.Context, query BenefitRe
 //	}
 //
 //	fmt.Println(retirementPlan)
-func (r *BenefitRetirementPlanService) New(ctx context.Context, body BenefitRetirementPlanNewParams, opts ...option.RequestOption) (res *BenefitRetirementPlanNewResponse, err error) {
+func (r *BenefitRetirementPlanService) New(ctx context.Context, body BenefitRetirementPlanNewParams, opts ...option.RequestOption) (res *PublicRetirementPlan1, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/benefits/retirement_plans"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
@@ -220,6 +220,69 @@ func (r PublicRetirementPlanType) IsKnown() bool {
 	return false
 }
 
+type PublicRetirementPlan1 struct {
+	// The tag of a company retirement plan.
+	ID                 string `json:"id" api:"required"`
+	CreatedAt          string `json:"createdAt" api:"required"`
+	EffectiveEndDate   string `json:"effectiveEndDate" api:"required,nullable"`
+	EffectiveStartDate string `json:"effectiveStartDate" api:"required"`
+	// The company-facing plan name.
+	Name string `json:"name" api:"required"`
+	// The system administering the plan. Manual plans are administered by the company
+	// outside a connected provider.
+	Provider PublicRetirementPlanProvider `json:"provider" api:"required"`
+	// The public lifecycle status of a retirement plan.
+	Status PublicRetirementPlanStatus `json:"status" api:"required"`
+	// The retirement plan type.
+	Type      PublicRetirementPlan1Type `json:"type" api:"required"`
+	UpdatedAt string                    `json:"updatedAt" api:"required"`
+	JSON      publicRetirementPlan1JSON `json:"-"`
+}
+
+// publicRetirementPlan1JSON contains the JSON metadata for the struct [PublicRetirementPlan1]
+type publicRetirementPlan1JSON struct {
+	ID                 apijson.Field
+	CreatedAt          apijson.Field
+	EffectiveEndDate   apijson.Field
+	EffectiveStartDate apijson.Field
+	Name               apijson.Field
+	Provider           apijson.Field
+	Status             apijson.Field
+	Type               apijson.Field
+	UpdatedAt          apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
+}
+
+func (r *PublicRetirementPlan1) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicRetirementPlan1JSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicRetirementPlan1Type string
+
+const (
+	PublicRetirementPlan1Type401k          PublicRetirementPlan1Type = "401k"
+	PublicRetirementPlan1TypeRoth401k      PublicRetirementPlan1Type = "roth_401k"
+	PublicRetirementPlan1Type403b          PublicRetirementPlan1Type = "403b"
+	PublicRetirementPlan1TypeRoth403b      PublicRetirementPlan1Type = "roth_403b"
+	PublicRetirementPlan1Type457           PublicRetirementPlan1Type = "457"
+	PublicRetirementPlan1TypeRoth457       PublicRetirementPlan1Type = "roth_457"
+	PublicRetirementPlan1TypeSimpleIra     PublicRetirementPlan1Type = "simple_ira"
+	PublicRetirementPlan1TypeRothSimpleIra PublicRetirementPlan1Type = "roth_simple_ira"
+)
+
+func (r PublicRetirementPlan1Type) IsKnown() bool {
+	switch r {
+	case PublicRetirementPlan1Type401k, PublicRetirementPlan1TypeRoth401k, PublicRetirementPlan1Type403b, PublicRetirementPlan1TypeRoth403b, PublicRetirementPlan1Type457, PublicRetirementPlan1TypeRoth457, PublicRetirementPlan1TypeSimpleIra, PublicRetirementPlan1TypeRothSimpleIra:
+		return true
+	}
+	return false
+}
+
 type PublicRetirementPlanProvider string
 
 const (
@@ -246,100 +309,6 @@ const (
 func (r PublicRetirementPlanStatus) IsKnown() bool {
 	switch r {
 	case PublicRetirementPlanStatusActive, PublicRetirementPlanStatusTerminated:
-		return true
-	}
-	return false
-}
-
-type BenefitRetirementPlanNewResponse struct {
-	// The tag of a company retirement plan.
-	ID                 string `json:"id" api:"required"`
-	CreatedAt          string `json:"createdAt" api:"required"`
-	EffectiveEndDate   string `json:"effectiveEndDate" api:"required,nullable"`
-	EffectiveStartDate string `json:"effectiveStartDate" api:"required"`
-	// The company-facing plan name.
-	Name string `json:"name" api:"required"`
-	// The system administering the plan. Manual plans are administered by the company
-	// outside a connected provider.
-	Provider PublicRetirementPlanProvider `json:"provider" api:"required"`
-	// The public lifecycle status of a retirement plan.
-	Status PublicRetirementPlanStatus `json:"status" api:"required"`
-	// The retirement plan type.
-	Type      BenefitRetirementPlanNewResponseType `json:"type" api:"required"`
-	UpdatedAt string                               `json:"updatedAt" api:"required"`
-	JSON      benefitRetirementPlanNewResponseJSON `json:"-"`
-}
-
-// benefitRetirementPlanNewResponseJSON contains the JSON metadata for the struct [BenefitRetirementPlanNewResponse]
-type benefitRetirementPlanNewResponseJSON struct {
-	ID                 apijson.Field
-	CreatedAt          apijson.Field
-	EffectiveEndDate   apijson.Field
-	EffectiveStartDate apijson.Field
-	Name               apijson.Field
-	Provider           apijson.Field
-	Status             apijson.Field
-	Type               apijson.Field
-	UpdatedAt          apijson.Field
-	raw                string
-	ExtraFields        map[string]apijson.Field
-}
-
-func (r *BenefitRetirementPlanNewResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r benefitRetirementPlanNewResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-type BenefitRetirementPlanNewResponseType string
-
-const (
-	BenefitRetirementPlanNewResponseType401k          BenefitRetirementPlanNewResponseType = "401k"
-	BenefitRetirementPlanNewResponseTypeRoth401k      BenefitRetirementPlanNewResponseType = "roth_401k"
-	BenefitRetirementPlanNewResponseType403b          BenefitRetirementPlanNewResponseType = "403b"
-	BenefitRetirementPlanNewResponseTypeRoth403b      BenefitRetirementPlanNewResponseType = "roth_403b"
-	BenefitRetirementPlanNewResponseType457           BenefitRetirementPlanNewResponseType = "457"
-	BenefitRetirementPlanNewResponseTypeRoth457       BenefitRetirementPlanNewResponseType = "roth_457"
-	BenefitRetirementPlanNewResponseTypeSimpleIra     BenefitRetirementPlanNewResponseType = "simple_ira"
-	BenefitRetirementPlanNewResponseTypeRothSimpleIra BenefitRetirementPlanNewResponseType = "roth_simple_ira"
-)
-
-func (r BenefitRetirementPlanNewResponseType) IsKnown() bool {
-	switch r {
-	case BenefitRetirementPlanNewResponseType401k, BenefitRetirementPlanNewResponseTypeRoth401k, BenefitRetirementPlanNewResponseType403b, BenefitRetirementPlanNewResponseTypeRoth403b, BenefitRetirementPlanNewResponseType457, BenefitRetirementPlanNewResponseTypeRoth457, BenefitRetirementPlanNewResponseTypeSimpleIra, BenefitRetirementPlanNewResponseTypeRothSimpleIra:
-		return true
-	}
-	return false
-}
-
-type BenefitRetirementPlanNewResponseProvider string
-
-const (
-	BenefitRetirementPlanNewResponseProviderManual        BenefitRetirementPlanNewResponseProvider = "manual"
-	BenefitRetirementPlanNewResponseProviderHumanInterest BenefitRetirementPlanNewResponseProvider = "human_interest"
-	BenefitRetirementPlanNewResponseProviderAccrue        BenefitRetirementPlanNewResponseProvider = "accrue"
-)
-
-func (r BenefitRetirementPlanNewResponseProvider) IsKnown() bool {
-	switch r {
-	case BenefitRetirementPlanNewResponseProviderManual, BenefitRetirementPlanNewResponseProviderHumanInterest, BenefitRetirementPlanNewResponseProviderAccrue:
-		return true
-	}
-	return false
-}
-
-type BenefitRetirementPlanNewResponseStatus string
-
-const (
-	BenefitRetirementPlanNewResponseStatusActive     BenefitRetirementPlanNewResponseStatus = "active"
-	BenefitRetirementPlanNewResponseStatusTerminated BenefitRetirementPlanNewResponseStatus = "terminated"
-)
-
-func (r BenefitRetirementPlanNewResponseStatus) IsKnown() bool {
-	switch r {
-	case BenefitRetirementPlanNewResponseStatusActive, BenefitRetirementPlanNewResponseStatusTerminated:
 		return true
 	}
 	return false

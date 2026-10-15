@@ -76,7 +76,7 @@ func (r *BenefitDeductionService) List(ctx context.Context, query BenefitDeducti
 //
 // Returns:
 //
-//	*BenefitDeductionNewResponse: The current version of a stable payroll benefit deduction.
+//	*PublicBenefitDeduction1: The current version of a stable payroll benefit deduction.
 //
 // Example:
 //
@@ -102,7 +102,7 @@ func (r *BenefitDeductionService) List(ctx context.Context, query BenefitDeducti
 //	}
 //
 //	fmt.Println(deduction)
-func (r *BenefitDeductionService) New(ctx context.Context, body BenefitDeductionNewParams, opts ...option.RequestOption) (res *BenefitDeductionNewResponse, err error) {
+func (r *BenefitDeductionService) New(ctx context.Context, body BenefitDeductionNewParams, opts ...option.RequestOption) (res *PublicBenefitDeduction1, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/benefits/deductions"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
@@ -186,7 +186,7 @@ type PublicBenefitDeduction struct {
 	// The deduction name shown in payroll and benefits surfaces.
 	Name string `json:"name" api:"required"`
 	// The associated benefit plan, or null for a planless payroll deduction.
-	Plan BenefitDeductionNewResponsePlan `json:"plan" api:"required,nullable"`
+	Plan PublicBenefitDeductionPlan2 `json:"plan" api:"required,nullable"`
 	// Whether the deduction recurs or applies once.
 	Recurrence PublicBenefitDeductionRecurrence `json:"recurrence" api:"required"`
 	// The public lifecycle status of the current deduction version.
@@ -279,6 +279,118 @@ const (
 func (r PublicBenefitDeductionRecurrence) IsKnown() bool {
 	switch r {
 	case PublicBenefitDeductionRecurrenceRecurring, PublicBenefitDeductionRecurrenceOneTime:
+		return true
+	}
+	return false
+}
+
+type PublicBenefitDeduction1 struct {
+	// Stable identifier shared by every internal version of this deduction.
+	ID string `json:"id" api:"required"`
+	// How the employee and employer contributions are calculated.
+	Calculation PublicBenefitDeductionCalculation `json:"calculation" api:"required"`
+	// The broad reporting category. The type field identifies the specific payroll
+	// deduction.
+	Category           PublicBenefitDeductionCategory `json:"category" api:"required"`
+	CreatedAt          string                         `json:"createdAt" api:"required"`
+	EffectiveEndDate   string                         `json:"effectiveEndDate" api:"required,nullable"`
+	EffectiveStartDate string                         `json:"effectiveStartDate" api:"required"`
+	// The deduction name shown in payroll and benefits surfaces.
+	Name string `json:"name" api:"required"`
+	// The associated benefit plan, or null for a planless payroll deduction.
+	Plan PublicBenefitDeductionPlan2 `json:"plan" api:"required,nullable"`
+	// Whether the deduction recurs or applies once.
+	Recurrence PublicBenefitDeduction1Recurrence `json:"recurrence" api:"required"`
+	// The public lifecycle status of the current deduction version.
+	Status PublicBenefitDeductionStatus `json:"status" api:"required"`
+	// The specific payroll deduction type within the broader category.
+	Type      PublicBenefitDeduction1Type `json:"type" api:"required"`
+	UpdatedAt string                      `json:"updatedAt" api:"required"`
+	// Basic identifying information for a worker associated with another resource.
+	Worker PublicWorkerReference       `json:"worker" api:"required"`
+	JSON   publicBenefitDeduction1JSON `json:"-"`
+}
+
+// publicBenefitDeduction1JSON contains the JSON metadata for the struct [PublicBenefitDeduction1]
+type publicBenefitDeduction1JSON struct {
+	ID                 apijson.Field
+	Calculation        apijson.Field
+	Category           apijson.Field
+	CreatedAt          apijson.Field
+	EffectiveEndDate   apijson.Field
+	EffectiveStartDate apijson.Field
+	Name               apijson.Field
+	Plan               apijson.Field
+	Recurrence         apijson.Field
+	Status             apijson.Field
+	Type               apijson.Field
+	UpdatedAt          apijson.Field
+	Worker             apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
+}
+
+func (r *PublicBenefitDeduction1) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicBenefitDeduction1JSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicBenefitDeduction1Type string
+
+const (
+	PublicBenefitDeduction1TypeMedical             PublicBenefitDeduction1Type = "medical"
+	PublicBenefitDeduction1TypeDental              PublicBenefitDeduction1Type = "dental"
+	PublicBenefitDeduction1TypeVision              PublicBenefitDeduction1Type = "vision"
+	PublicBenefitDeduction1TypeLife                PublicBenefitDeduction1Type = "life"
+	PublicBenefitDeduction1TypeShortTermDisability PublicBenefitDeduction1Type = "short_term_disability"
+	PublicBenefitDeduction1TypeLongTermDisability  PublicBenefitDeduction1Type = "long_term_disability"
+	PublicBenefitDeduction1Type401k                PublicBenefitDeduction1Type = "401k"
+	PublicBenefitDeduction1TypeRoth401k            PublicBenefitDeduction1Type = "roth_401k"
+	PublicBenefitDeduction1Type403b                PublicBenefitDeduction1Type = "403b"
+	PublicBenefitDeduction1TypeRoth403b            PublicBenefitDeduction1Type = "roth_403b"
+	PublicBenefitDeduction1Type457                 PublicBenefitDeduction1Type = "457"
+	PublicBenefitDeduction1TypeRoth457             PublicBenefitDeduction1Type = "roth_457"
+	PublicBenefitDeduction1TypeHsa                 PublicBenefitDeduction1Type = "hsa"
+	PublicBenefitDeduction1TypeFsaMedical          PublicBenefitDeduction1Type = "fsa_medical"
+	PublicBenefitDeduction1TypeFsaDependentCare    PublicBenefitDeduction1Type = "fsa_dependent_care"
+	PublicBenefitDeduction1TypeTransit             PublicBenefitDeduction1Type = "transit"
+	PublicBenefitDeduction1TypeParking             PublicBenefitDeduction1Type = "parking"
+	PublicBenefitDeduction1TypeAccident            PublicBenefitDeduction1Type = "accident"
+	PublicBenefitDeduction1TypeCancer              PublicBenefitDeduction1Type = "cancer"
+	PublicBenefitDeduction1TypeCriticalIllness     PublicBenefitDeduction1Type = "critical_illness"
+	PublicBenefitDeduction1TypeHospital            PublicBenefitDeduction1Type = "hospital"
+	PublicBenefitDeduction1TypeMedicalOther        PublicBenefitDeduction1Type = "medical_other"
+	PublicBenefitDeduction1TypeSimpleIra           PublicBenefitDeduction1Type = "simple_ira"
+	PublicBenefitDeduction1TypeRothSimpleIra       PublicBenefitDeduction1Type = "roth_simple_ira"
+	PublicBenefitDeduction1TypeNqdc                PublicBenefitDeduction1Type = "nqdc"
+	PublicBenefitDeduction1TypeNontaxableFringe    PublicBenefitDeduction1Type = "nontaxable_fringe"
+	PublicBenefitDeduction1TypePucc                PublicBenefitDeduction1Type = "pucc"
+	PublicBenefitDeduction1TypeVoluntary           PublicBenefitDeduction1Type = "voluntary"
+	PublicBenefitDeduction1TypePostTax             PublicBenefitDeduction1Type = "post_tax"
+	PublicBenefitDeduction1TypeOther               PublicBenefitDeduction1Type = "other"
+)
+
+func (r PublicBenefitDeduction1Type) IsKnown() bool {
+	switch r {
+	case PublicBenefitDeduction1TypeMedical, PublicBenefitDeduction1TypeDental, PublicBenefitDeduction1TypeVision, PublicBenefitDeduction1TypeLife, PublicBenefitDeduction1TypeShortTermDisability, PublicBenefitDeduction1TypeLongTermDisability, PublicBenefitDeduction1Type401k, PublicBenefitDeduction1TypeRoth401k, PublicBenefitDeduction1Type403b, PublicBenefitDeduction1TypeRoth403b, PublicBenefitDeduction1Type457, PublicBenefitDeduction1TypeRoth457, PublicBenefitDeduction1TypeHsa, PublicBenefitDeduction1TypeFsaMedical, PublicBenefitDeduction1TypeFsaDependentCare, PublicBenefitDeduction1TypeTransit, PublicBenefitDeduction1TypeParking, PublicBenefitDeduction1TypeAccident, PublicBenefitDeduction1TypeCancer, PublicBenefitDeduction1TypeCriticalIllness, PublicBenefitDeduction1TypeHospital, PublicBenefitDeduction1TypeMedicalOther, PublicBenefitDeduction1TypeSimpleIra, PublicBenefitDeduction1TypeRothSimpleIra, PublicBenefitDeduction1TypeNqdc, PublicBenefitDeduction1TypeNontaxableFringe, PublicBenefitDeduction1TypePucc, PublicBenefitDeduction1TypeVoluntary, PublicBenefitDeduction1TypePostTax, PublicBenefitDeduction1TypeOther:
+		return true
+	}
+	return false
+}
+
+type PublicBenefitDeduction1Recurrence string
+
+const (
+	PublicBenefitDeduction1RecurrenceRecurring PublicBenefitDeduction1Recurrence = "recurring"
+	PublicBenefitDeduction1RecurrenceOneTime   PublicBenefitDeduction1Recurrence = "one_time"
+)
+
+func (r PublicBenefitDeduction1Recurrence) IsKnown() bool {
+	switch r {
+	case PublicBenefitDeduction1RecurrenceRecurring, PublicBenefitDeduction1RecurrenceOneTime:
 		return true
 	}
 	return false
@@ -610,155 +722,6 @@ const (
 func (r PercentageBenefitInputType) IsKnown() bool {
 	switch r {
 	case PercentageBenefitInputTypePercentage:
-		return true
-	}
-	return false
-}
-
-type BenefitDeductionNewResponse struct {
-	// Stable identifier shared by every internal version of this deduction.
-	ID string `json:"id" api:"required"`
-	// How the employee and employer contributions are calculated.
-	Calculation PublicBenefitDeductionCalculation `json:"calculation" api:"required"`
-	// The broad reporting category. The type field identifies the specific payroll
-	// deduction.
-	Category           PublicBenefitDeductionCategory `json:"category" api:"required"`
-	CreatedAt          string                         `json:"createdAt" api:"required"`
-	EffectiveEndDate   string                         `json:"effectiveEndDate" api:"required,nullable"`
-	EffectiveStartDate string                         `json:"effectiveStartDate" api:"required"`
-	// The deduction name shown in payroll and benefits surfaces.
-	Name string `json:"name" api:"required"`
-	// The associated benefit plan, or null for a planless payroll deduction.
-	Plan BenefitDeductionNewResponsePlan `json:"plan" api:"required,nullable"`
-	// Whether the deduction recurs or applies once.
-	Recurrence BenefitDeductionNewResponseRecurrence `json:"recurrence" api:"required"`
-	// The public lifecycle status of the current deduction version.
-	Status PublicBenefitDeductionStatus `json:"status" api:"required"`
-	// The specific payroll deduction type within the broader category.
-	Type      BenefitDeductionNewResponseType `json:"type" api:"required"`
-	UpdatedAt string                          `json:"updatedAt" api:"required"`
-	// Basic identifying information for a worker associated with another resource.
-	Worker PublicWorkerReference           `json:"worker" api:"required"`
-	JSON   benefitDeductionNewResponseJSON `json:"-"`
-}
-
-// benefitDeductionNewResponseJSON contains the JSON metadata for the struct [BenefitDeductionNewResponse]
-type benefitDeductionNewResponseJSON struct {
-	ID                 apijson.Field
-	Calculation        apijson.Field
-	Category           apijson.Field
-	CreatedAt          apijson.Field
-	EffectiveEndDate   apijson.Field
-	EffectiveStartDate apijson.Field
-	Name               apijson.Field
-	Plan               apijson.Field
-	Recurrence         apijson.Field
-	Status             apijson.Field
-	Type               apijson.Field
-	UpdatedAt          apijson.Field
-	Worker             apijson.Field
-	raw                string
-	ExtraFields        map[string]apijson.Field
-}
-
-func (r *BenefitDeductionNewResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r benefitDeductionNewResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-type BenefitDeductionNewResponseCategory string
-
-const (
-	BenefitDeductionNewResponseCategoryHealth        BenefitDeductionNewResponseCategory = "health"
-	BenefitDeductionNewResponseCategoryRetirement    BenefitDeductionNewResponseCategory = "retirement"
-	BenefitDeductionNewResponseCategoryHealthSavings BenefitDeductionNewResponseCategory = "health_savings"
-	BenefitDeductionNewResponseCategoryCommuter      BenefitDeductionNewResponseCategory = "commuter"
-	BenefitDeductionNewResponseCategoryVoluntary     BenefitDeductionNewResponseCategory = "voluntary"
-	BenefitDeductionNewResponseCategoryPostTax       BenefitDeductionNewResponseCategory = "post_tax"
-	BenefitDeductionNewResponseCategoryOther         BenefitDeductionNewResponseCategory = "other"
-)
-
-func (r BenefitDeductionNewResponseCategory) IsKnown() bool {
-	switch r {
-	case BenefitDeductionNewResponseCategoryHealth, BenefitDeductionNewResponseCategoryRetirement, BenefitDeductionNewResponseCategoryHealthSavings, BenefitDeductionNewResponseCategoryCommuter, BenefitDeductionNewResponseCategoryVoluntary, BenefitDeductionNewResponseCategoryPostTax, BenefitDeductionNewResponseCategoryOther:
-		return true
-	}
-	return false
-}
-
-type BenefitDeductionNewResponseType string
-
-const (
-	BenefitDeductionNewResponseTypeMedical             BenefitDeductionNewResponseType = "medical"
-	BenefitDeductionNewResponseTypeDental              BenefitDeductionNewResponseType = "dental"
-	BenefitDeductionNewResponseTypeVision              BenefitDeductionNewResponseType = "vision"
-	BenefitDeductionNewResponseTypeLife                BenefitDeductionNewResponseType = "life"
-	BenefitDeductionNewResponseTypeShortTermDisability BenefitDeductionNewResponseType = "short_term_disability"
-	BenefitDeductionNewResponseTypeLongTermDisability  BenefitDeductionNewResponseType = "long_term_disability"
-	BenefitDeductionNewResponseType401k                BenefitDeductionNewResponseType = "401k"
-	BenefitDeductionNewResponseTypeRoth401k            BenefitDeductionNewResponseType = "roth_401k"
-	BenefitDeductionNewResponseType403b                BenefitDeductionNewResponseType = "403b"
-	BenefitDeductionNewResponseTypeRoth403b            BenefitDeductionNewResponseType = "roth_403b"
-	BenefitDeductionNewResponseType457                 BenefitDeductionNewResponseType = "457"
-	BenefitDeductionNewResponseTypeRoth457             BenefitDeductionNewResponseType = "roth_457"
-	BenefitDeductionNewResponseTypeHsa                 BenefitDeductionNewResponseType = "hsa"
-	BenefitDeductionNewResponseTypeFsaMedical          BenefitDeductionNewResponseType = "fsa_medical"
-	BenefitDeductionNewResponseTypeFsaDependentCare    BenefitDeductionNewResponseType = "fsa_dependent_care"
-	BenefitDeductionNewResponseTypeTransit             BenefitDeductionNewResponseType = "transit"
-	BenefitDeductionNewResponseTypeParking             BenefitDeductionNewResponseType = "parking"
-	BenefitDeductionNewResponseTypeAccident            BenefitDeductionNewResponseType = "accident"
-	BenefitDeductionNewResponseTypeCancer              BenefitDeductionNewResponseType = "cancer"
-	BenefitDeductionNewResponseTypeCriticalIllness     BenefitDeductionNewResponseType = "critical_illness"
-	BenefitDeductionNewResponseTypeHospital            BenefitDeductionNewResponseType = "hospital"
-	BenefitDeductionNewResponseTypeMedicalOther        BenefitDeductionNewResponseType = "medical_other"
-	BenefitDeductionNewResponseTypeSimpleIra           BenefitDeductionNewResponseType = "simple_ira"
-	BenefitDeductionNewResponseTypeRothSimpleIra       BenefitDeductionNewResponseType = "roth_simple_ira"
-	BenefitDeductionNewResponseTypeNqdc                BenefitDeductionNewResponseType = "nqdc"
-	BenefitDeductionNewResponseTypeNontaxableFringe    BenefitDeductionNewResponseType = "nontaxable_fringe"
-	BenefitDeductionNewResponseTypePucc                BenefitDeductionNewResponseType = "pucc"
-	BenefitDeductionNewResponseTypeVoluntary           BenefitDeductionNewResponseType = "voluntary"
-	BenefitDeductionNewResponseTypePostTax             BenefitDeductionNewResponseType = "post_tax"
-	BenefitDeductionNewResponseTypeOther               BenefitDeductionNewResponseType = "other"
-)
-
-func (r BenefitDeductionNewResponseType) IsKnown() bool {
-	switch r {
-	case BenefitDeductionNewResponseTypeMedical, BenefitDeductionNewResponseTypeDental, BenefitDeductionNewResponseTypeVision, BenefitDeductionNewResponseTypeLife, BenefitDeductionNewResponseTypeShortTermDisability, BenefitDeductionNewResponseTypeLongTermDisability, BenefitDeductionNewResponseType401k, BenefitDeductionNewResponseTypeRoth401k, BenefitDeductionNewResponseType403b, BenefitDeductionNewResponseTypeRoth403b, BenefitDeductionNewResponseType457, BenefitDeductionNewResponseTypeRoth457, BenefitDeductionNewResponseTypeHsa, BenefitDeductionNewResponseTypeFsaMedical, BenefitDeductionNewResponseTypeFsaDependentCare, BenefitDeductionNewResponseTypeTransit, BenefitDeductionNewResponseTypeParking, BenefitDeductionNewResponseTypeAccident, BenefitDeductionNewResponseTypeCancer, BenefitDeductionNewResponseTypeCriticalIllness, BenefitDeductionNewResponseTypeHospital, BenefitDeductionNewResponseTypeMedicalOther, BenefitDeductionNewResponseTypeSimpleIra, BenefitDeductionNewResponseTypeRothSimpleIra, BenefitDeductionNewResponseTypeNqdc, BenefitDeductionNewResponseTypeNontaxableFringe, BenefitDeductionNewResponseTypePucc, BenefitDeductionNewResponseTypeVoluntary, BenefitDeductionNewResponseTypePostTax, BenefitDeductionNewResponseTypeOther:
-		return true
-	}
-	return false
-}
-
-type BenefitDeductionNewResponseRecurrence string
-
-const (
-	BenefitDeductionNewResponseRecurrenceRecurring BenefitDeductionNewResponseRecurrence = "recurring"
-	BenefitDeductionNewResponseRecurrenceOneTime   BenefitDeductionNewResponseRecurrence = "one_time"
-)
-
-func (r BenefitDeductionNewResponseRecurrence) IsKnown() bool {
-	switch r {
-	case BenefitDeductionNewResponseRecurrenceRecurring, BenefitDeductionNewResponseRecurrenceOneTime:
-		return true
-	}
-	return false
-}
-
-type BenefitDeductionNewResponseStatus string
-
-const (
-	BenefitDeductionNewResponseStatusActive     BenefitDeductionNewResponseStatus = "active"
-	BenefitDeductionNewResponseStatusPending    BenefitDeductionNewResponseStatus = "pending"
-	BenefitDeductionNewResponseStatusSuspended  BenefitDeductionNewResponseStatus = "suspended"
-	BenefitDeductionNewResponseStatusTerminated BenefitDeductionNewResponseStatus = "terminated"
-)
-
-func (r BenefitDeductionNewResponseStatus) IsKnown() bool {
-	switch r {
-	case BenefitDeductionNewResponseStatusActive, BenefitDeductionNewResponseStatusPending, BenefitDeductionNewResponseStatusSuspended, BenefitDeductionNewResponseStatusTerminated:
 		return true
 	}
 	return false
@@ -1678,18 +1641,18 @@ func (r benefitDeductionListResponseJSON) RawJSON() string {
 	return r.raw
 }
 
-type BenefitDeductionNewResponsePlan struct {
+type PublicBenefitDeductionPlan2 struct {
 	// The tag of a company health plan.
 	ID string `json:"id" api:"required"`
 	// The associated health plan name.
-	Name  string                              `json:"name" api:"required"`
-	Type  BenefitDeductionNewResponsePlanType `json:"type" api:"required"`
-	JSON  benefitDeductionNewResponsePlanJSON `json:"-"`
-	union BenefitDeductionNewResponsePlanUnion
+	Name  string                          `json:"name" api:"required"`
+	Type  PublicBenefitDeductionPlan2Type `json:"type" api:"required"`
+	JSON  publicBenefitDeductionPlan2JSON `json:"-"`
+	union PublicBenefitDeductionPlan2Union
 }
 
-// benefitDeductionNewResponsePlanJSON contains the JSON metadata for the struct [BenefitDeductionNewResponsePlan]
-type benefitDeductionNewResponsePlanJSON struct {
+// publicBenefitDeductionPlan2JSON contains the JSON metadata for the struct [PublicBenefitDeductionPlan2]
+type publicBenefitDeductionPlan2JSON struct {
 	ID          apijson.Field
 	Name        apijson.Field
 	Type        apijson.Field
@@ -1697,12 +1660,12 @@ type benefitDeductionNewResponsePlanJSON struct {
 	ExtraFields map[string]apijson.Field
 }
 
-func (r benefitDeductionNewResponsePlanJSON) RawJSON() string {
+func (r publicBenefitDeductionPlan2JSON) RawJSON() string {
 	return r.raw
 }
 
-func (r *BenefitDeductionNewResponsePlan) UnmarshalJSON(data []byte) (err error) {
-	*r = BenefitDeductionNewResponsePlan{}
+func (r *PublicBenefitDeductionPlan2) UnmarshalJSON(data []byte) (err error) {
+	*r = PublicBenefitDeductionPlan2{}
 	err = apijson.UnmarshalRoot(data, &r.union)
 	if err != nil {
 		return err
@@ -1710,7 +1673,7 @@ func (r *BenefitDeductionNewResponsePlan) UnmarshalJSON(data []byte) (err error)
 	return apijson.Port(r.union, &r)
 }
 
-func (r BenefitDeductionNewResponsePlan) AsUnion() BenefitDeductionNewResponsePlanUnion {
+func (r PublicBenefitDeductionPlan2) AsUnion() PublicBenefitDeductionPlan2Union {
 	return r.union
 }
 
@@ -1763,13 +1726,13 @@ func (r PublicBenefitDeductionCalculationFrequency) IsKnown() bool {
 	return false
 }
 
-type BenefitDeductionNewResponsePlanUnion interface {
-	implementsBenefitDeductionNewResponsePlan()
+type PublicBenefitDeductionPlan2Union interface {
+	implementsPublicBenefitDeductionPlan2()
 }
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*BenefitDeductionNewResponsePlanUnion)(nil)).Elem(),
+		reflect.TypeOf((*PublicBenefitDeductionPlan2Union)(nil)).Elem(),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
@@ -1782,16 +1745,16 @@ func init() {
 	)
 }
 
-type BenefitDeductionNewResponsePlanType string
+type PublicBenefitDeductionPlan2Type string
 
 const (
-	BenefitDeductionNewResponsePlanTypeHealthPlan     BenefitDeductionNewResponsePlanType = "health_plan"
-	BenefitDeductionNewResponsePlanTypeRetirementPlan BenefitDeductionNewResponsePlanType = "retirement_plan"
+	PublicBenefitDeductionPlan2TypeHealthPlan     PublicBenefitDeductionPlan2Type = "health_plan"
+	PublicBenefitDeductionPlan2TypeRetirementPlan PublicBenefitDeductionPlan2Type = "retirement_plan"
 )
 
-func (r BenefitDeductionNewResponsePlanType) IsKnown() bool {
+func (r PublicBenefitDeductionPlan2Type) IsKnown() bool {
 	switch r {
-	case BenefitDeductionNewResponsePlanTypeHealthPlan, BenefitDeductionNewResponsePlanTypeRetirementPlan:
+	case PublicBenefitDeductionPlan2TypeHealthPlan, PublicBenefitDeductionPlan2TypeRetirementPlan:
 		return true
 	}
 	return false
@@ -1801,9 +1764,9 @@ func (r FixedAmountBenefitCalculation) implementsPublicBenefitDeductionCalculati
 
 func (r PercentageBenefitCalculation) implementsPublicBenefitDeductionCalculation() {}
 
-func (r HealthPlanReference) implementsBenefitDeductionNewResponsePlan() {}
+func (r HealthPlanReference) implementsPublicBenefitDeductionPlan2() {}
 
-func (r RetirementPlanReference) implementsBenefitDeductionNewResponsePlan() {}
+func (r RetirementPlanReference) implementsPublicBenefitDeductionPlan2() {}
 
 type BenefitMoneyInputParam struct {
 	// minor units — cents, e.g. 2345 for $23.45

@@ -57,6 +57,9 @@ Complete reference of every operation, grouped by resource. See [the README](./R
   - [`PayRates Regular`](#payrates-regular)
     - [Create Regular Pay Rate](#create-regular-pay-rate)
     - [Delete Future Regular Pay Rate](#delete-future-regular-pay-rate)
+- [`PaySplits`](#paysplits)
+  - [List pay splits](#list-pay-splits)
+  - [Get pay split](#get-pay-split)
 - [`Payroll`](#payroll)
   - [List Payrolls](#list-payrolls)
   - [Get Payroll](#get-payroll)
@@ -172,7 +175,7 @@ Create a retirement plan for a company on the manual retirement channel.
 | Direction | Type |
 | --- | --- |
 | Request | [`BenefitRetirementPlanNewParams`](./benefitretirementplan.go) |
-| Response | [`BenefitRetirementPlanNewResponse`](./benefitretirementplan.go) |
+| Response | [`PublicRetirementPlan1`](./benefitretirementplan.go) |
 
 ```go
 retirementPlan, err := client.Benefits.RetirementPlans.New(context.Background(), sdk.BenefitRetirementPlanNewParams{
@@ -254,7 +257,7 @@ Create a benefit deduction for a worker.
 | Direction | Type |
 | --- | --- |
 | Request | [`BenefitDeductionNewParams`](./benefitdeduction.go) |
-| Response | [`BenefitDeductionNewResponse`](./benefitdeduction.go) |
+| Response | [`PublicBenefitDeduction1`](./benefitdeduction.go) |
 
 ```go
 deduction, err := client.Benefits.Deductions.New(context.Background(), sdk.BenefitDeductionNewParams{
@@ -921,6 +924,48 @@ err := client.PayRates.Regular.Delete(context.Background(), sdk.PayRateRegularDe
 if err != nil {
 	panic(err)
 }
+```
+
+## `PaySplits`
+
+Read stored pay-split configurations without changing banking instructions or guaranteeing payroll execution.
+
+### List pay splits
+
+List stored pay-split configurations, newest first. Defaults to active. Requires workers banking and profile read scopes plus the applicable US or global compensation read scope.
+
+| Direction | Type |
+| --- | --- |
+| Request | [`PaySplitListParams`](./paysplit.go) |
+| Response | [`PaySplitListResponse`](./paysplit.go) |
+
+```go
+paySplit, err := client.PaySplits.List(context.Background(), sdk.PaySplitListParams{
+	Limit:    sdk.F[string]("limit"),
+	Statuses: sdk.F[[]sdk.PublicPaySplitStatus]([]sdk.PublicPaySplitStatus{"active"}),
+})
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(paySplit)
+```
+
+### Get pay split
+
+Get a stored pay-split configuration, including retained inactive configurations. Requires workers banking and profile read scopes plus the applicable US or global compensation read scope.
+
+| Direction | Type |
+| --- | --- |
+| Response | [`PublicPaySplit`](./paysplit.go) |
+
+```go
+paySplit, err := client.PaySplits.Get(context.Background(), "nps_1234")
+if err != nil {
+	panic(err)
+}
+
+fmt.Println(paySplit)
 ```
 
 ## `Payroll`
