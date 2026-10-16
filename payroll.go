@@ -253,22 +253,26 @@ func (r publicPaycheckListJSON) RawJSON() string {
 
 type PublicPaycheckDetail struct {
 	// The tag of the paycheck.
-	ID             string                   `json:"id" api:"required"`
-	Benefits       interface{}              `json:"benefits" api:"required"`
-	Deductions     interface{}              `json:"deductions" api:"required"`
-	Description    string                   `json:"description" api:"required,nullable"`
-	Earnings       interface{}              `json:"earnings" api:"required"`
-	ExchangeRates  interface{}              `json:"exchangeRates" api:"required"`
-	Payday         string                   `json:"payday" api:"required"`
-	PaymentMethod  interface{}              `json:"paymentMethod" api:"required"`
-	Payroll        interface{}              `json:"payroll" api:"required"`
-	Reimbursements interface{}              `json:"reimbursements" api:"required"`
-	ReportedHours  float64                  `json:"reportedHours" api:"required,nullable"`
-	Status         interface{}              `json:"status" api:"required"`
-	Taxes          interface{}              `json:"taxes" api:"required"`
-	Totals         interface{}              `json:"totals" api:"required"`
-	Worker         interface{}              `json:"worker" api:"required"`
-	JSON           publicPaycheckDetailJSON `json:"-"`
+	ID             string      `json:"id" api:"required"`
+	Benefits       interface{} `json:"benefits" api:"required"`
+	Deductions     interface{} `json:"deductions" api:"required"`
+	Description    string      `json:"description" api:"required,nullable"`
+	Earnings       interface{} `json:"earnings" api:"required"`
+	ExchangeRates  interface{} `json:"exchangeRates" api:"required"`
+	Payday         string      `json:"payday" api:"required"`
+	PaymentMethod  interface{} `json:"paymentMethod" api:"required"`
+	Payroll        interface{} `json:"payroll" api:"required"`
+	Reimbursements interface{} `json:"reimbursements" api:"required"`
+	ReportedHours  float64     `json:"reportedHours" api:"required,nullable"`
+	Status         interface{} `json:"status" api:"required"`
+	Taxes          interface{} `json:"taxes" api:"required"`
+	Totals         interface{} `json:"totals" api:"required"`
+	Worker         interface{} `json:"worker" api:"required"`
+	// Employee YTD amounts for the selected US W-2 paystub. Groups with a nonzero
+	// current or YTD amount are included, including historical-only groups with no
+	// amount on this paycheck.
+	YearToDate PublicPaycheckDetailYearToDate `json:"yearToDate" api:"required,nullable"`
+	JSON       publicPaycheckDetailJSON       `json:"-"`
 }
 
 // publicPaycheckDetailJSON contains the JSON metadata for the struct [PublicPaycheckDetail]
@@ -288,6 +292,7 @@ type publicPaycheckDetailJSON struct {
 	Taxes          apijson.Field
 	Totals         apijson.Field
 	Worker         apijson.Field
+	YearToDate     apijson.Field
 	raw            string
 	ExtraFields    map[string]apijson.Field
 }
@@ -1686,4 +1691,229 @@ func (r PayrollListPaychecksParamsWorkerType) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+type PublicPaycheckDetailYearToDate struct {
+	AsOfDate       string      `json:"asOfDate" api:"required"`
+	Benefits       interface{} `json:"benefits" api:"required"`
+	Deductions     interface{} `json:"deductions" api:"required"`
+	Earnings       interface{} `json:"earnings" api:"required"`
+	Reimbursements interface{} `json:"reimbursements" api:"required"`
+	Taxes          interface{} `json:"taxes" api:"required"`
+	// Provider-reported employee YTD category totals, in signed USD cents.
+	Totals PublicPaycheckDetailYearToDateTotals `json:"totals" api:"required"`
+	JSON   publicPaycheckDetailYearToDateJSON   `json:"-"`
+}
+
+// publicPaycheckDetailYearToDateJSON contains the JSON metadata for the struct [PublicPaycheckDetailYearToDate]
+type publicPaycheckDetailYearToDateJSON struct {
+	AsOfDate       apijson.Field
+	Benefits       apijson.Field
+	Deductions     apijson.Field
+	Earnings       apijson.Field
+	Reimbursements apijson.Field
+	Taxes          apijson.Field
+	Totals         apijson.Field
+	raw            string
+	ExtraFields    map[string]apijson.Field
+}
+
+func (r *PublicPaycheckDetailYearToDate) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicPaycheckDetailYearToDateJSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicPaycheckDetailYearToDateTotals struct {
+	// Gross earnings year-to-date for the selected paystub.
+	GrossPay PublicPaycheckDetailYearToDateTotalsGrossPay `json:"grossPay" api:"required"`
+	// Net pay year-to-date for the selected paystub.
+	NetPay PublicPaycheckDetailYearToDateTotalsNetPay `json:"netPay" api:"required"`
+	// Post-tax deductions year-to-date for the selected paystub.
+	PostTaxDeductions PublicPaycheckDetailYearToDateTotalsPostTaxDeductions `json:"postTaxDeductions" api:"required"`
+	// Reimbursements year-to-date for the selected paystub.
+	Reimbursements PublicPaycheckDetailYearToDateTotalsReimbursements `json:"reimbursements" api:"required"`
+	// Employee benefit contributions year-to-date for the selected paystub.
+	WorkerBenefitContributions PublicPaycheckDetailYearToDateTotalsWorkerBenefitContributions `json:"workerBenefitContributions" api:"required"`
+	// Employee taxes withheld year-to-date for the selected paystub.
+	WorkerTaxes PublicPaycheckDetailYearToDateTotalsWorkerTaxes `json:"workerTaxes" api:"required"`
+	JSON        publicPaycheckDetailYearToDateTotalsJSON        `json:"-"`
+}
+
+// publicPaycheckDetailYearToDateTotalsJSON contains the JSON metadata for the struct [PublicPaycheckDetailYearToDateTotals]
+type publicPaycheckDetailYearToDateTotalsJSON struct {
+	GrossPay                   apijson.Field
+	NetPay                     apijson.Field
+	PostTaxDeductions          apijson.Field
+	Reimbursements             apijson.Field
+	WorkerBenefitContributions apijson.Field
+	WorkerTaxes                apijson.Field
+	raw                        string
+	ExtraFields                map[string]apijson.Field
+}
+
+func (r *PublicPaycheckDetailYearToDateTotals) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicPaycheckDetailYearToDateTotalsJSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicPaycheckDetailYearToDateTotalsGrossPay struct {
+	// minor units — cents, e.g. 2345 for $23.45
+	Amount   int64       `json:"amount" api:"required"`
+	Currency interface{} `json:"currency" api:"required"`
+	// The server-formatted display string for the amount in its currency.
+	Display string                                           `json:"display" api:"required"`
+	JSON    publicPaycheckDetailYearToDateTotalsGrossPayJSON `json:"-"`
+}
+
+// publicPaycheckDetailYearToDateTotalsGrossPayJSON contains the JSON metadata for the struct [PublicPaycheckDetailYearToDateTotalsGrossPay]
+type publicPaycheckDetailYearToDateTotalsGrossPayJSON struct {
+	Amount      apijson.Field
+	Currency    apijson.Field
+	Display     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicPaycheckDetailYearToDateTotalsGrossPay) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicPaycheckDetailYearToDateTotalsGrossPayJSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicPaycheckDetailYearToDateTotalsNetPay struct {
+	// minor units — cents, e.g. 2345 for $23.45
+	Amount   int64       `json:"amount" api:"required"`
+	Currency interface{} `json:"currency" api:"required"`
+	// The server-formatted display string for the amount in its currency.
+	Display string                                         `json:"display" api:"required"`
+	JSON    publicPaycheckDetailYearToDateTotalsNetPayJSON `json:"-"`
+}
+
+// publicPaycheckDetailYearToDateTotalsNetPayJSON contains the JSON metadata for the struct [PublicPaycheckDetailYearToDateTotalsNetPay]
+type publicPaycheckDetailYearToDateTotalsNetPayJSON struct {
+	Amount      apijson.Field
+	Currency    apijson.Field
+	Display     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicPaycheckDetailYearToDateTotalsNetPay) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicPaycheckDetailYearToDateTotalsNetPayJSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicPaycheckDetailYearToDateTotalsWorkerTaxes struct {
+	// minor units — cents, e.g. 2345 for $23.45
+	Amount   int64       `json:"amount" api:"required"`
+	Currency interface{} `json:"currency" api:"required"`
+	// The server-formatted display string for the amount in its currency.
+	Display string                                              `json:"display" api:"required"`
+	JSON    publicPaycheckDetailYearToDateTotalsWorkerTaxesJSON `json:"-"`
+}
+
+// publicPaycheckDetailYearToDateTotalsWorkerTaxesJSON contains the JSON metadata for the struct [PublicPaycheckDetailYearToDateTotalsWorkerTaxes]
+type publicPaycheckDetailYearToDateTotalsWorkerTaxesJSON struct {
+	Amount      apijson.Field
+	Currency    apijson.Field
+	Display     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicPaycheckDetailYearToDateTotalsWorkerTaxes) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicPaycheckDetailYearToDateTotalsWorkerTaxesJSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicPaycheckDetailYearToDateTotalsWorkerBenefitContributions struct {
+	// minor units — cents, e.g. 2345 for $23.45
+	Amount   int64       `json:"amount" api:"required"`
+	Currency interface{} `json:"currency" api:"required"`
+	// The server-formatted display string for the amount in its currency.
+	Display string                                                             `json:"display" api:"required"`
+	JSON    publicPaycheckDetailYearToDateTotalsWorkerBenefitContributionsJSON `json:"-"`
+}
+
+// publicPaycheckDetailYearToDateTotalsWorkerBenefitContributionsJSON contains the JSON metadata for the struct [PublicPaycheckDetailYearToDateTotalsWorkerBenefitContributions]
+type publicPaycheckDetailYearToDateTotalsWorkerBenefitContributionsJSON struct {
+	Amount      apijson.Field
+	Currency    apijson.Field
+	Display     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicPaycheckDetailYearToDateTotalsWorkerBenefitContributions) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicPaycheckDetailYearToDateTotalsWorkerBenefitContributionsJSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicPaycheckDetailYearToDateTotalsReimbursements struct {
+	// minor units — cents, e.g. 2345 for $23.45
+	Amount   int64       `json:"amount" api:"required"`
+	Currency interface{} `json:"currency" api:"required"`
+	// The server-formatted display string for the amount in its currency.
+	Display string                                                 `json:"display" api:"required"`
+	JSON    publicPaycheckDetailYearToDateTotalsReimbursementsJSON `json:"-"`
+}
+
+// publicPaycheckDetailYearToDateTotalsReimbursementsJSON contains the JSON metadata for the struct [PublicPaycheckDetailYearToDateTotalsReimbursements]
+type publicPaycheckDetailYearToDateTotalsReimbursementsJSON struct {
+	Amount      apijson.Field
+	Currency    apijson.Field
+	Display     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicPaycheckDetailYearToDateTotalsReimbursements) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicPaycheckDetailYearToDateTotalsReimbursementsJSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicPaycheckDetailYearToDateTotalsPostTaxDeductions struct {
+	// minor units — cents, e.g. 2345 for $23.45
+	Amount   int64       `json:"amount" api:"required"`
+	Currency interface{} `json:"currency" api:"required"`
+	// The server-formatted display string for the amount in its currency.
+	Display string                                                    `json:"display" api:"required"`
+	JSON    publicPaycheckDetailYearToDateTotalsPostTaxDeductionsJSON `json:"-"`
+}
+
+// publicPaycheckDetailYearToDateTotalsPostTaxDeductionsJSON contains the JSON metadata for the struct [PublicPaycheckDetailYearToDateTotalsPostTaxDeductions]
+type publicPaycheckDetailYearToDateTotalsPostTaxDeductionsJSON struct {
+	Amount      apijson.Field
+	Currency    apijson.Field
+	Display     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicPaycheckDetailYearToDateTotalsPostTaxDeductions) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicPaycheckDetailYearToDateTotalsPostTaxDeductionsJSON) RawJSON() string {
+	return r.raw
 }
