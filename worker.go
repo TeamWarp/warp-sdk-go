@@ -1374,6 +1374,7 @@ type WorkerUpdateParams struct {
 	PreferredName     param.Field[string]                              `json:"preferredName"`
 	StartDate         param.Field[string]                              `json:"startDate"`
 	StateRegistration param.Field[WorkerUpdateParamsStateRegistration] `json:"stateRegistration"`
+	TShirtSize        param.Field[WorkerUpdateParamsTShirtSize]        `json:"tShirtSize"`
 	TimeZone          param.Field[string]                              `json:"timeZone"`
 	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
 	WorkEmail param.Field[string] `json:"workEmail" format:"email"`
@@ -1383,6 +1384,26 @@ type WorkerUpdateParams struct {
 
 func (r WorkerUpdateParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+type WorkerUpdateParamsTShirtSize string
+
+const (
+	WorkerUpdateParamsTShirtSizeXs   WorkerUpdateParamsTShirtSize = "XS"
+	WorkerUpdateParamsTShirtSizeS    WorkerUpdateParamsTShirtSize = "S"
+	WorkerUpdateParamsTShirtSizeM    WorkerUpdateParamsTShirtSize = "M"
+	WorkerUpdateParamsTShirtSizeL    WorkerUpdateParamsTShirtSize = "L"
+	WorkerUpdateParamsTShirtSizeXl   WorkerUpdateParamsTShirtSize = "XL"
+	WorkerUpdateParamsTShirtSizeXxl  WorkerUpdateParamsTShirtSize = "XXL"
+	WorkerUpdateParamsTShirtSizeXxxl WorkerUpdateParamsTShirtSize = "XXXL"
+)
+
+func (r WorkerUpdateParamsTShirtSize) IsKnown() bool {
+	switch r {
+	case WorkerUpdateParamsTShirtSizeXs, WorkerUpdateParamsTShirtSizeS, WorkerUpdateParamsTShirtSizeM, WorkerUpdateParamsTShirtSizeL, WorkerUpdateParamsTShirtSizeXl, WorkerUpdateParamsTShirtSizeXxl, WorkerUpdateParamsTShirtSizeXxxl:
+		return true
+	}
+	return false
 }
 
 type WorkerUpdateParamsMaritalStatus string

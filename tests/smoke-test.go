@@ -1077,6 +1077,7 @@ func _smokeCase79() {
 		PreferredName:     sdk.F[string](""),
 		StartDate:         sdk.F[string](""),
 		StateRegistration: sdk.F[sdk.WorkerUpdateParamsStateRegistration](sdk.WorkerUpdateParamsStateRegistration("self_managed")),
+		TShirtSize:        sdk.F[sdk.WorkerUpdateParamsTShirtSize](sdk.WorkerUpdateParamsTShirtSize("XS")),
 		TimeZone:          sdk.F[string]("America/New_York"),
 		WorkEmail:         sdk.F[string]("john@joinwarp.com"),
 		WorkplaceID:       sdk.F[string]("wkp_1234"),
