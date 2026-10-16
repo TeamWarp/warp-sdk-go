@@ -124,8 +124,10 @@ func (r *DepartmentService) Update(ctx context.Context, id string, body Departme
 }
 
 type DepartmentListParams struct {
-	Limit    param.Field[string] `query:"limit" api:"required"`
-	AfterID  param.Field[string] `query:"afterId"`
+	Limit param.Field[string] `query:"limit" api:"required"`
+	// The unique public id of the department
+	AfterID param.Field[string] `query:"afterId"`
+	// The unique public id of the department
 	BeforeID param.Field[string] `query:"beforeId"`
 }
 
@@ -154,17 +156,17 @@ func (r DepartmentUpdateParams) MarshalJSON() (data []byte, err error) {
 }
 
 type DepartmentListResponse struct {
-	HasMore bool                         `json:"hasMore" api:"required"`
 	Count   int64                        `json:"count" api:"required"`
 	Data    []DepartmentListResponseData `json:"data" api:"required"`
+	HasMore bool                         `json:"hasMore" api:"required"`
 	JSON    departmentListResponseJSON   `json:"-"`
 }
 
 // departmentListResponseJSON contains the JSON metadata for the struct [DepartmentListResponse]
 type departmentListResponseJSON struct {
-	HasMore     apijson.Field
 	Count       apijson.Field
 	Data        apijson.Field
+	HasMore     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -180,16 +182,16 @@ func (r departmentListResponseJSON) RawJSON() string {
 type DepartmentNewResponse struct {
 	// The unique public id of the department
 	ID        string                    `json:"id" api:"required"`
-	Name      string                    `json:"name" api:"required"`
 	CreatedAt string                    `json:"createdAt" api:"required"`
+	Name      string                    `json:"name" api:"required"`
 	JSON      departmentNewResponseJSON `json:"-"`
 }
 
 // departmentNewResponseJSON contains the JSON metadata for the struct [DepartmentNewResponse]
 type departmentNewResponseJSON struct {
 	ID          apijson.Field
-	Name        apijson.Field
 	CreatedAt   apijson.Field
+	Name        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -205,16 +207,16 @@ func (r departmentNewResponseJSON) RawJSON() string {
 type DepartmentUpdateResponse struct {
 	// The unique public id of the department
 	ID        string                       `json:"id" api:"required"`
-	Name      string                       `json:"name" api:"required"`
 	CreatedAt string                       `json:"createdAt" api:"required"`
+	Name      string                       `json:"name" api:"required"`
 	JSON      departmentUpdateResponseJSON `json:"-"`
 }
 
 // departmentUpdateResponseJSON contains the JSON metadata for the struct [DepartmentUpdateResponse]
 type departmentUpdateResponseJSON struct {
 	ID          apijson.Field
-	Name        apijson.Field
 	CreatedAt   apijson.Field
+	Name        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -230,16 +232,16 @@ func (r departmentUpdateResponseJSON) RawJSON() string {
 type DepartmentListResponseData struct {
 	// The unique public id of the department
 	ID        string                         `json:"id" api:"required"`
-	Name      string                         `json:"name" api:"required"`
 	CreatedAt string                         `json:"createdAt" api:"required"`
+	Name      string                         `json:"name" api:"required"`
 	JSON      departmentListResponseDataJSON `json:"-"`
 }
 
 // departmentListResponseDataJSON contains the JSON metadata for the struct [DepartmentListResponseData]
 type departmentListResponseDataJSON struct {
 	ID          apijson.Field
-	Name        apijson.Field
 	CreatedAt   apijson.Field
+	Name        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
