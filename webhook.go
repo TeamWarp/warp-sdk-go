@@ -604,8 +604,10 @@ type WorkerCreatedWebhookEventData struct {
 	// are not enabled.
 	Level WorkerCreatedWebhookEventDataLevel `json:"level" api:"nullable"`
 	// The worker's manager, or null if unassigned.
-	Manager PublicWorkerManager               `json:"manager" api:"nullable"`
-	JSON    workerCreatedWebhookEventDataJSON `json:"-"`
+	Manager PublicWorkerManager `json:"manager" api:"nullable"`
+	// The worker's stored T-shirt size, or null when unset or unavailable.
+	TShirtSize WorkerCreatedWebhookEventDataTShirtSize `json:"tShirtSize" api:"nullable"`
+	JSON       workerCreatedWebhookEventDataJSON       `json:"-"`
 }
 
 // workerCreatedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerCreatedWebhookEventData]
@@ -640,6 +642,7 @@ type workerCreatedWebhookEventDataJSON struct {
 	CustomFields      apijson.Field
 	Level             apijson.Field
 	Manager           apijson.Field
+	TShirtSize        apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
 }
@@ -711,6 +714,26 @@ const (
 func (r WorkerCreatedWebhookEventDataMaritalStatus) IsKnown() bool {
 	switch r {
 	case WorkerCreatedWebhookEventDataMaritalStatusMarried, WorkerCreatedWebhookEventDataMaritalStatusNotMarried:
+		return true
+	}
+	return false
+}
+
+type WorkerCreatedWebhookEventDataTShirtSize string
+
+const (
+	WorkerCreatedWebhookEventDataTShirtSizeXs   WorkerCreatedWebhookEventDataTShirtSize = "XS"
+	WorkerCreatedWebhookEventDataTShirtSizeS    WorkerCreatedWebhookEventDataTShirtSize = "S"
+	WorkerCreatedWebhookEventDataTShirtSizeM    WorkerCreatedWebhookEventDataTShirtSize = "M"
+	WorkerCreatedWebhookEventDataTShirtSizeL    WorkerCreatedWebhookEventDataTShirtSize = "L"
+	WorkerCreatedWebhookEventDataTShirtSizeXl   WorkerCreatedWebhookEventDataTShirtSize = "XL"
+	WorkerCreatedWebhookEventDataTShirtSizeXxl  WorkerCreatedWebhookEventDataTShirtSize = "XXL"
+	WorkerCreatedWebhookEventDataTShirtSizeXxxl WorkerCreatedWebhookEventDataTShirtSize = "XXXL"
+)
+
+func (r WorkerCreatedWebhookEventDataTShirtSize) IsKnown() bool {
+	switch r {
+	case WorkerCreatedWebhookEventDataTShirtSizeXs, WorkerCreatedWebhookEventDataTShirtSizeS, WorkerCreatedWebhookEventDataTShirtSizeM, WorkerCreatedWebhookEventDataTShirtSizeL, WorkerCreatedWebhookEventDataTShirtSizeXl, WorkerCreatedWebhookEventDataTShirtSizeXxl, WorkerCreatedWebhookEventDataTShirtSizeXxxl:
 		return true
 	}
 	return false
@@ -924,8 +947,10 @@ type WorkerUpdatedWebhookEventData struct {
 	// are not enabled.
 	Level WorkerUpdatedWebhookEventDataLevel `json:"level" api:"nullable"`
 	// The worker's manager, or null if unassigned.
-	Manager PublicWorkerManager               `json:"manager" api:"nullable"`
-	JSON    workerUpdatedWebhookEventDataJSON `json:"-"`
+	Manager PublicWorkerManager `json:"manager" api:"nullable"`
+	// The worker's stored T-shirt size, or null when unset or unavailable.
+	TShirtSize WorkerUpdatedWebhookEventDataTShirtSize `json:"tShirtSize" api:"nullable"`
+	JSON       workerUpdatedWebhookEventDataJSON       `json:"-"`
 }
 
 // workerUpdatedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerUpdatedWebhookEventData]
@@ -960,6 +985,7 @@ type workerUpdatedWebhookEventDataJSON struct {
 	CustomFields      apijson.Field
 	Level             apijson.Field
 	Manager           apijson.Field
+	TShirtSize        apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
 }
@@ -1031,6 +1057,26 @@ const (
 func (r WorkerUpdatedWebhookEventDataMaritalStatus) IsKnown() bool {
 	switch r {
 	case WorkerUpdatedWebhookEventDataMaritalStatusMarried, WorkerUpdatedWebhookEventDataMaritalStatusNotMarried:
+		return true
+	}
+	return false
+}
+
+type WorkerUpdatedWebhookEventDataTShirtSize string
+
+const (
+	WorkerUpdatedWebhookEventDataTShirtSizeXs   WorkerUpdatedWebhookEventDataTShirtSize = "XS"
+	WorkerUpdatedWebhookEventDataTShirtSizeS    WorkerUpdatedWebhookEventDataTShirtSize = "S"
+	WorkerUpdatedWebhookEventDataTShirtSizeM    WorkerUpdatedWebhookEventDataTShirtSize = "M"
+	WorkerUpdatedWebhookEventDataTShirtSizeL    WorkerUpdatedWebhookEventDataTShirtSize = "L"
+	WorkerUpdatedWebhookEventDataTShirtSizeXl   WorkerUpdatedWebhookEventDataTShirtSize = "XL"
+	WorkerUpdatedWebhookEventDataTShirtSizeXxl  WorkerUpdatedWebhookEventDataTShirtSize = "XXL"
+	WorkerUpdatedWebhookEventDataTShirtSizeXxxl WorkerUpdatedWebhookEventDataTShirtSize = "XXXL"
+)
+
+func (r WorkerUpdatedWebhookEventDataTShirtSize) IsKnown() bool {
+	switch r {
+	case WorkerUpdatedWebhookEventDataTShirtSizeXs, WorkerUpdatedWebhookEventDataTShirtSizeS, WorkerUpdatedWebhookEventDataTShirtSizeM, WorkerUpdatedWebhookEventDataTShirtSizeL, WorkerUpdatedWebhookEventDataTShirtSizeXl, WorkerUpdatedWebhookEventDataTShirtSizeXxl, WorkerUpdatedWebhookEventDataTShirtSizeXxxl:
 		return true
 	}
 	return false
@@ -1244,8 +1290,10 @@ type WorkerDeletedWebhookEventData struct {
 	// are not enabled.
 	Level WorkerDeletedWebhookEventDataLevel `json:"level" api:"nullable"`
 	// The worker's manager, or null if unassigned.
-	Manager PublicWorkerManager               `json:"manager" api:"nullable"`
-	JSON    workerDeletedWebhookEventDataJSON `json:"-"`
+	Manager PublicWorkerManager `json:"manager" api:"nullable"`
+	// The worker's stored T-shirt size, or null when unset or unavailable.
+	TShirtSize WorkerDeletedWebhookEventDataTShirtSize `json:"tShirtSize" api:"nullable"`
+	JSON       workerDeletedWebhookEventDataJSON       `json:"-"`
 }
 
 // workerDeletedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerDeletedWebhookEventData]
@@ -1280,6 +1328,7 @@ type workerDeletedWebhookEventDataJSON struct {
 	CustomFields      apijson.Field
 	Level             apijson.Field
 	Manager           apijson.Field
+	TShirtSize        apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
 }
@@ -1351,6 +1400,26 @@ const (
 func (r WorkerDeletedWebhookEventDataMaritalStatus) IsKnown() bool {
 	switch r {
 	case WorkerDeletedWebhookEventDataMaritalStatusMarried, WorkerDeletedWebhookEventDataMaritalStatusNotMarried:
+		return true
+	}
+	return false
+}
+
+type WorkerDeletedWebhookEventDataTShirtSize string
+
+const (
+	WorkerDeletedWebhookEventDataTShirtSizeXs   WorkerDeletedWebhookEventDataTShirtSize = "XS"
+	WorkerDeletedWebhookEventDataTShirtSizeS    WorkerDeletedWebhookEventDataTShirtSize = "S"
+	WorkerDeletedWebhookEventDataTShirtSizeM    WorkerDeletedWebhookEventDataTShirtSize = "M"
+	WorkerDeletedWebhookEventDataTShirtSizeL    WorkerDeletedWebhookEventDataTShirtSize = "L"
+	WorkerDeletedWebhookEventDataTShirtSizeXl   WorkerDeletedWebhookEventDataTShirtSize = "XL"
+	WorkerDeletedWebhookEventDataTShirtSizeXxl  WorkerDeletedWebhookEventDataTShirtSize = "XXL"
+	WorkerDeletedWebhookEventDataTShirtSizeXxxl WorkerDeletedWebhookEventDataTShirtSize = "XXXL"
+)
+
+func (r WorkerDeletedWebhookEventDataTShirtSize) IsKnown() bool {
+	switch r {
+	case WorkerDeletedWebhookEventDataTShirtSizeXs, WorkerDeletedWebhookEventDataTShirtSizeS, WorkerDeletedWebhookEventDataTShirtSizeM, WorkerDeletedWebhookEventDataTShirtSizeL, WorkerDeletedWebhookEventDataTShirtSizeXl, WorkerDeletedWebhookEventDataTShirtSizeXxl, WorkerDeletedWebhookEventDataTShirtSizeXxxl:
 		return true
 	}
 	return false
@@ -1564,8 +1633,10 @@ type WorkerInviteSentWebhookEventData struct {
 	// are not enabled.
 	Level WorkerInviteSentWebhookEventDataLevel `json:"level" api:"nullable"`
 	// The worker's manager, or null if unassigned.
-	Manager PublicWorkerManager                  `json:"manager" api:"nullable"`
-	JSON    workerInviteSentWebhookEventDataJSON `json:"-"`
+	Manager PublicWorkerManager `json:"manager" api:"nullable"`
+	// The worker's stored T-shirt size, or null when unset or unavailable.
+	TShirtSize WorkerInviteSentWebhookEventDataTShirtSize `json:"tShirtSize" api:"nullable"`
+	JSON       workerInviteSentWebhookEventDataJSON       `json:"-"`
 }
 
 // workerInviteSentWebhookEventDataJSON contains the JSON metadata for the struct [WorkerInviteSentWebhookEventData]
@@ -1600,6 +1671,7 @@ type workerInviteSentWebhookEventDataJSON struct {
 	CustomFields      apijson.Field
 	Level             apijson.Field
 	Manager           apijson.Field
+	TShirtSize        apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
 }
@@ -1671,6 +1743,26 @@ const (
 func (r WorkerInviteSentWebhookEventDataMaritalStatus) IsKnown() bool {
 	switch r {
 	case WorkerInviteSentWebhookEventDataMaritalStatusMarried, WorkerInviteSentWebhookEventDataMaritalStatusNotMarried:
+		return true
+	}
+	return false
+}
+
+type WorkerInviteSentWebhookEventDataTShirtSize string
+
+const (
+	WorkerInviteSentWebhookEventDataTShirtSizeXs   WorkerInviteSentWebhookEventDataTShirtSize = "XS"
+	WorkerInviteSentWebhookEventDataTShirtSizeS    WorkerInviteSentWebhookEventDataTShirtSize = "S"
+	WorkerInviteSentWebhookEventDataTShirtSizeM    WorkerInviteSentWebhookEventDataTShirtSize = "M"
+	WorkerInviteSentWebhookEventDataTShirtSizeL    WorkerInviteSentWebhookEventDataTShirtSize = "L"
+	WorkerInviteSentWebhookEventDataTShirtSizeXl   WorkerInviteSentWebhookEventDataTShirtSize = "XL"
+	WorkerInviteSentWebhookEventDataTShirtSizeXxl  WorkerInviteSentWebhookEventDataTShirtSize = "XXL"
+	WorkerInviteSentWebhookEventDataTShirtSizeXxxl WorkerInviteSentWebhookEventDataTShirtSize = "XXXL"
+)
+
+func (r WorkerInviteSentWebhookEventDataTShirtSize) IsKnown() bool {
+	switch r {
+	case WorkerInviteSentWebhookEventDataTShirtSizeXs, WorkerInviteSentWebhookEventDataTShirtSizeS, WorkerInviteSentWebhookEventDataTShirtSizeM, WorkerInviteSentWebhookEventDataTShirtSizeL, WorkerInviteSentWebhookEventDataTShirtSizeXl, WorkerInviteSentWebhookEventDataTShirtSizeXxl, WorkerInviteSentWebhookEventDataTShirtSizeXxxl:
 		return true
 	}
 	return false
@@ -1884,8 +1976,10 @@ type WorkerInviteAcceptedWebhookEventData struct {
 	// are not enabled.
 	Level WorkerInviteAcceptedWebhookEventDataLevel `json:"level" api:"nullable"`
 	// The worker's manager, or null if unassigned.
-	Manager PublicWorkerManager                      `json:"manager" api:"nullable"`
-	JSON    workerInviteAcceptedWebhookEventDataJSON `json:"-"`
+	Manager PublicWorkerManager `json:"manager" api:"nullable"`
+	// The worker's stored T-shirt size, or null when unset or unavailable.
+	TShirtSize WorkerInviteAcceptedWebhookEventDataTShirtSize `json:"tShirtSize" api:"nullable"`
+	JSON       workerInviteAcceptedWebhookEventDataJSON       `json:"-"`
 }
 
 // workerInviteAcceptedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerInviteAcceptedWebhookEventData]
@@ -1920,6 +2014,7 @@ type workerInviteAcceptedWebhookEventDataJSON struct {
 	CustomFields      apijson.Field
 	Level             apijson.Field
 	Manager           apijson.Field
+	TShirtSize        apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
 }
@@ -1991,6 +2086,26 @@ const (
 func (r WorkerInviteAcceptedWebhookEventDataMaritalStatus) IsKnown() bool {
 	switch r {
 	case WorkerInviteAcceptedWebhookEventDataMaritalStatusMarried, WorkerInviteAcceptedWebhookEventDataMaritalStatusNotMarried:
+		return true
+	}
+	return false
+}
+
+type WorkerInviteAcceptedWebhookEventDataTShirtSize string
+
+const (
+	WorkerInviteAcceptedWebhookEventDataTShirtSizeXs   WorkerInviteAcceptedWebhookEventDataTShirtSize = "XS"
+	WorkerInviteAcceptedWebhookEventDataTShirtSizeS    WorkerInviteAcceptedWebhookEventDataTShirtSize = "S"
+	WorkerInviteAcceptedWebhookEventDataTShirtSizeM    WorkerInviteAcceptedWebhookEventDataTShirtSize = "M"
+	WorkerInviteAcceptedWebhookEventDataTShirtSizeL    WorkerInviteAcceptedWebhookEventDataTShirtSize = "L"
+	WorkerInviteAcceptedWebhookEventDataTShirtSizeXl   WorkerInviteAcceptedWebhookEventDataTShirtSize = "XL"
+	WorkerInviteAcceptedWebhookEventDataTShirtSizeXxl  WorkerInviteAcceptedWebhookEventDataTShirtSize = "XXL"
+	WorkerInviteAcceptedWebhookEventDataTShirtSizeXxxl WorkerInviteAcceptedWebhookEventDataTShirtSize = "XXXL"
+)
+
+func (r WorkerInviteAcceptedWebhookEventDataTShirtSize) IsKnown() bool {
+	switch r {
+	case WorkerInviteAcceptedWebhookEventDataTShirtSizeXs, WorkerInviteAcceptedWebhookEventDataTShirtSizeS, WorkerInviteAcceptedWebhookEventDataTShirtSizeM, WorkerInviteAcceptedWebhookEventDataTShirtSizeL, WorkerInviteAcceptedWebhookEventDataTShirtSizeXl, WorkerInviteAcceptedWebhookEventDataTShirtSizeXxl, WorkerInviteAcceptedWebhookEventDataTShirtSizeXxxl:
 		return true
 	}
 	return false
@@ -2204,8 +2319,10 @@ type WorkerOnboardingCompletedWebhookEventData struct {
 	// are not enabled.
 	Level WorkerOnboardingCompletedWebhookEventDataLevel `json:"level" api:"nullable"`
 	// The worker's manager, or null if unassigned.
-	Manager PublicWorkerManager                           `json:"manager" api:"nullable"`
-	JSON    workerOnboardingCompletedWebhookEventDataJSON `json:"-"`
+	Manager PublicWorkerManager `json:"manager" api:"nullable"`
+	// The worker's stored T-shirt size, or null when unset or unavailable.
+	TShirtSize WorkerOnboardingCompletedWebhookEventDataTShirtSize `json:"tShirtSize" api:"nullable"`
+	JSON       workerOnboardingCompletedWebhookEventDataJSON       `json:"-"`
 }
 
 // workerOnboardingCompletedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerOnboardingCompletedWebhookEventData]
@@ -2240,6 +2357,7 @@ type workerOnboardingCompletedWebhookEventDataJSON struct {
 	CustomFields      apijson.Field
 	Level             apijson.Field
 	Manager           apijson.Field
+	TShirtSize        apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
 }
@@ -2311,6 +2429,26 @@ const (
 func (r WorkerOnboardingCompletedWebhookEventDataMaritalStatus) IsKnown() bool {
 	switch r {
 	case WorkerOnboardingCompletedWebhookEventDataMaritalStatusMarried, WorkerOnboardingCompletedWebhookEventDataMaritalStatusNotMarried:
+		return true
+	}
+	return false
+}
+
+type WorkerOnboardingCompletedWebhookEventDataTShirtSize string
+
+const (
+	WorkerOnboardingCompletedWebhookEventDataTShirtSizeXs   WorkerOnboardingCompletedWebhookEventDataTShirtSize = "XS"
+	WorkerOnboardingCompletedWebhookEventDataTShirtSizeS    WorkerOnboardingCompletedWebhookEventDataTShirtSize = "S"
+	WorkerOnboardingCompletedWebhookEventDataTShirtSizeM    WorkerOnboardingCompletedWebhookEventDataTShirtSize = "M"
+	WorkerOnboardingCompletedWebhookEventDataTShirtSizeL    WorkerOnboardingCompletedWebhookEventDataTShirtSize = "L"
+	WorkerOnboardingCompletedWebhookEventDataTShirtSizeXl   WorkerOnboardingCompletedWebhookEventDataTShirtSize = "XL"
+	WorkerOnboardingCompletedWebhookEventDataTShirtSizeXxl  WorkerOnboardingCompletedWebhookEventDataTShirtSize = "XXL"
+	WorkerOnboardingCompletedWebhookEventDataTShirtSizeXxxl WorkerOnboardingCompletedWebhookEventDataTShirtSize = "XXXL"
+)
+
+func (r WorkerOnboardingCompletedWebhookEventDataTShirtSize) IsKnown() bool {
+	switch r {
+	case WorkerOnboardingCompletedWebhookEventDataTShirtSizeXs, WorkerOnboardingCompletedWebhookEventDataTShirtSizeS, WorkerOnboardingCompletedWebhookEventDataTShirtSizeM, WorkerOnboardingCompletedWebhookEventDataTShirtSizeL, WorkerOnboardingCompletedWebhookEventDataTShirtSizeXl, WorkerOnboardingCompletedWebhookEventDataTShirtSizeXxl, WorkerOnboardingCompletedWebhookEventDataTShirtSizeXxxl:
 		return true
 	}
 	return false
@@ -2524,8 +2662,10 @@ type WorkerOffboardingStartedWebhookEventData struct {
 	// are not enabled.
 	Level WorkerOffboardingStartedWebhookEventDataLevel `json:"level" api:"nullable"`
 	// The worker's manager, or null if unassigned.
-	Manager PublicWorkerManager                          `json:"manager" api:"nullable"`
-	JSON    workerOffboardingStartedWebhookEventDataJSON `json:"-"`
+	Manager PublicWorkerManager `json:"manager" api:"nullable"`
+	// The worker's stored T-shirt size, or null when unset or unavailable.
+	TShirtSize WorkerOffboardingStartedWebhookEventDataTShirtSize `json:"tShirtSize" api:"nullable"`
+	JSON       workerOffboardingStartedWebhookEventDataJSON       `json:"-"`
 }
 
 // workerOffboardingStartedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerOffboardingStartedWebhookEventData]
@@ -2560,6 +2700,7 @@ type workerOffboardingStartedWebhookEventDataJSON struct {
 	CustomFields      apijson.Field
 	Level             apijson.Field
 	Manager           apijson.Field
+	TShirtSize        apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
 }
@@ -2631,6 +2772,26 @@ const (
 func (r WorkerOffboardingStartedWebhookEventDataMaritalStatus) IsKnown() bool {
 	switch r {
 	case WorkerOffboardingStartedWebhookEventDataMaritalStatusMarried, WorkerOffboardingStartedWebhookEventDataMaritalStatusNotMarried:
+		return true
+	}
+	return false
+}
+
+type WorkerOffboardingStartedWebhookEventDataTShirtSize string
+
+const (
+	WorkerOffboardingStartedWebhookEventDataTShirtSizeXs   WorkerOffboardingStartedWebhookEventDataTShirtSize = "XS"
+	WorkerOffboardingStartedWebhookEventDataTShirtSizeS    WorkerOffboardingStartedWebhookEventDataTShirtSize = "S"
+	WorkerOffboardingStartedWebhookEventDataTShirtSizeM    WorkerOffboardingStartedWebhookEventDataTShirtSize = "M"
+	WorkerOffboardingStartedWebhookEventDataTShirtSizeL    WorkerOffboardingStartedWebhookEventDataTShirtSize = "L"
+	WorkerOffboardingStartedWebhookEventDataTShirtSizeXl   WorkerOffboardingStartedWebhookEventDataTShirtSize = "XL"
+	WorkerOffboardingStartedWebhookEventDataTShirtSizeXxl  WorkerOffboardingStartedWebhookEventDataTShirtSize = "XXL"
+	WorkerOffboardingStartedWebhookEventDataTShirtSizeXxxl WorkerOffboardingStartedWebhookEventDataTShirtSize = "XXXL"
+)
+
+func (r WorkerOffboardingStartedWebhookEventDataTShirtSize) IsKnown() bool {
+	switch r {
+	case WorkerOffboardingStartedWebhookEventDataTShirtSizeXs, WorkerOffboardingStartedWebhookEventDataTShirtSizeS, WorkerOffboardingStartedWebhookEventDataTShirtSizeM, WorkerOffboardingStartedWebhookEventDataTShirtSizeL, WorkerOffboardingStartedWebhookEventDataTShirtSizeXl, WorkerOffboardingStartedWebhookEventDataTShirtSizeXxl, WorkerOffboardingStartedWebhookEventDataTShirtSizeXxxl:
 		return true
 	}
 	return false
@@ -2844,8 +3005,10 @@ type WorkerOffboardedWebhookEventData struct {
 	// are not enabled.
 	Level WorkerOffboardedWebhookEventDataLevel `json:"level" api:"nullable"`
 	// The worker's manager, or null if unassigned.
-	Manager PublicWorkerManager                  `json:"manager" api:"nullable"`
-	JSON    workerOffboardedWebhookEventDataJSON `json:"-"`
+	Manager PublicWorkerManager `json:"manager" api:"nullable"`
+	// The worker's stored T-shirt size, or null when unset or unavailable.
+	TShirtSize WorkerOffboardedWebhookEventDataTShirtSize `json:"tShirtSize" api:"nullable"`
+	JSON       workerOffboardedWebhookEventDataJSON       `json:"-"`
 }
 
 // workerOffboardedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerOffboardedWebhookEventData]
@@ -2880,6 +3043,7 @@ type workerOffboardedWebhookEventDataJSON struct {
 	CustomFields      apijson.Field
 	Level             apijson.Field
 	Manager           apijson.Field
+	TShirtSize        apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
 }
@@ -2951,6 +3115,26 @@ const (
 func (r WorkerOffboardedWebhookEventDataMaritalStatus) IsKnown() bool {
 	switch r {
 	case WorkerOffboardedWebhookEventDataMaritalStatusMarried, WorkerOffboardedWebhookEventDataMaritalStatusNotMarried:
+		return true
+	}
+	return false
+}
+
+type WorkerOffboardedWebhookEventDataTShirtSize string
+
+const (
+	WorkerOffboardedWebhookEventDataTShirtSizeXs   WorkerOffboardedWebhookEventDataTShirtSize = "XS"
+	WorkerOffboardedWebhookEventDataTShirtSizeS    WorkerOffboardedWebhookEventDataTShirtSize = "S"
+	WorkerOffboardedWebhookEventDataTShirtSizeM    WorkerOffboardedWebhookEventDataTShirtSize = "M"
+	WorkerOffboardedWebhookEventDataTShirtSizeL    WorkerOffboardedWebhookEventDataTShirtSize = "L"
+	WorkerOffboardedWebhookEventDataTShirtSizeXl   WorkerOffboardedWebhookEventDataTShirtSize = "XL"
+	WorkerOffboardedWebhookEventDataTShirtSizeXxl  WorkerOffboardedWebhookEventDataTShirtSize = "XXL"
+	WorkerOffboardedWebhookEventDataTShirtSizeXxxl WorkerOffboardedWebhookEventDataTShirtSize = "XXXL"
+)
+
+func (r WorkerOffboardedWebhookEventDataTShirtSize) IsKnown() bool {
+	switch r {
+	case WorkerOffboardedWebhookEventDataTShirtSizeXs, WorkerOffboardedWebhookEventDataTShirtSizeS, WorkerOffboardedWebhookEventDataTShirtSizeM, WorkerOffboardedWebhookEventDataTShirtSizeL, WorkerOffboardedWebhookEventDataTShirtSizeXl, WorkerOffboardedWebhookEventDataTShirtSizeXxl, WorkerOffboardedWebhookEventDataTShirtSizeXxxl:
 		return true
 	}
 	return false
@@ -3164,8 +3348,10 @@ type WorkerReactivatedWebhookEventData struct {
 	// are not enabled.
 	Level WorkerReactivatedWebhookEventDataLevel `json:"level" api:"nullable"`
 	// The worker's manager, or null if unassigned.
-	Manager PublicWorkerManager                   `json:"manager" api:"nullable"`
-	JSON    workerReactivatedWebhookEventDataJSON `json:"-"`
+	Manager PublicWorkerManager `json:"manager" api:"nullable"`
+	// The worker's stored T-shirt size, or null when unset or unavailable.
+	TShirtSize WorkerReactivatedWebhookEventDataTShirtSize `json:"tShirtSize" api:"nullable"`
+	JSON       workerReactivatedWebhookEventDataJSON       `json:"-"`
 }
 
 // workerReactivatedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerReactivatedWebhookEventData]
@@ -3200,6 +3386,7 @@ type workerReactivatedWebhookEventDataJSON struct {
 	CustomFields      apijson.Field
 	Level             apijson.Field
 	Manager           apijson.Field
+	TShirtSize        apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
 }
@@ -3271,6 +3458,26 @@ const (
 func (r WorkerReactivatedWebhookEventDataMaritalStatus) IsKnown() bool {
 	switch r {
 	case WorkerReactivatedWebhookEventDataMaritalStatusMarried, WorkerReactivatedWebhookEventDataMaritalStatusNotMarried:
+		return true
+	}
+	return false
+}
+
+type WorkerReactivatedWebhookEventDataTShirtSize string
+
+const (
+	WorkerReactivatedWebhookEventDataTShirtSizeXs   WorkerReactivatedWebhookEventDataTShirtSize = "XS"
+	WorkerReactivatedWebhookEventDataTShirtSizeS    WorkerReactivatedWebhookEventDataTShirtSize = "S"
+	WorkerReactivatedWebhookEventDataTShirtSizeM    WorkerReactivatedWebhookEventDataTShirtSize = "M"
+	WorkerReactivatedWebhookEventDataTShirtSizeL    WorkerReactivatedWebhookEventDataTShirtSize = "L"
+	WorkerReactivatedWebhookEventDataTShirtSizeXl   WorkerReactivatedWebhookEventDataTShirtSize = "XL"
+	WorkerReactivatedWebhookEventDataTShirtSizeXxl  WorkerReactivatedWebhookEventDataTShirtSize = "XXL"
+	WorkerReactivatedWebhookEventDataTShirtSizeXxxl WorkerReactivatedWebhookEventDataTShirtSize = "XXXL"
+)
+
+func (r WorkerReactivatedWebhookEventDataTShirtSize) IsKnown() bool {
+	switch r {
+	case WorkerReactivatedWebhookEventDataTShirtSizeXs, WorkerReactivatedWebhookEventDataTShirtSizeS, WorkerReactivatedWebhookEventDataTShirtSizeM, WorkerReactivatedWebhookEventDataTShirtSizeL, WorkerReactivatedWebhookEventDataTShirtSizeXl, WorkerReactivatedWebhookEventDataTShirtSizeXxl, WorkerReactivatedWebhookEventDataTShirtSizeXxxl:
 		return true
 	}
 	return false

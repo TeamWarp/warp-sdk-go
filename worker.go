@@ -2292,8 +2292,10 @@ type WorkerUpdateResponse struct {
 	// are not enabled.
 	Level WorkerUpdateResponseLevel `json:"level" api:"nullable"`
 	// The worker's manager, or null if unassigned.
-	Manager PublicWorkerManager      `json:"manager" api:"nullable"`
-	JSON    workerUpdateResponseJSON `json:"-"`
+	Manager PublicWorkerManager `json:"manager" api:"nullable"`
+	// The worker's stored T-shirt size, or null when unset or unavailable.
+	TShirtSize WorkerUpdateResponseTShirtSize `json:"tShirtSize" api:"nullable"`
+	JSON       workerUpdateResponseJSON       `json:"-"`
 }
 
 // workerUpdateResponseJSON contains the JSON metadata for the struct [WorkerUpdateResponse]
@@ -2328,6 +2330,7 @@ type workerUpdateResponseJSON struct {
 	CustomFields      apijson.Field
 	Level             apijson.Field
 	Manager           apijson.Field
+	TShirtSize        apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
 }
@@ -2397,8 +2400,10 @@ type WorkerGetResponse struct {
 	// are not enabled.
 	Level WorkerGetResponseLevel `json:"level" api:"nullable"`
 	// The worker's manager, or null if unassigned.
-	Manager PublicWorkerManager   `json:"manager" api:"nullable"`
-	JSON    workerGetResponseJSON `json:"-"`
+	Manager PublicWorkerManager `json:"manager" api:"nullable"`
+	// The worker's stored T-shirt size, or null when unset or unavailable.
+	TShirtSize WorkerGetResponseTShirtSize `json:"tShirtSize" api:"nullable"`
+	JSON       workerGetResponseJSON       `json:"-"`
 }
 
 // workerGetResponseJSON contains the JSON metadata for the struct [WorkerGetResponse]
@@ -2433,6 +2438,7 @@ type workerGetResponseJSON struct {
 	CustomFields      apijson.Field
 	Level             apijson.Field
 	Manager           apijson.Field
+	TShirtSize        apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
 }
@@ -2526,8 +2532,10 @@ type WorkerNewEmployeeResponse struct {
 	// are not enabled.
 	Level WorkerNewEmployeeResponseLevel `json:"level" api:"nullable"`
 	// The worker's manager, or null if unassigned.
-	Manager PublicWorkerManager           `json:"manager" api:"nullable"`
-	JSON    workerNewEmployeeResponseJSON `json:"-"`
+	Manager PublicWorkerManager `json:"manager" api:"nullable"`
+	// The worker's stored T-shirt size, or null when unset or unavailable.
+	TShirtSize WorkerNewEmployeeResponseTShirtSize `json:"tShirtSize" api:"nullable"`
+	JSON       workerNewEmployeeResponseJSON       `json:"-"`
 }
 
 // workerNewEmployeeResponseJSON contains the JSON metadata for the struct [WorkerNewEmployeeResponse]
@@ -2562,6 +2570,7 @@ type workerNewEmployeeResponseJSON struct {
 	CustomFields      apijson.Field
 	Level             apijson.Field
 	Manager           apijson.Field
+	TShirtSize        apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
 }
@@ -2631,8 +2640,10 @@ type WorkerNewContractorResponse struct {
 	// are not enabled.
 	Level WorkerNewContractorResponseLevel `json:"level" api:"nullable"`
 	// The worker's manager, or null if unassigned.
-	Manager PublicWorkerManager             `json:"manager" api:"nullable"`
-	JSON    workerNewContractorResponseJSON `json:"-"`
+	Manager PublicWorkerManager `json:"manager" api:"nullable"`
+	// The worker's stored T-shirt size, or null when unset or unavailable.
+	TShirtSize WorkerNewContractorResponseTShirtSize `json:"tShirtSize" api:"nullable"`
+	JSON       workerNewContractorResponseJSON       `json:"-"`
 }
 
 // workerNewContractorResponseJSON contains the JSON metadata for the struct [WorkerNewContractorResponse]
@@ -2667,6 +2678,7 @@ type workerNewContractorResponseJSON struct {
 	CustomFields      apijson.Field
 	Level             apijson.Field
 	Manager           apijson.Field
+	TShirtSize        apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
 }
@@ -2736,8 +2748,10 @@ type WorkerInviteResponse struct {
 	// are not enabled.
 	Level WorkerInviteResponseLevel `json:"level" api:"nullable"`
 	// The worker's manager, or null if unassigned.
-	Manager PublicWorkerManager      `json:"manager" api:"nullable"`
-	JSON    workerInviteResponseJSON `json:"-"`
+	Manager PublicWorkerManager `json:"manager" api:"nullable"`
+	// The worker's stored T-shirt size, or null when unset or unavailable.
+	TShirtSize WorkerInviteResponseTShirtSize `json:"tShirtSize" api:"nullable"`
+	JSON       workerInviteResponseJSON       `json:"-"`
 }
 
 // workerInviteResponseJSON contains the JSON metadata for the struct [WorkerInviteResponse]
@@ -2772,6 +2786,7 @@ type workerInviteResponseJSON struct {
 	CustomFields      apijson.Field
 	Level             apijson.Field
 	Manager           apijson.Field
+	TShirtSize        apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
 }
@@ -3048,6 +3063,26 @@ func (r WorkerUpdateResponseMaritalStatus) IsKnown() bool {
 	return false
 }
 
+type WorkerUpdateResponseTShirtSize string
+
+const (
+	WorkerUpdateResponseTShirtSizeXs   WorkerUpdateResponseTShirtSize = "XS"
+	WorkerUpdateResponseTShirtSizeS    WorkerUpdateResponseTShirtSize = "S"
+	WorkerUpdateResponseTShirtSizeM    WorkerUpdateResponseTShirtSize = "M"
+	WorkerUpdateResponseTShirtSizeL    WorkerUpdateResponseTShirtSize = "L"
+	WorkerUpdateResponseTShirtSizeXl   WorkerUpdateResponseTShirtSize = "XL"
+	WorkerUpdateResponseTShirtSizeXxl  WorkerUpdateResponseTShirtSize = "XXL"
+	WorkerUpdateResponseTShirtSizeXxxl WorkerUpdateResponseTShirtSize = "XXXL"
+)
+
+func (r WorkerUpdateResponseTShirtSize) IsKnown() bool {
+	switch r {
+	case WorkerUpdateResponseTShirtSizeXs, WorkerUpdateResponseTShirtSizeS, WorkerUpdateResponseTShirtSizeM, WorkerUpdateResponseTShirtSizeL, WorkerUpdateResponseTShirtSizeXl, WorkerUpdateResponseTShirtSizeXxl, WorkerUpdateResponseTShirtSizeXxxl:
+		return true
+	}
+	return false
+}
+
 type WorkerUpdateResponseDepartment struct {
 	// The unique public id of the department
 	ID   string                             `json:"id" api:"required"`
@@ -3187,6 +3222,26 @@ func (r WorkerGetResponseMaritalStatus) IsKnown() bool {
 	return false
 }
 
+type WorkerGetResponseTShirtSize string
+
+const (
+	WorkerGetResponseTShirtSizeXs   WorkerGetResponseTShirtSize = "XS"
+	WorkerGetResponseTShirtSizeS    WorkerGetResponseTShirtSize = "S"
+	WorkerGetResponseTShirtSizeM    WorkerGetResponseTShirtSize = "M"
+	WorkerGetResponseTShirtSizeL    WorkerGetResponseTShirtSize = "L"
+	WorkerGetResponseTShirtSizeXl   WorkerGetResponseTShirtSize = "XL"
+	WorkerGetResponseTShirtSizeXxl  WorkerGetResponseTShirtSize = "XXL"
+	WorkerGetResponseTShirtSizeXxxl WorkerGetResponseTShirtSize = "XXXL"
+)
+
+func (r WorkerGetResponseTShirtSize) IsKnown() bool {
+	switch r {
+	case WorkerGetResponseTShirtSizeXs, WorkerGetResponseTShirtSizeS, WorkerGetResponseTShirtSizeM, WorkerGetResponseTShirtSizeL, WorkerGetResponseTShirtSizeXl, WorkerGetResponseTShirtSizeXxl, WorkerGetResponseTShirtSizeXxxl:
+		return true
+	}
+	return false
+}
+
 type WorkerGetResponseDepartment struct {
 	// The unique public id of the department
 	ID   string                          `json:"id" api:"required"`
@@ -3319,8 +3374,10 @@ type WorkerListResponseData struct {
 	// are not enabled.
 	Level WorkerListResponseDataLevel `json:"level" api:"nullable"`
 	// The worker's manager, or null if unassigned.
-	Manager PublicWorkerManager        `json:"manager" api:"nullable"`
-	JSON    workerListResponseDataJSON `json:"-"`
+	Manager PublicWorkerManager `json:"manager" api:"nullable"`
+	// The worker's stored T-shirt size, or null when unset or unavailable.
+	TShirtSize WorkerListResponseDataTShirtSize `json:"tShirtSize" api:"nullable"`
+	JSON       workerListResponseDataJSON       `json:"-"`
 }
 
 // workerListResponseDataJSON contains the JSON metadata for the struct [WorkerListResponseData]
@@ -3355,6 +3412,7 @@ type workerListResponseDataJSON struct {
 	CustomFields      apijson.Field
 	Level             apijson.Field
 	Manager           apijson.Field
+	TShirtSize        apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
 }
@@ -3426,6 +3484,26 @@ const (
 func (r WorkerNewEmployeeResponseMaritalStatus) IsKnown() bool {
 	switch r {
 	case WorkerNewEmployeeResponseMaritalStatusMarried, WorkerNewEmployeeResponseMaritalStatusNotMarried:
+		return true
+	}
+	return false
+}
+
+type WorkerNewEmployeeResponseTShirtSize string
+
+const (
+	WorkerNewEmployeeResponseTShirtSizeXs   WorkerNewEmployeeResponseTShirtSize = "XS"
+	WorkerNewEmployeeResponseTShirtSizeS    WorkerNewEmployeeResponseTShirtSize = "S"
+	WorkerNewEmployeeResponseTShirtSizeM    WorkerNewEmployeeResponseTShirtSize = "M"
+	WorkerNewEmployeeResponseTShirtSizeL    WorkerNewEmployeeResponseTShirtSize = "L"
+	WorkerNewEmployeeResponseTShirtSizeXl   WorkerNewEmployeeResponseTShirtSize = "XL"
+	WorkerNewEmployeeResponseTShirtSizeXxl  WorkerNewEmployeeResponseTShirtSize = "XXL"
+	WorkerNewEmployeeResponseTShirtSizeXxxl WorkerNewEmployeeResponseTShirtSize = "XXXL"
+)
+
+func (r WorkerNewEmployeeResponseTShirtSize) IsKnown() bool {
+	switch r {
+	case WorkerNewEmployeeResponseTShirtSizeXs, WorkerNewEmployeeResponseTShirtSizeS, WorkerNewEmployeeResponseTShirtSizeM, WorkerNewEmployeeResponseTShirtSizeL, WorkerNewEmployeeResponseTShirtSizeXl, WorkerNewEmployeeResponseTShirtSizeXxl, WorkerNewEmployeeResponseTShirtSizeXxxl:
 		return true
 	}
 	return false
@@ -3570,6 +3648,26 @@ func (r WorkerNewContractorResponseMaritalStatus) IsKnown() bool {
 	return false
 }
 
+type WorkerNewContractorResponseTShirtSize string
+
+const (
+	WorkerNewContractorResponseTShirtSizeXs   WorkerNewContractorResponseTShirtSize = "XS"
+	WorkerNewContractorResponseTShirtSizeS    WorkerNewContractorResponseTShirtSize = "S"
+	WorkerNewContractorResponseTShirtSizeM    WorkerNewContractorResponseTShirtSize = "M"
+	WorkerNewContractorResponseTShirtSizeL    WorkerNewContractorResponseTShirtSize = "L"
+	WorkerNewContractorResponseTShirtSizeXl   WorkerNewContractorResponseTShirtSize = "XL"
+	WorkerNewContractorResponseTShirtSizeXxl  WorkerNewContractorResponseTShirtSize = "XXL"
+	WorkerNewContractorResponseTShirtSizeXxxl WorkerNewContractorResponseTShirtSize = "XXXL"
+)
+
+func (r WorkerNewContractorResponseTShirtSize) IsKnown() bool {
+	switch r {
+	case WorkerNewContractorResponseTShirtSizeXs, WorkerNewContractorResponseTShirtSizeS, WorkerNewContractorResponseTShirtSizeM, WorkerNewContractorResponseTShirtSizeL, WorkerNewContractorResponseTShirtSizeXl, WorkerNewContractorResponseTShirtSizeXxl, WorkerNewContractorResponseTShirtSizeXxxl:
+		return true
+	}
+	return false
+}
+
 type WorkerNewContractorResponseDepartment struct {
 	// The unique public id of the department
 	ID   string                                    `json:"id" api:"required"`
@@ -3704,6 +3802,26 @@ const (
 func (r WorkerInviteResponseMaritalStatus) IsKnown() bool {
 	switch r {
 	case WorkerInviteResponseMaritalStatusMarried, WorkerInviteResponseMaritalStatusNotMarried:
+		return true
+	}
+	return false
+}
+
+type WorkerInviteResponseTShirtSize string
+
+const (
+	WorkerInviteResponseTShirtSizeXs   WorkerInviteResponseTShirtSize = "XS"
+	WorkerInviteResponseTShirtSizeS    WorkerInviteResponseTShirtSize = "S"
+	WorkerInviteResponseTShirtSizeM    WorkerInviteResponseTShirtSize = "M"
+	WorkerInviteResponseTShirtSizeL    WorkerInviteResponseTShirtSize = "L"
+	WorkerInviteResponseTShirtSizeXl   WorkerInviteResponseTShirtSize = "XL"
+	WorkerInviteResponseTShirtSizeXxl  WorkerInviteResponseTShirtSize = "XXL"
+	WorkerInviteResponseTShirtSizeXxxl WorkerInviteResponseTShirtSize = "XXXL"
+)
+
+func (r WorkerInviteResponseTShirtSize) IsKnown() bool {
+	switch r {
+	case WorkerInviteResponseTShirtSizeXs, WorkerInviteResponseTShirtSizeS, WorkerInviteResponseTShirtSizeM, WorkerInviteResponseTShirtSizeL, WorkerInviteResponseTShirtSizeXl, WorkerInviteResponseTShirtSizeXxl, WorkerInviteResponseTShirtSizeXxxl:
 		return true
 	}
 	return false
@@ -3951,6 +4069,26 @@ const (
 func (r WorkerListResponseDataMaritalStatus) IsKnown() bool {
 	switch r {
 	case WorkerListResponseDataMaritalStatusMarried, WorkerListResponseDataMaritalStatusNotMarried:
+		return true
+	}
+	return false
+}
+
+type WorkerListResponseDataTShirtSize string
+
+const (
+	WorkerListResponseDataTShirtSizeXs   WorkerListResponseDataTShirtSize = "XS"
+	WorkerListResponseDataTShirtSizeS    WorkerListResponseDataTShirtSize = "S"
+	WorkerListResponseDataTShirtSizeM    WorkerListResponseDataTShirtSize = "M"
+	WorkerListResponseDataTShirtSizeL    WorkerListResponseDataTShirtSize = "L"
+	WorkerListResponseDataTShirtSizeXl   WorkerListResponseDataTShirtSize = "XL"
+	WorkerListResponseDataTShirtSizeXxl  WorkerListResponseDataTShirtSize = "XXL"
+	WorkerListResponseDataTShirtSizeXxxl WorkerListResponseDataTShirtSize = "XXXL"
+)
+
+func (r WorkerListResponseDataTShirtSize) IsKnown() bool {
+	switch r {
+	case WorkerListResponseDataTShirtSizeXs, WorkerListResponseDataTShirtSizeS, WorkerListResponseDataTShirtSizeM, WorkerListResponseDataTShirtSizeL, WorkerListResponseDataTShirtSizeXl, WorkerListResponseDataTShirtSizeXxl, WorkerListResponseDataTShirtSizeXxxl:
 		return true
 	}
 	return false
