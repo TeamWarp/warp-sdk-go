@@ -73,7 +73,7 @@ func (r *BankAccountService) List(ctx context.Context, query BankAccountListPara
 //
 // Returns:
 //
-//	*PublicBankAccount: Stored worker bank account metadata without full account numbers, routing details or provider identifiers.
+//	*PublicBankAccount
 //
 // Example:
 //

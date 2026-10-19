@@ -76,7 +76,7 @@ func (r *BenefitDeductionService) List(ctx context.Context, query BenefitDeducti
 //
 // Returns:
 //
-//	*PublicBenefitDeduction1: The current version of a stable payroll benefit deduction.
+//	*PublicBenefitDeduction1
 //
 // Example:
 //
@@ -119,7 +119,7 @@ func (r *BenefitDeductionService) New(ctx context.Context, body BenefitDeduction
 //
 // Returns:
 //
-//	*PublicBenefitDeduction: The current version of a stable payroll benefit deduction.
+//	*PublicBenefitDeduction
 //
 // Example:
 //
@@ -151,7 +151,7 @@ func (r *BenefitDeductionService) Get(ctx context.Context, id string, opts ...op
 //
 // Returns:
 //
-//	*PublicBenefitDeduction: The current version of a stable payroll benefit deduction.
+//	*PublicBenefitDeduction
 //
 // Example:
 //

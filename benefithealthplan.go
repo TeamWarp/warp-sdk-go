@@ -73,7 +73,7 @@ func (r *BenefitHealthPlanService) List(ctx context.Context, query BenefitHealth
 //
 // Returns:
 //
-//	*PublicHealthPlan: A company health plan available through Warp.
+//	*PublicHealthPlan
 //
 // Example:
 //

@@ -43,7 +43,7 @@ func NewPayrollService(opts ...option.RequestOption) (r *PayrollService) {
 //
 // Returns:
 //
-//	*PublicPayrollList: A cursor-paginated page of payroll summaries.
+//	*PublicPayrollList
 //
 // Example:
 //
@@ -72,7 +72,7 @@ func (r *PayrollService) List(ctx context.Context, query PayrollListParams, opts
 //
 // Returns:
 //
-//	*PublicPayrollDetail: A payroll run with funding and lifecycle details. Every amount in totals is expressed in fundingCurrency; line-derived categories are converted and rounded per paycheck before aggregation, while netPay remains provider-authoritative.
+//	*PublicPayrollDetail
 //
 // Example:
 //
@@ -103,7 +103,7 @@ func (r *PayrollService) Get(ctx context.Context, id string, opts ...option.Requ
 //
 // Returns:
 //
-//	*PublicPaycheckList: A cursor-paginated page of paycheck summaries.
+//	*PublicPaycheckList
 //
 // Example:
 //
@@ -132,7 +132,7 @@ func (r *PayrollService) ListPaychecks(ctx context.Context, query PayrollListPay
 //
 // Returns:
 //
-//	*PublicPaycheckDetail: A paycheck with currency-specific calculation lines, totals grouped by currency, and authoritative parent-payroll funding-currency totals. Source currencies for expenses, benefits, or other inputs are outside this payroll-calculation resource.
+//	*PublicPaycheckDetail
 //
 // Example:
 //

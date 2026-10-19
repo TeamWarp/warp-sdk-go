@@ -73,7 +73,7 @@ func (r *BenefitRetirementPlanService) List(ctx context.Context, query BenefitRe
 //
 // Returns:
 //
-//	*PublicRetirementPlan1: A company retirement plan available through Warp.
+//	*PublicRetirementPlan1
 //
 // Example:
 //
@@ -104,7 +104,7 @@ func (r *BenefitRetirementPlanService) New(ctx context.Context, body BenefitReti
 //
 // Returns:
 //
-//	*PublicRetirementPlan: A company retirement plan available through Warp.
+//	*PublicRetirementPlan
 //
 // Example:
 //
@@ -136,7 +136,7 @@ func (r *BenefitRetirementPlanService) Get(ctx context.Context, id string, opts 
 //
 // Returns:
 //
-//	*PublicRetirementPlan: A company retirement plan available through Warp.
+//	*PublicRetirementPlan
 //
 // Example:
 //
