@@ -74,7 +74,7 @@ func (r *PayRateService) List(ctx context.Context, query PayRateListParams, opts
 //
 // Returns:
 //
-//	*PublicPayRate: A regular or additional pay rate assigned to a worker.
+//	*PublicPayRate
 //
 // Example:
 //

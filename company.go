@@ -37,7 +37,7 @@ func NewCompanyService(opts ...option.RequestOption) (r *CompanyService) {
 //
 // Returns:
 //
-//	*PublicCompany: Basic identity, contact, address, and incorporation information for your company.
+//	*PublicCompany
 //
 // Example:
 //

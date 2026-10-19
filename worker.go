@@ -47,7 +47,7 @@ func NewWorkerService(opts ...option.RequestOption) (r *WorkerService) {
 //
 // Returns:
 //
-//	*WorkerUpdateResponse: A worker profile, including lifecycle, workplace, profile, and compensation fields.
+//	*WorkerUpdateResponse
 //
 // Example:
 //
@@ -78,7 +78,7 @@ func (r *WorkerService) Update(ctx context.Context, id string, body WorkerUpdate
 //
 // Returns:
 //
-//	*WorkerGetResponse: A worker profile, including lifecycle, workplace, profile, and compensation fields.
+//	*WorkerGetResponse
 //
 // Example:
 //
@@ -197,7 +197,7 @@ func (r *WorkerService) List(ctx context.Context, query WorkerListParams, opts .
 //
 // Returns:
 //
-//	*WorkerNewEmployeeResponse: A worker profile, including lifecycle, workplace, profile, and compensation fields.
+//	*WorkerNewEmployeeResponse
 //
 // Example:
 //
@@ -240,7 +240,7 @@ func (r *WorkerService) NewEmployee(ctx context.Context, body WorkerNewEmployeeP
 //
 // Returns:
 //
-//	*WorkerNewContractorResponse: A worker profile, including lifecycle, workplace, profile, and compensation fields.
+//	*WorkerNewContractorResponse
 //
 // Example:
 //
@@ -277,7 +277,7 @@ func (r *WorkerService) NewContractor(ctx context.Context, body WorkerNewContrac
 //
 // Returns:
 //
-//	*WorkerInviteResponse: A worker profile, including lifecycle, workplace, profile, and compensation fields.
+//	*WorkerInviteResponse
 //
 // Example:
 //
