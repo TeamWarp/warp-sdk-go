@@ -36,32 +36,35 @@ func NewWorkerService(opts ...option.RequestOption) (r *WorkerService) {
 	return
 }
 
-// List all workers. Workers include anyone employed by the company, whether US or international, full-time employees or contractors.
+// Update a worker and return the updated worker object. Omitted fields remain unchanged. Requires workers:profile write, plus read access to any referenced department, level, or workplace. See individual fields for update restrictions.
 //
 // Parameters:
 //
 //	ctx: Context for the request.
-//	query: WorkerListParams request parameters.
+//	id: The id of the worker.
+//	body: WorkerUpdateParams request parameters.
 //	opts: Options to apply to this request.
 //
 // Returns:
 //
-//	*WorkerListResponse: Success
+//	*WorkerUpdateResponse
 //
 // Example:
 //
-//	worker, err := client.Workers.List(context.Background(), sdk.WorkerListParams{
-//		Limit: sdk.F[string]("limit"),
-//	})
+//	worker, err := client.Workers.Update(context.Background(), "wrk_1234", sdk.WorkerUpdateParams{})
 //	if err != nil {
 //		panic(err)
 //	}
 //
 //	fmt.Println(worker)
-func (r *WorkerService) List(ctx context.Context, query WorkerListParams, opts ...option.RequestOption) (res *WorkerListResponse, err error) {
+func (r *WorkerService) Update(ctx context.Context, id string, body WorkerUpdateParams, opts ...option.RequestOption) (res *WorkerUpdateResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
-	path := "v1/workers"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return nil, err
+	}
+	path := fmt.Sprintf("v1/workers/%s", url.PathEscape(id))
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, body, &res, opts...)
 	return res, err
 }
 
@@ -75,7 +78,7 @@ func (r *WorkerService) List(ctx context.Context, query WorkerListParams, opts .
 //
 // Returns:
 //
-//	*WorkerGetResponse: A worker profile, including lifecycle, workplace, profile, and compensation fields.
+//	*WorkerGetResponse
 //
 // Example:
 //
@@ -126,6 +129,64 @@ func (r *WorkerService) Delete(ctx context.Context, id string, opts ...option.Re
 	return err
 }
 
+// Reveal full Social Security numbers for up to 50 workers. Requires the workers:pii read scope. Results preserve request order and use null when a worker has no SSN on file. The request fails if any worker is not found, emits one audit event per worker, and returns Cache-Control: private, no-store.
+//
+// Parameters:
+//
+//	ctx: Context for the request.
+//	body: WorkerRevealSsnParams request parameters.
+//	opts: Options to apply to this request.
+//
+// Returns:
+//
+//	*[]PublicWorkerSsn: Success
+//
+// Example:
+//
+//	worker, err := client.Workers.RevealSsn(context.Background(), sdk.WorkerRevealSsnParams{
+//		WorkerIDs: sdk.F[[]string]([]string{"wrk_khac8380c2Lm", "wrk_q7Vm2pR9xK4c"}),
+//	})
+//	if err != nil {
+//		panic(err)
+//	}
+//
+//	fmt.Println(worker)
+func (r *WorkerService) RevealSsn(ctx context.Context, body WorkerRevealSsnParams, opts ...option.RequestOption) (res *[]PublicWorkerSsn, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "v1/workers/reveal_ssn"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return res, err
+}
+
+// List all workers. Workers include anyone employed by the company, whether US or international, full-time employees or contractors.
+//
+// Parameters:
+//
+//	ctx: Context for the request.
+//	query: WorkerListParams request parameters.
+//	opts: Options to apply to this request.
+//
+// Returns:
+//
+//	*WorkerListResponse: Success
+//
+// Example:
+//
+//	worker, err := client.Workers.List(context.Background(), sdk.WorkerListParams{
+//		Limit: sdk.F[string]("limit"),
+//	})
+//	if err != nil {
+//		panic(err)
+//	}
+//
+//	fmt.Println(worker)
+func (r *WorkerService) List(ctx context.Context, query WorkerListParams, opts ...option.RequestOption) (res *WorkerListResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "v1/workers"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return res, err
+}
+
 // Create a new US employee. The worker will be created in draft status and must be invited separately via the invite endpoint. If hiring in a state without an existing tax registration, you must specify the stateRegistration field.
 //
 // Parameters:
@@ -136,13 +197,14 @@ func (r *WorkerService) Delete(ctx context.Context, id string, opts ...option.Re
 //
 // Returns:
 //
-//	*WorkerNewEmployeeResponse: A worker profile, including lifecycle, workplace, profile, and compensation fields.
+//	*WorkerNewEmployeeResponse
 //
 // Example:
 //
 //	worker, err := client.Workers.NewEmployee(context.Background(), sdk.WorkerNewEmployeeParams{
 //		Compensation: sdk.F[sdk.WorkerNewEmployeeParamsCompensation](sdk.WorkerNewEmployeeParamsCompensation{
-//			Amount: sdk.F[float64](0),
+//			Amount: sdk.F[float64](1),
+//			Per:    sdk.F[sdk.WorkerNewEmployeeParamsCompensationPer](sdk.WorkerNewEmployeeParamsCompensationPer("hour")),
 //		}),
 //		DepartmentID: sdk.F[string]("dpt_1234"),
 //		Email:        sdk.F[string]("john@joinwarp.com"),
@@ -152,6 +214,7 @@ func (r *WorkerService) Delete(ctx context.Context, id string, opts ...option.Re
 //		Position:     sdk.F[string]("Software Engineer"),
 //		StartDate:    sdk.F[string](""),
 //		WorkLocation: sdk.F[sdk.WorkerNewEmployeeParamsWorkLocationUnion](sdk.WorkerNewEmployeeParamsWorkLocationOfficeWorkLocation{
+//			Type:        sdk.F[sdk.WorkerNewEmployeeParamsWorkLocationOfficeWorkLocationType](sdk.WorkerNewEmployeeParamsWorkLocationOfficeWorkLocationType("office")),
 //			WorkplaceID: sdk.F[string]("wkp_1234"),
 //		}),
 //	})
@@ -177,18 +240,20 @@ func (r *WorkerService) NewEmployee(ctx context.Context, body WorkerNewEmployeeP
 //
 // Returns:
 //
-//	*WorkerNewContractorResponse: A worker profile, including lifecycle, workplace, profile, and compensation fields.
+//	*WorkerNewContractorResponse
 //
 // Example:
 //
 //	worker, err := client.Workers.NewContractor(context.Background(), sdk.WorkerNewContractorParams{
 //		DepartmentID: sdk.F[string]("dpt_1234"),
 //		Email:        sdk.F[string]("john@joinwarp.com"),
+//		EntityType:   sdk.F[sdk.WorkerNewContractorParamsEntityType](sdk.WorkerNewContractorParamsEntityType("individual")),
 //		FirstName:    sdk.F[string]("Melissa"),
 //		LastName:     sdk.F[string]("Jones"),
 //		ManagerID:    sdk.F[string]("wrk_1234"),
 //		Position:     sdk.F[string]("Design Consultant"),
 //		StartDate:    sdk.F[string](""),
+//		WorkCountry:  sdk.F[sdk.WorkerNewContractorParamsWorkCountry](sdk.WorkerNewContractorParamsWorkCountry("AD")),
 //	})
 //	if err != nil {
 //		panic(err)
@@ -212,7 +277,7 @@ func (r *WorkerService) NewContractor(ctx context.Context, body WorkerNewContrac
 //
 // Returns:
 //
-//	*WorkerInviteResponse: A worker profile, including lifecycle, workplace, profile, and compensation fields.
+//	*WorkerInviteResponse
 //
 // Example:
 //
@@ -233,25 +298,345 @@ func (r *WorkerService) Invite(ctx context.Context, id string, opts ...option.Re
 	return res, err
 }
 
+type PublicWorkerAddress struct {
+	City       string                     `json:"city" api:"required"`
+	Country    PublicWorkerAddressCountry `json:"country" api:"required"`
+	Line1      string                     `json:"line1" api:"required"`
+	Line2      string                     `json:"line2" api:"required,nullable"`
+	PostalCode string                     `json:"postalCode" api:"required,nullable"`
+	State      string                     `json:"state" api:"required,nullable"`
+	JSON       publicWorkerAddressJSON    `json:"-"`
+}
+
+// publicWorkerAddressJSON contains the JSON metadata for the struct [PublicWorkerAddress]
+type publicWorkerAddressJSON struct {
+	City        apijson.Field
+	Country     apijson.Field
+	Line1       apijson.Field
+	Line2       apijson.Field
+	PostalCode  apijson.Field
+	State       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicWorkerAddress) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicWorkerAddressJSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicWorkerAddressCountry string
+
+const (
+	PublicWorkerAddressCountryAd PublicWorkerAddressCountry = "AD"
+	PublicWorkerAddressCountryAe PublicWorkerAddressCountry = "AE"
+	PublicWorkerAddressCountryAf PublicWorkerAddressCountry = "AF"
+	PublicWorkerAddressCountryAg PublicWorkerAddressCountry = "AG"
+	PublicWorkerAddressCountryAI PublicWorkerAddressCountry = "AI"
+	PublicWorkerAddressCountryAl PublicWorkerAddressCountry = "AL"
+	PublicWorkerAddressCountryAm PublicWorkerAddressCountry = "AM"
+	PublicWorkerAddressCountryAo PublicWorkerAddressCountry = "AO"
+	PublicWorkerAddressCountryAq PublicWorkerAddressCountry = "AQ"
+	PublicWorkerAddressCountryAr PublicWorkerAddressCountry = "AR"
+	PublicWorkerAddressCountryAs PublicWorkerAddressCountry = "AS"
+	PublicWorkerAddressCountryAt PublicWorkerAddressCountry = "AT"
+	PublicWorkerAddressCountryAu PublicWorkerAddressCountry = "AU"
+	PublicWorkerAddressCountryAw PublicWorkerAddressCountry = "AW"
+	PublicWorkerAddressCountryAx PublicWorkerAddressCountry = "AX"
+	PublicWorkerAddressCountryAz PublicWorkerAddressCountry = "AZ"
+	PublicWorkerAddressCountryBa PublicWorkerAddressCountry = "BA"
+	PublicWorkerAddressCountryBb PublicWorkerAddressCountry = "BB"
+	PublicWorkerAddressCountryBd PublicWorkerAddressCountry = "BD"
+	PublicWorkerAddressCountryBe PublicWorkerAddressCountry = "BE"
+	PublicWorkerAddressCountryBf PublicWorkerAddressCountry = "BF"
+	PublicWorkerAddressCountryBg PublicWorkerAddressCountry = "BG"
+	PublicWorkerAddressCountryBh PublicWorkerAddressCountry = "BH"
+	PublicWorkerAddressCountryBi PublicWorkerAddressCountry = "BI"
+	PublicWorkerAddressCountryBj PublicWorkerAddressCountry = "BJ"
+	PublicWorkerAddressCountryBl PublicWorkerAddressCountry = "BL"
+	PublicWorkerAddressCountryBm PublicWorkerAddressCountry = "BM"
+	PublicWorkerAddressCountryBn PublicWorkerAddressCountry = "BN"
+	PublicWorkerAddressCountryBo PublicWorkerAddressCountry = "BO"
+	PublicWorkerAddressCountryBq PublicWorkerAddressCountry = "BQ"
+	PublicWorkerAddressCountryBr PublicWorkerAddressCountry = "BR"
+	PublicWorkerAddressCountryBs PublicWorkerAddressCountry = "BS"
+	PublicWorkerAddressCountryBt PublicWorkerAddressCountry = "BT"
+	PublicWorkerAddressCountryBv PublicWorkerAddressCountry = "BV"
+	PublicWorkerAddressCountryBw PublicWorkerAddressCountry = "BW"
+	PublicWorkerAddressCountryBy PublicWorkerAddressCountry = "BY"
+	PublicWorkerAddressCountryBz PublicWorkerAddressCountry = "BZ"
+	PublicWorkerAddressCountryCa PublicWorkerAddressCountry = "CA"
+	PublicWorkerAddressCountryCc PublicWorkerAddressCountry = "CC"
+	PublicWorkerAddressCountryCd PublicWorkerAddressCountry = "CD"
+	PublicWorkerAddressCountryCf PublicWorkerAddressCountry = "CF"
+	PublicWorkerAddressCountryCg PublicWorkerAddressCountry = "CG"
+	PublicWorkerAddressCountryCh PublicWorkerAddressCountry = "CH"
+	PublicWorkerAddressCountryCi PublicWorkerAddressCountry = "CI"
+	PublicWorkerAddressCountryCk PublicWorkerAddressCountry = "CK"
+	PublicWorkerAddressCountryCl PublicWorkerAddressCountry = "CL"
+	PublicWorkerAddressCountryCm PublicWorkerAddressCountry = "CM"
+	PublicWorkerAddressCountryCn PublicWorkerAddressCountry = "CN"
+	PublicWorkerAddressCountryCo PublicWorkerAddressCountry = "CO"
+	PublicWorkerAddressCountryCr PublicWorkerAddressCountry = "CR"
+	PublicWorkerAddressCountryCu PublicWorkerAddressCountry = "CU"
+	PublicWorkerAddressCountryCv PublicWorkerAddressCountry = "CV"
+	PublicWorkerAddressCountryCw PublicWorkerAddressCountry = "CW"
+	PublicWorkerAddressCountryCx PublicWorkerAddressCountry = "CX"
+	PublicWorkerAddressCountryCy PublicWorkerAddressCountry = "CY"
+	PublicWorkerAddressCountryCz PublicWorkerAddressCountry = "CZ"
+	PublicWorkerAddressCountryDe PublicWorkerAddressCountry = "DE"
+	PublicWorkerAddressCountryDj PublicWorkerAddressCountry = "DJ"
+	PublicWorkerAddressCountryDk PublicWorkerAddressCountry = "DK"
+	PublicWorkerAddressCountryDm PublicWorkerAddressCountry = "DM"
+	PublicWorkerAddressCountryDo PublicWorkerAddressCountry = "DO"
+	PublicWorkerAddressCountryDz PublicWorkerAddressCountry = "DZ"
+	PublicWorkerAddressCountryEc PublicWorkerAddressCountry = "EC"
+	PublicWorkerAddressCountryEe PublicWorkerAddressCountry = "EE"
+	PublicWorkerAddressCountryEg PublicWorkerAddressCountry = "EG"
+	PublicWorkerAddressCountryEh PublicWorkerAddressCountry = "EH"
+	PublicWorkerAddressCountryEr PublicWorkerAddressCountry = "ER"
+	PublicWorkerAddressCountryEs PublicWorkerAddressCountry = "ES"
+	PublicWorkerAddressCountryEt PublicWorkerAddressCountry = "ET"
+	PublicWorkerAddressCountryFi PublicWorkerAddressCountry = "FI"
+	PublicWorkerAddressCountryFj PublicWorkerAddressCountry = "FJ"
+	PublicWorkerAddressCountryFk PublicWorkerAddressCountry = "FK"
+	PublicWorkerAddressCountryFm PublicWorkerAddressCountry = "FM"
+	PublicWorkerAddressCountryFo PublicWorkerAddressCountry = "FO"
+	PublicWorkerAddressCountryFr PublicWorkerAddressCountry = "FR"
+	PublicWorkerAddressCountryGa PublicWorkerAddressCountry = "GA"
+	PublicWorkerAddressCountryGB PublicWorkerAddressCountry = "GB"
+	PublicWorkerAddressCountryGd PublicWorkerAddressCountry = "GD"
+	PublicWorkerAddressCountryGe PublicWorkerAddressCountry = "GE"
+	PublicWorkerAddressCountryGf PublicWorkerAddressCountry = "GF"
+	PublicWorkerAddressCountryGg PublicWorkerAddressCountry = "GG"
+	PublicWorkerAddressCountryGh PublicWorkerAddressCountry = "GH"
+	PublicWorkerAddressCountryGi PublicWorkerAddressCountry = "GI"
+	PublicWorkerAddressCountryGl PublicWorkerAddressCountry = "GL"
+	PublicWorkerAddressCountryGm PublicWorkerAddressCountry = "GM"
+	PublicWorkerAddressCountryGn PublicWorkerAddressCountry = "GN"
+	PublicWorkerAddressCountryGp PublicWorkerAddressCountry = "GP"
+	PublicWorkerAddressCountryGq PublicWorkerAddressCountry = "GQ"
+	PublicWorkerAddressCountryGr PublicWorkerAddressCountry = "GR"
+	PublicWorkerAddressCountryGs PublicWorkerAddressCountry = "GS"
+	PublicWorkerAddressCountryGt PublicWorkerAddressCountry = "GT"
+	PublicWorkerAddressCountryGu PublicWorkerAddressCountry = "GU"
+	PublicWorkerAddressCountryGw PublicWorkerAddressCountry = "GW"
+	PublicWorkerAddressCountryGy PublicWorkerAddressCountry = "GY"
+	PublicWorkerAddressCountryHk PublicWorkerAddressCountry = "HK"
+	PublicWorkerAddressCountryHm PublicWorkerAddressCountry = "HM"
+	PublicWorkerAddressCountryHn PublicWorkerAddressCountry = "HN"
+	PublicWorkerAddressCountryHr PublicWorkerAddressCountry = "HR"
+	PublicWorkerAddressCountryHt PublicWorkerAddressCountry = "HT"
+	PublicWorkerAddressCountryHu PublicWorkerAddressCountry = "HU"
+	PublicWorkerAddressCountryID PublicWorkerAddressCountry = "ID"
+	PublicWorkerAddressCountryIe PublicWorkerAddressCountry = "IE"
+	PublicWorkerAddressCountryIl PublicWorkerAddressCountry = "IL"
+	PublicWorkerAddressCountryIm PublicWorkerAddressCountry = "IM"
+	PublicWorkerAddressCountryIn PublicWorkerAddressCountry = "IN"
+	PublicWorkerAddressCountryIo PublicWorkerAddressCountry = "IO"
+	PublicWorkerAddressCountryIq PublicWorkerAddressCountry = "IQ"
+	PublicWorkerAddressCountryIr PublicWorkerAddressCountry = "IR"
+	PublicWorkerAddressCountryIs PublicWorkerAddressCountry = "IS"
+	PublicWorkerAddressCountryIt PublicWorkerAddressCountry = "IT"
+	PublicWorkerAddressCountryJe PublicWorkerAddressCountry = "JE"
+	PublicWorkerAddressCountryJm PublicWorkerAddressCountry = "JM"
+	PublicWorkerAddressCountryJo PublicWorkerAddressCountry = "JO"
+	PublicWorkerAddressCountryJp PublicWorkerAddressCountry = "JP"
+	PublicWorkerAddressCountryKe PublicWorkerAddressCountry = "KE"
+	PublicWorkerAddressCountryKg PublicWorkerAddressCountry = "KG"
+	PublicWorkerAddressCountryKh PublicWorkerAddressCountry = "KH"
+	PublicWorkerAddressCountryKi PublicWorkerAddressCountry = "KI"
+	PublicWorkerAddressCountryKm PublicWorkerAddressCountry = "KM"
+	PublicWorkerAddressCountryKn PublicWorkerAddressCountry = "KN"
+	PublicWorkerAddressCountryKp PublicWorkerAddressCountry = "KP"
+	PublicWorkerAddressCountryKr PublicWorkerAddressCountry = "KR"
+	PublicWorkerAddressCountryKw PublicWorkerAddressCountry = "KW"
+	PublicWorkerAddressCountryKy PublicWorkerAddressCountry = "KY"
+	PublicWorkerAddressCountryKz PublicWorkerAddressCountry = "KZ"
+	PublicWorkerAddressCountryLa PublicWorkerAddressCountry = "LA"
+	PublicWorkerAddressCountryLb PublicWorkerAddressCountry = "LB"
+	PublicWorkerAddressCountryLc PublicWorkerAddressCountry = "LC"
+	PublicWorkerAddressCountryLi PublicWorkerAddressCountry = "LI"
+	PublicWorkerAddressCountryLk PublicWorkerAddressCountry = "LK"
+	PublicWorkerAddressCountryLr PublicWorkerAddressCountry = "LR"
+	PublicWorkerAddressCountryLs PublicWorkerAddressCountry = "LS"
+	PublicWorkerAddressCountryLt PublicWorkerAddressCountry = "LT"
+	PublicWorkerAddressCountryLu PublicWorkerAddressCountry = "LU"
+	PublicWorkerAddressCountryLv PublicWorkerAddressCountry = "LV"
+	PublicWorkerAddressCountryLy PublicWorkerAddressCountry = "LY"
+	PublicWorkerAddressCountryMa PublicWorkerAddressCountry = "MA"
+	PublicWorkerAddressCountryMc PublicWorkerAddressCountry = "MC"
+	PublicWorkerAddressCountryMd PublicWorkerAddressCountry = "MD"
+	PublicWorkerAddressCountryMe PublicWorkerAddressCountry = "ME"
+	PublicWorkerAddressCountryMf PublicWorkerAddressCountry = "MF"
+	PublicWorkerAddressCountryMg PublicWorkerAddressCountry = "MG"
+	PublicWorkerAddressCountryMh PublicWorkerAddressCountry = "MH"
+	PublicWorkerAddressCountryMk PublicWorkerAddressCountry = "MK"
+	PublicWorkerAddressCountryMl PublicWorkerAddressCountry = "ML"
+	PublicWorkerAddressCountryMm PublicWorkerAddressCountry = "MM"
+	PublicWorkerAddressCountryMn PublicWorkerAddressCountry = "MN"
+	PublicWorkerAddressCountryMo PublicWorkerAddressCountry = "MO"
+	PublicWorkerAddressCountryMp PublicWorkerAddressCountry = "MP"
+	PublicWorkerAddressCountryMq PublicWorkerAddressCountry = "MQ"
+	PublicWorkerAddressCountryMr PublicWorkerAddressCountry = "MR"
+	PublicWorkerAddressCountryMs PublicWorkerAddressCountry = "MS"
+	PublicWorkerAddressCountryMt PublicWorkerAddressCountry = "MT"
+	PublicWorkerAddressCountryMu PublicWorkerAddressCountry = "MU"
+	PublicWorkerAddressCountryMv PublicWorkerAddressCountry = "MV"
+	PublicWorkerAddressCountryMw PublicWorkerAddressCountry = "MW"
+	PublicWorkerAddressCountryMx PublicWorkerAddressCountry = "MX"
+	PublicWorkerAddressCountryMy PublicWorkerAddressCountry = "MY"
+	PublicWorkerAddressCountryMz PublicWorkerAddressCountry = "MZ"
+	PublicWorkerAddressCountryNa PublicWorkerAddressCountry = "NA"
+	PublicWorkerAddressCountryNc PublicWorkerAddressCountry = "NC"
+	PublicWorkerAddressCountryNe PublicWorkerAddressCountry = "NE"
+	PublicWorkerAddressCountryNf PublicWorkerAddressCountry = "NF"
+	PublicWorkerAddressCountryNg PublicWorkerAddressCountry = "NG"
+	PublicWorkerAddressCountryNi PublicWorkerAddressCountry = "NI"
+	PublicWorkerAddressCountryNl PublicWorkerAddressCountry = "NL"
+	PublicWorkerAddressCountryNo PublicWorkerAddressCountry = "NO"
+	PublicWorkerAddressCountryNp PublicWorkerAddressCountry = "NP"
+	PublicWorkerAddressCountryNr PublicWorkerAddressCountry = "NR"
+	PublicWorkerAddressCountryNu PublicWorkerAddressCountry = "NU"
+	PublicWorkerAddressCountryNz PublicWorkerAddressCountry = "NZ"
+	PublicWorkerAddressCountryOm PublicWorkerAddressCountry = "OM"
+	PublicWorkerAddressCountryPa PublicWorkerAddressCountry = "PA"
+	PublicWorkerAddressCountryPe PublicWorkerAddressCountry = "PE"
+	PublicWorkerAddressCountryPf PublicWorkerAddressCountry = "PF"
+	PublicWorkerAddressCountryPg PublicWorkerAddressCountry = "PG"
+	PublicWorkerAddressCountryPh PublicWorkerAddressCountry = "PH"
+	PublicWorkerAddressCountryPk PublicWorkerAddressCountry = "PK"
+	PublicWorkerAddressCountryPl PublicWorkerAddressCountry = "PL"
+	PublicWorkerAddressCountryPm PublicWorkerAddressCountry = "PM"
+	PublicWorkerAddressCountryPn PublicWorkerAddressCountry = "PN"
+	PublicWorkerAddressCountryPr PublicWorkerAddressCountry = "PR"
+	PublicWorkerAddressCountryPs PublicWorkerAddressCountry = "PS"
+	PublicWorkerAddressCountryPt PublicWorkerAddressCountry = "PT"
+	PublicWorkerAddressCountryPw PublicWorkerAddressCountry = "PW"
+	PublicWorkerAddressCountryPy PublicWorkerAddressCountry = "PY"
+	PublicWorkerAddressCountryQa PublicWorkerAddressCountry = "QA"
+	PublicWorkerAddressCountryRe PublicWorkerAddressCountry = "RE"
+	PublicWorkerAddressCountryRo PublicWorkerAddressCountry = "RO"
+	PublicWorkerAddressCountryRs PublicWorkerAddressCountry = "RS"
+	PublicWorkerAddressCountryRu PublicWorkerAddressCountry = "RU"
+	PublicWorkerAddressCountryRw PublicWorkerAddressCountry = "RW"
+	PublicWorkerAddressCountrySa PublicWorkerAddressCountry = "SA"
+	PublicWorkerAddressCountrySb PublicWorkerAddressCountry = "SB"
+	PublicWorkerAddressCountrySc PublicWorkerAddressCountry = "SC"
+	PublicWorkerAddressCountrySd PublicWorkerAddressCountry = "SD"
+	PublicWorkerAddressCountrySe PublicWorkerAddressCountry = "SE"
+	PublicWorkerAddressCountrySg PublicWorkerAddressCountry = "SG"
+	PublicWorkerAddressCountrySh PublicWorkerAddressCountry = "SH"
+	PublicWorkerAddressCountrySi PublicWorkerAddressCountry = "SI"
+	PublicWorkerAddressCountrySj PublicWorkerAddressCountry = "SJ"
+	PublicWorkerAddressCountrySk PublicWorkerAddressCountry = "SK"
+	PublicWorkerAddressCountrySl PublicWorkerAddressCountry = "SL"
+	PublicWorkerAddressCountrySm PublicWorkerAddressCountry = "SM"
+	PublicWorkerAddressCountrySn PublicWorkerAddressCountry = "SN"
+	PublicWorkerAddressCountrySo PublicWorkerAddressCountry = "SO"
+	PublicWorkerAddressCountrySr PublicWorkerAddressCountry = "SR"
+	PublicWorkerAddressCountrySS PublicWorkerAddressCountry = "SS"
+	PublicWorkerAddressCountrySt PublicWorkerAddressCountry = "ST"
+	PublicWorkerAddressCountrySv PublicWorkerAddressCountry = "SV"
+	PublicWorkerAddressCountrySx PublicWorkerAddressCountry = "SX"
+	PublicWorkerAddressCountrySy PublicWorkerAddressCountry = "SY"
+	PublicWorkerAddressCountrySz PublicWorkerAddressCountry = "SZ"
+	PublicWorkerAddressCountryTc PublicWorkerAddressCountry = "TC"
+	PublicWorkerAddressCountryTd PublicWorkerAddressCountry = "TD"
+	PublicWorkerAddressCountryTf PublicWorkerAddressCountry = "TF"
+	PublicWorkerAddressCountryTg PublicWorkerAddressCountry = "TG"
+	PublicWorkerAddressCountryTh PublicWorkerAddressCountry = "TH"
+	PublicWorkerAddressCountryTj PublicWorkerAddressCountry = "TJ"
+	PublicWorkerAddressCountryTk PublicWorkerAddressCountry = "TK"
+	PublicWorkerAddressCountryTl PublicWorkerAddressCountry = "TL"
+	PublicWorkerAddressCountryTm PublicWorkerAddressCountry = "TM"
+	PublicWorkerAddressCountryTn PublicWorkerAddressCountry = "TN"
+	PublicWorkerAddressCountryTo PublicWorkerAddressCountry = "TO"
+	PublicWorkerAddressCountryTr PublicWorkerAddressCountry = "TR"
+	PublicWorkerAddressCountryTt PublicWorkerAddressCountry = "TT"
+	PublicWorkerAddressCountryTv PublicWorkerAddressCountry = "TV"
+	PublicWorkerAddressCountryTw PublicWorkerAddressCountry = "TW"
+	PublicWorkerAddressCountryTz PublicWorkerAddressCountry = "TZ"
+	PublicWorkerAddressCountryUa PublicWorkerAddressCountry = "UA"
+	PublicWorkerAddressCountryUg PublicWorkerAddressCountry = "UG"
+	PublicWorkerAddressCountryUm PublicWorkerAddressCountry = "UM"
+	PublicWorkerAddressCountryUs PublicWorkerAddressCountry = "US"
+	PublicWorkerAddressCountryUy PublicWorkerAddressCountry = "UY"
+	PublicWorkerAddressCountryUz PublicWorkerAddressCountry = "UZ"
+	PublicWorkerAddressCountryVa PublicWorkerAddressCountry = "VA"
+	PublicWorkerAddressCountryVc PublicWorkerAddressCountry = "VC"
+	PublicWorkerAddressCountryVe PublicWorkerAddressCountry = "VE"
+	PublicWorkerAddressCountryVg PublicWorkerAddressCountry = "VG"
+	PublicWorkerAddressCountryVi PublicWorkerAddressCountry = "VI"
+	PublicWorkerAddressCountryVn PublicWorkerAddressCountry = "VN"
+	PublicWorkerAddressCountryVu PublicWorkerAddressCountry = "VU"
+	PublicWorkerAddressCountryWf PublicWorkerAddressCountry = "WF"
+	PublicWorkerAddressCountryWs PublicWorkerAddressCountry = "WS"
+	PublicWorkerAddressCountryXk PublicWorkerAddressCountry = "XK"
+	PublicWorkerAddressCountryYe PublicWorkerAddressCountry = "YE"
+	PublicWorkerAddressCountryYt PublicWorkerAddressCountry = "YT"
+	PublicWorkerAddressCountryZa PublicWorkerAddressCountry = "ZA"
+	PublicWorkerAddressCountryZm PublicWorkerAddressCountry = "ZM"
+	PublicWorkerAddressCountryZw PublicWorkerAddressCountry = "ZW"
+)
+
+func (r PublicWorkerAddressCountry) IsKnown() bool {
+	switch r {
+	case PublicWorkerAddressCountryAd, PublicWorkerAddressCountryAe, PublicWorkerAddressCountryAf, PublicWorkerAddressCountryAg, PublicWorkerAddressCountryAI, PublicWorkerAddressCountryAl, PublicWorkerAddressCountryAm, PublicWorkerAddressCountryAo, PublicWorkerAddressCountryAq, PublicWorkerAddressCountryAr, PublicWorkerAddressCountryAs, PublicWorkerAddressCountryAt, PublicWorkerAddressCountryAu, PublicWorkerAddressCountryAw, PublicWorkerAddressCountryAx, PublicWorkerAddressCountryAz, PublicWorkerAddressCountryBa, PublicWorkerAddressCountryBb, PublicWorkerAddressCountryBd, PublicWorkerAddressCountryBe, PublicWorkerAddressCountryBf, PublicWorkerAddressCountryBg, PublicWorkerAddressCountryBh, PublicWorkerAddressCountryBi, PublicWorkerAddressCountryBj, PublicWorkerAddressCountryBl, PublicWorkerAddressCountryBm, PublicWorkerAddressCountryBn, PublicWorkerAddressCountryBo, PublicWorkerAddressCountryBq, PublicWorkerAddressCountryBr, PublicWorkerAddressCountryBs, PublicWorkerAddressCountryBt, PublicWorkerAddressCountryBv, PublicWorkerAddressCountryBw, PublicWorkerAddressCountryBy, PublicWorkerAddressCountryBz, PublicWorkerAddressCountryCa, PublicWorkerAddressCountryCc, PublicWorkerAddressCountryCd, PublicWorkerAddressCountryCf, PublicWorkerAddressCountryCg, PublicWorkerAddressCountryCh, PublicWorkerAddressCountryCi, PublicWorkerAddressCountryCk, PublicWorkerAddressCountryCl, PublicWorkerAddressCountryCm, PublicWorkerAddressCountryCn, PublicWorkerAddressCountryCo, PublicWorkerAddressCountryCr, PublicWorkerAddressCountryCu, PublicWorkerAddressCountryCv, PublicWorkerAddressCountryCw, PublicWorkerAddressCountryCx, PublicWorkerAddressCountryCy, PublicWorkerAddressCountryCz, PublicWorkerAddressCountryDe, PublicWorkerAddressCountryDj, PublicWorkerAddressCountryDk, PublicWorkerAddressCountryDm, PublicWorkerAddressCountryDo, PublicWorkerAddressCountryDz, PublicWorkerAddressCountryEc, PublicWorkerAddressCountryEe, PublicWorkerAddressCountryEg, PublicWorkerAddressCountryEh, PublicWorkerAddressCountryEr, PublicWorkerAddressCountryEs, PublicWorkerAddressCountryEt, PublicWorkerAddressCountryFi, PublicWorkerAddressCountryFj, PublicWorkerAddressCountryFk, PublicWorkerAddressCountryFm, PublicWorkerAddressCountryFo, PublicWorkerAddressCountryFr, PublicWorkerAddressCountryGa, PublicWorkerAddressCountryGB, PublicWorkerAddressCountryGd, PublicWorkerAddressCountryGe, PublicWorkerAddressCountryGf, PublicWorkerAddressCountryGg, PublicWorkerAddressCountryGh, PublicWorkerAddressCountryGi, PublicWorkerAddressCountryGl, PublicWorkerAddressCountryGm, PublicWorkerAddressCountryGn, PublicWorkerAddressCountryGp, PublicWorkerAddressCountryGq, PublicWorkerAddressCountryGr, PublicWorkerAddressCountryGs, PublicWorkerAddressCountryGt, PublicWorkerAddressCountryGu, PublicWorkerAddressCountryGw, PublicWorkerAddressCountryGy, PublicWorkerAddressCountryHk, PublicWorkerAddressCountryHm, PublicWorkerAddressCountryHn, PublicWorkerAddressCountryHr, PublicWorkerAddressCountryHt, PublicWorkerAddressCountryHu, PublicWorkerAddressCountryID, PublicWorkerAddressCountryIe, PublicWorkerAddressCountryIl, PublicWorkerAddressCountryIm, PublicWorkerAddressCountryIn, PublicWorkerAddressCountryIo, PublicWorkerAddressCountryIq, PublicWorkerAddressCountryIr, PublicWorkerAddressCountryIs, PublicWorkerAddressCountryIt, PublicWorkerAddressCountryJe, PublicWorkerAddressCountryJm, PublicWorkerAddressCountryJo, PublicWorkerAddressCountryJp, PublicWorkerAddressCountryKe, PublicWorkerAddressCountryKg, PublicWorkerAddressCountryKh, PublicWorkerAddressCountryKi, PublicWorkerAddressCountryKm, PublicWorkerAddressCountryKn, PublicWorkerAddressCountryKp, PublicWorkerAddressCountryKr, PublicWorkerAddressCountryKw, PublicWorkerAddressCountryKy, PublicWorkerAddressCountryKz, PublicWorkerAddressCountryLa, PublicWorkerAddressCountryLb, PublicWorkerAddressCountryLc, PublicWorkerAddressCountryLi, PublicWorkerAddressCountryLk, PublicWorkerAddressCountryLr, PublicWorkerAddressCountryLs, PublicWorkerAddressCountryLt, PublicWorkerAddressCountryLu, PublicWorkerAddressCountryLv, PublicWorkerAddressCountryLy, PublicWorkerAddressCountryMa, PublicWorkerAddressCountryMc, PublicWorkerAddressCountryMd, PublicWorkerAddressCountryMe, PublicWorkerAddressCountryMf, PublicWorkerAddressCountryMg, PublicWorkerAddressCountryMh, PublicWorkerAddressCountryMk, PublicWorkerAddressCountryMl, PublicWorkerAddressCountryMm, PublicWorkerAddressCountryMn, PublicWorkerAddressCountryMo, PublicWorkerAddressCountryMp, PublicWorkerAddressCountryMq, PublicWorkerAddressCountryMr, PublicWorkerAddressCountryMs, PublicWorkerAddressCountryMt, PublicWorkerAddressCountryMu, PublicWorkerAddressCountryMv, PublicWorkerAddressCountryMw, PublicWorkerAddressCountryMx, PublicWorkerAddressCountryMy, PublicWorkerAddressCountryMz, PublicWorkerAddressCountryNa, PublicWorkerAddressCountryNc, PublicWorkerAddressCountryNe, PublicWorkerAddressCountryNf, PublicWorkerAddressCountryNg, PublicWorkerAddressCountryNi, PublicWorkerAddressCountryNl, PublicWorkerAddressCountryNo, PublicWorkerAddressCountryNp, PublicWorkerAddressCountryNr, PublicWorkerAddressCountryNu, PublicWorkerAddressCountryNz, PublicWorkerAddressCountryOm, PublicWorkerAddressCountryPa, PublicWorkerAddressCountryPe, PublicWorkerAddressCountryPf, PublicWorkerAddressCountryPg, PublicWorkerAddressCountryPh, PublicWorkerAddressCountryPk, PublicWorkerAddressCountryPl, PublicWorkerAddressCountryPm, PublicWorkerAddressCountryPn, PublicWorkerAddressCountryPr, PublicWorkerAddressCountryPs, PublicWorkerAddressCountryPt, PublicWorkerAddressCountryPw, PublicWorkerAddressCountryPy, PublicWorkerAddressCountryQa, PublicWorkerAddressCountryRe, PublicWorkerAddressCountryRo, PublicWorkerAddressCountryRs, PublicWorkerAddressCountryRu, PublicWorkerAddressCountryRw, PublicWorkerAddressCountrySa, PublicWorkerAddressCountrySb, PublicWorkerAddressCountrySc, PublicWorkerAddressCountrySd, PublicWorkerAddressCountrySe, PublicWorkerAddressCountrySg, PublicWorkerAddressCountrySh, PublicWorkerAddressCountrySi, PublicWorkerAddressCountrySj, PublicWorkerAddressCountrySk, PublicWorkerAddressCountrySl, PublicWorkerAddressCountrySm, PublicWorkerAddressCountrySn, PublicWorkerAddressCountrySo, PublicWorkerAddressCountrySr, PublicWorkerAddressCountrySS, PublicWorkerAddressCountrySt, PublicWorkerAddressCountrySv, PublicWorkerAddressCountrySx, PublicWorkerAddressCountrySy, PublicWorkerAddressCountrySz, PublicWorkerAddressCountryTc, PublicWorkerAddressCountryTd, PublicWorkerAddressCountryTf, PublicWorkerAddressCountryTg, PublicWorkerAddressCountryTh, PublicWorkerAddressCountryTj, PublicWorkerAddressCountryTk, PublicWorkerAddressCountryTl, PublicWorkerAddressCountryTm, PublicWorkerAddressCountryTn, PublicWorkerAddressCountryTo, PublicWorkerAddressCountryTr, PublicWorkerAddressCountryTt, PublicWorkerAddressCountryTv, PublicWorkerAddressCountryTw, PublicWorkerAddressCountryTz, PublicWorkerAddressCountryUa, PublicWorkerAddressCountryUg, PublicWorkerAddressCountryUm, PublicWorkerAddressCountryUs, PublicWorkerAddressCountryUy, PublicWorkerAddressCountryUz, PublicWorkerAddressCountryVa, PublicWorkerAddressCountryVc, PublicWorkerAddressCountryVe, PublicWorkerAddressCountryVg, PublicWorkerAddressCountryVi, PublicWorkerAddressCountryVn, PublicWorkerAddressCountryVu, PublicWorkerAddressCountryWf, PublicWorkerAddressCountryWs, PublicWorkerAddressCountryXk, PublicWorkerAddressCountryYe, PublicWorkerAddressCountryYt, PublicWorkerAddressCountryZa, PublicWorkerAddressCountryZm, PublicWorkerAddressCountryZw:
+		return true
+	}
+	return false
+}
+
+type PublicWorkerManager struct {
+	// The id of the worker.
+	ID          string                  `json:"id" api:"required"`
+	DisplayName string                  `json:"displayName" api:"required"`
+	FirstName   string                  `json:"firstName" api:"required"`
+	LastName    string                  `json:"lastName" api:"required"`
+	JSON        publicWorkerManagerJSON `json:"-"`
+}
+
+// publicWorkerManagerJSON contains the JSON metadata for the struct [PublicWorkerManager]
+type publicWorkerManagerJSON struct {
+	ID          apijson.Field
+	DisplayName apijson.Field
+	FirstName   apijson.Field
+	LastName    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicWorkerManager) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicWorkerManagerJSON) RawJSON() string {
+	return r.raw
+}
+
 type PublicWorkerCompensation struct {
-	// The tag of the pay rate.
-	PayRateID string      `json:"payRateId" api:"required"`
-	Per       interface{} `json:"per" api:"required"`
-	// Amount in the currency base unit, e.g. cents for USD.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount   int64                            `json:"amount" api:"required"`
 	Currency PublicWorkerCompensationCurrency `json:"currency" api:"required"`
 	// The server-formatted pay rate, including its period.
-	Display string                       `json:"display" api:"required"`
-	JSON    publicWorkerCompensationJSON `json:"-"`
+	Display string `json:"display" api:"required"`
+	// The tag of the pay rate.
+	PayRateID string                       `json:"payRateId" api:"required"`
+	Per       interface{}                  `json:"per" api:"required"`
+	JSON      publicWorkerCompensationJSON `json:"-"`
 }
 
 // publicWorkerCompensationJSON contains the JSON metadata for the struct [PublicWorkerCompensation]
 type publicWorkerCompensationJSON struct {
-	PayRateID   apijson.Field
-	Per         apijson.Field
 	Amount      apijson.Field
 	Currency    apijson.Field
 	Display     apijson.Field
+	PayRateID   apijson.Field
+	Per         apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -338,18 +723,43 @@ func (r PublicWorkerCompensationCurrency) IsKnown() bool {
 	return false
 }
 
+type PublicWorkerSsn struct {
+	// The id of the worker.
+	ID string `json:"id" api:"required"`
+	// The nine-digit Social Security number, or null when the worker has no SSN on
+	// file.
+	Ssn  string              `json:"ssn" api:"required,nullable"`
+	JSON publicWorkerSsnJSON `json:"-"`
+}
+
+// publicWorkerSsnJSON contains the JSON metadata for the struct [PublicWorkerSsn]
+type publicWorkerSsnJSON struct {
+	ID          apijson.Field
+	Ssn         apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicWorkerSsn) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicWorkerSsnJSON) RawJSON() string {
+	return r.raw
+}
+
 type PublicTextWorkerCustomField struct {
-	Type PublicTextWorkerCustomFieldType `json:"type" api:"required"`
 	// The tag of a company custom worker field.
-	ID   string `json:"id" api:"required"`
-	Name string `json:"name" api:"required"`
-	// True when this API key’s permission scopes cannot read the field’s category. The
-	// value fields are withheld (null), not absent — null does not imply the worker
-	// has no value.
-	Redacted bool `json:"redacted" api:"required"`
+	ID string `json:"id" api:"required"`
 	// The value rendered as the Warp dashboard displays it; null when unset or
 	// redacted.
 	Display string `json:"display" api:"required,nullable"`
+	Name    string `json:"name" api:"required"`
+	// True when this API key’s permission scopes cannot read the field’s category. The
+	// value fields are withheld (null), not absent — null does not imply the worker
+	// has no value.
+	Redacted bool                            `json:"redacted" api:"required"`
+	Type     PublicTextWorkerCustomFieldType `json:"type" api:"required"`
 	// The worker’s text; null when unset or when the field is redacted for this API
 	// key.
 	Value string                          `json:"value" api:"required,nullable"`
@@ -358,11 +768,11 @@ type PublicTextWorkerCustomField struct {
 
 // publicTextWorkerCustomFieldJSON contains the JSON metadata for the struct [PublicTextWorkerCustomField]
 type publicTextWorkerCustomFieldJSON struct {
-	Type        apijson.Field
 	ID          apijson.Field
+	Display     apijson.Field
 	Name        apijson.Field
 	Redacted    apijson.Field
-	Display     apijson.Field
+	Type        apijson.Field
 	Value       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -391,17 +801,17 @@ func (r PublicTextWorkerCustomFieldType) IsKnown() bool {
 }
 
 type PublicNumberWorkerCustomField struct {
-	Type PublicNumberWorkerCustomFieldType `json:"type" api:"required"`
 	// The tag of a company custom worker field.
-	ID   string `json:"id" api:"required"`
-	Name string `json:"name" api:"required"`
-	// True when this API key’s permission scopes cannot read the field’s category. The
-	// value fields are withheld (null), not absent — null does not imply the worker
-	// has no value.
-	Redacted bool `json:"redacted" api:"required"`
+	ID string `json:"id" api:"required"`
 	// The value rendered as the Warp dashboard displays it; null when unset or
 	// redacted.
 	Display string `json:"display" api:"required,nullable"`
+	Name    string `json:"name" api:"required"`
+	// True when this API key’s permission scopes cannot read the field’s category. The
+	// value fields are withheld (null), not absent — null does not imply the worker
+	// has no value.
+	Redacted bool                              `json:"redacted" api:"required"`
+	Type     PublicNumberWorkerCustomFieldType `json:"type" api:"required"`
 	// The worker’s number; null when unset or when the field is redacted for this API
 	// key.
 	Value interface{}                       `json:"value" api:"required,nullable"`
@@ -410,11 +820,11 @@ type PublicNumberWorkerCustomField struct {
 
 // publicNumberWorkerCustomFieldJSON contains the JSON metadata for the struct [PublicNumberWorkerCustomField]
 type publicNumberWorkerCustomFieldJSON struct {
-	Type        apijson.Field
 	ID          apijson.Field
+	Display     apijson.Field
 	Name        apijson.Field
 	Redacted    apijson.Field
-	Display     apijson.Field
+	Type        apijson.Field
 	Value       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -443,17 +853,17 @@ func (r PublicNumberWorkerCustomFieldType) IsKnown() bool {
 }
 
 type PublicDateWorkerCustomField struct {
-	Type PublicDateWorkerCustomFieldType `json:"type" api:"required"`
 	// The tag of a company custom worker field.
-	ID   string `json:"id" api:"required"`
-	Name string `json:"name" api:"required"`
-	// True when this API key’s permission scopes cannot read the field’s category. The
-	// value fields are withheld (null), not absent — null does not imply the worker
-	// has no value.
-	Redacted bool `json:"redacted" api:"required"`
+	ID string `json:"id" api:"required"`
 	// The value rendered as the Warp dashboard displays it; null when unset or
 	// redacted.
 	Display string `json:"display" api:"required,nullable"`
+	Name    string `json:"name" api:"required"`
+	// True when this API key’s permission scopes cannot read the field’s category. The
+	// value fields are withheld (null), not absent — null does not imply the worker
+	// has no value.
+	Redacted bool                            `json:"redacted" api:"required"`
+	Type     PublicDateWorkerCustomFieldType `json:"type" api:"required"`
 	// The worker’s date; null when unset or when the field is redacted for this API
 	// key.
 	Value string                          `json:"value" api:"required,nullable"`
@@ -462,11 +872,11 @@ type PublicDateWorkerCustomField struct {
 
 // publicDateWorkerCustomFieldJSON contains the JSON metadata for the struct [PublicDateWorkerCustomField]
 type publicDateWorkerCustomFieldJSON struct {
-	Type        apijson.Field
 	ID          apijson.Field
+	Display     apijson.Field
 	Name        apijson.Field
 	Redacted    apijson.Field
-	Display     apijson.Field
+	Type        apijson.Field
 	Value       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -495,17 +905,17 @@ func (r PublicDateWorkerCustomFieldType) IsKnown() bool {
 }
 
 type PublicBooleanWorkerCustomField struct {
-	Type PublicBooleanWorkerCustomFieldType `json:"type" api:"required"`
 	// The tag of a company custom worker field.
-	ID   string `json:"id" api:"required"`
-	Name string `json:"name" api:"required"`
-	// True when this API key’s permission scopes cannot read the field’s category. The
-	// value fields are withheld (null), not absent — null does not imply the worker
-	// has no value.
-	Redacted bool `json:"redacted" api:"required"`
+	ID string `json:"id" api:"required"`
 	// The value rendered as the Warp dashboard displays it; null when unset or
 	// redacted.
 	Display string `json:"display" api:"required,nullable"`
+	Name    string `json:"name" api:"required"`
+	// True when this API key’s permission scopes cannot read the field’s category. The
+	// value fields are withheld (null), not absent — null does not imply the worker
+	// has no value.
+	Redacted bool                               `json:"redacted" api:"required"`
+	Type     PublicBooleanWorkerCustomFieldType `json:"type" api:"required"`
 	// The worker’s answer; null when unset or when the field is redacted for this API
 	// key.
 	Value bool                               `json:"value" api:"required,nullable"`
@@ -514,11 +924,11 @@ type PublicBooleanWorkerCustomField struct {
 
 // publicBooleanWorkerCustomFieldJSON contains the JSON metadata for the struct [PublicBooleanWorkerCustomField]
 type publicBooleanWorkerCustomFieldJSON struct {
-	Type        apijson.Field
 	ID          apijson.Field
+	Display     apijson.Field
 	Name        apijson.Field
 	Redacted    apijson.Field
-	Display     apijson.Field
+	Type        apijson.Field
 	Value       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -547,35 +957,35 @@ func (r PublicBooleanWorkerCustomFieldType) IsKnown() bool {
 }
 
 type PublicCurrencyWorkerCustomField struct {
-	Type PublicCurrencyWorkerCustomFieldType `json:"type" api:"required"`
 	// The tag of a company custom worker field.
-	ID   string `json:"id" api:"required"`
-	Name string `json:"name" api:"required"`
-	// True when this API key’s permission scopes cannot read the field’s category. The
-	// value fields are withheld (null), not absent — null does not imply the worker
-	// has no value.
-	Redacted bool `json:"redacted" api:"required"`
-	// The value rendered as the Warp dashboard displays it; null when unset or
-	// redacted.
-	Display string `json:"display" api:"required,nullable"`
+	ID string `json:"id" api:"required"`
 	// The amount in integer base units of currencyCode (e.g. cents); null when unset
 	// or when the field is redacted for this API key.
 	Amount int64 `json:"amount" api:"required,nullable"`
 	// The amount’s currency; null when unset or when the field is redacted for this
 	// API key.
 	CurrencyCode PublicCurrencyWorkerCustomFieldCurrencyCode `json:"currencyCode" api:"required,nullable"`
-	JSON         publicCurrencyWorkerCustomFieldJSON         `json:"-"`
+	// The value rendered as the Warp dashboard displays it; null when unset or
+	// redacted.
+	Display string `json:"display" api:"required,nullable"`
+	Name    string `json:"name" api:"required"`
+	// True when this API key’s permission scopes cannot read the field’s category. The
+	// value fields are withheld (null), not absent — null does not imply the worker
+	// has no value.
+	Redacted bool                                `json:"redacted" api:"required"`
+	Type     PublicCurrencyWorkerCustomFieldType `json:"type" api:"required"`
+	JSON     publicCurrencyWorkerCustomFieldJSON `json:"-"`
 }
 
 // publicCurrencyWorkerCustomFieldJSON contains the JSON metadata for the struct [PublicCurrencyWorkerCustomField]
 type publicCurrencyWorkerCustomFieldJSON struct {
-	Type         apijson.Field
 	ID           apijson.Field
-	Name         apijson.Field
-	Redacted     apijson.Field
-	Display      apijson.Field
 	Amount       apijson.Field
 	CurrencyCode apijson.Field
+	Display      apijson.Field
+	Name         apijson.Field
+	Redacted     apijson.Field
+	Type         apijson.Field
 	raw          string
 	ExtraFields  map[string]apijson.Field
 }
@@ -677,17 +1087,17 @@ func (r PublicCurrencyWorkerCustomFieldCurrencyCode) IsKnown() bool {
 }
 
 type PublicPercentageWorkerCustomField struct {
-	Type PublicPercentageWorkerCustomFieldType `json:"type" api:"required"`
 	// The tag of a company custom worker field.
-	ID   string `json:"id" api:"required"`
-	Name string `json:"name" api:"required"`
-	// True when this API key’s permission scopes cannot read the field’s category. The
-	// value fields are withheld (null), not absent — null does not imply the worker
-	// has no value.
-	Redacted bool `json:"redacted" api:"required"`
+	ID string `json:"id" api:"required"`
 	// The value rendered as the Warp dashboard displays it; null when unset or
 	// redacted.
 	Display string `json:"display" api:"required,nullable"`
+	Name    string `json:"name" api:"required"`
+	// True when this API key’s permission scopes cannot read the field’s category. The
+	// value fields are withheld (null), not absent — null does not imply the worker
+	// has no value.
+	Redacted bool                                  `json:"redacted" api:"required"`
+	Type     PublicPercentageWorkerCustomFieldType `json:"type" api:"required"`
 	// The worker’s percentage; null when unset or when the field is redacted for this
 	// API key.
 	Value interface{}                           `json:"value" api:"required,nullable"`
@@ -696,11 +1106,11 @@ type PublicPercentageWorkerCustomField struct {
 
 // publicPercentageWorkerCustomFieldJSON contains the JSON metadata for the struct [PublicPercentageWorkerCustomField]
 type publicPercentageWorkerCustomFieldJSON struct {
-	Type        apijson.Field
 	ID          apijson.Field
+	Display     apijson.Field
 	Name        apijson.Field
 	Redacted    apijson.Field
-	Display     apijson.Field
+	Type        apijson.Field
 	Value       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -729,31 +1139,31 @@ func (r PublicPercentageWorkerCustomFieldType) IsKnown() bool {
 }
 
 type PublicSelectWorkerCustomField struct {
-	Type PublicSelectWorkerCustomFieldType `json:"type" api:"required"`
 	// The tag of a company custom worker field.
-	ID   string `json:"id" api:"required"`
-	Name string `json:"name" api:"required"`
-	// True when this API key’s permission scopes cannot read the field’s category. The
-	// value fields are withheld (null), not absent — null does not imply the worker
-	// has no value.
-	Redacted bool `json:"redacted" api:"required"`
+	ID string `json:"id" api:"required"`
 	// The value rendered as the Warp dashboard displays it; null when unset or
 	// redacted.
 	Display string `json:"display" api:"required,nullable"`
+	Name    string `json:"name" api:"required"`
 	// The selected option; null when unset or when the field is redacted for this API
 	// key.
 	Option PublicSelectWorkerCustomFieldOption `json:"option" api:"required,nullable"`
-	JSON   publicSelectWorkerCustomFieldJSON   `json:"-"`
+	// True when this API key’s permission scopes cannot read the field’s category. The
+	// value fields are withheld (null), not absent — null does not imply the worker
+	// has no value.
+	Redacted bool                              `json:"redacted" api:"required"`
+	Type     PublicSelectWorkerCustomFieldType `json:"type" api:"required"`
+	JSON     publicSelectWorkerCustomFieldJSON `json:"-"`
 }
 
 // publicSelectWorkerCustomFieldJSON contains the JSON metadata for the struct [PublicSelectWorkerCustomField]
 type publicSelectWorkerCustomFieldJSON struct {
-	Type        apijson.Field
 	ID          apijson.Field
-	Name        apijson.Field
-	Redacted    apijson.Field
 	Display     apijson.Field
+	Name        apijson.Field
 	Option      apijson.Field
+	Redacted    apijson.Field
+	Type        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -781,31 +1191,31 @@ func (r PublicSelectWorkerCustomFieldType) IsKnown() bool {
 }
 
 type PublicMultiSelectWorkerCustomField struct {
-	Type PublicMultiSelectWorkerCustomFieldType `json:"type" api:"required"`
 	// The tag of a company custom worker field.
-	ID   string `json:"id" api:"required"`
-	Name string `json:"name" api:"required"`
-	// True when this API key’s permission scopes cannot read the field’s category. The
-	// value fields are withheld (null), not absent — null does not imply the worker
-	// has no value.
-	Redacted bool `json:"redacted" api:"required"`
+	ID string `json:"id" api:"required"`
 	// The value rendered as the Warp dashboard displays it; null when unset or
 	// redacted.
 	Display string `json:"display" api:"required,nullable"`
+	Name    string `json:"name" api:"required"`
 	// The selected options; null when unset or when the field is redacted for this API
 	// key.
 	Options []PublicMultiSelectWorkerCustomFieldOption `json:"options" api:"required,nullable"`
-	JSON    publicMultiSelectWorkerCustomFieldJSON     `json:"-"`
+	// True when this API key’s permission scopes cannot read the field’s category. The
+	// value fields are withheld (null), not absent — null does not imply the worker
+	// has no value.
+	Redacted bool                                   `json:"redacted" api:"required"`
+	Type     PublicMultiSelectWorkerCustomFieldType `json:"type" api:"required"`
+	JSON     publicMultiSelectWorkerCustomFieldJSON `json:"-"`
 }
 
 // publicMultiSelectWorkerCustomFieldJSON contains the JSON metadata for the struct [PublicMultiSelectWorkerCustomField]
 type publicMultiSelectWorkerCustomFieldJSON struct {
-	Type        apijson.Field
 	ID          apijson.Field
-	Name        apijson.Field
-	Redacted    apijson.Field
 	Display     apijson.Field
+	Name        apijson.Field
 	Options     apijson.Field
+	Redacted    apijson.Field
+	Type        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -944,9 +1354,117 @@ func (r RemoteWorkLocationState) IsKnown() bool {
 	return false
 }
 
+type WorkerUpdateParams struct {
+	Address       param.Field[interface{}]                     `json:"address"`
+	BiologicalSex param.Field[WorkerUpdateParamsBiologicalSex] `json:"biologicalSex"`
+	DateOfBirth   param.Field[string]                          `json:"dateOfBirth"`
+	// The unique public id of the department
+	DepartmentID param.Field[string] `json:"departmentId"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	Email     param.Field[string] `json:"email" format:"email"`
+	FirstName param.Field[string] `json:"firstName"`
+	LastName  param.Field[string] `json:"lastName"`
+	// The unique public id of the job level
+	LevelID param.Field[string] `json:"levelId"`
+	// The id of the worker.
+	ManagerID         param.Field[string]                              `json:"managerId"`
+	MaritalStatus     param.Field[WorkerUpdateParamsMaritalStatus]     `json:"maritalStatus"`
+	Phone             param.Field[string]                              `json:"phone"`
+	Position          param.Field[string]                              `json:"position"`
+	PreferredName     param.Field[string]                              `json:"preferredName"`
+	StartDate         param.Field[string]                              `json:"startDate"`
+	StateRegistration param.Field[WorkerUpdateParamsStateRegistration] `json:"stateRegistration"`
+	TShirtSize        param.Field[WorkerUpdateParamsTShirtSize]        `json:"tShirtSize"`
+	TimeZone          param.Field[string]                              `json:"timeZone"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	WorkEmail param.Field[string] `json:"workEmail" format:"email"`
+	// Public workplace identifier
+	WorkplaceID param.Field[string] `json:"workplaceId"`
+}
+
+func (r WorkerUpdateParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type WorkerUpdateParamsTShirtSize string
+
+const (
+	WorkerUpdateParamsTShirtSizeXs   WorkerUpdateParamsTShirtSize = "XS"
+	WorkerUpdateParamsTShirtSizeS    WorkerUpdateParamsTShirtSize = "S"
+	WorkerUpdateParamsTShirtSizeM    WorkerUpdateParamsTShirtSize = "M"
+	WorkerUpdateParamsTShirtSizeL    WorkerUpdateParamsTShirtSize = "L"
+	WorkerUpdateParamsTShirtSizeXl   WorkerUpdateParamsTShirtSize = "XL"
+	WorkerUpdateParamsTShirtSizeXxl  WorkerUpdateParamsTShirtSize = "XXL"
+	WorkerUpdateParamsTShirtSizeXxxl WorkerUpdateParamsTShirtSize = "XXXL"
+)
+
+func (r WorkerUpdateParamsTShirtSize) IsKnown() bool {
+	switch r {
+	case WorkerUpdateParamsTShirtSizeXs, WorkerUpdateParamsTShirtSizeS, WorkerUpdateParamsTShirtSizeM, WorkerUpdateParamsTShirtSizeL, WorkerUpdateParamsTShirtSizeXl, WorkerUpdateParamsTShirtSizeXxl, WorkerUpdateParamsTShirtSizeXxxl:
+		return true
+	}
+	return false
+}
+
+type WorkerUpdateParamsMaritalStatus string
+
+const (
+	WorkerUpdateParamsMaritalStatusMarried    WorkerUpdateParamsMaritalStatus = "married"
+	WorkerUpdateParamsMaritalStatusNotMarried WorkerUpdateParamsMaritalStatus = "not_married"
+)
+
+func (r WorkerUpdateParamsMaritalStatus) IsKnown() bool {
+	switch r {
+	case WorkerUpdateParamsMaritalStatusMarried, WorkerUpdateParamsMaritalStatusNotMarried:
+		return true
+	}
+	return false
+}
+
+type WorkerUpdateParamsBiologicalSex string
+
+const (
+	WorkerUpdateParamsBiologicalSexMale   WorkerUpdateParamsBiologicalSex = "male"
+	WorkerUpdateParamsBiologicalSexFemale WorkerUpdateParamsBiologicalSex = "female"
+)
+
+func (r WorkerUpdateParamsBiologicalSex) IsKnown() bool {
+	switch r {
+	case WorkerUpdateParamsBiologicalSexMale, WorkerUpdateParamsBiologicalSexFemale:
+		return true
+	}
+	return false
+}
+
+type WorkerUpdateParamsStateRegistration string
+
+const (
+	WorkerUpdateParamsStateRegistrationSelfManaged WorkerUpdateParamsStateRegistration = "self_managed"
+	WorkerUpdateParamsStateRegistrationWarpManaged WorkerUpdateParamsStateRegistration = "warp_managed"
+)
+
+func (r WorkerUpdateParamsStateRegistration) IsKnown() bool {
+	switch r {
+	case WorkerUpdateParamsStateRegistrationSelfManaged, WorkerUpdateParamsStateRegistrationWarpManaged:
+		return true
+	}
+	return false
+}
+
+type WorkerRevealSsnParams struct {
+	// One to 50 unique worker ids. Results are returned in this order.
+	WorkerIDs param.Field[[]string] `json:"workerIds" api:"required"`
+}
+
+func (r WorkerRevealSsnParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
 type WorkerListParams struct {
-	Limit     param.Field[string]                   `query:"limit" api:"required"`
-	AfterID   param.Field[string]                   `query:"afterId"`
+	Limit param.Field[string] `query:"limit" api:"required"`
+	// The id of the worker.
+	AfterID param.Field[string] `query:"afterId"`
+	// The id of the worker.
 	BeforeID  param.Field[string]                   `query:"beforeId"`
 	Statuses  param.Field[[]WorkerListParamsStatus] `query:"statuses"`
 	Types     param.Field[[]WorkerListParamsType]   `query:"types"`
@@ -1014,12 +1532,22 @@ type WorkerNewEmployeeParams struct {
 	WorkLocation param.Field[WorkerNewEmployeeParamsWorkLocationUnion] `json:"workLocation" api:"required"`
 	// The job level to assign this employee to, or null to leave unassigned. Omit this
 	// field when job levels are not enabled.
-	LevelID           param.Field[string]                                   `json:"levelId"`
-	PaySchedule       param.Field[WorkerNewEmployeeParamsPaySchedule]       `json:"paySchedule"`
-	RequireI9         param.Field[bool]                                     `json:"requireI9"`
+	LevelID param.Field[string] `json:"levelId"`
+	// The employee's pay schedule. Must be a pay schedule that the company has
+	// configured.
+	PaySchedule param.Field[WorkerNewEmployeeParamsPaySchedule] `json:"paySchedule"`
+	// Whether the employee is required to complete I-9 work authorization. Set to
+	// false if the employee has already been verified off-platform. Defaults to true.
+	RequireI9 param.Field[bool] `json:"requireI9"`
+	// How state tax registration is handled for this employee's work state. Required
+	// when hiring in a state where your company doesn't have an existing registration.
+	// Use 'self_managed' if you've already registered in this state, or 'warp_managed'
+	// for Warp to handle registration on your behalf.
 	StateRegistration param.Field[WorkerNewEmployeeParamsStateRegistration] `json:"stateRegistration"`
-	StockOptions      param.Field[interface{}]                              `json:"stockOptions"`
-	WorkEmail         param.Field[string]                                   `json:"workEmail" format:"email"`
+	// Number of stock options granted to this employee.
+	StockOptions param.Field[interface{}] `json:"stockOptions"`
+	// Company-issued email address, if applicable.
+	WorkEmail param.Field[string] `json:"workEmail" format:"email"`
 }
 
 func (r WorkerNewEmployeeParams) MarshalJSON() (data []byte, err error) {
@@ -1220,17 +1748,24 @@ type WorkerNewContractorParams struct {
 	// The worker id of this contractor's direct manager.
 	ManagerID param.Field[string] `json:"managerId" api:"required"`
 	// The contractor's role or job title.
-	Position     param.Field[string]                                `json:"position" api:"required"`
-	StartDate    param.Field[string]                                `json:"startDate" api:"required"`
-	WorkCountry  param.Field[WorkerNewContractorParamsWorkCountry]  `json:"workCountry" api:"required"`
-	BusinessName param.Field[string]                                `json:"businessName"`
+	Position    param.Field[string]                               `json:"position" api:"required"`
+	StartDate   param.Field[string]                               `json:"startDate" api:"required"`
+	WorkCountry param.Field[WorkerNewContractorParamsWorkCountry] `json:"workCountry" api:"required"`
+	// Required when entityType is "business". The legal name of the contractor's
+	// business.
+	BusinessName param.Field[string] `json:"businessName"`
+	// The contractor's pay rate. Omit if you'd like to pay on-demand or via invoicing.
 	Compensation param.Field[WorkerNewContractorParamsCompensation] `json:"compensation"`
 	// The job level to assign this contractor to, or null to leave unassigned. Omit
 	// this field when job levels are not enabled.
-	LevelID     param.Field[string]                               `json:"levelId"`
+	LevelID param.Field[string] `json:"levelId"`
+	// The contractor's pay schedule. Must be a pay schedule that the company has
+	// configured.
 	PaySchedule param.Field[WorkerNewContractorParamsPaySchedule] `json:"paySchedule"`
-	ScopeOfWork param.Field[string]                               `json:"scopeOfWork"`
-	WorkEmail   param.Field[string]                               `json:"workEmail" format:"email"`
+	// A description of the work the contractor will perform.
+	ScopeOfWork param.Field[string] `json:"scopeOfWork"`
+	// Company-issued email address, if applicable.
+	WorkEmail param.Field[string] `json:"workEmail" format:"email"`
 }
 
 func (r WorkerNewContractorParams) MarshalJSON() (data []byte, err error) {
@@ -1636,487 +2171,18 @@ func (r WorkerNewContractorParamsPaySchedule) IsKnown() bool {
 	return false
 }
 
-type WorkerListResponse struct {
-	HasMore bool                     `json:"hasMore" api:"required"`
-	Count   int64                    `json:"count" api:"required"`
-	Data    []WorkerListResponseData `json:"data" api:"required"`
-	JSON    workerListResponseJSON   `json:"-"`
-}
-
-// workerListResponseJSON contains the JSON metadata for the struct [WorkerListResponse]
-type workerListResponseJSON struct {
-	HasMore     apijson.Field
-	Count       apijson.Field
-	Data        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *WorkerListResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r workerListResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-type WorkerGetResponse struct {
-	// The id of the worker.
-	ID           string                  `json:"id" api:"required"`
-	Position     string                  `json:"position" api:"required"`
-	Type         WorkerGetResponseType   `json:"type" api:"required"`
-	Status       WorkerGetResponseStatus `json:"status" api:"required"`
-	StartDate    string                  `json:"startDate" api:"required"`
-	EndDate      string                  `json:"endDate" api:"required,nullable"`
-	IsBusiness   bool                    `json:"isBusiness" api:"required,nullable"`
-	BusinessName string                  `json:"businessName" api:"required,nullable"`
-	FirstName    string                  `json:"firstName" api:"required"`
-	LastName     string                  `json:"lastName" api:"required"`
-	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
-	Email         string `json:"email" api:"required" format:"email"`
-	WorkEmail     string `json:"workEmail" api:"required,nullable" format:"email"`
-	PreferredName string `json:"preferredName" api:"required,nullable"`
-	// The worker's biological sex, or null when unavailable.
-	BiologicalSex WorkerGetResponseBiologicalSex `json:"biologicalSex" api:"required,nullable"`
-	// The worker's marital status, or null when unavailable.
-	MaritalStatus WorkerGetResponseMaritalStatus `json:"maritalStatus" api:"required,nullable"`
-	// The worker's date of birth, or null when unavailable.
-	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
-	// The worker's personal phone number, or null when unavailable.
-	Phone string `json:"phone" api:"required,nullable"`
-	// The worker's home address, or null when unavailable.
-	Address WorkerGetResponseAddress `json:"address" api:"required,nullable"`
-	// The "ui" name of a worker. If it's a business contractor business name is used.
-	// Otherwise we default to preferred name, then first-last.
-	DisplayName string `json:"displayName" api:"required"`
-	// The IANA timezone of the worker (e.g., America/New_York).
-	TimeZone string `json:"timeZone" api:"required,nullable"`
-	// The department the worker belongs to, or null if unassigned.
-	Department WorkerGetResponseDepartment `json:"department" api:"required,nullable"`
-	// The primary workplace the worker is assigned to, or null if unassigned.
-	PrimaryWorkplace WorkerGetResponsePrimaryWorkplace `json:"primaryWorkplace" api:"required,nullable"`
-	// The date the worker was most recently reactivated after an offboarding. This is
-	// distinct from startDate and is null if the worker has not been rehired.
-	LatestRehireDate string `json:"latestRehireDate" api:"required,nullable"`
-	// The reason the worker was terminated, or null when no termination reason is
-	// recorded.
-	TerminationReason string `json:"terminationReason" api:"required,nullable"`
-	UpdatedAt         string `json:"updatedAt" api:"required"`
-	// The worker's current regular compensation, or the rate effective on a future
-	// start date. Null when the worker has no applicable regular pay rate or the API
-	// key lacks the corresponding compensation read scope.
-	Compensation PublicWorkerCompensation `json:"compensation" api:"required,nullable"`
-	// The worker's assigned job level, or null if unassigned. Omitted when job levels
-	// are not enabled.
-	Level        WorkerGetResponseLevel    `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
-	JSON         workerGetResponseJSON     `json:"-"`
-}
-
-// workerGetResponseJSON contains the JSON metadata for the struct [WorkerGetResponse]
-type workerGetResponseJSON struct {
-	ID                apijson.Field
-	Position          apijson.Field
-	Type              apijson.Field
-	Status            apijson.Field
-	StartDate         apijson.Field
-	EndDate           apijson.Field
-	IsBusiness        apijson.Field
-	BusinessName      apijson.Field
-	FirstName         apijson.Field
-	LastName          apijson.Field
-	Email             apijson.Field
-	WorkEmail         apijson.Field
-	PreferredName     apijson.Field
-	BiologicalSex     apijson.Field
-	MaritalStatus     apijson.Field
-	DateOfBirth       apijson.Field
-	Phone             apijson.Field
-	Address           apijson.Field
-	DisplayName       apijson.Field
-	TimeZone          apijson.Field
-	Department        apijson.Field
-	PrimaryWorkplace  apijson.Field
-	LatestRehireDate  apijson.Field
-	TerminationReason apijson.Field
-	UpdatedAt         apijson.Field
-	Compensation      apijson.Field
-	Level             apijson.Field
-	CustomFields      apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
-}
-
-func (r *WorkerGetResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r workerGetResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-type WorkerNewEmployeeResponse struct {
-	// The id of the worker.
-	ID           string                          `json:"id" api:"required"`
-	Position     string                          `json:"position" api:"required"`
-	Type         WorkerNewEmployeeResponseType   `json:"type" api:"required"`
-	Status       WorkerNewEmployeeResponseStatus `json:"status" api:"required"`
-	StartDate    string                          `json:"startDate" api:"required"`
-	EndDate      string                          `json:"endDate" api:"required,nullable"`
-	IsBusiness   bool                            `json:"isBusiness" api:"required,nullable"`
-	BusinessName string                          `json:"businessName" api:"required,nullable"`
-	FirstName    string                          `json:"firstName" api:"required"`
-	LastName     string                          `json:"lastName" api:"required"`
-	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
-	Email         string `json:"email" api:"required" format:"email"`
-	WorkEmail     string `json:"workEmail" api:"required,nullable" format:"email"`
-	PreferredName string `json:"preferredName" api:"required,nullable"`
-	// The worker's biological sex, or null when unavailable.
-	BiologicalSex WorkerNewEmployeeResponseBiologicalSex `json:"biologicalSex" api:"required,nullable"`
-	// The worker's marital status, or null when unavailable.
-	MaritalStatus WorkerNewEmployeeResponseMaritalStatus `json:"maritalStatus" api:"required,nullable"`
-	// The worker's date of birth, or null when unavailable.
-	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
-	// The worker's personal phone number, or null when unavailable.
-	Phone string `json:"phone" api:"required,nullable"`
-	// The worker's home address, or null when unavailable.
-	Address WorkerNewEmployeeResponseAddress `json:"address" api:"required,nullable"`
-	// The "ui" name of a worker. If it's a business contractor business name is used.
-	// Otherwise we default to preferred name, then first-last.
-	DisplayName string `json:"displayName" api:"required"`
-	// The IANA timezone of the worker (e.g., America/New_York).
-	TimeZone string `json:"timeZone" api:"required,nullable"`
-	// The department the worker belongs to, or null if unassigned.
-	Department WorkerNewEmployeeResponseDepartment `json:"department" api:"required,nullable"`
-	// The primary workplace the worker is assigned to, or null if unassigned.
-	PrimaryWorkplace WorkerNewEmployeeResponsePrimaryWorkplace `json:"primaryWorkplace" api:"required,nullable"`
-	// The date the worker was most recently reactivated after an offboarding. This is
-	// distinct from startDate and is null if the worker has not been rehired.
-	LatestRehireDate string `json:"latestRehireDate" api:"required,nullable"`
-	// The reason the worker was terminated, or null when no termination reason is
-	// recorded.
-	TerminationReason string `json:"terminationReason" api:"required,nullable"`
-	UpdatedAt         string `json:"updatedAt" api:"required"`
-	// The worker's current regular compensation, or the rate effective on a future
-	// start date. Null when the worker has no applicable regular pay rate or the API
-	// key lacks the corresponding compensation read scope.
-	Compensation PublicWorkerCompensation `json:"compensation" api:"required,nullable"`
-	// The worker's assigned job level, or null if unassigned. Omitted when job levels
-	// are not enabled.
-	Level        WorkerNewEmployeeResponseLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField      `json:"customFields" api:"nullable"`
-	JSON         workerNewEmployeeResponseJSON  `json:"-"`
-}
-
-// workerNewEmployeeResponseJSON contains the JSON metadata for the struct [WorkerNewEmployeeResponse]
-type workerNewEmployeeResponseJSON struct {
-	ID                apijson.Field
-	Position          apijson.Field
-	Type              apijson.Field
-	Status            apijson.Field
-	StartDate         apijson.Field
-	EndDate           apijson.Field
-	IsBusiness        apijson.Field
-	BusinessName      apijson.Field
-	FirstName         apijson.Field
-	LastName          apijson.Field
-	Email             apijson.Field
-	WorkEmail         apijson.Field
-	PreferredName     apijson.Field
-	BiologicalSex     apijson.Field
-	MaritalStatus     apijson.Field
-	DateOfBirth       apijson.Field
-	Phone             apijson.Field
-	Address           apijson.Field
-	DisplayName       apijson.Field
-	TimeZone          apijson.Field
-	Department        apijson.Field
-	PrimaryWorkplace  apijson.Field
-	LatestRehireDate  apijson.Field
-	TerminationReason apijson.Field
-	UpdatedAt         apijson.Field
-	Compensation      apijson.Field
-	Level             apijson.Field
-	CustomFields      apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
-}
-
-func (r *WorkerNewEmployeeResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r workerNewEmployeeResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-type WorkerNewContractorResponse struct {
-	// The id of the worker.
-	ID           string                            `json:"id" api:"required"`
-	Position     string                            `json:"position" api:"required"`
-	Type         WorkerNewContractorResponseType   `json:"type" api:"required"`
-	Status       WorkerNewContractorResponseStatus `json:"status" api:"required"`
-	StartDate    string                            `json:"startDate" api:"required"`
-	EndDate      string                            `json:"endDate" api:"required,nullable"`
-	IsBusiness   bool                              `json:"isBusiness" api:"required,nullable"`
-	BusinessName string                            `json:"businessName" api:"required,nullable"`
-	FirstName    string                            `json:"firstName" api:"required"`
-	LastName     string                            `json:"lastName" api:"required"`
-	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
-	Email         string `json:"email" api:"required" format:"email"`
-	WorkEmail     string `json:"workEmail" api:"required,nullable" format:"email"`
-	PreferredName string `json:"preferredName" api:"required,nullable"`
-	// The worker's biological sex, or null when unavailable.
-	BiologicalSex WorkerNewContractorResponseBiologicalSex `json:"biologicalSex" api:"required,nullable"`
-	// The worker's marital status, or null when unavailable.
-	MaritalStatus WorkerNewContractorResponseMaritalStatus `json:"maritalStatus" api:"required,nullable"`
-	// The worker's date of birth, or null when unavailable.
-	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
-	// The worker's personal phone number, or null when unavailable.
-	Phone string `json:"phone" api:"required,nullable"`
-	// The worker's home address, or null when unavailable.
-	Address WorkerNewContractorResponseAddress `json:"address" api:"required,nullable"`
-	// The "ui" name of a worker. If it's a business contractor business name is used.
-	// Otherwise we default to preferred name, then first-last.
-	DisplayName string `json:"displayName" api:"required"`
-	// The IANA timezone of the worker (e.g., America/New_York).
-	TimeZone string `json:"timeZone" api:"required,nullable"`
-	// The department the worker belongs to, or null if unassigned.
-	Department WorkerNewContractorResponseDepartment `json:"department" api:"required,nullable"`
-	// The primary workplace the worker is assigned to, or null if unassigned.
-	PrimaryWorkplace WorkerNewContractorResponsePrimaryWorkplace `json:"primaryWorkplace" api:"required,nullable"`
-	// The date the worker was most recently reactivated after an offboarding. This is
-	// distinct from startDate and is null if the worker has not been rehired.
-	LatestRehireDate string `json:"latestRehireDate" api:"required,nullable"`
-	// The reason the worker was terminated, or null when no termination reason is
-	// recorded.
-	TerminationReason string `json:"terminationReason" api:"required,nullable"`
-	UpdatedAt         string `json:"updatedAt" api:"required"`
-	// The worker's current regular compensation, or the rate effective on a future
-	// start date. Null when the worker has no applicable regular pay rate or the API
-	// key lacks the corresponding compensation read scope.
-	Compensation PublicWorkerCompensation `json:"compensation" api:"required,nullable"`
-	// The worker's assigned job level, or null if unassigned. Omitted when job levels
-	// are not enabled.
-	Level        WorkerNewContractorResponseLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField        `json:"customFields" api:"nullable"`
-	JSON         workerNewContractorResponseJSON  `json:"-"`
-}
-
-// workerNewContractorResponseJSON contains the JSON metadata for the struct [WorkerNewContractorResponse]
-type workerNewContractorResponseJSON struct {
-	ID                apijson.Field
-	Position          apijson.Field
-	Type              apijson.Field
-	Status            apijson.Field
-	StartDate         apijson.Field
-	EndDate           apijson.Field
-	IsBusiness        apijson.Field
-	BusinessName      apijson.Field
-	FirstName         apijson.Field
-	LastName          apijson.Field
-	Email             apijson.Field
-	WorkEmail         apijson.Field
-	PreferredName     apijson.Field
-	BiologicalSex     apijson.Field
-	MaritalStatus     apijson.Field
-	DateOfBirth       apijson.Field
-	Phone             apijson.Field
-	Address           apijson.Field
-	DisplayName       apijson.Field
-	TimeZone          apijson.Field
-	Department        apijson.Field
-	PrimaryWorkplace  apijson.Field
-	LatestRehireDate  apijson.Field
-	TerminationReason apijson.Field
-	UpdatedAt         apijson.Field
-	Compensation      apijson.Field
-	Level             apijson.Field
-	CustomFields      apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
-}
-
-func (r *WorkerNewContractorResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r workerNewContractorResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-type WorkerInviteResponse struct {
-	// The id of the worker.
-	ID           string                     `json:"id" api:"required"`
-	Position     string                     `json:"position" api:"required"`
-	Type         WorkerInviteResponseType   `json:"type" api:"required"`
-	Status       WorkerInviteResponseStatus `json:"status" api:"required"`
-	StartDate    string                     `json:"startDate" api:"required"`
-	EndDate      string                     `json:"endDate" api:"required,nullable"`
-	IsBusiness   bool                       `json:"isBusiness" api:"required,nullable"`
-	BusinessName string                     `json:"businessName" api:"required,nullable"`
-	FirstName    string                     `json:"firstName" api:"required"`
-	LastName     string                     `json:"lastName" api:"required"`
-	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
-	Email         string `json:"email" api:"required" format:"email"`
-	WorkEmail     string `json:"workEmail" api:"required,nullable" format:"email"`
-	PreferredName string `json:"preferredName" api:"required,nullable"`
-	// The worker's biological sex, or null when unavailable.
-	BiologicalSex WorkerInviteResponseBiologicalSex `json:"biologicalSex" api:"required,nullable"`
-	// The worker's marital status, or null when unavailable.
-	MaritalStatus WorkerInviteResponseMaritalStatus `json:"maritalStatus" api:"required,nullable"`
-	// The worker's date of birth, or null when unavailable.
-	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
-	// The worker's personal phone number, or null when unavailable.
-	Phone string `json:"phone" api:"required,nullable"`
-	// The worker's home address, or null when unavailable.
-	Address WorkerInviteResponseAddress `json:"address" api:"required,nullable"`
-	// The "ui" name of a worker. If it's a business contractor business name is used.
-	// Otherwise we default to preferred name, then first-last.
-	DisplayName string `json:"displayName" api:"required"`
-	// The IANA timezone of the worker (e.g., America/New_York).
-	TimeZone string `json:"timeZone" api:"required,nullable"`
-	// The department the worker belongs to, or null if unassigned.
-	Department WorkerInviteResponseDepartment `json:"department" api:"required,nullable"`
-	// The primary workplace the worker is assigned to, or null if unassigned.
-	PrimaryWorkplace WorkerInviteResponsePrimaryWorkplace `json:"primaryWorkplace" api:"required,nullable"`
-	// The date the worker was most recently reactivated after an offboarding. This is
-	// distinct from startDate and is null if the worker has not been rehired.
-	LatestRehireDate string `json:"latestRehireDate" api:"required,nullable"`
-	// The reason the worker was terminated, or null when no termination reason is
-	// recorded.
-	TerminationReason string `json:"terminationReason" api:"required,nullable"`
-	UpdatedAt         string `json:"updatedAt" api:"required"`
-	// The worker's current regular compensation, or the rate effective on a future
-	// start date. Null when the worker has no applicable regular pay rate or the API
-	// key lacks the corresponding compensation read scope.
-	Compensation PublicWorkerCompensation `json:"compensation" api:"required,nullable"`
-	// The worker's assigned job level, or null if unassigned. Omitted when job levels
-	// are not enabled.
-	Level        WorkerInviteResponseLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
-	JSON         workerInviteResponseJSON  `json:"-"`
-}
-
-// workerInviteResponseJSON contains the JSON metadata for the struct [WorkerInviteResponse]
-type workerInviteResponseJSON struct {
-	ID                apijson.Field
-	Position          apijson.Field
-	Type              apijson.Field
-	Status            apijson.Field
-	StartDate         apijson.Field
-	EndDate           apijson.Field
-	IsBusiness        apijson.Field
-	BusinessName      apijson.Field
-	FirstName         apijson.Field
-	LastName          apijson.Field
-	Email             apijson.Field
-	WorkEmail         apijson.Field
-	PreferredName     apijson.Field
-	BiologicalSex     apijson.Field
-	MaritalStatus     apijson.Field
-	DateOfBirth       apijson.Field
-	Phone             apijson.Field
-	Address           apijson.Field
-	DisplayName       apijson.Field
-	TimeZone          apijson.Field
-	Department        apijson.Field
-	PrimaryWorkplace  apijson.Field
-	LatestRehireDate  apijson.Field
-	TerminationReason apijson.Field
-	UpdatedAt         apijson.Field
-	Compensation      apijson.Field
-	Level             apijson.Field
-	CustomFields      apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
-}
-
-func (r *WorkerInviteResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r workerInviteResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-type PublicSelectWorkerCustomFieldOption struct {
-	// The tag of a company custom worker field option.
-	ID        string                                    `json:"id" api:"required"`
-	Label     string                                    `json:"label" api:"required"`
-	Value     string                                    `json:"value" api:"required"`
-	SortOrder interface{}                               `json:"sortOrder" api:"required"`
-	Status    PublicSelectWorkerCustomFieldOptionStatus `json:"status" api:"required"`
-	CreatedAt string                                    `json:"createdAt" api:"required"`
-	JSON      publicSelectWorkerCustomFieldOptionJSON   `json:"-"`
-}
-
-// publicSelectWorkerCustomFieldOptionJSON contains the JSON metadata for the struct [PublicSelectWorkerCustomFieldOption]
-type publicSelectWorkerCustomFieldOptionJSON struct {
-	ID          apijson.Field
-	Label       apijson.Field
-	Value       apijson.Field
-	SortOrder   apijson.Field
-	Status      apijson.Field
-	CreatedAt   apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PublicSelectWorkerCustomFieldOption) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r publicSelectWorkerCustomFieldOptionJSON) RawJSON() string {
-	return r.raw
-}
-
-type PublicMultiSelectWorkerCustomFieldOption struct {
-	// The tag of a company custom worker field option.
-	ID        string                                          `json:"id" api:"required"`
-	Label     string                                          `json:"label" api:"required"`
-	Value     string                                          `json:"value" api:"required"`
-	SortOrder interface{}                                     `json:"sortOrder" api:"required"`
-	Status    PublicMultiSelectWorkerCustomFieldOptionsStatus `json:"status" api:"required"`
-	CreatedAt string                                          `json:"createdAt" api:"required"`
-	JSON      publicMultiSelectWorkerCustomFieldOptionJSON    `json:"-"`
-}
-
-// publicMultiSelectWorkerCustomFieldOptionJSON contains the JSON metadata for the struct [PublicMultiSelectWorkerCustomFieldOption]
-type publicMultiSelectWorkerCustomFieldOptionJSON struct {
-	ID          apijson.Field
-	Label       apijson.Field
-	Value       apijson.Field
-	SortOrder   apijson.Field
-	Status      apijson.Field
-	CreatedAt   apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PublicMultiSelectWorkerCustomFieldOption) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r publicMultiSelectWorkerCustomFieldOptionJSON) RawJSON() string {
-	return r.raw
-}
-
 type PublicWorkerCustomField struct {
-	Type PublicWorkerCustomFieldType `json:"type" api:"required"`
 	// The tag of a company custom worker field.
-	ID   string `json:"id" api:"required"`
-	Name string `json:"name" api:"required"`
-	// True when this API key’s permission scopes cannot read the field’s category. The
-	// value fields are withheld (null), not absent — null does not imply the worker
-	// has no value.
-	Redacted bool `json:"redacted" api:"required"`
+	ID string `json:"id" api:"required"`
 	// The value rendered as the Warp dashboard displays it; null when unset or
 	// redacted.
 	Display string `json:"display" api:"required,nullable"`
-	// The worker’s text; null when unset or when the field is redacted for this API
-	// key.
-	Value interface{} `json:"value" api:"nullable"`
+	Name    string `json:"name" api:"required"`
+	// True when this API key’s permission scopes cannot read the field’s category. The
+	// value fields are withheld (null), not absent — null does not imply the worker
+	// has no value.
+	Redacted bool                        `json:"redacted" api:"required"`
+	Type     PublicWorkerCustomFieldType `json:"type" api:"required"`
 	// The amount in integer base units of currencyCode (e.g. cents); null when unset
 	// or when the field is redacted for this API key.
 	Amount int64 `json:"amount" api:"nullable"`
@@ -2128,23 +2194,26 @@ type PublicWorkerCustomField struct {
 	Option interface{} `json:"option" api:"nullable"`
 	// The selected options; null when unset or when the field is redacted for this API
 	// key.
-	Options interface{}                 `json:"options" api:"nullable"`
-	JSON    publicWorkerCustomFieldJSON `json:"-"`
-	union   PublicWorkerCustomFieldUnion
+	Options interface{} `json:"options" api:"nullable"`
+	// The worker’s text; null when unset or when the field is redacted for this API
+	// key.
+	Value interface{}                 `json:"value" api:"nullable"`
+	JSON  publicWorkerCustomFieldJSON `json:"-"`
+	union PublicWorkerCustomFieldUnion
 }
 
 // publicWorkerCustomFieldJSON contains the JSON metadata for the struct [PublicWorkerCustomField]
 type publicWorkerCustomFieldJSON struct {
-	Type         apijson.Field
 	ID           apijson.Field
+	Display      apijson.Field
 	Name         apijson.Field
 	Redacted     apijson.Field
-	Display      apijson.Field
-	Value        apijson.Field
+	Type         apijson.Field
 	Amount       apijson.Field
 	CurrencyCode apijson.Field
 	Option       apijson.Field
 	Options      apijson.Field
+	Value        apijson.Field
 	raw          string
 	ExtraFields  map[string]apijson.Field
 }
@@ -2166,98 +2235,926 @@ func (r PublicWorkerCustomField) AsUnion() PublicWorkerCustomFieldUnion {
 	return r.union
 }
 
-type WorkerListResponseData struct {
+type WorkerUpdateResponse struct {
 	// The id of the worker.
-	ID           string                       `json:"id" api:"required"`
-	Position     string                       `json:"position" api:"required"`
-	Type         WorkerListResponseDataType   `json:"type" api:"required"`
-	Status       WorkerListResponseDataStatus `json:"status" api:"required"`
-	StartDate    string                       `json:"startDate" api:"required"`
-	EndDate      string                       `json:"endDate" api:"required,nullable"`
-	IsBusiness   bool                         `json:"isBusiness" api:"required,nullable"`
-	BusinessName string                       `json:"businessName" api:"required,nullable"`
-	FirstName    string                       `json:"firstName" api:"required"`
-	LastName     string                       `json:"lastName" api:"required"`
-	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
-	Email         string `json:"email" api:"required" format:"email"`
-	WorkEmail     string `json:"workEmail" api:"required,nullable" format:"email"`
-	PreferredName string `json:"preferredName" api:"required,nullable"`
-	// The worker's biological sex, or null when unavailable.
-	BiologicalSex WorkerListResponseDataBiologicalSex `json:"biologicalSex" api:"required,nullable"`
-	// The worker's marital status, or null when unavailable.
-	MaritalStatus WorkerListResponseDataMaritalStatus `json:"maritalStatus" api:"required,nullable"`
-	// The worker's date of birth, or null when unavailable.
-	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
-	// The worker's personal phone number, or null when unavailable.
-	Phone string `json:"phone" api:"required,nullable"`
+	ID string `json:"id" api:"required"`
 	// The worker's home address, or null when unavailable.
-	Address WorkerListResponseDataAddress `json:"address" api:"required,nullable"`
-	// The "ui" name of a worker. If it's a business contractor business name is used.
-	// Otherwise we default to preferred name, then first-last.
-	DisplayName string `json:"displayName" api:"required"`
-	// The IANA timezone of the worker (e.g., America/New_York).
-	TimeZone string `json:"timeZone" api:"required,nullable"`
-	// The department the worker belongs to, or null if unassigned.
-	Department WorkerListResponseDataDepartment `json:"department" api:"required,nullable"`
-	// The primary workplace the worker is assigned to, or null if unassigned.
-	PrimaryWorkplace WorkerListResponseDataPrimaryWorkplace `json:"primaryWorkplace" api:"required,nullable"`
-	// The date the worker was most recently reactivated after an offboarding. This is
-	// distinct from startDate and is null if the worker has not been rehired.
-	LatestRehireDate string `json:"latestRehireDate" api:"required,nullable"`
-	// The reason the worker was terminated, or null when no termination reason is
-	// recorded.
-	TerminationReason string `json:"terminationReason" api:"required,nullable"`
-	UpdatedAt         string `json:"updatedAt" api:"required"`
+	Address         PublicWorkerAddress `json:"address" api:"required,nullable"`
+	BenefitEligible bool                `json:"benefitEligible" api:"required"`
+	// The worker's biological sex, or null when unavailable.
+	BiologicalSex WorkerUpdateResponseBiologicalSex `json:"biologicalSex" api:"required,nullable"`
+	BusinessName  string                            `json:"businessName" api:"required,nullable"`
 	// The worker's current regular compensation, or the rate effective on a future
 	// start date. Null when the worker has no applicable regular pay rate or the API
 	// key lacks the corresponding compensation read scope.
 	Compensation PublicWorkerCompensation `json:"compensation" api:"required,nullable"`
+	// The worker's date of birth, or null when unavailable.
+	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
+	// The department the worker belongs to, or null if unassigned.
+	Department WorkerUpdateResponseDepartment `json:"department" api:"required,nullable"`
+	// The "ui" name of a worker. If it's a business contractor business name is used.
+	// Otherwise we default to preferred name, then first-last.
+	DisplayName string `json:"displayName" api:"required"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	Email      string `json:"email" api:"required" format:"email"`
+	EndDate    string `json:"endDate" api:"required,nullable"`
+	FirstName  string `json:"firstName" api:"required"`
+	IsBusiness bool   `json:"isBusiness" api:"required,nullable"`
+	LastName   string `json:"lastName" api:"required"`
+	// The date the worker was most recently reactivated after an offboarding. This is
+	// distinct from startDate and is null if the worker has not been rehired.
+	LatestRehireDate string `json:"latestRehireDate" api:"required,nullable"`
+	// The worker's marital status, or null when unavailable.
+	MaritalStatus WorkerUpdateResponseMaritalStatus `json:"maritalStatus" api:"required,nullable"`
+	// The worker's personal phone number, or null when unavailable.
+	Phone         string `json:"phone" api:"required,nullable"`
+	Position      string `json:"position" api:"required"`
+	PreferredName string `json:"preferredName" api:"required,nullable"`
+	// The primary workplace the worker is assigned to, or null if unassigned.
+	PrimaryWorkplace WorkerUpdateResponsePrimaryWorkplace `json:"primaryWorkplace" api:"required,nullable"`
+	StartDate        string                               `json:"startDate" api:"required"`
+	Status           WorkerUpdateResponseStatus           `json:"status" api:"required"`
+	// The reason the worker was terminated, or null when no termination reason is
+	// recorded.
+	TerminationReason string `json:"terminationReason" api:"required,nullable"`
+	// The IANA timezone of the worker (e.g., America/New_York).
+	TimeZone  string                   `json:"timeZone" api:"required,nullable"`
+	Type      WorkerUpdateResponseType `json:"type" api:"required"`
+	UpdatedAt string                   `json:"updatedAt" api:"required"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	WorkEmail string `json:"workEmail" api:"required,nullable" format:"email"`
+	// The worker's custom field values. Every active company custom field appears;
+	// fields outside this API key's permission scopes are redacted (value null,
+	// redacted true) rather than omitted, so the list is identical across keys. Empty
+	// when the company has no custom fields.
+	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
-	Level        WorkerListResponseDataLevel `json:"level" api:"nullable"`
-	CustomFields []PublicWorkerCustomField   `json:"customFields" api:"nullable"`
-	JSON         workerListResponseDataJSON  `json:"-"`
+	Level WorkerUpdateResponseLevel `json:"level" api:"nullable"`
+	// The worker's manager, or null if unassigned.
+	Manager PublicWorkerManager `json:"manager" api:"nullable"`
+	// The worker's stored T-shirt size, or null when unset or unavailable.
+	TShirtSize WorkerUpdateResponseTShirtSize `json:"tShirtSize" api:"nullable"`
+	JSON       workerUpdateResponseJSON       `json:"-"`
 }
 
-// workerListResponseDataJSON contains the JSON metadata for the struct [WorkerListResponseData]
-type workerListResponseDataJSON struct {
+// workerUpdateResponseJSON contains the JSON metadata for the struct [WorkerUpdateResponse]
+type workerUpdateResponseJSON struct {
 	ID                apijson.Field
-	Position          apijson.Field
-	Type              apijson.Field
-	Status            apijson.Field
-	StartDate         apijson.Field
-	EndDate           apijson.Field
-	IsBusiness        apijson.Field
-	BusinessName      apijson.Field
-	FirstName         apijson.Field
-	LastName          apijson.Field
-	Email             apijson.Field
-	WorkEmail         apijson.Field
-	PreferredName     apijson.Field
-	BiologicalSex     apijson.Field
-	MaritalStatus     apijson.Field
-	DateOfBirth       apijson.Field
-	Phone             apijson.Field
 	Address           apijson.Field
-	DisplayName       apijson.Field
-	TimeZone          apijson.Field
-	Department        apijson.Field
-	PrimaryWorkplace  apijson.Field
-	LatestRehireDate  apijson.Field
-	TerminationReason apijson.Field
-	UpdatedAt         apijson.Field
+	BenefitEligible   apijson.Field
+	BiologicalSex     apijson.Field
+	BusinessName      apijson.Field
 	Compensation      apijson.Field
-	Level             apijson.Field
+	DateOfBirth       apijson.Field
+	Department        apijson.Field
+	DisplayName       apijson.Field
+	Email             apijson.Field
+	EndDate           apijson.Field
+	FirstName         apijson.Field
+	IsBusiness        apijson.Field
+	LastName          apijson.Field
+	LatestRehireDate  apijson.Field
+	MaritalStatus     apijson.Field
+	Phone             apijson.Field
+	Position          apijson.Field
+	PreferredName     apijson.Field
+	PrimaryWorkplace  apijson.Field
+	StartDate         apijson.Field
+	Status            apijson.Field
+	TerminationReason apijson.Field
+	TimeZone          apijson.Field
+	Type              apijson.Field
+	UpdatedAt         apijson.Field
+	WorkEmail         apijson.Field
 	CustomFields      apijson.Field
+	Level             apijson.Field
+	Manager           apijson.Field
+	TShirtSize        apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
 }
 
-func (r *WorkerListResponseData) UnmarshalJSON(data []byte) (err error) {
+func (r *WorkerUpdateResponse) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r workerListResponseDataJSON) RawJSON() string {
+func (r workerUpdateResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type WorkerGetResponse struct {
+	// The id of the worker.
+	ID string `json:"id" api:"required"`
+	// The worker's home address, or null when unavailable.
+	Address         PublicWorkerAddress `json:"address" api:"required,nullable"`
+	BenefitEligible bool                `json:"benefitEligible" api:"required"`
+	// The worker's biological sex, or null when unavailable.
+	BiologicalSex WorkerGetResponseBiologicalSex `json:"biologicalSex" api:"required,nullable"`
+	BusinessName  string                         `json:"businessName" api:"required,nullable"`
+	// The worker's current regular compensation, or the rate effective on a future
+	// start date. Null when the worker has no applicable regular pay rate or the API
+	// key lacks the corresponding compensation read scope.
+	Compensation PublicWorkerCompensation `json:"compensation" api:"required,nullable"`
+	// The worker's date of birth, or null when unavailable.
+	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
+	// The department the worker belongs to, or null if unassigned.
+	Department WorkerGetResponseDepartment `json:"department" api:"required,nullable"`
+	// The "ui" name of a worker. If it's a business contractor business name is used.
+	// Otherwise we default to preferred name, then first-last.
+	DisplayName string `json:"displayName" api:"required"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	Email      string `json:"email" api:"required" format:"email"`
+	EndDate    string `json:"endDate" api:"required,nullable"`
+	FirstName  string `json:"firstName" api:"required"`
+	IsBusiness bool   `json:"isBusiness" api:"required,nullable"`
+	LastName   string `json:"lastName" api:"required"`
+	// The date the worker was most recently reactivated after an offboarding. This is
+	// distinct from startDate and is null if the worker has not been rehired.
+	LatestRehireDate string `json:"latestRehireDate" api:"required,nullable"`
+	// The worker's marital status, or null when unavailable.
+	MaritalStatus WorkerGetResponseMaritalStatus `json:"maritalStatus" api:"required,nullable"`
+	// The worker's personal phone number, or null when unavailable.
+	Phone         string `json:"phone" api:"required,nullable"`
+	Position      string `json:"position" api:"required"`
+	PreferredName string `json:"preferredName" api:"required,nullable"`
+	// The primary workplace the worker is assigned to, or null if unassigned.
+	PrimaryWorkplace WorkerGetResponsePrimaryWorkplace `json:"primaryWorkplace" api:"required,nullable"`
+	StartDate        string                            `json:"startDate" api:"required"`
+	Status           WorkerGetResponseStatus           `json:"status" api:"required"`
+	// The reason the worker was terminated, or null when no termination reason is
+	// recorded.
+	TerminationReason string `json:"terminationReason" api:"required,nullable"`
+	// The IANA timezone of the worker (e.g., America/New_York).
+	TimeZone  string                `json:"timeZone" api:"required,nullable"`
+	Type      WorkerGetResponseType `json:"type" api:"required"`
+	UpdatedAt string                `json:"updatedAt" api:"required"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	WorkEmail string `json:"workEmail" api:"required,nullable" format:"email"`
+	// The worker's custom field values. Every active company custom field appears;
+	// fields outside this API key's permission scopes are redacted (value null,
+	// redacted true) rather than omitted, so the list is identical across keys. Empty
+	// when the company has no custom fields.
+	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	// The worker's assigned job level, or null if unassigned. Omitted when job levels
+	// are not enabled.
+	Level WorkerGetResponseLevel `json:"level" api:"nullable"`
+	// The worker's manager, or null if unassigned.
+	Manager PublicWorkerManager `json:"manager" api:"nullable"`
+	// The worker's stored T-shirt size, or null when unset or unavailable.
+	TShirtSize WorkerGetResponseTShirtSize `json:"tShirtSize" api:"nullable"`
+	JSON       workerGetResponseJSON       `json:"-"`
+}
+
+// workerGetResponseJSON contains the JSON metadata for the struct [WorkerGetResponse]
+type workerGetResponseJSON struct {
+	ID                apijson.Field
+	Address           apijson.Field
+	BenefitEligible   apijson.Field
+	BiologicalSex     apijson.Field
+	BusinessName      apijson.Field
+	Compensation      apijson.Field
+	DateOfBirth       apijson.Field
+	Department        apijson.Field
+	DisplayName       apijson.Field
+	Email             apijson.Field
+	EndDate           apijson.Field
+	FirstName         apijson.Field
+	IsBusiness        apijson.Field
+	LastName          apijson.Field
+	LatestRehireDate  apijson.Field
+	MaritalStatus     apijson.Field
+	Phone             apijson.Field
+	Position          apijson.Field
+	PreferredName     apijson.Field
+	PrimaryWorkplace  apijson.Field
+	StartDate         apijson.Field
+	Status            apijson.Field
+	TerminationReason apijson.Field
+	TimeZone          apijson.Field
+	Type              apijson.Field
+	UpdatedAt         apijson.Field
+	WorkEmail         apijson.Field
+	CustomFields      apijson.Field
+	Level             apijson.Field
+	Manager           apijson.Field
+	TShirtSize        apijson.Field
+	raw               string
+	ExtraFields       map[string]apijson.Field
+}
+
+func (r *WorkerGetResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workerGetResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type WorkerListResponse struct {
+	Count   int64                    `json:"count" api:"required"`
+	Data    []WorkerListResponseData `json:"data" api:"required"`
+	HasMore bool                     `json:"hasMore" api:"required"`
+	JSON    workerListResponseJSON   `json:"-"`
+}
+
+// workerListResponseJSON contains the JSON metadata for the struct [WorkerListResponse]
+type workerListResponseJSON struct {
+	Count       apijson.Field
+	Data        apijson.Field
+	HasMore     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorkerListResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workerListResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type WorkerNewEmployeeResponse struct {
+	// The id of the worker.
+	ID string `json:"id" api:"required"`
+	// The worker's home address, or null when unavailable.
+	Address         PublicWorkerAddress `json:"address" api:"required,nullable"`
+	BenefitEligible bool                `json:"benefitEligible" api:"required"`
+	// The worker's biological sex, or null when unavailable.
+	BiologicalSex WorkerNewEmployeeResponseBiologicalSex `json:"biologicalSex" api:"required,nullable"`
+	BusinessName  string                                 `json:"businessName" api:"required,nullable"`
+	// The worker's current regular compensation, or the rate effective on a future
+	// start date. Null when the worker has no applicable regular pay rate or the API
+	// key lacks the corresponding compensation read scope.
+	Compensation PublicWorkerCompensation `json:"compensation" api:"required,nullable"`
+	// The worker's date of birth, or null when unavailable.
+	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
+	// The department the worker belongs to, or null if unassigned.
+	Department WorkerNewEmployeeResponseDepartment `json:"department" api:"required,nullable"`
+	// The "ui" name of a worker. If it's a business contractor business name is used.
+	// Otherwise we default to preferred name, then first-last.
+	DisplayName string `json:"displayName" api:"required"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	Email      string `json:"email" api:"required" format:"email"`
+	EndDate    string `json:"endDate" api:"required,nullable"`
+	FirstName  string `json:"firstName" api:"required"`
+	IsBusiness bool   `json:"isBusiness" api:"required,nullable"`
+	LastName   string `json:"lastName" api:"required"`
+	// The date the worker was most recently reactivated after an offboarding. This is
+	// distinct from startDate and is null if the worker has not been rehired.
+	LatestRehireDate string `json:"latestRehireDate" api:"required,nullable"`
+	// The worker's marital status, or null when unavailable.
+	MaritalStatus WorkerNewEmployeeResponseMaritalStatus `json:"maritalStatus" api:"required,nullable"`
+	// The worker's personal phone number, or null when unavailable.
+	Phone         string `json:"phone" api:"required,nullable"`
+	Position      string `json:"position" api:"required"`
+	PreferredName string `json:"preferredName" api:"required,nullable"`
+	// The primary workplace the worker is assigned to, or null if unassigned.
+	PrimaryWorkplace WorkerNewEmployeeResponsePrimaryWorkplace `json:"primaryWorkplace" api:"required,nullable"`
+	StartDate        string                                    `json:"startDate" api:"required"`
+	Status           WorkerNewEmployeeResponseStatus           `json:"status" api:"required"`
+	// The reason the worker was terminated, or null when no termination reason is
+	// recorded.
+	TerminationReason string `json:"terminationReason" api:"required,nullable"`
+	// The IANA timezone of the worker (e.g., America/New_York).
+	TimeZone  string                        `json:"timeZone" api:"required,nullable"`
+	Type      WorkerNewEmployeeResponseType `json:"type" api:"required"`
+	UpdatedAt string                        `json:"updatedAt" api:"required"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	WorkEmail string `json:"workEmail" api:"required,nullable" format:"email"`
+	// The worker's custom field values. Every active company custom field appears;
+	// fields outside this API key's permission scopes are redacted (value null,
+	// redacted true) rather than omitted, so the list is identical across keys. Empty
+	// when the company has no custom fields.
+	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	// The worker's assigned job level, or null if unassigned. Omitted when job levels
+	// are not enabled.
+	Level WorkerNewEmployeeResponseLevel `json:"level" api:"nullable"`
+	// The worker's manager, or null if unassigned.
+	Manager PublicWorkerManager `json:"manager" api:"nullable"`
+	// The worker's stored T-shirt size, or null when unset or unavailable.
+	TShirtSize WorkerNewEmployeeResponseTShirtSize `json:"tShirtSize" api:"nullable"`
+	JSON       workerNewEmployeeResponseJSON       `json:"-"`
+}
+
+// workerNewEmployeeResponseJSON contains the JSON metadata for the struct [WorkerNewEmployeeResponse]
+type workerNewEmployeeResponseJSON struct {
+	ID                apijson.Field
+	Address           apijson.Field
+	BenefitEligible   apijson.Field
+	BiologicalSex     apijson.Field
+	BusinessName      apijson.Field
+	Compensation      apijson.Field
+	DateOfBirth       apijson.Field
+	Department        apijson.Field
+	DisplayName       apijson.Field
+	Email             apijson.Field
+	EndDate           apijson.Field
+	FirstName         apijson.Field
+	IsBusiness        apijson.Field
+	LastName          apijson.Field
+	LatestRehireDate  apijson.Field
+	MaritalStatus     apijson.Field
+	Phone             apijson.Field
+	Position          apijson.Field
+	PreferredName     apijson.Field
+	PrimaryWorkplace  apijson.Field
+	StartDate         apijson.Field
+	Status            apijson.Field
+	TerminationReason apijson.Field
+	TimeZone          apijson.Field
+	Type              apijson.Field
+	UpdatedAt         apijson.Field
+	WorkEmail         apijson.Field
+	CustomFields      apijson.Field
+	Level             apijson.Field
+	Manager           apijson.Field
+	TShirtSize        apijson.Field
+	raw               string
+	ExtraFields       map[string]apijson.Field
+}
+
+func (r *WorkerNewEmployeeResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workerNewEmployeeResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type WorkerNewContractorResponse struct {
+	// The id of the worker.
+	ID string `json:"id" api:"required"`
+	// The worker's home address, or null when unavailable.
+	Address         PublicWorkerAddress `json:"address" api:"required,nullable"`
+	BenefitEligible bool                `json:"benefitEligible" api:"required"`
+	// The worker's biological sex, or null when unavailable.
+	BiologicalSex WorkerNewContractorResponseBiologicalSex `json:"biologicalSex" api:"required,nullable"`
+	BusinessName  string                                   `json:"businessName" api:"required,nullable"`
+	// The worker's current regular compensation, or the rate effective on a future
+	// start date. Null when the worker has no applicable regular pay rate or the API
+	// key lacks the corresponding compensation read scope.
+	Compensation PublicWorkerCompensation `json:"compensation" api:"required,nullable"`
+	// The worker's date of birth, or null when unavailable.
+	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
+	// The department the worker belongs to, or null if unassigned.
+	Department WorkerNewContractorResponseDepartment `json:"department" api:"required,nullable"`
+	// The "ui" name of a worker. If it's a business contractor business name is used.
+	// Otherwise we default to preferred name, then first-last.
+	DisplayName string `json:"displayName" api:"required"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	Email      string `json:"email" api:"required" format:"email"`
+	EndDate    string `json:"endDate" api:"required,nullable"`
+	FirstName  string `json:"firstName" api:"required"`
+	IsBusiness bool   `json:"isBusiness" api:"required,nullable"`
+	LastName   string `json:"lastName" api:"required"`
+	// The date the worker was most recently reactivated after an offboarding. This is
+	// distinct from startDate and is null if the worker has not been rehired.
+	LatestRehireDate string `json:"latestRehireDate" api:"required,nullable"`
+	// The worker's marital status, or null when unavailable.
+	MaritalStatus WorkerNewContractorResponseMaritalStatus `json:"maritalStatus" api:"required,nullable"`
+	// The worker's personal phone number, or null when unavailable.
+	Phone         string `json:"phone" api:"required,nullable"`
+	Position      string `json:"position" api:"required"`
+	PreferredName string `json:"preferredName" api:"required,nullable"`
+	// The primary workplace the worker is assigned to, or null if unassigned.
+	PrimaryWorkplace WorkerNewContractorResponsePrimaryWorkplace `json:"primaryWorkplace" api:"required,nullable"`
+	StartDate        string                                      `json:"startDate" api:"required"`
+	Status           WorkerNewContractorResponseStatus           `json:"status" api:"required"`
+	// The reason the worker was terminated, or null when no termination reason is
+	// recorded.
+	TerminationReason string `json:"terminationReason" api:"required,nullable"`
+	// The IANA timezone of the worker (e.g., America/New_York).
+	TimeZone  string                          `json:"timeZone" api:"required,nullable"`
+	Type      WorkerNewContractorResponseType `json:"type" api:"required"`
+	UpdatedAt string                          `json:"updatedAt" api:"required"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	WorkEmail string `json:"workEmail" api:"required,nullable" format:"email"`
+	// The worker's custom field values. Every active company custom field appears;
+	// fields outside this API key's permission scopes are redacted (value null,
+	// redacted true) rather than omitted, so the list is identical across keys. Empty
+	// when the company has no custom fields.
+	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	// The worker's assigned job level, or null if unassigned. Omitted when job levels
+	// are not enabled.
+	Level WorkerNewContractorResponseLevel `json:"level" api:"nullable"`
+	// The worker's manager, or null if unassigned.
+	Manager PublicWorkerManager `json:"manager" api:"nullable"`
+	// The worker's stored T-shirt size, or null when unset or unavailable.
+	TShirtSize WorkerNewContractorResponseTShirtSize `json:"tShirtSize" api:"nullable"`
+	JSON       workerNewContractorResponseJSON       `json:"-"`
+}
+
+// workerNewContractorResponseJSON contains the JSON metadata for the struct [WorkerNewContractorResponse]
+type workerNewContractorResponseJSON struct {
+	ID                apijson.Field
+	Address           apijson.Field
+	BenefitEligible   apijson.Field
+	BiologicalSex     apijson.Field
+	BusinessName      apijson.Field
+	Compensation      apijson.Field
+	DateOfBirth       apijson.Field
+	Department        apijson.Field
+	DisplayName       apijson.Field
+	Email             apijson.Field
+	EndDate           apijson.Field
+	FirstName         apijson.Field
+	IsBusiness        apijson.Field
+	LastName          apijson.Field
+	LatestRehireDate  apijson.Field
+	MaritalStatus     apijson.Field
+	Phone             apijson.Field
+	Position          apijson.Field
+	PreferredName     apijson.Field
+	PrimaryWorkplace  apijson.Field
+	StartDate         apijson.Field
+	Status            apijson.Field
+	TerminationReason apijson.Field
+	TimeZone          apijson.Field
+	Type              apijson.Field
+	UpdatedAt         apijson.Field
+	WorkEmail         apijson.Field
+	CustomFields      apijson.Field
+	Level             apijson.Field
+	Manager           apijson.Field
+	TShirtSize        apijson.Field
+	raw               string
+	ExtraFields       map[string]apijson.Field
+}
+
+func (r *WorkerNewContractorResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workerNewContractorResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type WorkerInviteResponse struct {
+	// The id of the worker.
+	ID string `json:"id" api:"required"`
+	// The worker's home address, or null when unavailable.
+	Address         PublicWorkerAddress `json:"address" api:"required,nullable"`
+	BenefitEligible bool                `json:"benefitEligible" api:"required"`
+	// The worker's biological sex, or null when unavailable.
+	BiologicalSex WorkerInviteResponseBiologicalSex `json:"biologicalSex" api:"required,nullable"`
+	BusinessName  string                            `json:"businessName" api:"required,nullable"`
+	// The worker's current regular compensation, or the rate effective on a future
+	// start date. Null when the worker has no applicable regular pay rate or the API
+	// key lacks the corresponding compensation read scope.
+	Compensation PublicWorkerCompensation `json:"compensation" api:"required,nullable"`
+	// The worker's date of birth, or null when unavailable.
+	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
+	// The department the worker belongs to, or null if unassigned.
+	Department WorkerInviteResponseDepartment `json:"department" api:"required,nullable"`
+	// The "ui" name of a worker. If it's a business contractor business name is used.
+	// Otherwise we default to preferred name, then first-last.
+	DisplayName string `json:"displayName" api:"required"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	Email      string `json:"email" api:"required" format:"email"`
+	EndDate    string `json:"endDate" api:"required,nullable"`
+	FirstName  string `json:"firstName" api:"required"`
+	IsBusiness bool   `json:"isBusiness" api:"required,nullable"`
+	LastName   string `json:"lastName" api:"required"`
+	// The date the worker was most recently reactivated after an offboarding. This is
+	// distinct from startDate and is null if the worker has not been rehired.
+	LatestRehireDate string `json:"latestRehireDate" api:"required,nullable"`
+	// The worker's marital status, or null when unavailable.
+	MaritalStatus WorkerInviteResponseMaritalStatus `json:"maritalStatus" api:"required,nullable"`
+	// The worker's personal phone number, or null when unavailable.
+	Phone         string `json:"phone" api:"required,nullable"`
+	Position      string `json:"position" api:"required"`
+	PreferredName string `json:"preferredName" api:"required,nullable"`
+	// The primary workplace the worker is assigned to, or null if unassigned.
+	PrimaryWorkplace WorkerInviteResponsePrimaryWorkplace `json:"primaryWorkplace" api:"required,nullable"`
+	StartDate        string                               `json:"startDate" api:"required"`
+	Status           WorkerInviteResponseStatus           `json:"status" api:"required"`
+	// The reason the worker was terminated, or null when no termination reason is
+	// recorded.
+	TerminationReason string `json:"terminationReason" api:"required,nullable"`
+	// The IANA timezone of the worker (e.g., America/New_York).
+	TimeZone  string                   `json:"timeZone" api:"required,nullable"`
+	Type      WorkerInviteResponseType `json:"type" api:"required"`
+	UpdatedAt string                   `json:"updatedAt" api:"required"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	WorkEmail string `json:"workEmail" api:"required,nullable" format:"email"`
+	// The worker's custom field values. Every active company custom field appears;
+	// fields outside this API key's permission scopes are redacted (value null,
+	// redacted true) rather than omitted, so the list is identical across keys. Empty
+	// when the company has no custom fields.
+	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	// The worker's assigned job level, or null if unassigned. Omitted when job levels
+	// are not enabled.
+	Level WorkerInviteResponseLevel `json:"level" api:"nullable"`
+	// The worker's manager, or null if unassigned.
+	Manager PublicWorkerManager `json:"manager" api:"nullable"`
+	// The worker's stored T-shirt size, or null when unset or unavailable.
+	TShirtSize WorkerInviteResponseTShirtSize `json:"tShirtSize" api:"nullable"`
+	JSON       workerInviteResponseJSON       `json:"-"`
+}
+
+// workerInviteResponseJSON contains the JSON metadata for the struct [WorkerInviteResponse]
+type workerInviteResponseJSON struct {
+	ID                apijson.Field
+	Address           apijson.Field
+	BenefitEligible   apijson.Field
+	BiologicalSex     apijson.Field
+	BusinessName      apijson.Field
+	Compensation      apijson.Field
+	DateOfBirth       apijson.Field
+	Department        apijson.Field
+	DisplayName       apijson.Field
+	Email             apijson.Field
+	EndDate           apijson.Field
+	FirstName         apijson.Field
+	IsBusiness        apijson.Field
+	LastName          apijson.Field
+	LatestRehireDate  apijson.Field
+	MaritalStatus     apijson.Field
+	Phone             apijson.Field
+	Position          apijson.Field
+	PreferredName     apijson.Field
+	PrimaryWorkplace  apijson.Field
+	StartDate         apijson.Field
+	Status            apijson.Field
+	TerminationReason apijson.Field
+	TimeZone          apijson.Field
+	Type              apijson.Field
+	UpdatedAt         apijson.Field
+	WorkEmail         apijson.Field
+	CustomFields      apijson.Field
+	Level             apijson.Field
+	Manager           apijson.Field
+	TShirtSize        apijson.Field
+	raw               string
+	ExtraFields       map[string]apijson.Field
+}
+
+func (r *WorkerInviteResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workerInviteResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicSelectWorkerCustomFieldOption struct {
+	// The tag of a company custom worker field option.
+	ID        string                                    `json:"id" api:"required"`
+	CreatedAt string                                    `json:"createdAt" api:"required"`
+	Label     string                                    `json:"label" api:"required"`
+	SortOrder interface{}                               `json:"sortOrder" api:"required"`
+	Status    PublicSelectWorkerCustomFieldOptionStatus `json:"status" api:"required"`
+	Value     string                                    `json:"value" api:"required"`
+	JSON      publicSelectWorkerCustomFieldOptionJSON   `json:"-"`
+}
+
+// publicSelectWorkerCustomFieldOptionJSON contains the JSON metadata for the struct [PublicSelectWorkerCustomFieldOption]
+type publicSelectWorkerCustomFieldOptionJSON struct {
+	ID          apijson.Field
+	CreatedAt   apijson.Field
+	Label       apijson.Field
+	SortOrder   apijson.Field
+	Status      apijson.Field
+	Value       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicSelectWorkerCustomFieldOption) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicSelectWorkerCustomFieldOptionJSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicMultiSelectWorkerCustomFieldOption struct {
+	// The tag of a company custom worker field option.
+	ID        string                                          `json:"id" api:"required"`
+	CreatedAt string                                          `json:"createdAt" api:"required"`
+	Label     string                                          `json:"label" api:"required"`
+	SortOrder interface{}                                     `json:"sortOrder" api:"required"`
+	Status    PublicMultiSelectWorkerCustomFieldOptionsStatus `json:"status" api:"required"`
+	Value     string                                          `json:"value" api:"required"`
+	JSON      publicMultiSelectWorkerCustomFieldOptionJSON    `json:"-"`
+}
+
+// publicMultiSelectWorkerCustomFieldOptionJSON contains the JSON metadata for the struct [PublicMultiSelectWorkerCustomFieldOption]
+type publicMultiSelectWorkerCustomFieldOptionJSON struct {
+	ID          apijson.Field
+	CreatedAt   apijson.Field
+	Label       apijson.Field
+	SortOrder   apijson.Field
+	Status      apijson.Field
+	Value       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicMultiSelectWorkerCustomFieldOption) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicMultiSelectWorkerCustomFieldOptionJSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicWorkerCustomFieldUnion interface {
+	implementsPublicWorkerCustomField()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*PublicWorkerCustomFieldUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(PublicTextWorkerCustomField{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(PublicNumberWorkerCustomField{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(PublicDateWorkerCustomField{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(PublicBooleanWorkerCustomField{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(PublicCurrencyWorkerCustomField{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(PublicPercentageWorkerCustomField{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(PublicSelectWorkerCustomField{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(PublicMultiSelectWorkerCustomField{}),
+		},
+	)
+}
+
+type PublicWorkerCustomFieldType string
+
+const (
+	PublicWorkerCustomFieldTypeText        PublicWorkerCustomFieldType = "text"
+	PublicWorkerCustomFieldTypeNumber      PublicWorkerCustomFieldType = "number"
+	PublicWorkerCustomFieldTypeDate        PublicWorkerCustomFieldType = "date"
+	PublicWorkerCustomFieldTypeBoolean     PublicWorkerCustomFieldType = "boolean"
+	PublicWorkerCustomFieldTypeCurrency    PublicWorkerCustomFieldType = "currency"
+	PublicWorkerCustomFieldTypePercentage  PublicWorkerCustomFieldType = "percentage"
+	PublicWorkerCustomFieldTypeSelect      PublicWorkerCustomFieldType = "select"
+	PublicWorkerCustomFieldTypeMultiSelect PublicWorkerCustomFieldType = "multi_select"
+)
+
+func (r PublicWorkerCustomFieldType) IsKnown() bool {
+	switch r {
+	case PublicWorkerCustomFieldTypeText, PublicWorkerCustomFieldTypeNumber, PublicWorkerCustomFieldTypeDate, PublicWorkerCustomFieldTypeBoolean, PublicWorkerCustomFieldTypeCurrency, PublicWorkerCustomFieldTypePercentage, PublicWorkerCustomFieldTypeSelect, PublicWorkerCustomFieldTypeMultiSelect:
+		return true
+	}
+	return false
+}
+
+type PublicWorkerCustomFieldCurrencyCode string
+
+const (
+	PublicWorkerCustomFieldCurrencyCodeUsd PublicWorkerCustomFieldCurrencyCode = "USD"
+	PublicWorkerCustomFieldCurrencyCodeAud PublicWorkerCustomFieldCurrencyCode = "AUD"
+	PublicWorkerCustomFieldCurrencyCodeBgn PublicWorkerCustomFieldCurrencyCode = "BGN"
+	PublicWorkerCustomFieldCurrencyCodeBrl PublicWorkerCustomFieldCurrencyCode = "BRL"
+	PublicWorkerCustomFieldCurrencyCodeCad PublicWorkerCustomFieldCurrencyCode = "CAD"
+	PublicWorkerCustomFieldCurrencyCodeChf PublicWorkerCustomFieldCurrencyCode = "CHF"
+	PublicWorkerCustomFieldCurrencyCodeCzk PublicWorkerCustomFieldCurrencyCode = "CZK"
+	PublicWorkerCustomFieldCurrencyCodeDkk PublicWorkerCustomFieldCurrencyCode = "DKK"
+	PublicWorkerCustomFieldCurrencyCodeEur PublicWorkerCustomFieldCurrencyCode = "EUR"
+	PublicWorkerCustomFieldCurrencyCodeGbp PublicWorkerCustomFieldCurrencyCode = "GBP"
+	PublicWorkerCustomFieldCurrencyCodeHkd PublicWorkerCustomFieldCurrencyCode = "HKD"
+	PublicWorkerCustomFieldCurrencyCodeHuf PublicWorkerCustomFieldCurrencyCode = "HUF"
+	PublicWorkerCustomFieldCurrencyCodeIdr PublicWorkerCustomFieldCurrencyCode = "IDR"
+	PublicWorkerCustomFieldCurrencyCodeInr PublicWorkerCustomFieldCurrencyCode = "INR"
+	PublicWorkerCustomFieldCurrencyCodeJpy PublicWorkerCustomFieldCurrencyCode = "JPY"
+	PublicWorkerCustomFieldCurrencyCodeMyr PublicWorkerCustomFieldCurrencyCode = "MYR"
+	PublicWorkerCustomFieldCurrencyCodeNok PublicWorkerCustomFieldCurrencyCode = "NOK"
+	PublicWorkerCustomFieldCurrencyCodeNzd PublicWorkerCustomFieldCurrencyCode = "NZD"
+	PublicWorkerCustomFieldCurrencyCodeCny PublicWorkerCustomFieldCurrencyCode = "CNY"
+	PublicWorkerCustomFieldCurrencyCodePln PublicWorkerCustomFieldCurrencyCode = "PLN"
+	PublicWorkerCustomFieldCurrencyCodeRon PublicWorkerCustomFieldCurrencyCode = "RON"
+	PublicWorkerCustomFieldCurrencyCodeTry PublicWorkerCustomFieldCurrencyCode = "TRY"
+	PublicWorkerCustomFieldCurrencyCodeSek PublicWorkerCustomFieldCurrencyCode = "SEK"
+	PublicWorkerCustomFieldCurrencyCodeSgd PublicWorkerCustomFieldCurrencyCode = "SGD"
+	PublicWorkerCustomFieldCurrencyCodeAed PublicWorkerCustomFieldCurrencyCode = "AED"
+	PublicWorkerCustomFieldCurrencyCodeArs PublicWorkerCustomFieldCurrencyCode = "ARS"
+	PublicWorkerCustomFieldCurrencyCodeBdt PublicWorkerCustomFieldCurrencyCode = "BDT"
+	PublicWorkerCustomFieldCurrencyCodeBwp PublicWorkerCustomFieldCurrencyCode = "BWP"
+	PublicWorkerCustomFieldCurrencyCodeClp PublicWorkerCustomFieldCurrencyCode = "CLP"
+	PublicWorkerCustomFieldCurrencyCodeCop PublicWorkerCustomFieldCurrencyCode = "COP"
+	PublicWorkerCustomFieldCurrencyCodeCrc PublicWorkerCustomFieldCurrencyCode = "CRC"
+	PublicWorkerCustomFieldCurrencyCodeEgp PublicWorkerCustomFieldCurrencyCode = "EGP"
+	PublicWorkerCustomFieldCurrencyCodeFjd PublicWorkerCustomFieldCurrencyCode = "FJD"
+	PublicWorkerCustomFieldCurrencyCodeGel PublicWorkerCustomFieldCurrencyCode = "GEL"
+	PublicWorkerCustomFieldCurrencyCodeGhs PublicWorkerCustomFieldCurrencyCode = "GHS"
+	PublicWorkerCustomFieldCurrencyCodeIls PublicWorkerCustomFieldCurrencyCode = "ILS"
+	PublicWorkerCustomFieldCurrencyCodeKes PublicWorkerCustomFieldCurrencyCode = "KES"
+	PublicWorkerCustomFieldCurrencyCodeKrw PublicWorkerCustomFieldCurrencyCode = "KRW"
+	PublicWorkerCustomFieldCurrencyCodeLkr PublicWorkerCustomFieldCurrencyCode = "LKR"
+	PublicWorkerCustomFieldCurrencyCodeMad PublicWorkerCustomFieldCurrencyCode = "MAD"
+	PublicWorkerCustomFieldCurrencyCodeMxn PublicWorkerCustomFieldCurrencyCode = "MXN"
+	PublicWorkerCustomFieldCurrencyCodeNpr PublicWorkerCustomFieldCurrencyCode = "NPR"
+	PublicWorkerCustomFieldCurrencyCodePhp PublicWorkerCustomFieldCurrencyCode = "PHP"
+	PublicWorkerCustomFieldCurrencyCodePkr PublicWorkerCustomFieldCurrencyCode = "PKR"
+	PublicWorkerCustomFieldCurrencyCodeThb PublicWorkerCustomFieldCurrencyCode = "THB"
+	PublicWorkerCustomFieldCurrencyCodeUah PublicWorkerCustomFieldCurrencyCode = "UAH"
+	PublicWorkerCustomFieldCurrencyCodeUgx PublicWorkerCustomFieldCurrencyCode = "UGX"
+	PublicWorkerCustomFieldCurrencyCodeUyu PublicWorkerCustomFieldCurrencyCode = "UYU"
+	PublicWorkerCustomFieldCurrencyCodeVnd PublicWorkerCustomFieldCurrencyCode = "VND"
+	PublicWorkerCustomFieldCurrencyCodeZar PublicWorkerCustomFieldCurrencyCode = "ZAR"
+	PublicWorkerCustomFieldCurrencyCodeZmw PublicWorkerCustomFieldCurrencyCode = "ZMW"
+	PublicWorkerCustomFieldCurrencyCodeTnd PublicWorkerCustomFieldCurrencyCode = "TND"
+	PublicWorkerCustomFieldCurrencyCodeNgn PublicWorkerCustomFieldCurrencyCode = "NGN"
+	PublicWorkerCustomFieldCurrencyCodeRsd PublicWorkerCustomFieldCurrencyCode = "RSD"
+	PublicWorkerCustomFieldCurrencyCodeTwd PublicWorkerCustomFieldCurrencyCode = "TWD"
+	PublicWorkerCustomFieldCurrencyCodeGtq PublicWorkerCustomFieldCurrencyCode = "GTQ"
+	PublicWorkerCustomFieldCurrencyCodeHnl PublicWorkerCustomFieldCurrencyCode = "HNL"
+	PublicWorkerCustomFieldCurrencyCodeDop PublicWorkerCustomFieldCurrencyCode = "DOP"
+	PublicWorkerCustomFieldCurrencyCodeSar PublicWorkerCustomFieldCurrencyCode = "SAR"
+	PublicWorkerCustomFieldCurrencyCodeXaf PublicWorkerCustomFieldCurrencyCode = "XAF"
+	PublicWorkerCustomFieldCurrencyCodePen PublicWorkerCustomFieldCurrencyCode = "PEN"
+)
+
+func (r PublicWorkerCustomFieldCurrencyCode) IsKnown() bool {
+	switch r {
+	case PublicWorkerCustomFieldCurrencyCodeUsd, PublicWorkerCustomFieldCurrencyCodeAud, PublicWorkerCustomFieldCurrencyCodeBgn, PublicWorkerCustomFieldCurrencyCodeBrl, PublicWorkerCustomFieldCurrencyCodeCad, PublicWorkerCustomFieldCurrencyCodeChf, PublicWorkerCustomFieldCurrencyCodeCzk, PublicWorkerCustomFieldCurrencyCodeDkk, PublicWorkerCustomFieldCurrencyCodeEur, PublicWorkerCustomFieldCurrencyCodeGbp, PublicWorkerCustomFieldCurrencyCodeHkd, PublicWorkerCustomFieldCurrencyCodeHuf, PublicWorkerCustomFieldCurrencyCodeIdr, PublicWorkerCustomFieldCurrencyCodeInr, PublicWorkerCustomFieldCurrencyCodeJpy, PublicWorkerCustomFieldCurrencyCodeMyr, PublicWorkerCustomFieldCurrencyCodeNok, PublicWorkerCustomFieldCurrencyCodeNzd, PublicWorkerCustomFieldCurrencyCodeCny, PublicWorkerCustomFieldCurrencyCodePln, PublicWorkerCustomFieldCurrencyCodeRon, PublicWorkerCustomFieldCurrencyCodeTry, PublicWorkerCustomFieldCurrencyCodeSek, PublicWorkerCustomFieldCurrencyCodeSgd, PublicWorkerCustomFieldCurrencyCodeAed, PublicWorkerCustomFieldCurrencyCodeArs, PublicWorkerCustomFieldCurrencyCodeBdt, PublicWorkerCustomFieldCurrencyCodeBwp, PublicWorkerCustomFieldCurrencyCodeClp, PublicWorkerCustomFieldCurrencyCodeCop, PublicWorkerCustomFieldCurrencyCodeCrc, PublicWorkerCustomFieldCurrencyCodeEgp, PublicWorkerCustomFieldCurrencyCodeFjd, PublicWorkerCustomFieldCurrencyCodeGel, PublicWorkerCustomFieldCurrencyCodeGhs, PublicWorkerCustomFieldCurrencyCodeIls, PublicWorkerCustomFieldCurrencyCodeKes, PublicWorkerCustomFieldCurrencyCodeKrw, PublicWorkerCustomFieldCurrencyCodeLkr, PublicWorkerCustomFieldCurrencyCodeMad, PublicWorkerCustomFieldCurrencyCodeMxn, PublicWorkerCustomFieldCurrencyCodeNpr, PublicWorkerCustomFieldCurrencyCodePhp, PublicWorkerCustomFieldCurrencyCodePkr, PublicWorkerCustomFieldCurrencyCodeThb, PublicWorkerCustomFieldCurrencyCodeUah, PublicWorkerCustomFieldCurrencyCodeUgx, PublicWorkerCustomFieldCurrencyCodeUyu, PublicWorkerCustomFieldCurrencyCodeVnd, PublicWorkerCustomFieldCurrencyCodeZar, PublicWorkerCustomFieldCurrencyCodeZmw, PublicWorkerCustomFieldCurrencyCodeTnd, PublicWorkerCustomFieldCurrencyCodeNgn, PublicWorkerCustomFieldCurrencyCodeRsd, PublicWorkerCustomFieldCurrencyCodeTwd, PublicWorkerCustomFieldCurrencyCodeGtq, PublicWorkerCustomFieldCurrencyCodeHnl, PublicWorkerCustomFieldCurrencyCodeDop, PublicWorkerCustomFieldCurrencyCodeSar, PublicWorkerCustomFieldCurrencyCodeXaf, PublicWorkerCustomFieldCurrencyCodePen:
+		return true
+	}
+	return false
+}
+
+type WorkerUpdateResponseType string
+
+const (
+	WorkerUpdateResponseTypeEmployee   WorkerUpdateResponseType = "employee"
+	WorkerUpdateResponseTypeContractor WorkerUpdateResponseType = "contractor"
+)
+
+func (r WorkerUpdateResponseType) IsKnown() bool {
+	switch r {
+	case WorkerUpdateResponseTypeEmployee, WorkerUpdateResponseTypeContractor:
+		return true
+	}
+	return false
+}
+
+type WorkerUpdateResponseStatus string
+
+const (
+	WorkerUpdateResponseStatusDraft       WorkerUpdateResponseStatus = "draft"
+	WorkerUpdateResponseStatusInvited     WorkerUpdateResponseStatus = "invited"
+	WorkerUpdateResponseStatusOnboarding  WorkerUpdateResponseStatus = "onboarding"
+	WorkerUpdateResponseStatusActive      WorkerUpdateResponseStatus = "active"
+	WorkerUpdateResponseStatusOffboarding WorkerUpdateResponseStatus = "offboarding"
+	WorkerUpdateResponseStatusInactive    WorkerUpdateResponseStatus = "inactive"
+)
+
+func (r WorkerUpdateResponseStatus) IsKnown() bool {
+	switch r {
+	case WorkerUpdateResponseStatusDraft, WorkerUpdateResponseStatusInvited, WorkerUpdateResponseStatusOnboarding, WorkerUpdateResponseStatusActive, WorkerUpdateResponseStatusOffboarding, WorkerUpdateResponseStatusInactive:
+		return true
+	}
+	return false
+}
+
+type WorkerUpdateResponseBiologicalSex string
+
+const (
+	WorkerUpdateResponseBiologicalSexMale   WorkerUpdateResponseBiologicalSex = "male"
+	WorkerUpdateResponseBiologicalSexFemale WorkerUpdateResponseBiologicalSex = "female"
+)
+
+func (r WorkerUpdateResponseBiologicalSex) IsKnown() bool {
+	switch r {
+	case WorkerUpdateResponseBiologicalSexMale, WorkerUpdateResponseBiologicalSexFemale:
+		return true
+	}
+	return false
+}
+
+type WorkerUpdateResponseMaritalStatus string
+
+const (
+	WorkerUpdateResponseMaritalStatusMarried    WorkerUpdateResponseMaritalStatus = "married"
+	WorkerUpdateResponseMaritalStatusNotMarried WorkerUpdateResponseMaritalStatus = "not_married"
+)
+
+func (r WorkerUpdateResponseMaritalStatus) IsKnown() bool {
+	switch r {
+	case WorkerUpdateResponseMaritalStatusMarried, WorkerUpdateResponseMaritalStatusNotMarried:
+		return true
+	}
+	return false
+}
+
+type WorkerUpdateResponseTShirtSize string
+
+const (
+	WorkerUpdateResponseTShirtSizeXs   WorkerUpdateResponseTShirtSize = "XS"
+	WorkerUpdateResponseTShirtSizeS    WorkerUpdateResponseTShirtSize = "S"
+	WorkerUpdateResponseTShirtSizeM    WorkerUpdateResponseTShirtSize = "M"
+	WorkerUpdateResponseTShirtSizeL    WorkerUpdateResponseTShirtSize = "L"
+	WorkerUpdateResponseTShirtSizeXl   WorkerUpdateResponseTShirtSize = "XL"
+	WorkerUpdateResponseTShirtSizeXxl  WorkerUpdateResponseTShirtSize = "XXL"
+	WorkerUpdateResponseTShirtSizeXxxl WorkerUpdateResponseTShirtSize = "XXXL"
+)
+
+func (r WorkerUpdateResponseTShirtSize) IsKnown() bool {
+	switch r {
+	case WorkerUpdateResponseTShirtSizeXs, WorkerUpdateResponseTShirtSizeS, WorkerUpdateResponseTShirtSizeM, WorkerUpdateResponseTShirtSizeL, WorkerUpdateResponseTShirtSizeXl, WorkerUpdateResponseTShirtSizeXxl, WorkerUpdateResponseTShirtSizeXxxl:
+		return true
+	}
+	return false
+}
+
+type WorkerUpdateResponseDepartment struct {
+	// The unique public id of the department
+	ID   string                             `json:"id" api:"required"`
+	Name string                             `json:"name" api:"required"`
+	JSON workerUpdateResponseDepartmentJSON `json:"-"`
+}
+
+// workerUpdateResponseDepartmentJSON contains the JSON metadata for the struct [WorkerUpdateResponseDepartment]
+type workerUpdateResponseDepartmentJSON struct {
+	ID          apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorkerUpdateResponseDepartment) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workerUpdateResponseDepartmentJSON) RawJSON() string {
+	return r.raw
+}
+
+type WorkerUpdateResponsePrimaryWorkplace struct {
+	// Public workplace identifier
+	ID   string                                   `json:"id" api:"required"`
+	Name string                                   `json:"name" api:"required"`
+	Type WorkerUpdateResponsePrimaryWorkplaceType `json:"type" api:"required"`
+	JSON workerUpdateResponsePrimaryWorkplaceJSON `json:"-"`
+}
+
+// workerUpdateResponsePrimaryWorkplaceJSON contains the JSON metadata for the struct [WorkerUpdateResponsePrimaryWorkplace]
+type workerUpdateResponsePrimaryWorkplaceJSON struct {
+	ID          apijson.Field
+	Name        apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorkerUpdateResponsePrimaryWorkplace) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workerUpdateResponsePrimaryWorkplaceJSON) RawJSON() string {
+	return r.raw
+}
+
+type WorkerUpdateResponseLevel struct {
+	// The unique public id of the job level
+	ID    string                         `json:"id" api:"required"`
+	Code  string                         `json:"code" api:"required"`
+	Name  string                         `json:"name" api:"required"`
+	Track WorkerUpdateResponseLevelTrack `json:"track" api:"required"`
+	JSON  workerUpdateResponseLevelJSON  `json:"-"`
+}
+
+// workerUpdateResponseLevelJSON contains the JSON metadata for the struct [WorkerUpdateResponseLevel]
+type workerUpdateResponseLevelJSON struct {
+	ID          apijson.Field
+	Code        apijson.Field
+	Name        apijson.Field
+	Track       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorkerUpdateResponseLevel) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workerUpdateResponseLevelJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -2325,34 +3222,24 @@ func (r WorkerGetResponseMaritalStatus) IsKnown() bool {
 	return false
 }
 
-type WorkerGetResponseAddress struct {
-	Line1      string                          `json:"line1" api:"required"`
-	Line2      string                          `json:"line2" api:"required,nullable"`
-	City       string                          `json:"city" api:"required"`
-	State      string                          `json:"state" api:"required,nullable"`
-	PostalCode string                          `json:"postalCode" api:"required,nullable"`
-	Country    WorkerGetResponseAddressCountry `json:"country" api:"required"`
-	JSON       workerGetResponseAddressJSON    `json:"-"`
-}
+type WorkerGetResponseTShirtSize string
 
-// workerGetResponseAddressJSON contains the JSON metadata for the struct [WorkerGetResponseAddress]
-type workerGetResponseAddressJSON struct {
-	Line1       apijson.Field
-	Line2       apijson.Field
-	City        apijson.Field
-	State       apijson.Field
-	PostalCode  apijson.Field
-	Country     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
+const (
+	WorkerGetResponseTShirtSizeXs   WorkerGetResponseTShirtSize = "XS"
+	WorkerGetResponseTShirtSizeS    WorkerGetResponseTShirtSize = "S"
+	WorkerGetResponseTShirtSizeM    WorkerGetResponseTShirtSize = "M"
+	WorkerGetResponseTShirtSizeL    WorkerGetResponseTShirtSize = "L"
+	WorkerGetResponseTShirtSizeXl   WorkerGetResponseTShirtSize = "XL"
+	WorkerGetResponseTShirtSizeXxl  WorkerGetResponseTShirtSize = "XXL"
+	WorkerGetResponseTShirtSizeXxxl WorkerGetResponseTShirtSize = "XXXL"
+)
 
-func (r *WorkerGetResponseAddress) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r workerGetResponseAddressJSON) RawJSON() string {
-	return r.raw
+func (r WorkerGetResponseTShirtSize) IsKnown() bool {
+	switch r {
+	case WorkerGetResponseTShirtSizeXs, WorkerGetResponseTShirtSizeS, WorkerGetResponseTShirtSizeM, WorkerGetResponseTShirtSizeL, WorkerGetResponseTShirtSizeXl, WorkerGetResponseTShirtSizeXxl, WorkerGetResponseTShirtSizeXxxl:
+		return true
+	}
+	return false
 }
 
 type WorkerGetResponseDepartment struct {
@@ -2430,6 +3317,114 @@ func (r workerGetResponseLevelJSON) RawJSON() string {
 	return r.raw
 }
 
+type WorkerListResponseData struct {
+	// The id of the worker.
+	ID string `json:"id" api:"required"`
+	// The worker's home address, or null when unavailable.
+	Address         PublicWorkerAddress `json:"address" api:"required,nullable"`
+	BenefitEligible bool                `json:"benefitEligible" api:"required"`
+	// The worker's biological sex, or null when unavailable.
+	BiologicalSex WorkerListResponseDataBiologicalSex `json:"biologicalSex" api:"required,nullable"`
+	BusinessName  string                              `json:"businessName" api:"required,nullable"`
+	// The worker's current regular compensation, or the rate effective on a future
+	// start date. Null when the worker has no applicable regular pay rate or the API
+	// key lacks the corresponding compensation read scope.
+	Compensation PublicWorkerCompensation `json:"compensation" api:"required,nullable"`
+	// The worker's date of birth, or null when unavailable.
+	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
+	// The department the worker belongs to, or null if unassigned.
+	Department WorkerListResponseDataDepartment `json:"department" api:"required,nullable"`
+	// The "ui" name of a worker. If it's a business contractor business name is used.
+	// Otherwise we default to preferred name, then first-last.
+	DisplayName string `json:"displayName" api:"required"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	Email      string `json:"email" api:"required" format:"email"`
+	EndDate    string `json:"endDate" api:"required,nullable"`
+	FirstName  string `json:"firstName" api:"required"`
+	IsBusiness bool   `json:"isBusiness" api:"required,nullable"`
+	LastName   string `json:"lastName" api:"required"`
+	// The date the worker was most recently reactivated after an offboarding. This is
+	// distinct from startDate and is null if the worker has not been rehired.
+	LatestRehireDate string `json:"latestRehireDate" api:"required,nullable"`
+	// The worker's marital status, or null when unavailable.
+	MaritalStatus WorkerListResponseDataMaritalStatus `json:"maritalStatus" api:"required,nullable"`
+	// The worker's personal phone number, or null when unavailable.
+	Phone         string `json:"phone" api:"required,nullable"`
+	Position      string `json:"position" api:"required"`
+	PreferredName string `json:"preferredName" api:"required,nullable"`
+	// The primary workplace the worker is assigned to, or null if unassigned.
+	PrimaryWorkplace WorkerListResponseDataPrimaryWorkplace `json:"primaryWorkplace" api:"required,nullable"`
+	StartDate        string                                 `json:"startDate" api:"required"`
+	Status           WorkerListResponseDataStatus           `json:"status" api:"required"`
+	// The reason the worker was terminated, or null when no termination reason is
+	// recorded.
+	TerminationReason string `json:"terminationReason" api:"required,nullable"`
+	// The IANA timezone of the worker (e.g., America/New_York).
+	TimeZone  string                     `json:"timeZone" api:"required,nullable"`
+	Type      WorkerListResponseDataType `json:"type" api:"required"`
+	UpdatedAt string                     `json:"updatedAt" api:"required"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	WorkEmail string `json:"workEmail" api:"required,nullable" format:"email"`
+	// The worker's custom field values. Every active company custom field appears;
+	// fields outside this API key's permission scopes are redacted (value null,
+	// redacted true) rather than omitted, so the list is identical across keys. Empty
+	// when the company has no custom fields.
+	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	// The worker's assigned job level, or null if unassigned. Omitted when job levels
+	// are not enabled.
+	Level WorkerListResponseDataLevel `json:"level" api:"nullable"`
+	// The worker's manager, or null if unassigned.
+	Manager PublicWorkerManager `json:"manager" api:"nullable"`
+	// The worker's stored T-shirt size, or null when unset or unavailable.
+	TShirtSize WorkerListResponseDataTShirtSize `json:"tShirtSize" api:"nullable"`
+	JSON       workerListResponseDataJSON       `json:"-"`
+}
+
+// workerListResponseDataJSON contains the JSON metadata for the struct [WorkerListResponseData]
+type workerListResponseDataJSON struct {
+	ID                apijson.Field
+	Address           apijson.Field
+	BenefitEligible   apijson.Field
+	BiologicalSex     apijson.Field
+	BusinessName      apijson.Field
+	Compensation      apijson.Field
+	DateOfBirth       apijson.Field
+	Department        apijson.Field
+	DisplayName       apijson.Field
+	Email             apijson.Field
+	EndDate           apijson.Field
+	FirstName         apijson.Field
+	IsBusiness        apijson.Field
+	LastName          apijson.Field
+	LatestRehireDate  apijson.Field
+	MaritalStatus     apijson.Field
+	Phone             apijson.Field
+	Position          apijson.Field
+	PreferredName     apijson.Field
+	PrimaryWorkplace  apijson.Field
+	StartDate         apijson.Field
+	Status            apijson.Field
+	TerminationReason apijson.Field
+	TimeZone          apijson.Field
+	Type              apijson.Field
+	UpdatedAt         apijson.Field
+	WorkEmail         apijson.Field
+	CustomFields      apijson.Field
+	Level             apijson.Field
+	Manager           apijson.Field
+	TShirtSize        apijson.Field
+	raw               string
+	ExtraFields       map[string]apijson.Field
+}
+
+func (r *WorkerListResponseData) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workerListResponseDataJSON) RawJSON() string {
+	return r.raw
+}
+
 type WorkerNewEmployeeResponseType string
 
 const (
@@ -2494,34 +3489,24 @@ func (r WorkerNewEmployeeResponseMaritalStatus) IsKnown() bool {
 	return false
 }
 
-type WorkerNewEmployeeResponseAddress struct {
-	Line1      string                                  `json:"line1" api:"required"`
-	Line2      string                                  `json:"line2" api:"required,nullable"`
-	City       string                                  `json:"city" api:"required"`
-	State      string                                  `json:"state" api:"required,nullable"`
-	PostalCode string                                  `json:"postalCode" api:"required,nullable"`
-	Country    WorkerNewEmployeeResponseAddressCountry `json:"country" api:"required"`
-	JSON       workerNewEmployeeResponseAddressJSON    `json:"-"`
-}
+type WorkerNewEmployeeResponseTShirtSize string
 
-// workerNewEmployeeResponseAddressJSON contains the JSON metadata for the struct [WorkerNewEmployeeResponseAddress]
-type workerNewEmployeeResponseAddressJSON struct {
-	Line1       apijson.Field
-	Line2       apijson.Field
-	City        apijson.Field
-	State       apijson.Field
-	PostalCode  apijson.Field
-	Country     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
+const (
+	WorkerNewEmployeeResponseTShirtSizeXs   WorkerNewEmployeeResponseTShirtSize = "XS"
+	WorkerNewEmployeeResponseTShirtSizeS    WorkerNewEmployeeResponseTShirtSize = "S"
+	WorkerNewEmployeeResponseTShirtSizeM    WorkerNewEmployeeResponseTShirtSize = "M"
+	WorkerNewEmployeeResponseTShirtSizeL    WorkerNewEmployeeResponseTShirtSize = "L"
+	WorkerNewEmployeeResponseTShirtSizeXl   WorkerNewEmployeeResponseTShirtSize = "XL"
+	WorkerNewEmployeeResponseTShirtSizeXxl  WorkerNewEmployeeResponseTShirtSize = "XXL"
+	WorkerNewEmployeeResponseTShirtSizeXxxl WorkerNewEmployeeResponseTShirtSize = "XXXL"
+)
 
-func (r *WorkerNewEmployeeResponseAddress) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r workerNewEmployeeResponseAddressJSON) RawJSON() string {
-	return r.raw
+func (r WorkerNewEmployeeResponseTShirtSize) IsKnown() bool {
+	switch r {
+	case WorkerNewEmployeeResponseTShirtSizeXs, WorkerNewEmployeeResponseTShirtSizeS, WorkerNewEmployeeResponseTShirtSizeM, WorkerNewEmployeeResponseTShirtSizeL, WorkerNewEmployeeResponseTShirtSizeXl, WorkerNewEmployeeResponseTShirtSizeXxl, WorkerNewEmployeeResponseTShirtSizeXxxl:
+		return true
+	}
+	return false
 }
 
 type WorkerNewEmployeeResponseDepartment struct {
@@ -2663,34 +3648,24 @@ func (r WorkerNewContractorResponseMaritalStatus) IsKnown() bool {
 	return false
 }
 
-type WorkerNewContractorResponseAddress struct {
-	Line1      string                                    `json:"line1" api:"required"`
-	Line2      string                                    `json:"line2" api:"required,nullable"`
-	City       string                                    `json:"city" api:"required"`
-	State      string                                    `json:"state" api:"required,nullable"`
-	PostalCode string                                    `json:"postalCode" api:"required,nullable"`
-	Country    WorkerNewContractorResponseAddressCountry `json:"country" api:"required"`
-	JSON       workerNewContractorResponseAddressJSON    `json:"-"`
-}
+type WorkerNewContractorResponseTShirtSize string
 
-// workerNewContractorResponseAddressJSON contains the JSON metadata for the struct [WorkerNewContractorResponseAddress]
-type workerNewContractorResponseAddressJSON struct {
-	Line1       apijson.Field
-	Line2       apijson.Field
-	City        apijson.Field
-	State       apijson.Field
-	PostalCode  apijson.Field
-	Country     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
+const (
+	WorkerNewContractorResponseTShirtSizeXs   WorkerNewContractorResponseTShirtSize = "XS"
+	WorkerNewContractorResponseTShirtSizeS    WorkerNewContractorResponseTShirtSize = "S"
+	WorkerNewContractorResponseTShirtSizeM    WorkerNewContractorResponseTShirtSize = "M"
+	WorkerNewContractorResponseTShirtSizeL    WorkerNewContractorResponseTShirtSize = "L"
+	WorkerNewContractorResponseTShirtSizeXl   WorkerNewContractorResponseTShirtSize = "XL"
+	WorkerNewContractorResponseTShirtSizeXxl  WorkerNewContractorResponseTShirtSize = "XXL"
+	WorkerNewContractorResponseTShirtSizeXxxl WorkerNewContractorResponseTShirtSize = "XXXL"
+)
 
-func (r *WorkerNewContractorResponseAddress) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r workerNewContractorResponseAddressJSON) RawJSON() string {
-	return r.raw
+func (r WorkerNewContractorResponseTShirtSize) IsKnown() bool {
+	switch r {
+	case WorkerNewContractorResponseTShirtSizeXs, WorkerNewContractorResponseTShirtSizeS, WorkerNewContractorResponseTShirtSizeM, WorkerNewContractorResponseTShirtSizeL, WorkerNewContractorResponseTShirtSizeXl, WorkerNewContractorResponseTShirtSizeXxl, WorkerNewContractorResponseTShirtSizeXxxl:
+		return true
+	}
+	return false
 }
 
 type WorkerNewContractorResponseDepartment struct {
@@ -2832,34 +3807,24 @@ func (r WorkerInviteResponseMaritalStatus) IsKnown() bool {
 	return false
 }
 
-type WorkerInviteResponseAddress struct {
-	Line1      string                             `json:"line1" api:"required"`
-	Line2      string                             `json:"line2" api:"required,nullable"`
-	City       string                             `json:"city" api:"required"`
-	State      string                             `json:"state" api:"required,nullable"`
-	PostalCode string                             `json:"postalCode" api:"required,nullable"`
-	Country    WorkerInviteResponseAddressCountry `json:"country" api:"required"`
-	JSON       workerInviteResponseAddressJSON    `json:"-"`
-}
+type WorkerInviteResponseTShirtSize string
 
-// workerInviteResponseAddressJSON contains the JSON metadata for the struct [WorkerInviteResponseAddress]
-type workerInviteResponseAddressJSON struct {
-	Line1       apijson.Field
-	Line2       apijson.Field
-	City        apijson.Field
-	State       apijson.Field
-	PostalCode  apijson.Field
-	Country     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
+const (
+	WorkerInviteResponseTShirtSizeXs   WorkerInviteResponseTShirtSize = "XS"
+	WorkerInviteResponseTShirtSizeS    WorkerInviteResponseTShirtSize = "S"
+	WorkerInviteResponseTShirtSizeM    WorkerInviteResponseTShirtSize = "M"
+	WorkerInviteResponseTShirtSizeL    WorkerInviteResponseTShirtSize = "L"
+	WorkerInviteResponseTShirtSizeXl   WorkerInviteResponseTShirtSize = "XL"
+	WorkerInviteResponseTShirtSizeXxl  WorkerInviteResponseTShirtSize = "XXL"
+	WorkerInviteResponseTShirtSizeXxxl WorkerInviteResponseTShirtSize = "XXXL"
+)
 
-func (r *WorkerInviteResponseAddress) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r workerInviteResponseAddressJSON) RawJSON() string {
-	return r.raw
+func (r WorkerInviteResponseTShirtSize) IsKnown() bool {
+	switch r {
+	case WorkerInviteResponseTShirtSizeXs, WorkerInviteResponseTShirtSizeS, WorkerInviteResponseTShirtSizeM, WorkerInviteResponseTShirtSizeL, WorkerInviteResponseTShirtSizeXl, WorkerInviteResponseTShirtSizeXxl, WorkerInviteResponseTShirtSizeXxxl:
+		return true
+	}
+	return false
 }
 
 type WorkerInviteResponseDepartment struct {
@@ -2967,147 +3932,79 @@ func (r PublicMultiSelectWorkerCustomFieldOptionsStatus) IsKnown() bool {
 	return false
 }
 
-type PublicWorkerCustomFieldUnion interface {
-	implementsPublicWorkerCustomField()
-}
+func (r PublicTextWorkerCustomField) implementsPublicWorkerCustomField() {}
 
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeOf((*PublicWorkerCustomFieldUnion)(nil)).Elem(),
-		"type",
-		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(PublicTextWorkerCustomField{}),
-			DiscriminatorValue: "text",
-		},
-		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(PublicNumberWorkerCustomField{}),
-			DiscriminatorValue: "number",
-		},
-		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(PublicDateWorkerCustomField{}),
-			DiscriminatorValue: "date",
-		},
-		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(PublicBooleanWorkerCustomField{}),
-			DiscriminatorValue: "boolean",
-		},
-		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(PublicCurrencyWorkerCustomField{}),
-			DiscriminatorValue: "currency",
-		},
-		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(PublicPercentageWorkerCustomField{}),
-			DiscriminatorValue: "percentage",
-		},
-		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(PublicSelectWorkerCustomField{}),
-			DiscriminatorValue: "select",
-		},
-		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(PublicMultiSelectWorkerCustomField{}),
-			DiscriminatorValue: "multi_select",
-		},
-	)
-}
+func (r PublicNumberWorkerCustomField) implementsPublicWorkerCustomField() {}
 
-type PublicWorkerCustomFieldType string
+func (r PublicDateWorkerCustomField) implementsPublicWorkerCustomField() {}
+
+func (r PublicBooleanWorkerCustomField) implementsPublicWorkerCustomField() {}
+
+func (r PublicCurrencyWorkerCustomField) implementsPublicWorkerCustomField() {}
+
+func (r PublicPercentageWorkerCustomField) implementsPublicWorkerCustomField() {}
+
+func (r PublicSelectWorkerCustomField) implementsPublicWorkerCustomField() {}
+
+func (r PublicMultiSelectWorkerCustomField) implementsPublicWorkerCustomField() {}
+
+type WorkerUpdateResponsePrimaryWorkplaceType string
 
 const (
-	PublicWorkerCustomFieldTypeText        PublicWorkerCustomFieldType = "text"
-	PublicWorkerCustomFieldTypeNumber      PublicWorkerCustomFieldType = "number"
-	PublicWorkerCustomFieldTypeDate        PublicWorkerCustomFieldType = "date"
-	PublicWorkerCustomFieldTypeBoolean     PublicWorkerCustomFieldType = "boolean"
-	PublicWorkerCustomFieldTypeCurrency    PublicWorkerCustomFieldType = "currency"
-	PublicWorkerCustomFieldTypePercentage  PublicWorkerCustomFieldType = "percentage"
-	PublicWorkerCustomFieldTypeSelect      PublicWorkerCustomFieldType = "select"
-	PublicWorkerCustomFieldTypeMultiSelect PublicWorkerCustomFieldType = "multi_select"
+	WorkerUpdateResponsePrimaryWorkplaceTypeRemote WorkerUpdateResponsePrimaryWorkplaceType = "remote"
+	WorkerUpdateResponsePrimaryWorkplaceTypeOffice WorkerUpdateResponsePrimaryWorkplaceType = "office"
 )
 
-func (r PublicWorkerCustomFieldType) IsKnown() bool {
+func (r WorkerUpdateResponsePrimaryWorkplaceType) IsKnown() bool {
 	switch r {
-	case PublicWorkerCustomFieldTypeText, PublicWorkerCustomFieldTypeNumber, PublicWorkerCustomFieldTypeDate, PublicWorkerCustomFieldTypeBoolean, PublicWorkerCustomFieldTypeCurrency, PublicWorkerCustomFieldTypePercentage, PublicWorkerCustomFieldTypeSelect, PublicWorkerCustomFieldTypeMultiSelect:
+	case WorkerUpdateResponsePrimaryWorkplaceTypeRemote, WorkerUpdateResponsePrimaryWorkplaceTypeOffice:
 		return true
 	}
 	return false
 }
 
-type PublicWorkerCustomFieldCurrencyCode string
+type WorkerUpdateResponseLevelTrack string
 
 const (
-	PublicWorkerCustomFieldCurrencyCodeUsd PublicWorkerCustomFieldCurrencyCode = "USD"
-	PublicWorkerCustomFieldCurrencyCodeAud PublicWorkerCustomFieldCurrencyCode = "AUD"
-	PublicWorkerCustomFieldCurrencyCodeBgn PublicWorkerCustomFieldCurrencyCode = "BGN"
-	PublicWorkerCustomFieldCurrencyCodeBrl PublicWorkerCustomFieldCurrencyCode = "BRL"
-	PublicWorkerCustomFieldCurrencyCodeCad PublicWorkerCustomFieldCurrencyCode = "CAD"
-	PublicWorkerCustomFieldCurrencyCodeChf PublicWorkerCustomFieldCurrencyCode = "CHF"
-	PublicWorkerCustomFieldCurrencyCodeCzk PublicWorkerCustomFieldCurrencyCode = "CZK"
-	PublicWorkerCustomFieldCurrencyCodeDkk PublicWorkerCustomFieldCurrencyCode = "DKK"
-	PublicWorkerCustomFieldCurrencyCodeEur PublicWorkerCustomFieldCurrencyCode = "EUR"
-	PublicWorkerCustomFieldCurrencyCodeGbp PublicWorkerCustomFieldCurrencyCode = "GBP"
-	PublicWorkerCustomFieldCurrencyCodeHkd PublicWorkerCustomFieldCurrencyCode = "HKD"
-	PublicWorkerCustomFieldCurrencyCodeHuf PublicWorkerCustomFieldCurrencyCode = "HUF"
-	PublicWorkerCustomFieldCurrencyCodeIdr PublicWorkerCustomFieldCurrencyCode = "IDR"
-	PublicWorkerCustomFieldCurrencyCodeInr PublicWorkerCustomFieldCurrencyCode = "INR"
-	PublicWorkerCustomFieldCurrencyCodeJpy PublicWorkerCustomFieldCurrencyCode = "JPY"
-	PublicWorkerCustomFieldCurrencyCodeMyr PublicWorkerCustomFieldCurrencyCode = "MYR"
-	PublicWorkerCustomFieldCurrencyCodeNok PublicWorkerCustomFieldCurrencyCode = "NOK"
-	PublicWorkerCustomFieldCurrencyCodeNzd PublicWorkerCustomFieldCurrencyCode = "NZD"
-	PublicWorkerCustomFieldCurrencyCodeCny PublicWorkerCustomFieldCurrencyCode = "CNY"
-	PublicWorkerCustomFieldCurrencyCodePln PublicWorkerCustomFieldCurrencyCode = "PLN"
-	PublicWorkerCustomFieldCurrencyCodeRon PublicWorkerCustomFieldCurrencyCode = "RON"
-	PublicWorkerCustomFieldCurrencyCodeTry PublicWorkerCustomFieldCurrencyCode = "TRY"
-	PublicWorkerCustomFieldCurrencyCodeSek PublicWorkerCustomFieldCurrencyCode = "SEK"
-	PublicWorkerCustomFieldCurrencyCodeSgd PublicWorkerCustomFieldCurrencyCode = "SGD"
-	PublicWorkerCustomFieldCurrencyCodeAed PublicWorkerCustomFieldCurrencyCode = "AED"
-	PublicWorkerCustomFieldCurrencyCodeArs PublicWorkerCustomFieldCurrencyCode = "ARS"
-	PublicWorkerCustomFieldCurrencyCodeBdt PublicWorkerCustomFieldCurrencyCode = "BDT"
-	PublicWorkerCustomFieldCurrencyCodeBwp PublicWorkerCustomFieldCurrencyCode = "BWP"
-	PublicWorkerCustomFieldCurrencyCodeClp PublicWorkerCustomFieldCurrencyCode = "CLP"
-	PublicWorkerCustomFieldCurrencyCodeCop PublicWorkerCustomFieldCurrencyCode = "COP"
-	PublicWorkerCustomFieldCurrencyCodeCrc PublicWorkerCustomFieldCurrencyCode = "CRC"
-	PublicWorkerCustomFieldCurrencyCodeEgp PublicWorkerCustomFieldCurrencyCode = "EGP"
-	PublicWorkerCustomFieldCurrencyCodeFjd PublicWorkerCustomFieldCurrencyCode = "FJD"
-	PublicWorkerCustomFieldCurrencyCodeGel PublicWorkerCustomFieldCurrencyCode = "GEL"
-	PublicWorkerCustomFieldCurrencyCodeGhs PublicWorkerCustomFieldCurrencyCode = "GHS"
-	PublicWorkerCustomFieldCurrencyCodeIls PublicWorkerCustomFieldCurrencyCode = "ILS"
-	PublicWorkerCustomFieldCurrencyCodeKes PublicWorkerCustomFieldCurrencyCode = "KES"
-	PublicWorkerCustomFieldCurrencyCodeKrw PublicWorkerCustomFieldCurrencyCode = "KRW"
-	PublicWorkerCustomFieldCurrencyCodeLkr PublicWorkerCustomFieldCurrencyCode = "LKR"
-	PublicWorkerCustomFieldCurrencyCodeMad PublicWorkerCustomFieldCurrencyCode = "MAD"
-	PublicWorkerCustomFieldCurrencyCodeMxn PublicWorkerCustomFieldCurrencyCode = "MXN"
-	PublicWorkerCustomFieldCurrencyCodeNpr PublicWorkerCustomFieldCurrencyCode = "NPR"
-	PublicWorkerCustomFieldCurrencyCodePhp PublicWorkerCustomFieldCurrencyCode = "PHP"
-	PublicWorkerCustomFieldCurrencyCodePkr PublicWorkerCustomFieldCurrencyCode = "PKR"
-	PublicWorkerCustomFieldCurrencyCodeThb PublicWorkerCustomFieldCurrencyCode = "THB"
-	PublicWorkerCustomFieldCurrencyCodeUah PublicWorkerCustomFieldCurrencyCode = "UAH"
-	PublicWorkerCustomFieldCurrencyCodeUgx PublicWorkerCustomFieldCurrencyCode = "UGX"
-	PublicWorkerCustomFieldCurrencyCodeUyu PublicWorkerCustomFieldCurrencyCode = "UYU"
-	PublicWorkerCustomFieldCurrencyCodeVnd PublicWorkerCustomFieldCurrencyCode = "VND"
-	PublicWorkerCustomFieldCurrencyCodeZar PublicWorkerCustomFieldCurrencyCode = "ZAR"
-	PublicWorkerCustomFieldCurrencyCodeZmw PublicWorkerCustomFieldCurrencyCode = "ZMW"
-	PublicWorkerCustomFieldCurrencyCodeTnd PublicWorkerCustomFieldCurrencyCode = "TND"
-	PublicWorkerCustomFieldCurrencyCodeNgn PublicWorkerCustomFieldCurrencyCode = "NGN"
-	PublicWorkerCustomFieldCurrencyCodeRsd PublicWorkerCustomFieldCurrencyCode = "RSD"
-	PublicWorkerCustomFieldCurrencyCodeTwd PublicWorkerCustomFieldCurrencyCode = "TWD"
-	PublicWorkerCustomFieldCurrencyCodeGtq PublicWorkerCustomFieldCurrencyCode = "GTQ"
-	PublicWorkerCustomFieldCurrencyCodeHnl PublicWorkerCustomFieldCurrencyCode = "HNL"
-	PublicWorkerCustomFieldCurrencyCodeDop PublicWorkerCustomFieldCurrencyCode = "DOP"
-	PublicWorkerCustomFieldCurrencyCodeSar PublicWorkerCustomFieldCurrencyCode = "SAR"
-	PublicWorkerCustomFieldCurrencyCodeXaf PublicWorkerCustomFieldCurrencyCode = "XAF"
-	PublicWorkerCustomFieldCurrencyCodePen PublicWorkerCustomFieldCurrencyCode = "PEN"
+	WorkerUpdateResponseLevelTrackIc        WorkerUpdateResponseLevelTrack = "ic"
+	WorkerUpdateResponseLevelTrackManager   WorkerUpdateResponseLevelTrack = "manager"
+	WorkerUpdateResponseLevelTrackExecutive WorkerUpdateResponseLevelTrack = "executive"
 )
 
-func (r PublicWorkerCustomFieldCurrencyCode) IsKnown() bool {
+func (r WorkerUpdateResponseLevelTrack) IsKnown() bool {
 	switch r {
-	case PublicWorkerCustomFieldCurrencyCodeUsd, PublicWorkerCustomFieldCurrencyCodeAud, PublicWorkerCustomFieldCurrencyCodeBgn, PublicWorkerCustomFieldCurrencyCodeBrl, PublicWorkerCustomFieldCurrencyCodeCad, PublicWorkerCustomFieldCurrencyCodeChf, PublicWorkerCustomFieldCurrencyCodeCzk, PublicWorkerCustomFieldCurrencyCodeDkk, PublicWorkerCustomFieldCurrencyCodeEur, PublicWorkerCustomFieldCurrencyCodeGbp, PublicWorkerCustomFieldCurrencyCodeHkd, PublicWorkerCustomFieldCurrencyCodeHuf, PublicWorkerCustomFieldCurrencyCodeIdr, PublicWorkerCustomFieldCurrencyCodeInr, PublicWorkerCustomFieldCurrencyCodeJpy, PublicWorkerCustomFieldCurrencyCodeMyr, PublicWorkerCustomFieldCurrencyCodeNok, PublicWorkerCustomFieldCurrencyCodeNzd, PublicWorkerCustomFieldCurrencyCodeCny, PublicWorkerCustomFieldCurrencyCodePln, PublicWorkerCustomFieldCurrencyCodeRon, PublicWorkerCustomFieldCurrencyCodeTry, PublicWorkerCustomFieldCurrencyCodeSek, PublicWorkerCustomFieldCurrencyCodeSgd, PublicWorkerCustomFieldCurrencyCodeAed, PublicWorkerCustomFieldCurrencyCodeArs, PublicWorkerCustomFieldCurrencyCodeBdt, PublicWorkerCustomFieldCurrencyCodeBwp, PublicWorkerCustomFieldCurrencyCodeClp, PublicWorkerCustomFieldCurrencyCodeCop, PublicWorkerCustomFieldCurrencyCodeCrc, PublicWorkerCustomFieldCurrencyCodeEgp, PublicWorkerCustomFieldCurrencyCodeFjd, PublicWorkerCustomFieldCurrencyCodeGel, PublicWorkerCustomFieldCurrencyCodeGhs, PublicWorkerCustomFieldCurrencyCodeIls, PublicWorkerCustomFieldCurrencyCodeKes, PublicWorkerCustomFieldCurrencyCodeKrw, PublicWorkerCustomFieldCurrencyCodeLkr, PublicWorkerCustomFieldCurrencyCodeMad, PublicWorkerCustomFieldCurrencyCodeMxn, PublicWorkerCustomFieldCurrencyCodeNpr, PublicWorkerCustomFieldCurrencyCodePhp, PublicWorkerCustomFieldCurrencyCodePkr, PublicWorkerCustomFieldCurrencyCodeThb, PublicWorkerCustomFieldCurrencyCodeUah, PublicWorkerCustomFieldCurrencyCodeUgx, PublicWorkerCustomFieldCurrencyCodeUyu, PublicWorkerCustomFieldCurrencyCodeVnd, PublicWorkerCustomFieldCurrencyCodeZar, PublicWorkerCustomFieldCurrencyCodeZmw, PublicWorkerCustomFieldCurrencyCodeTnd, PublicWorkerCustomFieldCurrencyCodeNgn, PublicWorkerCustomFieldCurrencyCodeRsd, PublicWorkerCustomFieldCurrencyCodeTwd, PublicWorkerCustomFieldCurrencyCodeGtq, PublicWorkerCustomFieldCurrencyCodeHnl, PublicWorkerCustomFieldCurrencyCodeDop, PublicWorkerCustomFieldCurrencyCodeSar, PublicWorkerCustomFieldCurrencyCodeXaf, PublicWorkerCustomFieldCurrencyCodePen:
+	case WorkerUpdateResponseLevelTrackIc, WorkerUpdateResponseLevelTrackManager, WorkerUpdateResponseLevelTrackExecutive:
+		return true
+	}
+	return false
+}
+
+type WorkerGetResponsePrimaryWorkplaceType string
+
+const (
+	WorkerGetResponsePrimaryWorkplaceTypeRemote WorkerGetResponsePrimaryWorkplaceType = "remote"
+	WorkerGetResponsePrimaryWorkplaceTypeOffice WorkerGetResponsePrimaryWorkplaceType = "office"
+)
+
+func (r WorkerGetResponsePrimaryWorkplaceType) IsKnown() bool {
+	switch r {
+	case WorkerGetResponsePrimaryWorkplaceTypeRemote, WorkerGetResponsePrimaryWorkplaceTypeOffice:
+		return true
+	}
+	return false
+}
+
+type WorkerGetResponseLevelTrack string
+
+const (
+	WorkerGetResponseLevelTrackIc        WorkerGetResponseLevelTrack = "ic"
+	WorkerGetResponseLevelTrackManager   WorkerGetResponseLevelTrack = "manager"
+	WorkerGetResponseLevelTrackExecutive WorkerGetResponseLevelTrack = "executive"
+)
+
+func (r WorkerGetResponseLevelTrack) IsKnown() bool {
+	switch r {
+	case WorkerGetResponseLevelTrackIc, WorkerGetResponseLevelTrackManager, WorkerGetResponseLevelTrackExecutive:
 		return true
 	}
 	return false
@@ -3177,34 +4074,24 @@ func (r WorkerListResponseDataMaritalStatus) IsKnown() bool {
 	return false
 }
 
-type WorkerListResponseDataAddress struct {
-	Line1      string                               `json:"line1" api:"required"`
-	Line2      string                               `json:"line2" api:"required,nullable"`
-	City       string                               `json:"city" api:"required"`
-	State      string                               `json:"state" api:"required,nullable"`
-	PostalCode string                               `json:"postalCode" api:"required,nullable"`
-	Country    WorkerListResponseDataAddressCountry `json:"country" api:"required"`
-	JSON       workerListResponseDataAddressJSON    `json:"-"`
-}
+type WorkerListResponseDataTShirtSize string
 
-// workerListResponseDataAddressJSON contains the JSON metadata for the struct [WorkerListResponseDataAddress]
-type workerListResponseDataAddressJSON struct {
-	Line1       apijson.Field
-	Line2       apijson.Field
-	City        apijson.Field
-	State       apijson.Field
-	PostalCode  apijson.Field
-	Country     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
+const (
+	WorkerListResponseDataTShirtSizeXs   WorkerListResponseDataTShirtSize = "XS"
+	WorkerListResponseDataTShirtSizeS    WorkerListResponseDataTShirtSize = "S"
+	WorkerListResponseDataTShirtSizeM    WorkerListResponseDataTShirtSize = "M"
+	WorkerListResponseDataTShirtSizeL    WorkerListResponseDataTShirtSize = "L"
+	WorkerListResponseDataTShirtSizeXl   WorkerListResponseDataTShirtSize = "XL"
+	WorkerListResponseDataTShirtSizeXxl  WorkerListResponseDataTShirtSize = "XXL"
+	WorkerListResponseDataTShirtSizeXxxl WorkerListResponseDataTShirtSize = "XXXL"
+)
 
-func (r *WorkerListResponseDataAddress) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r workerListResponseDataAddressJSON) RawJSON() string {
-	return r.raw
+func (r WorkerListResponseDataTShirtSize) IsKnown() bool {
+	switch r {
+	case WorkerListResponseDataTShirtSizeXs, WorkerListResponseDataTShirtSizeS, WorkerListResponseDataTShirtSizeM, WorkerListResponseDataTShirtSizeL, WorkerListResponseDataTShirtSizeXl, WorkerListResponseDataTShirtSizeXxl, WorkerListResponseDataTShirtSizeXxxl:
+		return true
+	}
+	return false
 }
 
 type WorkerListResponseDataDepartment struct {
@@ -3282,563 +4169,6 @@ func (r workerListResponseDataLevelJSON) RawJSON() string {
 	return r.raw
 }
 
-type WorkerGetResponseAddressCountry string
-
-const (
-	WorkerGetResponseAddressCountryAd WorkerGetResponseAddressCountry = "AD"
-	WorkerGetResponseAddressCountryAe WorkerGetResponseAddressCountry = "AE"
-	WorkerGetResponseAddressCountryAf WorkerGetResponseAddressCountry = "AF"
-	WorkerGetResponseAddressCountryAg WorkerGetResponseAddressCountry = "AG"
-	WorkerGetResponseAddressCountryAI WorkerGetResponseAddressCountry = "AI"
-	WorkerGetResponseAddressCountryAl WorkerGetResponseAddressCountry = "AL"
-	WorkerGetResponseAddressCountryAm WorkerGetResponseAddressCountry = "AM"
-	WorkerGetResponseAddressCountryAo WorkerGetResponseAddressCountry = "AO"
-	WorkerGetResponseAddressCountryAq WorkerGetResponseAddressCountry = "AQ"
-	WorkerGetResponseAddressCountryAr WorkerGetResponseAddressCountry = "AR"
-	WorkerGetResponseAddressCountryAs WorkerGetResponseAddressCountry = "AS"
-	WorkerGetResponseAddressCountryAt WorkerGetResponseAddressCountry = "AT"
-	WorkerGetResponseAddressCountryAu WorkerGetResponseAddressCountry = "AU"
-	WorkerGetResponseAddressCountryAw WorkerGetResponseAddressCountry = "AW"
-	WorkerGetResponseAddressCountryAx WorkerGetResponseAddressCountry = "AX"
-	WorkerGetResponseAddressCountryAz WorkerGetResponseAddressCountry = "AZ"
-	WorkerGetResponseAddressCountryBa WorkerGetResponseAddressCountry = "BA"
-	WorkerGetResponseAddressCountryBb WorkerGetResponseAddressCountry = "BB"
-	WorkerGetResponseAddressCountryBd WorkerGetResponseAddressCountry = "BD"
-	WorkerGetResponseAddressCountryBe WorkerGetResponseAddressCountry = "BE"
-	WorkerGetResponseAddressCountryBf WorkerGetResponseAddressCountry = "BF"
-	WorkerGetResponseAddressCountryBg WorkerGetResponseAddressCountry = "BG"
-	WorkerGetResponseAddressCountryBh WorkerGetResponseAddressCountry = "BH"
-	WorkerGetResponseAddressCountryBi WorkerGetResponseAddressCountry = "BI"
-	WorkerGetResponseAddressCountryBj WorkerGetResponseAddressCountry = "BJ"
-	WorkerGetResponseAddressCountryBl WorkerGetResponseAddressCountry = "BL"
-	WorkerGetResponseAddressCountryBm WorkerGetResponseAddressCountry = "BM"
-	WorkerGetResponseAddressCountryBn WorkerGetResponseAddressCountry = "BN"
-	WorkerGetResponseAddressCountryBo WorkerGetResponseAddressCountry = "BO"
-	WorkerGetResponseAddressCountryBq WorkerGetResponseAddressCountry = "BQ"
-	WorkerGetResponseAddressCountryBr WorkerGetResponseAddressCountry = "BR"
-	WorkerGetResponseAddressCountryBs WorkerGetResponseAddressCountry = "BS"
-	WorkerGetResponseAddressCountryBt WorkerGetResponseAddressCountry = "BT"
-	WorkerGetResponseAddressCountryBv WorkerGetResponseAddressCountry = "BV"
-	WorkerGetResponseAddressCountryBw WorkerGetResponseAddressCountry = "BW"
-	WorkerGetResponseAddressCountryBy WorkerGetResponseAddressCountry = "BY"
-	WorkerGetResponseAddressCountryBz WorkerGetResponseAddressCountry = "BZ"
-	WorkerGetResponseAddressCountryCa WorkerGetResponseAddressCountry = "CA"
-	WorkerGetResponseAddressCountryCc WorkerGetResponseAddressCountry = "CC"
-	WorkerGetResponseAddressCountryCd WorkerGetResponseAddressCountry = "CD"
-	WorkerGetResponseAddressCountryCf WorkerGetResponseAddressCountry = "CF"
-	WorkerGetResponseAddressCountryCg WorkerGetResponseAddressCountry = "CG"
-	WorkerGetResponseAddressCountryCh WorkerGetResponseAddressCountry = "CH"
-	WorkerGetResponseAddressCountryCi WorkerGetResponseAddressCountry = "CI"
-	WorkerGetResponseAddressCountryCk WorkerGetResponseAddressCountry = "CK"
-	WorkerGetResponseAddressCountryCl WorkerGetResponseAddressCountry = "CL"
-	WorkerGetResponseAddressCountryCm WorkerGetResponseAddressCountry = "CM"
-	WorkerGetResponseAddressCountryCn WorkerGetResponseAddressCountry = "CN"
-	WorkerGetResponseAddressCountryCo WorkerGetResponseAddressCountry = "CO"
-	WorkerGetResponseAddressCountryCr WorkerGetResponseAddressCountry = "CR"
-	WorkerGetResponseAddressCountryCu WorkerGetResponseAddressCountry = "CU"
-	WorkerGetResponseAddressCountryCv WorkerGetResponseAddressCountry = "CV"
-	WorkerGetResponseAddressCountryCw WorkerGetResponseAddressCountry = "CW"
-	WorkerGetResponseAddressCountryCx WorkerGetResponseAddressCountry = "CX"
-	WorkerGetResponseAddressCountryCy WorkerGetResponseAddressCountry = "CY"
-	WorkerGetResponseAddressCountryCz WorkerGetResponseAddressCountry = "CZ"
-	WorkerGetResponseAddressCountryDe WorkerGetResponseAddressCountry = "DE"
-	WorkerGetResponseAddressCountryDj WorkerGetResponseAddressCountry = "DJ"
-	WorkerGetResponseAddressCountryDk WorkerGetResponseAddressCountry = "DK"
-	WorkerGetResponseAddressCountryDm WorkerGetResponseAddressCountry = "DM"
-	WorkerGetResponseAddressCountryDo WorkerGetResponseAddressCountry = "DO"
-	WorkerGetResponseAddressCountryDz WorkerGetResponseAddressCountry = "DZ"
-	WorkerGetResponseAddressCountryEc WorkerGetResponseAddressCountry = "EC"
-	WorkerGetResponseAddressCountryEe WorkerGetResponseAddressCountry = "EE"
-	WorkerGetResponseAddressCountryEg WorkerGetResponseAddressCountry = "EG"
-	WorkerGetResponseAddressCountryEh WorkerGetResponseAddressCountry = "EH"
-	WorkerGetResponseAddressCountryEr WorkerGetResponseAddressCountry = "ER"
-	WorkerGetResponseAddressCountryEs WorkerGetResponseAddressCountry = "ES"
-	WorkerGetResponseAddressCountryEt WorkerGetResponseAddressCountry = "ET"
-	WorkerGetResponseAddressCountryFi WorkerGetResponseAddressCountry = "FI"
-	WorkerGetResponseAddressCountryFj WorkerGetResponseAddressCountry = "FJ"
-	WorkerGetResponseAddressCountryFk WorkerGetResponseAddressCountry = "FK"
-	WorkerGetResponseAddressCountryFm WorkerGetResponseAddressCountry = "FM"
-	WorkerGetResponseAddressCountryFo WorkerGetResponseAddressCountry = "FO"
-	WorkerGetResponseAddressCountryFr WorkerGetResponseAddressCountry = "FR"
-	WorkerGetResponseAddressCountryGa WorkerGetResponseAddressCountry = "GA"
-	WorkerGetResponseAddressCountryGB WorkerGetResponseAddressCountry = "GB"
-	WorkerGetResponseAddressCountryGd WorkerGetResponseAddressCountry = "GD"
-	WorkerGetResponseAddressCountryGe WorkerGetResponseAddressCountry = "GE"
-	WorkerGetResponseAddressCountryGf WorkerGetResponseAddressCountry = "GF"
-	WorkerGetResponseAddressCountryGg WorkerGetResponseAddressCountry = "GG"
-	WorkerGetResponseAddressCountryGh WorkerGetResponseAddressCountry = "GH"
-	WorkerGetResponseAddressCountryGi WorkerGetResponseAddressCountry = "GI"
-	WorkerGetResponseAddressCountryGl WorkerGetResponseAddressCountry = "GL"
-	WorkerGetResponseAddressCountryGm WorkerGetResponseAddressCountry = "GM"
-	WorkerGetResponseAddressCountryGn WorkerGetResponseAddressCountry = "GN"
-	WorkerGetResponseAddressCountryGp WorkerGetResponseAddressCountry = "GP"
-	WorkerGetResponseAddressCountryGq WorkerGetResponseAddressCountry = "GQ"
-	WorkerGetResponseAddressCountryGr WorkerGetResponseAddressCountry = "GR"
-	WorkerGetResponseAddressCountryGs WorkerGetResponseAddressCountry = "GS"
-	WorkerGetResponseAddressCountryGt WorkerGetResponseAddressCountry = "GT"
-	WorkerGetResponseAddressCountryGu WorkerGetResponseAddressCountry = "GU"
-	WorkerGetResponseAddressCountryGw WorkerGetResponseAddressCountry = "GW"
-	WorkerGetResponseAddressCountryGy WorkerGetResponseAddressCountry = "GY"
-	WorkerGetResponseAddressCountryHk WorkerGetResponseAddressCountry = "HK"
-	WorkerGetResponseAddressCountryHm WorkerGetResponseAddressCountry = "HM"
-	WorkerGetResponseAddressCountryHn WorkerGetResponseAddressCountry = "HN"
-	WorkerGetResponseAddressCountryHr WorkerGetResponseAddressCountry = "HR"
-	WorkerGetResponseAddressCountryHt WorkerGetResponseAddressCountry = "HT"
-	WorkerGetResponseAddressCountryHu WorkerGetResponseAddressCountry = "HU"
-	WorkerGetResponseAddressCountryID WorkerGetResponseAddressCountry = "ID"
-	WorkerGetResponseAddressCountryIe WorkerGetResponseAddressCountry = "IE"
-	WorkerGetResponseAddressCountryIl WorkerGetResponseAddressCountry = "IL"
-	WorkerGetResponseAddressCountryIm WorkerGetResponseAddressCountry = "IM"
-	WorkerGetResponseAddressCountryIn WorkerGetResponseAddressCountry = "IN"
-	WorkerGetResponseAddressCountryIo WorkerGetResponseAddressCountry = "IO"
-	WorkerGetResponseAddressCountryIq WorkerGetResponseAddressCountry = "IQ"
-	WorkerGetResponseAddressCountryIr WorkerGetResponseAddressCountry = "IR"
-	WorkerGetResponseAddressCountryIs WorkerGetResponseAddressCountry = "IS"
-	WorkerGetResponseAddressCountryIt WorkerGetResponseAddressCountry = "IT"
-	WorkerGetResponseAddressCountryJe WorkerGetResponseAddressCountry = "JE"
-	WorkerGetResponseAddressCountryJm WorkerGetResponseAddressCountry = "JM"
-	WorkerGetResponseAddressCountryJo WorkerGetResponseAddressCountry = "JO"
-	WorkerGetResponseAddressCountryJp WorkerGetResponseAddressCountry = "JP"
-	WorkerGetResponseAddressCountryKe WorkerGetResponseAddressCountry = "KE"
-	WorkerGetResponseAddressCountryKg WorkerGetResponseAddressCountry = "KG"
-	WorkerGetResponseAddressCountryKh WorkerGetResponseAddressCountry = "KH"
-	WorkerGetResponseAddressCountryKi WorkerGetResponseAddressCountry = "KI"
-	WorkerGetResponseAddressCountryKm WorkerGetResponseAddressCountry = "KM"
-	WorkerGetResponseAddressCountryKn WorkerGetResponseAddressCountry = "KN"
-	WorkerGetResponseAddressCountryKp WorkerGetResponseAddressCountry = "KP"
-	WorkerGetResponseAddressCountryKr WorkerGetResponseAddressCountry = "KR"
-	WorkerGetResponseAddressCountryKw WorkerGetResponseAddressCountry = "KW"
-	WorkerGetResponseAddressCountryKy WorkerGetResponseAddressCountry = "KY"
-	WorkerGetResponseAddressCountryKz WorkerGetResponseAddressCountry = "KZ"
-	WorkerGetResponseAddressCountryLa WorkerGetResponseAddressCountry = "LA"
-	WorkerGetResponseAddressCountryLb WorkerGetResponseAddressCountry = "LB"
-	WorkerGetResponseAddressCountryLc WorkerGetResponseAddressCountry = "LC"
-	WorkerGetResponseAddressCountryLi WorkerGetResponseAddressCountry = "LI"
-	WorkerGetResponseAddressCountryLk WorkerGetResponseAddressCountry = "LK"
-	WorkerGetResponseAddressCountryLr WorkerGetResponseAddressCountry = "LR"
-	WorkerGetResponseAddressCountryLs WorkerGetResponseAddressCountry = "LS"
-	WorkerGetResponseAddressCountryLt WorkerGetResponseAddressCountry = "LT"
-	WorkerGetResponseAddressCountryLu WorkerGetResponseAddressCountry = "LU"
-	WorkerGetResponseAddressCountryLv WorkerGetResponseAddressCountry = "LV"
-	WorkerGetResponseAddressCountryLy WorkerGetResponseAddressCountry = "LY"
-	WorkerGetResponseAddressCountryMa WorkerGetResponseAddressCountry = "MA"
-	WorkerGetResponseAddressCountryMc WorkerGetResponseAddressCountry = "MC"
-	WorkerGetResponseAddressCountryMd WorkerGetResponseAddressCountry = "MD"
-	WorkerGetResponseAddressCountryMe WorkerGetResponseAddressCountry = "ME"
-	WorkerGetResponseAddressCountryMf WorkerGetResponseAddressCountry = "MF"
-	WorkerGetResponseAddressCountryMg WorkerGetResponseAddressCountry = "MG"
-	WorkerGetResponseAddressCountryMh WorkerGetResponseAddressCountry = "MH"
-	WorkerGetResponseAddressCountryMk WorkerGetResponseAddressCountry = "MK"
-	WorkerGetResponseAddressCountryMl WorkerGetResponseAddressCountry = "ML"
-	WorkerGetResponseAddressCountryMm WorkerGetResponseAddressCountry = "MM"
-	WorkerGetResponseAddressCountryMn WorkerGetResponseAddressCountry = "MN"
-	WorkerGetResponseAddressCountryMo WorkerGetResponseAddressCountry = "MO"
-	WorkerGetResponseAddressCountryMp WorkerGetResponseAddressCountry = "MP"
-	WorkerGetResponseAddressCountryMq WorkerGetResponseAddressCountry = "MQ"
-	WorkerGetResponseAddressCountryMr WorkerGetResponseAddressCountry = "MR"
-	WorkerGetResponseAddressCountryMs WorkerGetResponseAddressCountry = "MS"
-	WorkerGetResponseAddressCountryMt WorkerGetResponseAddressCountry = "MT"
-	WorkerGetResponseAddressCountryMu WorkerGetResponseAddressCountry = "MU"
-	WorkerGetResponseAddressCountryMv WorkerGetResponseAddressCountry = "MV"
-	WorkerGetResponseAddressCountryMw WorkerGetResponseAddressCountry = "MW"
-	WorkerGetResponseAddressCountryMx WorkerGetResponseAddressCountry = "MX"
-	WorkerGetResponseAddressCountryMy WorkerGetResponseAddressCountry = "MY"
-	WorkerGetResponseAddressCountryMz WorkerGetResponseAddressCountry = "MZ"
-	WorkerGetResponseAddressCountryNa WorkerGetResponseAddressCountry = "NA"
-	WorkerGetResponseAddressCountryNc WorkerGetResponseAddressCountry = "NC"
-	WorkerGetResponseAddressCountryNe WorkerGetResponseAddressCountry = "NE"
-	WorkerGetResponseAddressCountryNf WorkerGetResponseAddressCountry = "NF"
-	WorkerGetResponseAddressCountryNg WorkerGetResponseAddressCountry = "NG"
-	WorkerGetResponseAddressCountryNi WorkerGetResponseAddressCountry = "NI"
-	WorkerGetResponseAddressCountryNl WorkerGetResponseAddressCountry = "NL"
-	WorkerGetResponseAddressCountryNo WorkerGetResponseAddressCountry = "NO"
-	WorkerGetResponseAddressCountryNp WorkerGetResponseAddressCountry = "NP"
-	WorkerGetResponseAddressCountryNr WorkerGetResponseAddressCountry = "NR"
-	WorkerGetResponseAddressCountryNu WorkerGetResponseAddressCountry = "NU"
-	WorkerGetResponseAddressCountryNz WorkerGetResponseAddressCountry = "NZ"
-	WorkerGetResponseAddressCountryOm WorkerGetResponseAddressCountry = "OM"
-	WorkerGetResponseAddressCountryPa WorkerGetResponseAddressCountry = "PA"
-	WorkerGetResponseAddressCountryPe WorkerGetResponseAddressCountry = "PE"
-	WorkerGetResponseAddressCountryPf WorkerGetResponseAddressCountry = "PF"
-	WorkerGetResponseAddressCountryPg WorkerGetResponseAddressCountry = "PG"
-	WorkerGetResponseAddressCountryPh WorkerGetResponseAddressCountry = "PH"
-	WorkerGetResponseAddressCountryPk WorkerGetResponseAddressCountry = "PK"
-	WorkerGetResponseAddressCountryPl WorkerGetResponseAddressCountry = "PL"
-	WorkerGetResponseAddressCountryPm WorkerGetResponseAddressCountry = "PM"
-	WorkerGetResponseAddressCountryPn WorkerGetResponseAddressCountry = "PN"
-	WorkerGetResponseAddressCountryPr WorkerGetResponseAddressCountry = "PR"
-	WorkerGetResponseAddressCountryPs WorkerGetResponseAddressCountry = "PS"
-	WorkerGetResponseAddressCountryPt WorkerGetResponseAddressCountry = "PT"
-	WorkerGetResponseAddressCountryPw WorkerGetResponseAddressCountry = "PW"
-	WorkerGetResponseAddressCountryPy WorkerGetResponseAddressCountry = "PY"
-	WorkerGetResponseAddressCountryQa WorkerGetResponseAddressCountry = "QA"
-	WorkerGetResponseAddressCountryRe WorkerGetResponseAddressCountry = "RE"
-	WorkerGetResponseAddressCountryRo WorkerGetResponseAddressCountry = "RO"
-	WorkerGetResponseAddressCountryRs WorkerGetResponseAddressCountry = "RS"
-	WorkerGetResponseAddressCountryRu WorkerGetResponseAddressCountry = "RU"
-	WorkerGetResponseAddressCountryRw WorkerGetResponseAddressCountry = "RW"
-	WorkerGetResponseAddressCountrySa WorkerGetResponseAddressCountry = "SA"
-	WorkerGetResponseAddressCountrySb WorkerGetResponseAddressCountry = "SB"
-	WorkerGetResponseAddressCountrySc WorkerGetResponseAddressCountry = "SC"
-	WorkerGetResponseAddressCountrySd WorkerGetResponseAddressCountry = "SD"
-	WorkerGetResponseAddressCountrySe WorkerGetResponseAddressCountry = "SE"
-	WorkerGetResponseAddressCountrySg WorkerGetResponseAddressCountry = "SG"
-	WorkerGetResponseAddressCountrySh WorkerGetResponseAddressCountry = "SH"
-	WorkerGetResponseAddressCountrySi WorkerGetResponseAddressCountry = "SI"
-	WorkerGetResponseAddressCountrySj WorkerGetResponseAddressCountry = "SJ"
-	WorkerGetResponseAddressCountrySk WorkerGetResponseAddressCountry = "SK"
-	WorkerGetResponseAddressCountrySl WorkerGetResponseAddressCountry = "SL"
-	WorkerGetResponseAddressCountrySm WorkerGetResponseAddressCountry = "SM"
-	WorkerGetResponseAddressCountrySn WorkerGetResponseAddressCountry = "SN"
-	WorkerGetResponseAddressCountrySo WorkerGetResponseAddressCountry = "SO"
-	WorkerGetResponseAddressCountrySr WorkerGetResponseAddressCountry = "SR"
-	WorkerGetResponseAddressCountrySS WorkerGetResponseAddressCountry = "SS"
-	WorkerGetResponseAddressCountrySt WorkerGetResponseAddressCountry = "ST"
-	WorkerGetResponseAddressCountrySv WorkerGetResponseAddressCountry = "SV"
-	WorkerGetResponseAddressCountrySx WorkerGetResponseAddressCountry = "SX"
-	WorkerGetResponseAddressCountrySy WorkerGetResponseAddressCountry = "SY"
-	WorkerGetResponseAddressCountrySz WorkerGetResponseAddressCountry = "SZ"
-	WorkerGetResponseAddressCountryTc WorkerGetResponseAddressCountry = "TC"
-	WorkerGetResponseAddressCountryTd WorkerGetResponseAddressCountry = "TD"
-	WorkerGetResponseAddressCountryTf WorkerGetResponseAddressCountry = "TF"
-	WorkerGetResponseAddressCountryTg WorkerGetResponseAddressCountry = "TG"
-	WorkerGetResponseAddressCountryTh WorkerGetResponseAddressCountry = "TH"
-	WorkerGetResponseAddressCountryTj WorkerGetResponseAddressCountry = "TJ"
-	WorkerGetResponseAddressCountryTk WorkerGetResponseAddressCountry = "TK"
-	WorkerGetResponseAddressCountryTl WorkerGetResponseAddressCountry = "TL"
-	WorkerGetResponseAddressCountryTm WorkerGetResponseAddressCountry = "TM"
-	WorkerGetResponseAddressCountryTn WorkerGetResponseAddressCountry = "TN"
-	WorkerGetResponseAddressCountryTo WorkerGetResponseAddressCountry = "TO"
-	WorkerGetResponseAddressCountryTr WorkerGetResponseAddressCountry = "TR"
-	WorkerGetResponseAddressCountryTt WorkerGetResponseAddressCountry = "TT"
-	WorkerGetResponseAddressCountryTv WorkerGetResponseAddressCountry = "TV"
-	WorkerGetResponseAddressCountryTw WorkerGetResponseAddressCountry = "TW"
-	WorkerGetResponseAddressCountryTz WorkerGetResponseAddressCountry = "TZ"
-	WorkerGetResponseAddressCountryUa WorkerGetResponseAddressCountry = "UA"
-	WorkerGetResponseAddressCountryUg WorkerGetResponseAddressCountry = "UG"
-	WorkerGetResponseAddressCountryUm WorkerGetResponseAddressCountry = "UM"
-	WorkerGetResponseAddressCountryUs WorkerGetResponseAddressCountry = "US"
-	WorkerGetResponseAddressCountryUy WorkerGetResponseAddressCountry = "UY"
-	WorkerGetResponseAddressCountryUz WorkerGetResponseAddressCountry = "UZ"
-	WorkerGetResponseAddressCountryVa WorkerGetResponseAddressCountry = "VA"
-	WorkerGetResponseAddressCountryVc WorkerGetResponseAddressCountry = "VC"
-	WorkerGetResponseAddressCountryVe WorkerGetResponseAddressCountry = "VE"
-	WorkerGetResponseAddressCountryVg WorkerGetResponseAddressCountry = "VG"
-	WorkerGetResponseAddressCountryVi WorkerGetResponseAddressCountry = "VI"
-	WorkerGetResponseAddressCountryVn WorkerGetResponseAddressCountry = "VN"
-	WorkerGetResponseAddressCountryVu WorkerGetResponseAddressCountry = "VU"
-	WorkerGetResponseAddressCountryWf WorkerGetResponseAddressCountry = "WF"
-	WorkerGetResponseAddressCountryWs WorkerGetResponseAddressCountry = "WS"
-	WorkerGetResponseAddressCountryXk WorkerGetResponseAddressCountry = "XK"
-	WorkerGetResponseAddressCountryYe WorkerGetResponseAddressCountry = "YE"
-	WorkerGetResponseAddressCountryYt WorkerGetResponseAddressCountry = "YT"
-	WorkerGetResponseAddressCountryZa WorkerGetResponseAddressCountry = "ZA"
-	WorkerGetResponseAddressCountryZm WorkerGetResponseAddressCountry = "ZM"
-	WorkerGetResponseAddressCountryZw WorkerGetResponseAddressCountry = "ZW"
-)
-
-func (r WorkerGetResponseAddressCountry) IsKnown() bool {
-	switch r {
-	case WorkerGetResponseAddressCountryAd, WorkerGetResponseAddressCountryAe, WorkerGetResponseAddressCountryAf, WorkerGetResponseAddressCountryAg, WorkerGetResponseAddressCountryAI, WorkerGetResponseAddressCountryAl, WorkerGetResponseAddressCountryAm, WorkerGetResponseAddressCountryAo, WorkerGetResponseAddressCountryAq, WorkerGetResponseAddressCountryAr, WorkerGetResponseAddressCountryAs, WorkerGetResponseAddressCountryAt, WorkerGetResponseAddressCountryAu, WorkerGetResponseAddressCountryAw, WorkerGetResponseAddressCountryAx, WorkerGetResponseAddressCountryAz, WorkerGetResponseAddressCountryBa, WorkerGetResponseAddressCountryBb, WorkerGetResponseAddressCountryBd, WorkerGetResponseAddressCountryBe, WorkerGetResponseAddressCountryBf, WorkerGetResponseAddressCountryBg, WorkerGetResponseAddressCountryBh, WorkerGetResponseAddressCountryBi, WorkerGetResponseAddressCountryBj, WorkerGetResponseAddressCountryBl, WorkerGetResponseAddressCountryBm, WorkerGetResponseAddressCountryBn, WorkerGetResponseAddressCountryBo, WorkerGetResponseAddressCountryBq, WorkerGetResponseAddressCountryBr, WorkerGetResponseAddressCountryBs, WorkerGetResponseAddressCountryBt, WorkerGetResponseAddressCountryBv, WorkerGetResponseAddressCountryBw, WorkerGetResponseAddressCountryBy, WorkerGetResponseAddressCountryBz, WorkerGetResponseAddressCountryCa, WorkerGetResponseAddressCountryCc, WorkerGetResponseAddressCountryCd, WorkerGetResponseAddressCountryCf, WorkerGetResponseAddressCountryCg, WorkerGetResponseAddressCountryCh, WorkerGetResponseAddressCountryCi, WorkerGetResponseAddressCountryCk, WorkerGetResponseAddressCountryCl, WorkerGetResponseAddressCountryCm, WorkerGetResponseAddressCountryCn, WorkerGetResponseAddressCountryCo, WorkerGetResponseAddressCountryCr, WorkerGetResponseAddressCountryCu, WorkerGetResponseAddressCountryCv, WorkerGetResponseAddressCountryCw, WorkerGetResponseAddressCountryCx, WorkerGetResponseAddressCountryCy, WorkerGetResponseAddressCountryCz, WorkerGetResponseAddressCountryDe, WorkerGetResponseAddressCountryDj, WorkerGetResponseAddressCountryDk, WorkerGetResponseAddressCountryDm, WorkerGetResponseAddressCountryDo, WorkerGetResponseAddressCountryDz, WorkerGetResponseAddressCountryEc, WorkerGetResponseAddressCountryEe, WorkerGetResponseAddressCountryEg, WorkerGetResponseAddressCountryEh, WorkerGetResponseAddressCountryEr, WorkerGetResponseAddressCountryEs, WorkerGetResponseAddressCountryEt, WorkerGetResponseAddressCountryFi, WorkerGetResponseAddressCountryFj, WorkerGetResponseAddressCountryFk, WorkerGetResponseAddressCountryFm, WorkerGetResponseAddressCountryFo, WorkerGetResponseAddressCountryFr, WorkerGetResponseAddressCountryGa, WorkerGetResponseAddressCountryGB, WorkerGetResponseAddressCountryGd, WorkerGetResponseAddressCountryGe, WorkerGetResponseAddressCountryGf, WorkerGetResponseAddressCountryGg, WorkerGetResponseAddressCountryGh, WorkerGetResponseAddressCountryGi, WorkerGetResponseAddressCountryGl, WorkerGetResponseAddressCountryGm, WorkerGetResponseAddressCountryGn, WorkerGetResponseAddressCountryGp, WorkerGetResponseAddressCountryGq, WorkerGetResponseAddressCountryGr, WorkerGetResponseAddressCountryGs, WorkerGetResponseAddressCountryGt, WorkerGetResponseAddressCountryGu, WorkerGetResponseAddressCountryGw, WorkerGetResponseAddressCountryGy, WorkerGetResponseAddressCountryHk, WorkerGetResponseAddressCountryHm, WorkerGetResponseAddressCountryHn, WorkerGetResponseAddressCountryHr, WorkerGetResponseAddressCountryHt, WorkerGetResponseAddressCountryHu, WorkerGetResponseAddressCountryID, WorkerGetResponseAddressCountryIe, WorkerGetResponseAddressCountryIl, WorkerGetResponseAddressCountryIm, WorkerGetResponseAddressCountryIn, WorkerGetResponseAddressCountryIo, WorkerGetResponseAddressCountryIq, WorkerGetResponseAddressCountryIr, WorkerGetResponseAddressCountryIs, WorkerGetResponseAddressCountryIt, WorkerGetResponseAddressCountryJe, WorkerGetResponseAddressCountryJm, WorkerGetResponseAddressCountryJo, WorkerGetResponseAddressCountryJp, WorkerGetResponseAddressCountryKe, WorkerGetResponseAddressCountryKg, WorkerGetResponseAddressCountryKh, WorkerGetResponseAddressCountryKi, WorkerGetResponseAddressCountryKm, WorkerGetResponseAddressCountryKn, WorkerGetResponseAddressCountryKp, WorkerGetResponseAddressCountryKr, WorkerGetResponseAddressCountryKw, WorkerGetResponseAddressCountryKy, WorkerGetResponseAddressCountryKz, WorkerGetResponseAddressCountryLa, WorkerGetResponseAddressCountryLb, WorkerGetResponseAddressCountryLc, WorkerGetResponseAddressCountryLi, WorkerGetResponseAddressCountryLk, WorkerGetResponseAddressCountryLr, WorkerGetResponseAddressCountryLs, WorkerGetResponseAddressCountryLt, WorkerGetResponseAddressCountryLu, WorkerGetResponseAddressCountryLv, WorkerGetResponseAddressCountryLy, WorkerGetResponseAddressCountryMa, WorkerGetResponseAddressCountryMc, WorkerGetResponseAddressCountryMd, WorkerGetResponseAddressCountryMe, WorkerGetResponseAddressCountryMf, WorkerGetResponseAddressCountryMg, WorkerGetResponseAddressCountryMh, WorkerGetResponseAddressCountryMk, WorkerGetResponseAddressCountryMl, WorkerGetResponseAddressCountryMm, WorkerGetResponseAddressCountryMn, WorkerGetResponseAddressCountryMo, WorkerGetResponseAddressCountryMp, WorkerGetResponseAddressCountryMq, WorkerGetResponseAddressCountryMr, WorkerGetResponseAddressCountryMs, WorkerGetResponseAddressCountryMt, WorkerGetResponseAddressCountryMu, WorkerGetResponseAddressCountryMv, WorkerGetResponseAddressCountryMw, WorkerGetResponseAddressCountryMx, WorkerGetResponseAddressCountryMy, WorkerGetResponseAddressCountryMz, WorkerGetResponseAddressCountryNa, WorkerGetResponseAddressCountryNc, WorkerGetResponseAddressCountryNe, WorkerGetResponseAddressCountryNf, WorkerGetResponseAddressCountryNg, WorkerGetResponseAddressCountryNi, WorkerGetResponseAddressCountryNl, WorkerGetResponseAddressCountryNo, WorkerGetResponseAddressCountryNp, WorkerGetResponseAddressCountryNr, WorkerGetResponseAddressCountryNu, WorkerGetResponseAddressCountryNz, WorkerGetResponseAddressCountryOm, WorkerGetResponseAddressCountryPa, WorkerGetResponseAddressCountryPe, WorkerGetResponseAddressCountryPf, WorkerGetResponseAddressCountryPg, WorkerGetResponseAddressCountryPh, WorkerGetResponseAddressCountryPk, WorkerGetResponseAddressCountryPl, WorkerGetResponseAddressCountryPm, WorkerGetResponseAddressCountryPn, WorkerGetResponseAddressCountryPr, WorkerGetResponseAddressCountryPs, WorkerGetResponseAddressCountryPt, WorkerGetResponseAddressCountryPw, WorkerGetResponseAddressCountryPy, WorkerGetResponseAddressCountryQa, WorkerGetResponseAddressCountryRe, WorkerGetResponseAddressCountryRo, WorkerGetResponseAddressCountryRs, WorkerGetResponseAddressCountryRu, WorkerGetResponseAddressCountryRw, WorkerGetResponseAddressCountrySa, WorkerGetResponseAddressCountrySb, WorkerGetResponseAddressCountrySc, WorkerGetResponseAddressCountrySd, WorkerGetResponseAddressCountrySe, WorkerGetResponseAddressCountrySg, WorkerGetResponseAddressCountrySh, WorkerGetResponseAddressCountrySi, WorkerGetResponseAddressCountrySj, WorkerGetResponseAddressCountrySk, WorkerGetResponseAddressCountrySl, WorkerGetResponseAddressCountrySm, WorkerGetResponseAddressCountrySn, WorkerGetResponseAddressCountrySo, WorkerGetResponseAddressCountrySr, WorkerGetResponseAddressCountrySS, WorkerGetResponseAddressCountrySt, WorkerGetResponseAddressCountrySv, WorkerGetResponseAddressCountrySx, WorkerGetResponseAddressCountrySy, WorkerGetResponseAddressCountrySz, WorkerGetResponseAddressCountryTc, WorkerGetResponseAddressCountryTd, WorkerGetResponseAddressCountryTf, WorkerGetResponseAddressCountryTg, WorkerGetResponseAddressCountryTh, WorkerGetResponseAddressCountryTj, WorkerGetResponseAddressCountryTk, WorkerGetResponseAddressCountryTl, WorkerGetResponseAddressCountryTm, WorkerGetResponseAddressCountryTn, WorkerGetResponseAddressCountryTo, WorkerGetResponseAddressCountryTr, WorkerGetResponseAddressCountryTt, WorkerGetResponseAddressCountryTv, WorkerGetResponseAddressCountryTw, WorkerGetResponseAddressCountryTz, WorkerGetResponseAddressCountryUa, WorkerGetResponseAddressCountryUg, WorkerGetResponseAddressCountryUm, WorkerGetResponseAddressCountryUs, WorkerGetResponseAddressCountryUy, WorkerGetResponseAddressCountryUz, WorkerGetResponseAddressCountryVa, WorkerGetResponseAddressCountryVc, WorkerGetResponseAddressCountryVe, WorkerGetResponseAddressCountryVg, WorkerGetResponseAddressCountryVi, WorkerGetResponseAddressCountryVn, WorkerGetResponseAddressCountryVu, WorkerGetResponseAddressCountryWf, WorkerGetResponseAddressCountryWs, WorkerGetResponseAddressCountryXk, WorkerGetResponseAddressCountryYe, WorkerGetResponseAddressCountryYt, WorkerGetResponseAddressCountryZa, WorkerGetResponseAddressCountryZm, WorkerGetResponseAddressCountryZw:
-		return true
-	}
-	return false
-}
-
-type WorkerGetResponsePrimaryWorkplaceType string
-
-const (
-	WorkerGetResponsePrimaryWorkplaceTypeRemote WorkerGetResponsePrimaryWorkplaceType = "remote"
-	WorkerGetResponsePrimaryWorkplaceTypeOffice WorkerGetResponsePrimaryWorkplaceType = "office"
-)
-
-func (r WorkerGetResponsePrimaryWorkplaceType) IsKnown() bool {
-	switch r {
-	case WorkerGetResponsePrimaryWorkplaceTypeRemote, WorkerGetResponsePrimaryWorkplaceTypeOffice:
-		return true
-	}
-	return false
-}
-
-type WorkerGetResponseLevelTrack string
-
-const (
-	WorkerGetResponseLevelTrackIc        WorkerGetResponseLevelTrack = "ic"
-	WorkerGetResponseLevelTrackManager   WorkerGetResponseLevelTrack = "manager"
-	WorkerGetResponseLevelTrackExecutive WorkerGetResponseLevelTrack = "executive"
-)
-
-func (r WorkerGetResponseLevelTrack) IsKnown() bool {
-	switch r {
-	case WorkerGetResponseLevelTrackIc, WorkerGetResponseLevelTrackManager, WorkerGetResponseLevelTrackExecutive:
-		return true
-	}
-	return false
-}
-
-type WorkerNewEmployeeResponseAddressCountry string
-
-const (
-	WorkerNewEmployeeResponseAddressCountryAd WorkerNewEmployeeResponseAddressCountry = "AD"
-	WorkerNewEmployeeResponseAddressCountryAe WorkerNewEmployeeResponseAddressCountry = "AE"
-	WorkerNewEmployeeResponseAddressCountryAf WorkerNewEmployeeResponseAddressCountry = "AF"
-	WorkerNewEmployeeResponseAddressCountryAg WorkerNewEmployeeResponseAddressCountry = "AG"
-	WorkerNewEmployeeResponseAddressCountryAI WorkerNewEmployeeResponseAddressCountry = "AI"
-	WorkerNewEmployeeResponseAddressCountryAl WorkerNewEmployeeResponseAddressCountry = "AL"
-	WorkerNewEmployeeResponseAddressCountryAm WorkerNewEmployeeResponseAddressCountry = "AM"
-	WorkerNewEmployeeResponseAddressCountryAo WorkerNewEmployeeResponseAddressCountry = "AO"
-	WorkerNewEmployeeResponseAddressCountryAq WorkerNewEmployeeResponseAddressCountry = "AQ"
-	WorkerNewEmployeeResponseAddressCountryAr WorkerNewEmployeeResponseAddressCountry = "AR"
-	WorkerNewEmployeeResponseAddressCountryAs WorkerNewEmployeeResponseAddressCountry = "AS"
-	WorkerNewEmployeeResponseAddressCountryAt WorkerNewEmployeeResponseAddressCountry = "AT"
-	WorkerNewEmployeeResponseAddressCountryAu WorkerNewEmployeeResponseAddressCountry = "AU"
-	WorkerNewEmployeeResponseAddressCountryAw WorkerNewEmployeeResponseAddressCountry = "AW"
-	WorkerNewEmployeeResponseAddressCountryAx WorkerNewEmployeeResponseAddressCountry = "AX"
-	WorkerNewEmployeeResponseAddressCountryAz WorkerNewEmployeeResponseAddressCountry = "AZ"
-	WorkerNewEmployeeResponseAddressCountryBa WorkerNewEmployeeResponseAddressCountry = "BA"
-	WorkerNewEmployeeResponseAddressCountryBb WorkerNewEmployeeResponseAddressCountry = "BB"
-	WorkerNewEmployeeResponseAddressCountryBd WorkerNewEmployeeResponseAddressCountry = "BD"
-	WorkerNewEmployeeResponseAddressCountryBe WorkerNewEmployeeResponseAddressCountry = "BE"
-	WorkerNewEmployeeResponseAddressCountryBf WorkerNewEmployeeResponseAddressCountry = "BF"
-	WorkerNewEmployeeResponseAddressCountryBg WorkerNewEmployeeResponseAddressCountry = "BG"
-	WorkerNewEmployeeResponseAddressCountryBh WorkerNewEmployeeResponseAddressCountry = "BH"
-	WorkerNewEmployeeResponseAddressCountryBi WorkerNewEmployeeResponseAddressCountry = "BI"
-	WorkerNewEmployeeResponseAddressCountryBj WorkerNewEmployeeResponseAddressCountry = "BJ"
-	WorkerNewEmployeeResponseAddressCountryBl WorkerNewEmployeeResponseAddressCountry = "BL"
-	WorkerNewEmployeeResponseAddressCountryBm WorkerNewEmployeeResponseAddressCountry = "BM"
-	WorkerNewEmployeeResponseAddressCountryBn WorkerNewEmployeeResponseAddressCountry = "BN"
-	WorkerNewEmployeeResponseAddressCountryBo WorkerNewEmployeeResponseAddressCountry = "BO"
-	WorkerNewEmployeeResponseAddressCountryBq WorkerNewEmployeeResponseAddressCountry = "BQ"
-	WorkerNewEmployeeResponseAddressCountryBr WorkerNewEmployeeResponseAddressCountry = "BR"
-	WorkerNewEmployeeResponseAddressCountryBs WorkerNewEmployeeResponseAddressCountry = "BS"
-	WorkerNewEmployeeResponseAddressCountryBt WorkerNewEmployeeResponseAddressCountry = "BT"
-	WorkerNewEmployeeResponseAddressCountryBv WorkerNewEmployeeResponseAddressCountry = "BV"
-	WorkerNewEmployeeResponseAddressCountryBw WorkerNewEmployeeResponseAddressCountry = "BW"
-	WorkerNewEmployeeResponseAddressCountryBy WorkerNewEmployeeResponseAddressCountry = "BY"
-	WorkerNewEmployeeResponseAddressCountryBz WorkerNewEmployeeResponseAddressCountry = "BZ"
-	WorkerNewEmployeeResponseAddressCountryCa WorkerNewEmployeeResponseAddressCountry = "CA"
-	WorkerNewEmployeeResponseAddressCountryCc WorkerNewEmployeeResponseAddressCountry = "CC"
-	WorkerNewEmployeeResponseAddressCountryCd WorkerNewEmployeeResponseAddressCountry = "CD"
-	WorkerNewEmployeeResponseAddressCountryCf WorkerNewEmployeeResponseAddressCountry = "CF"
-	WorkerNewEmployeeResponseAddressCountryCg WorkerNewEmployeeResponseAddressCountry = "CG"
-	WorkerNewEmployeeResponseAddressCountryCh WorkerNewEmployeeResponseAddressCountry = "CH"
-	WorkerNewEmployeeResponseAddressCountryCi WorkerNewEmployeeResponseAddressCountry = "CI"
-	WorkerNewEmployeeResponseAddressCountryCk WorkerNewEmployeeResponseAddressCountry = "CK"
-	WorkerNewEmployeeResponseAddressCountryCl WorkerNewEmployeeResponseAddressCountry = "CL"
-	WorkerNewEmployeeResponseAddressCountryCm WorkerNewEmployeeResponseAddressCountry = "CM"
-	WorkerNewEmployeeResponseAddressCountryCn WorkerNewEmployeeResponseAddressCountry = "CN"
-	WorkerNewEmployeeResponseAddressCountryCo WorkerNewEmployeeResponseAddressCountry = "CO"
-	WorkerNewEmployeeResponseAddressCountryCr WorkerNewEmployeeResponseAddressCountry = "CR"
-	WorkerNewEmployeeResponseAddressCountryCu WorkerNewEmployeeResponseAddressCountry = "CU"
-	WorkerNewEmployeeResponseAddressCountryCv WorkerNewEmployeeResponseAddressCountry = "CV"
-	WorkerNewEmployeeResponseAddressCountryCw WorkerNewEmployeeResponseAddressCountry = "CW"
-	WorkerNewEmployeeResponseAddressCountryCx WorkerNewEmployeeResponseAddressCountry = "CX"
-	WorkerNewEmployeeResponseAddressCountryCy WorkerNewEmployeeResponseAddressCountry = "CY"
-	WorkerNewEmployeeResponseAddressCountryCz WorkerNewEmployeeResponseAddressCountry = "CZ"
-	WorkerNewEmployeeResponseAddressCountryDe WorkerNewEmployeeResponseAddressCountry = "DE"
-	WorkerNewEmployeeResponseAddressCountryDj WorkerNewEmployeeResponseAddressCountry = "DJ"
-	WorkerNewEmployeeResponseAddressCountryDk WorkerNewEmployeeResponseAddressCountry = "DK"
-	WorkerNewEmployeeResponseAddressCountryDm WorkerNewEmployeeResponseAddressCountry = "DM"
-	WorkerNewEmployeeResponseAddressCountryDo WorkerNewEmployeeResponseAddressCountry = "DO"
-	WorkerNewEmployeeResponseAddressCountryDz WorkerNewEmployeeResponseAddressCountry = "DZ"
-	WorkerNewEmployeeResponseAddressCountryEc WorkerNewEmployeeResponseAddressCountry = "EC"
-	WorkerNewEmployeeResponseAddressCountryEe WorkerNewEmployeeResponseAddressCountry = "EE"
-	WorkerNewEmployeeResponseAddressCountryEg WorkerNewEmployeeResponseAddressCountry = "EG"
-	WorkerNewEmployeeResponseAddressCountryEh WorkerNewEmployeeResponseAddressCountry = "EH"
-	WorkerNewEmployeeResponseAddressCountryEr WorkerNewEmployeeResponseAddressCountry = "ER"
-	WorkerNewEmployeeResponseAddressCountryEs WorkerNewEmployeeResponseAddressCountry = "ES"
-	WorkerNewEmployeeResponseAddressCountryEt WorkerNewEmployeeResponseAddressCountry = "ET"
-	WorkerNewEmployeeResponseAddressCountryFi WorkerNewEmployeeResponseAddressCountry = "FI"
-	WorkerNewEmployeeResponseAddressCountryFj WorkerNewEmployeeResponseAddressCountry = "FJ"
-	WorkerNewEmployeeResponseAddressCountryFk WorkerNewEmployeeResponseAddressCountry = "FK"
-	WorkerNewEmployeeResponseAddressCountryFm WorkerNewEmployeeResponseAddressCountry = "FM"
-	WorkerNewEmployeeResponseAddressCountryFo WorkerNewEmployeeResponseAddressCountry = "FO"
-	WorkerNewEmployeeResponseAddressCountryFr WorkerNewEmployeeResponseAddressCountry = "FR"
-	WorkerNewEmployeeResponseAddressCountryGa WorkerNewEmployeeResponseAddressCountry = "GA"
-	WorkerNewEmployeeResponseAddressCountryGB WorkerNewEmployeeResponseAddressCountry = "GB"
-	WorkerNewEmployeeResponseAddressCountryGd WorkerNewEmployeeResponseAddressCountry = "GD"
-	WorkerNewEmployeeResponseAddressCountryGe WorkerNewEmployeeResponseAddressCountry = "GE"
-	WorkerNewEmployeeResponseAddressCountryGf WorkerNewEmployeeResponseAddressCountry = "GF"
-	WorkerNewEmployeeResponseAddressCountryGg WorkerNewEmployeeResponseAddressCountry = "GG"
-	WorkerNewEmployeeResponseAddressCountryGh WorkerNewEmployeeResponseAddressCountry = "GH"
-	WorkerNewEmployeeResponseAddressCountryGi WorkerNewEmployeeResponseAddressCountry = "GI"
-	WorkerNewEmployeeResponseAddressCountryGl WorkerNewEmployeeResponseAddressCountry = "GL"
-	WorkerNewEmployeeResponseAddressCountryGm WorkerNewEmployeeResponseAddressCountry = "GM"
-	WorkerNewEmployeeResponseAddressCountryGn WorkerNewEmployeeResponseAddressCountry = "GN"
-	WorkerNewEmployeeResponseAddressCountryGp WorkerNewEmployeeResponseAddressCountry = "GP"
-	WorkerNewEmployeeResponseAddressCountryGq WorkerNewEmployeeResponseAddressCountry = "GQ"
-	WorkerNewEmployeeResponseAddressCountryGr WorkerNewEmployeeResponseAddressCountry = "GR"
-	WorkerNewEmployeeResponseAddressCountryGs WorkerNewEmployeeResponseAddressCountry = "GS"
-	WorkerNewEmployeeResponseAddressCountryGt WorkerNewEmployeeResponseAddressCountry = "GT"
-	WorkerNewEmployeeResponseAddressCountryGu WorkerNewEmployeeResponseAddressCountry = "GU"
-	WorkerNewEmployeeResponseAddressCountryGw WorkerNewEmployeeResponseAddressCountry = "GW"
-	WorkerNewEmployeeResponseAddressCountryGy WorkerNewEmployeeResponseAddressCountry = "GY"
-	WorkerNewEmployeeResponseAddressCountryHk WorkerNewEmployeeResponseAddressCountry = "HK"
-	WorkerNewEmployeeResponseAddressCountryHm WorkerNewEmployeeResponseAddressCountry = "HM"
-	WorkerNewEmployeeResponseAddressCountryHn WorkerNewEmployeeResponseAddressCountry = "HN"
-	WorkerNewEmployeeResponseAddressCountryHr WorkerNewEmployeeResponseAddressCountry = "HR"
-	WorkerNewEmployeeResponseAddressCountryHt WorkerNewEmployeeResponseAddressCountry = "HT"
-	WorkerNewEmployeeResponseAddressCountryHu WorkerNewEmployeeResponseAddressCountry = "HU"
-	WorkerNewEmployeeResponseAddressCountryID WorkerNewEmployeeResponseAddressCountry = "ID"
-	WorkerNewEmployeeResponseAddressCountryIe WorkerNewEmployeeResponseAddressCountry = "IE"
-	WorkerNewEmployeeResponseAddressCountryIl WorkerNewEmployeeResponseAddressCountry = "IL"
-	WorkerNewEmployeeResponseAddressCountryIm WorkerNewEmployeeResponseAddressCountry = "IM"
-	WorkerNewEmployeeResponseAddressCountryIn WorkerNewEmployeeResponseAddressCountry = "IN"
-	WorkerNewEmployeeResponseAddressCountryIo WorkerNewEmployeeResponseAddressCountry = "IO"
-	WorkerNewEmployeeResponseAddressCountryIq WorkerNewEmployeeResponseAddressCountry = "IQ"
-	WorkerNewEmployeeResponseAddressCountryIr WorkerNewEmployeeResponseAddressCountry = "IR"
-	WorkerNewEmployeeResponseAddressCountryIs WorkerNewEmployeeResponseAddressCountry = "IS"
-	WorkerNewEmployeeResponseAddressCountryIt WorkerNewEmployeeResponseAddressCountry = "IT"
-	WorkerNewEmployeeResponseAddressCountryJe WorkerNewEmployeeResponseAddressCountry = "JE"
-	WorkerNewEmployeeResponseAddressCountryJm WorkerNewEmployeeResponseAddressCountry = "JM"
-	WorkerNewEmployeeResponseAddressCountryJo WorkerNewEmployeeResponseAddressCountry = "JO"
-	WorkerNewEmployeeResponseAddressCountryJp WorkerNewEmployeeResponseAddressCountry = "JP"
-	WorkerNewEmployeeResponseAddressCountryKe WorkerNewEmployeeResponseAddressCountry = "KE"
-	WorkerNewEmployeeResponseAddressCountryKg WorkerNewEmployeeResponseAddressCountry = "KG"
-	WorkerNewEmployeeResponseAddressCountryKh WorkerNewEmployeeResponseAddressCountry = "KH"
-	WorkerNewEmployeeResponseAddressCountryKi WorkerNewEmployeeResponseAddressCountry = "KI"
-	WorkerNewEmployeeResponseAddressCountryKm WorkerNewEmployeeResponseAddressCountry = "KM"
-	WorkerNewEmployeeResponseAddressCountryKn WorkerNewEmployeeResponseAddressCountry = "KN"
-	WorkerNewEmployeeResponseAddressCountryKp WorkerNewEmployeeResponseAddressCountry = "KP"
-	WorkerNewEmployeeResponseAddressCountryKr WorkerNewEmployeeResponseAddressCountry = "KR"
-	WorkerNewEmployeeResponseAddressCountryKw WorkerNewEmployeeResponseAddressCountry = "KW"
-	WorkerNewEmployeeResponseAddressCountryKy WorkerNewEmployeeResponseAddressCountry = "KY"
-	WorkerNewEmployeeResponseAddressCountryKz WorkerNewEmployeeResponseAddressCountry = "KZ"
-	WorkerNewEmployeeResponseAddressCountryLa WorkerNewEmployeeResponseAddressCountry = "LA"
-	WorkerNewEmployeeResponseAddressCountryLb WorkerNewEmployeeResponseAddressCountry = "LB"
-	WorkerNewEmployeeResponseAddressCountryLc WorkerNewEmployeeResponseAddressCountry = "LC"
-	WorkerNewEmployeeResponseAddressCountryLi WorkerNewEmployeeResponseAddressCountry = "LI"
-	WorkerNewEmployeeResponseAddressCountryLk WorkerNewEmployeeResponseAddressCountry = "LK"
-	WorkerNewEmployeeResponseAddressCountryLr WorkerNewEmployeeResponseAddressCountry = "LR"
-	WorkerNewEmployeeResponseAddressCountryLs WorkerNewEmployeeResponseAddressCountry = "LS"
-	WorkerNewEmployeeResponseAddressCountryLt WorkerNewEmployeeResponseAddressCountry = "LT"
-	WorkerNewEmployeeResponseAddressCountryLu WorkerNewEmployeeResponseAddressCountry = "LU"
-	WorkerNewEmployeeResponseAddressCountryLv WorkerNewEmployeeResponseAddressCountry = "LV"
-	WorkerNewEmployeeResponseAddressCountryLy WorkerNewEmployeeResponseAddressCountry = "LY"
-	WorkerNewEmployeeResponseAddressCountryMa WorkerNewEmployeeResponseAddressCountry = "MA"
-	WorkerNewEmployeeResponseAddressCountryMc WorkerNewEmployeeResponseAddressCountry = "MC"
-	WorkerNewEmployeeResponseAddressCountryMd WorkerNewEmployeeResponseAddressCountry = "MD"
-	WorkerNewEmployeeResponseAddressCountryMe WorkerNewEmployeeResponseAddressCountry = "ME"
-	WorkerNewEmployeeResponseAddressCountryMf WorkerNewEmployeeResponseAddressCountry = "MF"
-	WorkerNewEmployeeResponseAddressCountryMg WorkerNewEmployeeResponseAddressCountry = "MG"
-	WorkerNewEmployeeResponseAddressCountryMh WorkerNewEmployeeResponseAddressCountry = "MH"
-	WorkerNewEmployeeResponseAddressCountryMk WorkerNewEmployeeResponseAddressCountry = "MK"
-	WorkerNewEmployeeResponseAddressCountryMl WorkerNewEmployeeResponseAddressCountry = "ML"
-	WorkerNewEmployeeResponseAddressCountryMm WorkerNewEmployeeResponseAddressCountry = "MM"
-	WorkerNewEmployeeResponseAddressCountryMn WorkerNewEmployeeResponseAddressCountry = "MN"
-	WorkerNewEmployeeResponseAddressCountryMo WorkerNewEmployeeResponseAddressCountry = "MO"
-	WorkerNewEmployeeResponseAddressCountryMp WorkerNewEmployeeResponseAddressCountry = "MP"
-	WorkerNewEmployeeResponseAddressCountryMq WorkerNewEmployeeResponseAddressCountry = "MQ"
-	WorkerNewEmployeeResponseAddressCountryMr WorkerNewEmployeeResponseAddressCountry = "MR"
-	WorkerNewEmployeeResponseAddressCountryMs WorkerNewEmployeeResponseAddressCountry = "MS"
-	WorkerNewEmployeeResponseAddressCountryMt WorkerNewEmployeeResponseAddressCountry = "MT"
-	WorkerNewEmployeeResponseAddressCountryMu WorkerNewEmployeeResponseAddressCountry = "MU"
-	WorkerNewEmployeeResponseAddressCountryMv WorkerNewEmployeeResponseAddressCountry = "MV"
-	WorkerNewEmployeeResponseAddressCountryMw WorkerNewEmployeeResponseAddressCountry = "MW"
-	WorkerNewEmployeeResponseAddressCountryMx WorkerNewEmployeeResponseAddressCountry = "MX"
-	WorkerNewEmployeeResponseAddressCountryMy WorkerNewEmployeeResponseAddressCountry = "MY"
-	WorkerNewEmployeeResponseAddressCountryMz WorkerNewEmployeeResponseAddressCountry = "MZ"
-	WorkerNewEmployeeResponseAddressCountryNa WorkerNewEmployeeResponseAddressCountry = "NA"
-	WorkerNewEmployeeResponseAddressCountryNc WorkerNewEmployeeResponseAddressCountry = "NC"
-	WorkerNewEmployeeResponseAddressCountryNe WorkerNewEmployeeResponseAddressCountry = "NE"
-	WorkerNewEmployeeResponseAddressCountryNf WorkerNewEmployeeResponseAddressCountry = "NF"
-	WorkerNewEmployeeResponseAddressCountryNg WorkerNewEmployeeResponseAddressCountry = "NG"
-	WorkerNewEmployeeResponseAddressCountryNi WorkerNewEmployeeResponseAddressCountry = "NI"
-	WorkerNewEmployeeResponseAddressCountryNl WorkerNewEmployeeResponseAddressCountry = "NL"
-	WorkerNewEmployeeResponseAddressCountryNo WorkerNewEmployeeResponseAddressCountry = "NO"
-	WorkerNewEmployeeResponseAddressCountryNp WorkerNewEmployeeResponseAddressCountry = "NP"
-	WorkerNewEmployeeResponseAddressCountryNr WorkerNewEmployeeResponseAddressCountry = "NR"
-	WorkerNewEmployeeResponseAddressCountryNu WorkerNewEmployeeResponseAddressCountry = "NU"
-	WorkerNewEmployeeResponseAddressCountryNz WorkerNewEmployeeResponseAddressCountry = "NZ"
-	WorkerNewEmployeeResponseAddressCountryOm WorkerNewEmployeeResponseAddressCountry = "OM"
-	WorkerNewEmployeeResponseAddressCountryPa WorkerNewEmployeeResponseAddressCountry = "PA"
-	WorkerNewEmployeeResponseAddressCountryPe WorkerNewEmployeeResponseAddressCountry = "PE"
-	WorkerNewEmployeeResponseAddressCountryPf WorkerNewEmployeeResponseAddressCountry = "PF"
-	WorkerNewEmployeeResponseAddressCountryPg WorkerNewEmployeeResponseAddressCountry = "PG"
-	WorkerNewEmployeeResponseAddressCountryPh WorkerNewEmployeeResponseAddressCountry = "PH"
-	WorkerNewEmployeeResponseAddressCountryPk WorkerNewEmployeeResponseAddressCountry = "PK"
-	WorkerNewEmployeeResponseAddressCountryPl WorkerNewEmployeeResponseAddressCountry = "PL"
-	WorkerNewEmployeeResponseAddressCountryPm WorkerNewEmployeeResponseAddressCountry = "PM"
-	WorkerNewEmployeeResponseAddressCountryPn WorkerNewEmployeeResponseAddressCountry = "PN"
-	WorkerNewEmployeeResponseAddressCountryPr WorkerNewEmployeeResponseAddressCountry = "PR"
-	WorkerNewEmployeeResponseAddressCountryPs WorkerNewEmployeeResponseAddressCountry = "PS"
-	WorkerNewEmployeeResponseAddressCountryPt WorkerNewEmployeeResponseAddressCountry = "PT"
-	WorkerNewEmployeeResponseAddressCountryPw WorkerNewEmployeeResponseAddressCountry = "PW"
-	WorkerNewEmployeeResponseAddressCountryPy WorkerNewEmployeeResponseAddressCountry = "PY"
-	WorkerNewEmployeeResponseAddressCountryQa WorkerNewEmployeeResponseAddressCountry = "QA"
-	WorkerNewEmployeeResponseAddressCountryRe WorkerNewEmployeeResponseAddressCountry = "RE"
-	WorkerNewEmployeeResponseAddressCountryRo WorkerNewEmployeeResponseAddressCountry = "RO"
-	WorkerNewEmployeeResponseAddressCountryRs WorkerNewEmployeeResponseAddressCountry = "RS"
-	WorkerNewEmployeeResponseAddressCountryRu WorkerNewEmployeeResponseAddressCountry = "RU"
-	WorkerNewEmployeeResponseAddressCountryRw WorkerNewEmployeeResponseAddressCountry = "RW"
-	WorkerNewEmployeeResponseAddressCountrySa WorkerNewEmployeeResponseAddressCountry = "SA"
-	WorkerNewEmployeeResponseAddressCountrySb WorkerNewEmployeeResponseAddressCountry = "SB"
-	WorkerNewEmployeeResponseAddressCountrySc WorkerNewEmployeeResponseAddressCountry = "SC"
-	WorkerNewEmployeeResponseAddressCountrySd WorkerNewEmployeeResponseAddressCountry = "SD"
-	WorkerNewEmployeeResponseAddressCountrySe WorkerNewEmployeeResponseAddressCountry = "SE"
-	WorkerNewEmployeeResponseAddressCountrySg WorkerNewEmployeeResponseAddressCountry = "SG"
-	WorkerNewEmployeeResponseAddressCountrySh WorkerNewEmployeeResponseAddressCountry = "SH"
-	WorkerNewEmployeeResponseAddressCountrySi WorkerNewEmployeeResponseAddressCountry = "SI"
-	WorkerNewEmployeeResponseAddressCountrySj WorkerNewEmployeeResponseAddressCountry = "SJ"
-	WorkerNewEmployeeResponseAddressCountrySk WorkerNewEmployeeResponseAddressCountry = "SK"
-	WorkerNewEmployeeResponseAddressCountrySl WorkerNewEmployeeResponseAddressCountry = "SL"
-	WorkerNewEmployeeResponseAddressCountrySm WorkerNewEmployeeResponseAddressCountry = "SM"
-	WorkerNewEmployeeResponseAddressCountrySn WorkerNewEmployeeResponseAddressCountry = "SN"
-	WorkerNewEmployeeResponseAddressCountrySo WorkerNewEmployeeResponseAddressCountry = "SO"
-	WorkerNewEmployeeResponseAddressCountrySr WorkerNewEmployeeResponseAddressCountry = "SR"
-	WorkerNewEmployeeResponseAddressCountrySS WorkerNewEmployeeResponseAddressCountry = "SS"
-	WorkerNewEmployeeResponseAddressCountrySt WorkerNewEmployeeResponseAddressCountry = "ST"
-	WorkerNewEmployeeResponseAddressCountrySv WorkerNewEmployeeResponseAddressCountry = "SV"
-	WorkerNewEmployeeResponseAddressCountrySx WorkerNewEmployeeResponseAddressCountry = "SX"
-	WorkerNewEmployeeResponseAddressCountrySy WorkerNewEmployeeResponseAddressCountry = "SY"
-	WorkerNewEmployeeResponseAddressCountrySz WorkerNewEmployeeResponseAddressCountry = "SZ"
-	WorkerNewEmployeeResponseAddressCountryTc WorkerNewEmployeeResponseAddressCountry = "TC"
-	WorkerNewEmployeeResponseAddressCountryTd WorkerNewEmployeeResponseAddressCountry = "TD"
-	WorkerNewEmployeeResponseAddressCountryTf WorkerNewEmployeeResponseAddressCountry = "TF"
-	WorkerNewEmployeeResponseAddressCountryTg WorkerNewEmployeeResponseAddressCountry = "TG"
-	WorkerNewEmployeeResponseAddressCountryTh WorkerNewEmployeeResponseAddressCountry = "TH"
-	WorkerNewEmployeeResponseAddressCountryTj WorkerNewEmployeeResponseAddressCountry = "TJ"
-	WorkerNewEmployeeResponseAddressCountryTk WorkerNewEmployeeResponseAddressCountry = "TK"
-	WorkerNewEmployeeResponseAddressCountryTl WorkerNewEmployeeResponseAddressCountry = "TL"
-	WorkerNewEmployeeResponseAddressCountryTm WorkerNewEmployeeResponseAddressCountry = "TM"
-	WorkerNewEmployeeResponseAddressCountryTn WorkerNewEmployeeResponseAddressCountry = "TN"
-	WorkerNewEmployeeResponseAddressCountryTo WorkerNewEmployeeResponseAddressCountry = "TO"
-	WorkerNewEmployeeResponseAddressCountryTr WorkerNewEmployeeResponseAddressCountry = "TR"
-	WorkerNewEmployeeResponseAddressCountryTt WorkerNewEmployeeResponseAddressCountry = "TT"
-	WorkerNewEmployeeResponseAddressCountryTv WorkerNewEmployeeResponseAddressCountry = "TV"
-	WorkerNewEmployeeResponseAddressCountryTw WorkerNewEmployeeResponseAddressCountry = "TW"
-	WorkerNewEmployeeResponseAddressCountryTz WorkerNewEmployeeResponseAddressCountry = "TZ"
-	WorkerNewEmployeeResponseAddressCountryUa WorkerNewEmployeeResponseAddressCountry = "UA"
-	WorkerNewEmployeeResponseAddressCountryUg WorkerNewEmployeeResponseAddressCountry = "UG"
-	WorkerNewEmployeeResponseAddressCountryUm WorkerNewEmployeeResponseAddressCountry = "UM"
-	WorkerNewEmployeeResponseAddressCountryUs WorkerNewEmployeeResponseAddressCountry = "US"
-	WorkerNewEmployeeResponseAddressCountryUy WorkerNewEmployeeResponseAddressCountry = "UY"
-	WorkerNewEmployeeResponseAddressCountryUz WorkerNewEmployeeResponseAddressCountry = "UZ"
-	WorkerNewEmployeeResponseAddressCountryVa WorkerNewEmployeeResponseAddressCountry = "VA"
-	WorkerNewEmployeeResponseAddressCountryVc WorkerNewEmployeeResponseAddressCountry = "VC"
-	WorkerNewEmployeeResponseAddressCountryVe WorkerNewEmployeeResponseAddressCountry = "VE"
-	WorkerNewEmployeeResponseAddressCountryVg WorkerNewEmployeeResponseAddressCountry = "VG"
-	WorkerNewEmployeeResponseAddressCountryVi WorkerNewEmployeeResponseAddressCountry = "VI"
-	WorkerNewEmployeeResponseAddressCountryVn WorkerNewEmployeeResponseAddressCountry = "VN"
-	WorkerNewEmployeeResponseAddressCountryVu WorkerNewEmployeeResponseAddressCountry = "VU"
-	WorkerNewEmployeeResponseAddressCountryWf WorkerNewEmployeeResponseAddressCountry = "WF"
-	WorkerNewEmployeeResponseAddressCountryWs WorkerNewEmployeeResponseAddressCountry = "WS"
-	WorkerNewEmployeeResponseAddressCountryXk WorkerNewEmployeeResponseAddressCountry = "XK"
-	WorkerNewEmployeeResponseAddressCountryYe WorkerNewEmployeeResponseAddressCountry = "YE"
-	WorkerNewEmployeeResponseAddressCountryYt WorkerNewEmployeeResponseAddressCountry = "YT"
-	WorkerNewEmployeeResponseAddressCountryZa WorkerNewEmployeeResponseAddressCountry = "ZA"
-	WorkerNewEmployeeResponseAddressCountryZm WorkerNewEmployeeResponseAddressCountry = "ZM"
-	WorkerNewEmployeeResponseAddressCountryZw WorkerNewEmployeeResponseAddressCountry = "ZW"
-)
-
-func (r WorkerNewEmployeeResponseAddressCountry) IsKnown() bool {
-	switch r {
-	case WorkerNewEmployeeResponseAddressCountryAd, WorkerNewEmployeeResponseAddressCountryAe, WorkerNewEmployeeResponseAddressCountryAf, WorkerNewEmployeeResponseAddressCountryAg, WorkerNewEmployeeResponseAddressCountryAI, WorkerNewEmployeeResponseAddressCountryAl, WorkerNewEmployeeResponseAddressCountryAm, WorkerNewEmployeeResponseAddressCountryAo, WorkerNewEmployeeResponseAddressCountryAq, WorkerNewEmployeeResponseAddressCountryAr, WorkerNewEmployeeResponseAddressCountryAs, WorkerNewEmployeeResponseAddressCountryAt, WorkerNewEmployeeResponseAddressCountryAu, WorkerNewEmployeeResponseAddressCountryAw, WorkerNewEmployeeResponseAddressCountryAx, WorkerNewEmployeeResponseAddressCountryAz, WorkerNewEmployeeResponseAddressCountryBa, WorkerNewEmployeeResponseAddressCountryBb, WorkerNewEmployeeResponseAddressCountryBd, WorkerNewEmployeeResponseAddressCountryBe, WorkerNewEmployeeResponseAddressCountryBf, WorkerNewEmployeeResponseAddressCountryBg, WorkerNewEmployeeResponseAddressCountryBh, WorkerNewEmployeeResponseAddressCountryBi, WorkerNewEmployeeResponseAddressCountryBj, WorkerNewEmployeeResponseAddressCountryBl, WorkerNewEmployeeResponseAddressCountryBm, WorkerNewEmployeeResponseAddressCountryBn, WorkerNewEmployeeResponseAddressCountryBo, WorkerNewEmployeeResponseAddressCountryBq, WorkerNewEmployeeResponseAddressCountryBr, WorkerNewEmployeeResponseAddressCountryBs, WorkerNewEmployeeResponseAddressCountryBt, WorkerNewEmployeeResponseAddressCountryBv, WorkerNewEmployeeResponseAddressCountryBw, WorkerNewEmployeeResponseAddressCountryBy, WorkerNewEmployeeResponseAddressCountryBz, WorkerNewEmployeeResponseAddressCountryCa, WorkerNewEmployeeResponseAddressCountryCc, WorkerNewEmployeeResponseAddressCountryCd, WorkerNewEmployeeResponseAddressCountryCf, WorkerNewEmployeeResponseAddressCountryCg, WorkerNewEmployeeResponseAddressCountryCh, WorkerNewEmployeeResponseAddressCountryCi, WorkerNewEmployeeResponseAddressCountryCk, WorkerNewEmployeeResponseAddressCountryCl, WorkerNewEmployeeResponseAddressCountryCm, WorkerNewEmployeeResponseAddressCountryCn, WorkerNewEmployeeResponseAddressCountryCo, WorkerNewEmployeeResponseAddressCountryCr, WorkerNewEmployeeResponseAddressCountryCu, WorkerNewEmployeeResponseAddressCountryCv, WorkerNewEmployeeResponseAddressCountryCw, WorkerNewEmployeeResponseAddressCountryCx, WorkerNewEmployeeResponseAddressCountryCy, WorkerNewEmployeeResponseAddressCountryCz, WorkerNewEmployeeResponseAddressCountryDe, WorkerNewEmployeeResponseAddressCountryDj, WorkerNewEmployeeResponseAddressCountryDk, WorkerNewEmployeeResponseAddressCountryDm, WorkerNewEmployeeResponseAddressCountryDo, WorkerNewEmployeeResponseAddressCountryDz, WorkerNewEmployeeResponseAddressCountryEc, WorkerNewEmployeeResponseAddressCountryEe, WorkerNewEmployeeResponseAddressCountryEg, WorkerNewEmployeeResponseAddressCountryEh, WorkerNewEmployeeResponseAddressCountryEr, WorkerNewEmployeeResponseAddressCountryEs, WorkerNewEmployeeResponseAddressCountryEt, WorkerNewEmployeeResponseAddressCountryFi, WorkerNewEmployeeResponseAddressCountryFj, WorkerNewEmployeeResponseAddressCountryFk, WorkerNewEmployeeResponseAddressCountryFm, WorkerNewEmployeeResponseAddressCountryFo, WorkerNewEmployeeResponseAddressCountryFr, WorkerNewEmployeeResponseAddressCountryGa, WorkerNewEmployeeResponseAddressCountryGB, WorkerNewEmployeeResponseAddressCountryGd, WorkerNewEmployeeResponseAddressCountryGe, WorkerNewEmployeeResponseAddressCountryGf, WorkerNewEmployeeResponseAddressCountryGg, WorkerNewEmployeeResponseAddressCountryGh, WorkerNewEmployeeResponseAddressCountryGi, WorkerNewEmployeeResponseAddressCountryGl, WorkerNewEmployeeResponseAddressCountryGm, WorkerNewEmployeeResponseAddressCountryGn, WorkerNewEmployeeResponseAddressCountryGp, WorkerNewEmployeeResponseAddressCountryGq, WorkerNewEmployeeResponseAddressCountryGr, WorkerNewEmployeeResponseAddressCountryGs, WorkerNewEmployeeResponseAddressCountryGt, WorkerNewEmployeeResponseAddressCountryGu, WorkerNewEmployeeResponseAddressCountryGw, WorkerNewEmployeeResponseAddressCountryGy, WorkerNewEmployeeResponseAddressCountryHk, WorkerNewEmployeeResponseAddressCountryHm, WorkerNewEmployeeResponseAddressCountryHn, WorkerNewEmployeeResponseAddressCountryHr, WorkerNewEmployeeResponseAddressCountryHt, WorkerNewEmployeeResponseAddressCountryHu, WorkerNewEmployeeResponseAddressCountryID, WorkerNewEmployeeResponseAddressCountryIe, WorkerNewEmployeeResponseAddressCountryIl, WorkerNewEmployeeResponseAddressCountryIm, WorkerNewEmployeeResponseAddressCountryIn, WorkerNewEmployeeResponseAddressCountryIo, WorkerNewEmployeeResponseAddressCountryIq, WorkerNewEmployeeResponseAddressCountryIr, WorkerNewEmployeeResponseAddressCountryIs, WorkerNewEmployeeResponseAddressCountryIt, WorkerNewEmployeeResponseAddressCountryJe, WorkerNewEmployeeResponseAddressCountryJm, WorkerNewEmployeeResponseAddressCountryJo, WorkerNewEmployeeResponseAddressCountryJp, WorkerNewEmployeeResponseAddressCountryKe, WorkerNewEmployeeResponseAddressCountryKg, WorkerNewEmployeeResponseAddressCountryKh, WorkerNewEmployeeResponseAddressCountryKi, WorkerNewEmployeeResponseAddressCountryKm, WorkerNewEmployeeResponseAddressCountryKn, WorkerNewEmployeeResponseAddressCountryKp, WorkerNewEmployeeResponseAddressCountryKr, WorkerNewEmployeeResponseAddressCountryKw, WorkerNewEmployeeResponseAddressCountryKy, WorkerNewEmployeeResponseAddressCountryKz, WorkerNewEmployeeResponseAddressCountryLa, WorkerNewEmployeeResponseAddressCountryLb, WorkerNewEmployeeResponseAddressCountryLc, WorkerNewEmployeeResponseAddressCountryLi, WorkerNewEmployeeResponseAddressCountryLk, WorkerNewEmployeeResponseAddressCountryLr, WorkerNewEmployeeResponseAddressCountryLs, WorkerNewEmployeeResponseAddressCountryLt, WorkerNewEmployeeResponseAddressCountryLu, WorkerNewEmployeeResponseAddressCountryLv, WorkerNewEmployeeResponseAddressCountryLy, WorkerNewEmployeeResponseAddressCountryMa, WorkerNewEmployeeResponseAddressCountryMc, WorkerNewEmployeeResponseAddressCountryMd, WorkerNewEmployeeResponseAddressCountryMe, WorkerNewEmployeeResponseAddressCountryMf, WorkerNewEmployeeResponseAddressCountryMg, WorkerNewEmployeeResponseAddressCountryMh, WorkerNewEmployeeResponseAddressCountryMk, WorkerNewEmployeeResponseAddressCountryMl, WorkerNewEmployeeResponseAddressCountryMm, WorkerNewEmployeeResponseAddressCountryMn, WorkerNewEmployeeResponseAddressCountryMo, WorkerNewEmployeeResponseAddressCountryMp, WorkerNewEmployeeResponseAddressCountryMq, WorkerNewEmployeeResponseAddressCountryMr, WorkerNewEmployeeResponseAddressCountryMs, WorkerNewEmployeeResponseAddressCountryMt, WorkerNewEmployeeResponseAddressCountryMu, WorkerNewEmployeeResponseAddressCountryMv, WorkerNewEmployeeResponseAddressCountryMw, WorkerNewEmployeeResponseAddressCountryMx, WorkerNewEmployeeResponseAddressCountryMy, WorkerNewEmployeeResponseAddressCountryMz, WorkerNewEmployeeResponseAddressCountryNa, WorkerNewEmployeeResponseAddressCountryNc, WorkerNewEmployeeResponseAddressCountryNe, WorkerNewEmployeeResponseAddressCountryNf, WorkerNewEmployeeResponseAddressCountryNg, WorkerNewEmployeeResponseAddressCountryNi, WorkerNewEmployeeResponseAddressCountryNl, WorkerNewEmployeeResponseAddressCountryNo, WorkerNewEmployeeResponseAddressCountryNp, WorkerNewEmployeeResponseAddressCountryNr, WorkerNewEmployeeResponseAddressCountryNu, WorkerNewEmployeeResponseAddressCountryNz, WorkerNewEmployeeResponseAddressCountryOm, WorkerNewEmployeeResponseAddressCountryPa, WorkerNewEmployeeResponseAddressCountryPe, WorkerNewEmployeeResponseAddressCountryPf, WorkerNewEmployeeResponseAddressCountryPg, WorkerNewEmployeeResponseAddressCountryPh, WorkerNewEmployeeResponseAddressCountryPk, WorkerNewEmployeeResponseAddressCountryPl, WorkerNewEmployeeResponseAddressCountryPm, WorkerNewEmployeeResponseAddressCountryPn, WorkerNewEmployeeResponseAddressCountryPr, WorkerNewEmployeeResponseAddressCountryPs, WorkerNewEmployeeResponseAddressCountryPt, WorkerNewEmployeeResponseAddressCountryPw, WorkerNewEmployeeResponseAddressCountryPy, WorkerNewEmployeeResponseAddressCountryQa, WorkerNewEmployeeResponseAddressCountryRe, WorkerNewEmployeeResponseAddressCountryRo, WorkerNewEmployeeResponseAddressCountryRs, WorkerNewEmployeeResponseAddressCountryRu, WorkerNewEmployeeResponseAddressCountryRw, WorkerNewEmployeeResponseAddressCountrySa, WorkerNewEmployeeResponseAddressCountrySb, WorkerNewEmployeeResponseAddressCountrySc, WorkerNewEmployeeResponseAddressCountrySd, WorkerNewEmployeeResponseAddressCountrySe, WorkerNewEmployeeResponseAddressCountrySg, WorkerNewEmployeeResponseAddressCountrySh, WorkerNewEmployeeResponseAddressCountrySi, WorkerNewEmployeeResponseAddressCountrySj, WorkerNewEmployeeResponseAddressCountrySk, WorkerNewEmployeeResponseAddressCountrySl, WorkerNewEmployeeResponseAddressCountrySm, WorkerNewEmployeeResponseAddressCountrySn, WorkerNewEmployeeResponseAddressCountrySo, WorkerNewEmployeeResponseAddressCountrySr, WorkerNewEmployeeResponseAddressCountrySS, WorkerNewEmployeeResponseAddressCountrySt, WorkerNewEmployeeResponseAddressCountrySv, WorkerNewEmployeeResponseAddressCountrySx, WorkerNewEmployeeResponseAddressCountrySy, WorkerNewEmployeeResponseAddressCountrySz, WorkerNewEmployeeResponseAddressCountryTc, WorkerNewEmployeeResponseAddressCountryTd, WorkerNewEmployeeResponseAddressCountryTf, WorkerNewEmployeeResponseAddressCountryTg, WorkerNewEmployeeResponseAddressCountryTh, WorkerNewEmployeeResponseAddressCountryTj, WorkerNewEmployeeResponseAddressCountryTk, WorkerNewEmployeeResponseAddressCountryTl, WorkerNewEmployeeResponseAddressCountryTm, WorkerNewEmployeeResponseAddressCountryTn, WorkerNewEmployeeResponseAddressCountryTo, WorkerNewEmployeeResponseAddressCountryTr, WorkerNewEmployeeResponseAddressCountryTt, WorkerNewEmployeeResponseAddressCountryTv, WorkerNewEmployeeResponseAddressCountryTw, WorkerNewEmployeeResponseAddressCountryTz, WorkerNewEmployeeResponseAddressCountryUa, WorkerNewEmployeeResponseAddressCountryUg, WorkerNewEmployeeResponseAddressCountryUm, WorkerNewEmployeeResponseAddressCountryUs, WorkerNewEmployeeResponseAddressCountryUy, WorkerNewEmployeeResponseAddressCountryUz, WorkerNewEmployeeResponseAddressCountryVa, WorkerNewEmployeeResponseAddressCountryVc, WorkerNewEmployeeResponseAddressCountryVe, WorkerNewEmployeeResponseAddressCountryVg, WorkerNewEmployeeResponseAddressCountryVi, WorkerNewEmployeeResponseAddressCountryVn, WorkerNewEmployeeResponseAddressCountryVu, WorkerNewEmployeeResponseAddressCountryWf, WorkerNewEmployeeResponseAddressCountryWs, WorkerNewEmployeeResponseAddressCountryXk, WorkerNewEmployeeResponseAddressCountryYe, WorkerNewEmployeeResponseAddressCountryYt, WorkerNewEmployeeResponseAddressCountryZa, WorkerNewEmployeeResponseAddressCountryZm, WorkerNewEmployeeResponseAddressCountryZw:
-		return true
-	}
-	return false
-}
-
 type WorkerNewEmployeeResponsePrimaryWorkplaceType string
 
 const (
@@ -3865,269 +4195,6 @@ const (
 func (r WorkerNewEmployeeResponseLevelTrack) IsKnown() bool {
 	switch r {
 	case WorkerNewEmployeeResponseLevelTrackIc, WorkerNewEmployeeResponseLevelTrackManager, WorkerNewEmployeeResponseLevelTrackExecutive:
-		return true
-	}
-	return false
-}
-
-type WorkerNewContractorResponseAddressCountry string
-
-const (
-	WorkerNewContractorResponseAddressCountryAd WorkerNewContractorResponseAddressCountry = "AD"
-	WorkerNewContractorResponseAddressCountryAe WorkerNewContractorResponseAddressCountry = "AE"
-	WorkerNewContractorResponseAddressCountryAf WorkerNewContractorResponseAddressCountry = "AF"
-	WorkerNewContractorResponseAddressCountryAg WorkerNewContractorResponseAddressCountry = "AG"
-	WorkerNewContractorResponseAddressCountryAI WorkerNewContractorResponseAddressCountry = "AI"
-	WorkerNewContractorResponseAddressCountryAl WorkerNewContractorResponseAddressCountry = "AL"
-	WorkerNewContractorResponseAddressCountryAm WorkerNewContractorResponseAddressCountry = "AM"
-	WorkerNewContractorResponseAddressCountryAo WorkerNewContractorResponseAddressCountry = "AO"
-	WorkerNewContractorResponseAddressCountryAq WorkerNewContractorResponseAddressCountry = "AQ"
-	WorkerNewContractorResponseAddressCountryAr WorkerNewContractorResponseAddressCountry = "AR"
-	WorkerNewContractorResponseAddressCountryAs WorkerNewContractorResponseAddressCountry = "AS"
-	WorkerNewContractorResponseAddressCountryAt WorkerNewContractorResponseAddressCountry = "AT"
-	WorkerNewContractorResponseAddressCountryAu WorkerNewContractorResponseAddressCountry = "AU"
-	WorkerNewContractorResponseAddressCountryAw WorkerNewContractorResponseAddressCountry = "AW"
-	WorkerNewContractorResponseAddressCountryAx WorkerNewContractorResponseAddressCountry = "AX"
-	WorkerNewContractorResponseAddressCountryAz WorkerNewContractorResponseAddressCountry = "AZ"
-	WorkerNewContractorResponseAddressCountryBa WorkerNewContractorResponseAddressCountry = "BA"
-	WorkerNewContractorResponseAddressCountryBb WorkerNewContractorResponseAddressCountry = "BB"
-	WorkerNewContractorResponseAddressCountryBd WorkerNewContractorResponseAddressCountry = "BD"
-	WorkerNewContractorResponseAddressCountryBe WorkerNewContractorResponseAddressCountry = "BE"
-	WorkerNewContractorResponseAddressCountryBf WorkerNewContractorResponseAddressCountry = "BF"
-	WorkerNewContractorResponseAddressCountryBg WorkerNewContractorResponseAddressCountry = "BG"
-	WorkerNewContractorResponseAddressCountryBh WorkerNewContractorResponseAddressCountry = "BH"
-	WorkerNewContractorResponseAddressCountryBi WorkerNewContractorResponseAddressCountry = "BI"
-	WorkerNewContractorResponseAddressCountryBj WorkerNewContractorResponseAddressCountry = "BJ"
-	WorkerNewContractorResponseAddressCountryBl WorkerNewContractorResponseAddressCountry = "BL"
-	WorkerNewContractorResponseAddressCountryBm WorkerNewContractorResponseAddressCountry = "BM"
-	WorkerNewContractorResponseAddressCountryBn WorkerNewContractorResponseAddressCountry = "BN"
-	WorkerNewContractorResponseAddressCountryBo WorkerNewContractorResponseAddressCountry = "BO"
-	WorkerNewContractorResponseAddressCountryBq WorkerNewContractorResponseAddressCountry = "BQ"
-	WorkerNewContractorResponseAddressCountryBr WorkerNewContractorResponseAddressCountry = "BR"
-	WorkerNewContractorResponseAddressCountryBs WorkerNewContractorResponseAddressCountry = "BS"
-	WorkerNewContractorResponseAddressCountryBt WorkerNewContractorResponseAddressCountry = "BT"
-	WorkerNewContractorResponseAddressCountryBv WorkerNewContractorResponseAddressCountry = "BV"
-	WorkerNewContractorResponseAddressCountryBw WorkerNewContractorResponseAddressCountry = "BW"
-	WorkerNewContractorResponseAddressCountryBy WorkerNewContractorResponseAddressCountry = "BY"
-	WorkerNewContractorResponseAddressCountryBz WorkerNewContractorResponseAddressCountry = "BZ"
-	WorkerNewContractorResponseAddressCountryCa WorkerNewContractorResponseAddressCountry = "CA"
-	WorkerNewContractorResponseAddressCountryCc WorkerNewContractorResponseAddressCountry = "CC"
-	WorkerNewContractorResponseAddressCountryCd WorkerNewContractorResponseAddressCountry = "CD"
-	WorkerNewContractorResponseAddressCountryCf WorkerNewContractorResponseAddressCountry = "CF"
-	WorkerNewContractorResponseAddressCountryCg WorkerNewContractorResponseAddressCountry = "CG"
-	WorkerNewContractorResponseAddressCountryCh WorkerNewContractorResponseAddressCountry = "CH"
-	WorkerNewContractorResponseAddressCountryCi WorkerNewContractorResponseAddressCountry = "CI"
-	WorkerNewContractorResponseAddressCountryCk WorkerNewContractorResponseAddressCountry = "CK"
-	WorkerNewContractorResponseAddressCountryCl WorkerNewContractorResponseAddressCountry = "CL"
-	WorkerNewContractorResponseAddressCountryCm WorkerNewContractorResponseAddressCountry = "CM"
-	WorkerNewContractorResponseAddressCountryCn WorkerNewContractorResponseAddressCountry = "CN"
-	WorkerNewContractorResponseAddressCountryCo WorkerNewContractorResponseAddressCountry = "CO"
-	WorkerNewContractorResponseAddressCountryCr WorkerNewContractorResponseAddressCountry = "CR"
-	WorkerNewContractorResponseAddressCountryCu WorkerNewContractorResponseAddressCountry = "CU"
-	WorkerNewContractorResponseAddressCountryCv WorkerNewContractorResponseAddressCountry = "CV"
-	WorkerNewContractorResponseAddressCountryCw WorkerNewContractorResponseAddressCountry = "CW"
-	WorkerNewContractorResponseAddressCountryCx WorkerNewContractorResponseAddressCountry = "CX"
-	WorkerNewContractorResponseAddressCountryCy WorkerNewContractorResponseAddressCountry = "CY"
-	WorkerNewContractorResponseAddressCountryCz WorkerNewContractorResponseAddressCountry = "CZ"
-	WorkerNewContractorResponseAddressCountryDe WorkerNewContractorResponseAddressCountry = "DE"
-	WorkerNewContractorResponseAddressCountryDj WorkerNewContractorResponseAddressCountry = "DJ"
-	WorkerNewContractorResponseAddressCountryDk WorkerNewContractorResponseAddressCountry = "DK"
-	WorkerNewContractorResponseAddressCountryDm WorkerNewContractorResponseAddressCountry = "DM"
-	WorkerNewContractorResponseAddressCountryDo WorkerNewContractorResponseAddressCountry = "DO"
-	WorkerNewContractorResponseAddressCountryDz WorkerNewContractorResponseAddressCountry = "DZ"
-	WorkerNewContractorResponseAddressCountryEc WorkerNewContractorResponseAddressCountry = "EC"
-	WorkerNewContractorResponseAddressCountryEe WorkerNewContractorResponseAddressCountry = "EE"
-	WorkerNewContractorResponseAddressCountryEg WorkerNewContractorResponseAddressCountry = "EG"
-	WorkerNewContractorResponseAddressCountryEh WorkerNewContractorResponseAddressCountry = "EH"
-	WorkerNewContractorResponseAddressCountryEr WorkerNewContractorResponseAddressCountry = "ER"
-	WorkerNewContractorResponseAddressCountryEs WorkerNewContractorResponseAddressCountry = "ES"
-	WorkerNewContractorResponseAddressCountryEt WorkerNewContractorResponseAddressCountry = "ET"
-	WorkerNewContractorResponseAddressCountryFi WorkerNewContractorResponseAddressCountry = "FI"
-	WorkerNewContractorResponseAddressCountryFj WorkerNewContractorResponseAddressCountry = "FJ"
-	WorkerNewContractorResponseAddressCountryFk WorkerNewContractorResponseAddressCountry = "FK"
-	WorkerNewContractorResponseAddressCountryFm WorkerNewContractorResponseAddressCountry = "FM"
-	WorkerNewContractorResponseAddressCountryFo WorkerNewContractorResponseAddressCountry = "FO"
-	WorkerNewContractorResponseAddressCountryFr WorkerNewContractorResponseAddressCountry = "FR"
-	WorkerNewContractorResponseAddressCountryGa WorkerNewContractorResponseAddressCountry = "GA"
-	WorkerNewContractorResponseAddressCountryGB WorkerNewContractorResponseAddressCountry = "GB"
-	WorkerNewContractorResponseAddressCountryGd WorkerNewContractorResponseAddressCountry = "GD"
-	WorkerNewContractorResponseAddressCountryGe WorkerNewContractorResponseAddressCountry = "GE"
-	WorkerNewContractorResponseAddressCountryGf WorkerNewContractorResponseAddressCountry = "GF"
-	WorkerNewContractorResponseAddressCountryGg WorkerNewContractorResponseAddressCountry = "GG"
-	WorkerNewContractorResponseAddressCountryGh WorkerNewContractorResponseAddressCountry = "GH"
-	WorkerNewContractorResponseAddressCountryGi WorkerNewContractorResponseAddressCountry = "GI"
-	WorkerNewContractorResponseAddressCountryGl WorkerNewContractorResponseAddressCountry = "GL"
-	WorkerNewContractorResponseAddressCountryGm WorkerNewContractorResponseAddressCountry = "GM"
-	WorkerNewContractorResponseAddressCountryGn WorkerNewContractorResponseAddressCountry = "GN"
-	WorkerNewContractorResponseAddressCountryGp WorkerNewContractorResponseAddressCountry = "GP"
-	WorkerNewContractorResponseAddressCountryGq WorkerNewContractorResponseAddressCountry = "GQ"
-	WorkerNewContractorResponseAddressCountryGr WorkerNewContractorResponseAddressCountry = "GR"
-	WorkerNewContractorResponseAddressCountryGs WorkerNewContractorResponseAddressCountry = "GS"
-	WorkerNewContractorResponseAddressCountryGt WorkerNewContractorResponseAddressCountry = "GT"
-	WorkerNewContractorResponseAddressCountryGu WorkerNewContractorResponseAddressCountry = "GU"
-	WorkerNewContractorResponseAddressCountryGw WorkerNewContractorResponseAddressCountry = "GW"
-	WorkerNewContractorResponseAddressCountryGy WorkerNewContractorResponseAddressCountry = "GY"
-	WorkerNewContractorResponseAddressCountryHk WorkerNewContractorResponseAddressCountry = "HK"
-	WorkerNewContractorResponseAddressCountryHm WorkerNewContractorResponseAddressCountry = "HM"
-	WorkerNewContractorResponseAddressCountryHn WorkerNewContractorResponseAddressCountry = "HN"
-	WorkerNewContractorResponseAddressCountryHr WorkerNewContractorResponseAddressCountry = "HR"
-	WorkerNewContractorResponseAddressCountryHt WorkerNewContractorResponseAddressCountry = "HT"
-	WorkerNewContractorResponseAddressCountryHu WorkerNewContractorResponseAddressCountry = "HU"
-	WorkerNewContractorResponseAddressCountryID WorkerNewContractorResponseAddressCountry = "ID"
-	WorkerNewContractorResponseAddressCountryIe WorkerNewContractorResponseAddressCountry = "IE"
-	WorkerNewContractorResponseAddressCountryIl WorkerNewContractorResponseAddressCountry = "IL"
-	WorkerNewContractorResponseAddressCountryIm WorkerNewContractorResponseAddressCountry = "IM"
-	WorkerNewContractorResponseAddressCountryIn WorkerNewContractorResponseAddressCountry = "IN"
-	WorkerNewContractorResponseAddressCountryIo WorkerNewContractorResponseAddressCountry = "IO"
-	WorkerNewContractorResponseAddressCountryIq WorkerNewContractorResponseAddressCountry = "IQ"
-	WorkerNewContractorResponseAddressCountryIr WorkerNewContractorResponseAddressCountry = "IR"
-	WorkerNewContractorResponseAddressCountryIs WorkerNewContractorResponseAddressCountry = "IS"
-	WorkerNewContractorResponseAddressCountryIt WorkerNewContractorResponseAddressCountry = "IT"
-	WorkerNewContractorResponseAddressCountryJe WorkerNewContractorResponseAddressCountry = "JE"
-	WorkerNewContractorResponseAddressCountryJm WorkerNewContractorResponseAddressCountry = "JM"
-	WorkerNewContractorResponseAddressCountryJo WorkerNewContractorResponseAddressCountry = "JO"
-	WorkerNewContractorResponseAddressCountryJp WorkerNewContractorResponseAddressCountry = "JP"
-	WorkerNewContractorResponseAddressCountryKe WorkerNewContractorResponseAddressCountry = "KE"
-	WorkerNewContractorResponseAddressCountryKg WorkerNewContractorResponseAddressCountry = "KG"
-	WorkerNewContractorResponseAddressCountryKh WorkerNewContractorResponseAddressCountry = "KH"
-	WorkerNewContractorResponseAddressCountryKi WorkerNewContractorResponseAddressCountry = "KI"
-	WorkerNewContractorResponseAddressCountryKm WorkerNewContractorResponseAddressCountry = "KM"
-	WorkerNewContractorResponseAddressCountryKn WorkerNewContractorResponseAddressCountry = "KN"
-	WorkerNewContractorResponseAddressCountryKp WorkerNewContractorResponseAddressCountry = "KP"
-	WorkerNewContractorResponseAddressCountryKr WorkerNewContractorResponseAddressCountry = "KR"
-	WorkerNewContractorResponseAddressCountryKw WorkerNewContractorResponseAddressCountry = "KW"
-	WorkerNewContractorResponseAddressCountryKy WorkerNewContractorResponseAddressCountry = "KY"
-	WorkerNewContractorResponseAddressCountryKz WorkerNewContractorResponseAddressCountry = "KZ"
-	WorkerNewContractorResponseAddressCountryLa WorkerNewContractorResponseAddressCountry = "LA"
-	WorkerNewContractorResponseAddressCountryLb WorkerNewContractorResponseAddressCountry = "LB"
-	WorkerNewContractorResponseAddressCountryLc WorkerNewContractorResponseAddressCountry = "LC"
-	WorkerNewContractorResponseAddressCountryLi WorkerNewContractorResponseAddressCountry = "LI"
-	WorkerNewContractorResponseAddressCountryLk WorkerNewContractorResponseAddressCountry = "LK"
-	WorkerNewContractorResponseAddressCountryLr WorkerNewContractorResponseAddressCountry = "LR"
-	WorkerNewContractorResponseAddressCountryLs WorkerNewContractorResponseAddressCountry = "LS"
-	WorkerNewContractorResponseAddressCountryLt WorkerNewContractorResponseAddressCountry = "LT"
-	WorkerNewContractorResponseAddressCountryLu WorkerNewContractorResponseAddressCountry = "LU"
-	WorkerNewContractorResponseAddressCountryLv WorkerNewContractorResponseAddressCountry = "LV"
-	WorkerNewContractorResponseAddressCountryLy WorkerNewContractorResponseAddressCountry = "LY"
-	WorkerNewContractorResponseAddressCountryMa WorkerNewContractorResponseAddressCountry = "MA"
-	WorkerNewContractorResponseAddressCountryMc WorkerNewContractorResponseAddressCountry = "MC"
-	WorkerNewContractorResponseAddressCountryMd WorkerNewContractorResponseAddressCountry = "MD"
-	WorkerNewContractorResponseAddressCountryMe WorkerNewContractorResponseAddressCountry = "ME"
-	WorkerNewContractorResponseAddressCountryMf WorkerNewContractorResponseAddressCountry = "MF"
-	WorkerNewContractorResponseAddressCountryMg WorkerNewContractorResponseAddressCountry = "MG"
-	WorkerNewContractorResponseAddressCountryMh WorkerNewContractorResponseAddressCountry = "MH"
-	WorkerNewContractorResponseAddressCountryMk WorkerNewContractorResponseAddressCountry = "MK"
-	WorkerNewContractorResponseAddressCountryMl WorkerNewContractorResponseAddressCountry = "ML"
-	WorkerNewContractorResponseAddressCountryMm WorkerNewContractorResponseAddressCountry = "MM"
-	WorkerNewContractorResponseAddressCountryMn WorkerNewContractorResponseAddressCountry = "MN"
-	WorkerNewContractorResponseAddressCountryMo WorkerNewContractorResponseAddressCountry = "MO"
-	WorkerNewContractorResponseAddressCountryMp WorkerNewContractorResponseAddressCountry = "MP"
-	WorkerNewContractorResponseAddressCountryMq WorkerNewContractorResponseAddressCountry = "MQ"
-	WorkerNewContractorResponseAddressCountryMr WorkerNewContractorResponseAddressCountry = "MR"
-	WorkerNewContractorResponseAddressCountryMs WorkerNewContractorResponseAddressCountry = "MS"
-	WorkerNewContractorResponseAddressCountryMt WorkerNewContractorResponseAddressCountry = "MT"
-	WorkerNewContractorResponseAddressCountryMu WorkerNewContractorResponseAddressCountry = "MU"
-	WorkerNewContractorResponseAddressCountryMv WorkerNewContractorResponseAddressCountry = "MV"
-	WorkerNewContractorResponseAddressCountryMw WorkerNewContractorResponseAddressCountry = "MW"
-	WorkerNewContractorResponseAddressCountryMx WorkerNewContractorResponseAddressCountry = "MX"
-	WorkerNewContractorResponseAddressCountryMy WorkerNewContractorResponseAddressCountry = "MY"
-	WorkerNewContractorResponseAddressCountryMz WorkerNewContractorResponseAddressCountry = "MZ"
-	WorkerNewContractorResponseAddressCountryNa WorkerNewContractorResponseAddressCountry = "NA"
-	WorkerNewContractorResponseAddressCountryNc WorkerNewContractorResponseAddressCountry = "NC"
-	WorkerNewContractorResponseAddressCountryNe WorkerNewContractorResponseAddressCountry = "NE"
-	WorkerNewContractorResponseAddressCountryNf WorkerNewContractorResponseAddressCountry = "NF"
-	WorkerNewContractorResponseAddressCountryNg WorkerNewContractorResponseAddressCountry = "NG"
-	WorkerNewContractorResponseAddressCountryNi WorkerNewContractorResponseAddressCountry = "NI"
-	WorkerNewContractorResponseAddressCountryNl WorkerNewContractorResponseAddressCountry = "NL"
-	WorkerNewContractorResponseAddressCountryNo WorkerNewContractorResponseAddressCountry = "NO"
-	WorkerNewContractorResponseAddressCountryNp WorkerNewContractorResponseAddressCountry = "NP"
-	WorkerNewContractorResponseAddressCountryNr WorkerNewContractorResponseAddressCountry = "NR"
-	WorkerNewContractorResponseAddressCountryNu WorkerNewContractorResponseAddressCountry = "NU"
-	WorkerNewContractorResponseAddressCountryNz WorkerNewContractorResponseAddressCountry = "NZ"
-	WorkerNewContractorResponseAddressCountryOm WorkerNewContractorResponseAddressCountry = "OM"
-	WorkerNewContractorResponseAddressCountryPa WorkerNewContractorResponseAddressCountry = "PA"
-	WorkerNewContractorResponseAddressCountryPe WorkerNewContractorResponseAddressCountry = "PE"
-	WorkerNewContractorResponseAddressCountryPf WorkerNewContractorResponseAddressCountry = "PF"
-	WorkerNewContractorResponseAddressCountryPg WorkerNewContractorResponseAddressCountry = "PG"
-	WorkerNewContractorResponseAddressCountryPh WorkerNewContractorResponseAddressCountry = "PH"
-	WorkerNewContractorResponseAddressCountryPk WorkerNewContractorResponseAddressCountry = "PK"
-	WorkerNewContractorResponseAddressCountryPl WorkerNewContractorResponseAddressCountry = "PL"
-	WorkerNewContractorResponseAddressCountryPm WorkerNewContractorResponseAddressCountry = "PM"
-	WorkerNewContractorResponseAddressCountryPn WorkerNewContractorResponseAddressCountry = "PN"
-	WorkerNewContractorResponseAddressCountryPr WorkerNewContractorResponseAddressCountry = "PR"
-	WorkerNewContractorResponseAddressCountryPs WorkerNewContractorResponseAddressCountry = "PS"
-	WorkerNewContractorResponseAddressCountryPt WorkerNewContractorResponseAddressCountry = "PT"
-	WorkerNewContractorResponseAddressCountryPw WorkerNewContractorResponseAddressCountry = "PW"
-	WorkerNewContractorResponseAddressCountryPy WorkerNewContractorResponseAddressCountry = "PY"
-	WorkerNewContractorResponseAddressCountryQa WorkerNewContractorResponseAddressCountry = "QA"
-	WorkerNewContractorResponseAddressCountryRe WorkerNewContractorResponseAddressCountry = "RE"
-	WorkerNewContractorResponseAddressCountryRo WorkerNewContractorResponseAddressCountry = "RO"
-	WorkerNewContractorResponseAddressCountryRs WorkerNewContractorResponseAddressCountry = "RS"
-	WorkerNewContractorResponseAddressCountryRu WorkerNewContractorResponseAddressCountry = "RU"
-	WorkerNewContractorResponseAddressCountryRw WorkerNewContractorResponseAddressCountry = "RW"
-	WorkerNewContractorResponseAddressCountrySa WorkerNewContractorResponseAddressCountry = "SA"
-	WorkerNewContractorResponseAddressCountrySb WorkerNewContractorResponseAddressCountry = "SB"
-	WorkerNewContractorResponseAddressCountrySc WorkerNewContractorResponseAddressCountry = "SC"
-	WorkerNewContractorResponseAddressCountrySd WorkerNewContractorResponseAddressCountry = "SD"
-	WorkerNewContractorResponseAddressCountrySe WorkerNewContractorResponseAddressCountry = "SE"
-	WorkerNewContractorResponseAddressCountrySg WorkerNewContractorResponseAddressCountry = "SG"
-	WorkerNewContractorResponseAddressCountrySh WorkerNewContractorResponseAddressCountry = "SH"
-	WorkerNewContractorResponseAddressCountrySi WorkerNewContractorResponseAddressCountry = "SI"
-	WorkerNewContractorResponseAddressCountrySj WorkerNewContractorResponseAddressCountry = "SJ"
-	WorkerNewContractorResponseAddressCountrySk WorkerNewContractorResponseAddressCountry = "SK"
-	WorkerNewContractorResponseAddressCountrySl WorkerNewContractorResponseAddressCountry = "SL"
-	WorkerNewContractorResponseAddressCountrySm WorkerNewContractorResponseAddressCountry = "SM"
-	WorkerNewContractorResponseAddressCountrySn WorkerNewContractorResponseAddressCountry = "SN"
-	WorkerNewContractorResponseAddressCountrySo WorkerNewContractorResponseAddressCountry = "SO"
-	WorkerNewContractorResponseAddressCountrySr WorkerNewContractorResponseAddressCountry = "SR"
-	WorkerNewContractorResponseAddressCountrySS WorkerNewContractorResponseAddressCountry = "SS"
-	WorkerNewContractorResponseAddressCountrySt WorkerNewContractorResponseAddressCountry = "ST"
-	WorkerNewContractorResponseAddressCountrySv WorkerNewContractorResponseAddressCountry = "SV"
-	WorkerNewContractorResponseAddressCountrySx WorkerNewContractorResponseAddressCountry = "SX"
-	WorkerNewContractorResponseAddressCountrySy WorkerNewContractorResponseAddressCountry = "SY"
-	WorkerNewContractorResponseAddressCountrySz WorkerNewContractorResponseAddressCountry = "SZ"
-	WorkerNewContractorResponseAddressCountryTc WorkerNewContractorResponseAddressCountry = "TC"
-	WorkerNewContractorResponseAddressCountryTd WorkerNewContractorResponseAddressCountry = "TD"
-	WorkerNewContractorResponseAddressCountryTf WorkerNewContractorResponseAddressCountry = "TF"
-	WorkerNewContractorResponseAddressCountryTg WorkerNewContractorResponseAddressCountry = "TG"
-	WorkerNewContractorResponseAddressCountryTh WorkerNewContractorResponseAddressCountry = "TH"
-	WorkerNewContractorResponseAddressCountryTj WorkerNewContractorResponseAddressCountry = "TJ"
-	WorkerNewContractorResponseAddressCountryTk WorkerNewContractorResponseAddressCountry = "TK"
-	WorkerNewContractorResponseAddressCountryTl WorkerNewContractorResponseAddressCountry = "TL"
-	WorkerNewContractorResponseAddressCountryTm WorkerNewContractorResponseAddressCountry = "TM"
-	WorkerNewContractorResponseAddressCountryTn WorkerNewContractorResponseAddressCountry = "TN"
-	WorkerNewContractorResponseAddressCountryTo WorkerNewContractorResponseAddressCountry = "TO"
-	WorkerNewContractorResponseAddressCountryTr WorkerNewContractorResponseAddressCountry = "TR"
-	WorkerNewContractorResponseAddressCountryTt WorkerNewContractorResponseAddressCountry = "TT"
-	WorkerNewContractorResponseAddressCountryTv WorkerNewContractorResponseAddressCountry = "TV"
-	WorkerNewContractorResponseAddressCountryTw WorkerNewContractorResponseAddressCountry = "TW"
-	WorkerNewContractorResponseAddressCountryTz WorkerNewContractorResponseAddressCountry = "TZ"
-	WorkerNewContractorResponseAddressCountryUa WorkerNewContractorResponseAddressCountry = "UA"
-	WorkerNewContractorResponseAddressCountryUg WorkerNewContractorResponseAddressCountry = "UG"
-	WorkerNewContractorResponseAddressCountryUm WorkerNewContractorResponseAddressCountry = "UM"
-	WorkerNewContractorResponseAddressCountryUs WorkerNewContractorResponseAddressCountry = "US"
-	WorkerNewContractorResponseAddressCountryUy WorkerNewContractorResponseAddressCountry = "UY"
-	WorkerNewContractorResponseAddressCountryUz WorkerNewContractorResponseAddressCountry = "UZ"
-	WorkerNewContractorResponseAddressCountryVa WorkerNewContractorResponseAddressCountry = "VA"
-	WorkerNewContractorResponseAddressCountryVc WorkerNewContractorResponseAddressCountry = "VC"
-	WorkerNewContractorResponseAddressCountryVe WorkerNewContractorResponseAddressCountry = "VE"
-	WorkerNewContractorResponseAddressCountryVg WorkerNewContractorResponseAddressCountry = "VG"
-	WorkerNewContractorResponseAddressCountryVi WorkerNewContractorResponseAddressCountry = "VI"
-	WorkerNewContractorResponseAddressCountryVn WorkerNewContractorResponseAddressCountry = "VN"
-	WorkerNewContractorResponseAddressCountryVu WorkerNewContractorResponseAddressCountry = "VU"
-	WorkerNewContractorResponseAddressCountryWf WorkerNewContractorResponseAddressCountry = "WF"
-	WorkerNewContractorResponseAddressCountryWs WorkerNewContractorResponseAddressCountry = "WS"
-	WorkerNewContractorResponseAddressCountryXk WorkerNewContractorResponseAddressCountry = "XK"
-	WorkerNewContractorResponseAddressCountryYe WorkerNewContractorResponseAddressCountry = "YE"
-	WorkerNewContractorResponseAddressCountryYt WorkerNewContractorResponseAddressCountry = "YT"
-	WorkerNewContractorResponseAddressCountryZa WorkerNewContractorResponseAddressCountry = "ZA"
-	WorkerNewContractorResponseAddressCountryZm WorkerNewContractorResponseAddressCountry = "ZM"
-	WorkerNewContractorResponseAddressCountryZw WorkerNewContractorResponseAddressCountry = "ZW"
-)
-
-func (r WorkerNewContractorResponseAddressCountry) IsKnown() bool {
-	switch r {
-	case WorkerNewContractorResponseAddressCountryAd, WorkerNewContractorResponseAddressCountryAe, WorkerNewContractorResponseAddressCountryAf, WorkerNewContractorResponseAddressCountryAg, WorkerNewContractorResponseAddressCountryAI, WorkerNewContractorResponseAddressCountryAl, WorkerNewContractorResponseAddressCountryAm, WorkerNewContractorResponseAddressCountryAo, WorkerNewContractorResponseAddressCountryAq, WorkerNewContractorResponseAddressCountryAr, WorkerNewContractorResponseAddressCountryAs, WorkerNewContractorResponseAddressCountryAt, WorkerNewContractorResponseAddressCountryAu, WorkerNewContractorResponseAddressCountryAw, WorkerNewContractorResponseAddressCountryAx, WorkerNewContractorResponseAddressCountryAz, WorkerNewContractorResponseAddressCountryBa, WorkerNewContractorResponseAddressCountryBb, WorkerNewContractorResponseAddressCountryBd, WorkerNewContractorResponseAddressCountryBe, WorkerNewContractorResponseAddressCountryBf, WorkerNewContractorResponseAddressCountryBg, WorkerNewContractorResponseAddressCountryBh, WorkerNewContractorResponseAddressCountryBi, WorkerNewContractorResponseAddressCountryBj, WorkerNewContractorResponseAddressCountryBl, WorkerNewContractorResponseAddressCountryBm, WorkerNewContractorResponseAddressCountryBn, WorkerNewContractorResponseAddressCountryBo, WorkerNewContractorResponseAddressCountryBq, WorkerNewContractorResponseAddressCountryBr, WorkerNewContractorResponseAddressCountryBs, WorkerNewContractorResponseAddressCountryBt, WorkerNewContractorResponseAddressCountryBv, WorkerNewContractorResponseAddressCountryBw, WorkerNewContractorResponseAddressCountryBy, WorkerNewContractorResponseAddressCountryBz, WorkerNewContractorResponseAddressCountryCa, WorkerNewContractorResponseAddressCountryCc, WorkerNewContractorResponseAddressCountryCd, WorkerNewContractorResponseAddressCountryCf, WorkerNewContractorResponseAddressCountryCg, WorkerNewContractorResponseAddressCountryCh, WorkerNewContractorResponseAddressCountryCi, WorkerNewContractorResponseAddressCountryCk, WorkerNewContractorResponseAddressCountryCl, WorkerNewContractorResponseAddressCountryCm, WorkerNewContractorResponseAddressCountryCn, WorkerNewContractorResponseAddressCountryCo, WorkerNewContractorResponseAddressCountryCr, WorkerNewContractorResponseAddressCountryCu, WorkerNewContractorResponseAddressCountryCv, WorkerNewContractorResponseAddressCountryCw, WorkerNewContractorResponseAddressCountryCx, WorkerNewContractorResponseAddressCountryCy, WorkerNewContractorResponseAddressCountryCz, WorkerNewContractorResponseAddressCountryDe, WorkerNewContractorResponseAddressCountryDj, WorkerNewContractorResponseAddressCountryDk, WorkerNewContractorResponseAddressCountryDm, WorkerNewContractorResponseAddressCountryDo, WorkerNewContractorResponseAddressCountryDz, WorkerNewContractorResponseAddressCountryEc, WorkerNewContractorResponseAddressCountryEe, WorkerNewContractorResponseAddressCountryEg, WorkerNewContractorResponseAddressCountryEh, WorkerNewContractorResponseAddressCountryEr, WorkerNewContractorResponseAddressCountryEs, WorkerNewContractorResponseAddressCountryEt, WorkerNewContractorResponseAddressCountryFi, WorkerNewContractorResponseAddressCountryFj, WorkerNewContractorResponseAddressCountryFk, WorkerNewContractorResponseAddressCountryFm, WorkerNewContractorResponseAddressCountryFo, WorkerNewContractorResponseAddressCountryFr, WorkerNewContractorResponseAddressCountryGa, WorkerNewContractorResponseAddressCountryGB, WorkerNewContractorResponseAddressCountryGd, WorkerNewContractorResponseAddressCountryGe, WorkerNewContractorResponseAddressCountryGf, WorkerNewContractorResponseAddressCountryGg, WorkerNewContractorResponseAddressCountryGh, WorkerNewContractorResponseAddressCountryGi, WorkerNewContractorResponseAddressCountryGl, WorkerNewContractorResponseAddressCountryGm, WorkerNewContractorResponseAddressCountryGn, WorkerNewContractorResponseAddressCountryGp, WorkerNewContractorResponseAddressCountryGq, WorkerNewContractorResponseAddressCountryGr, WorkerNewContractorResponseAddressCountryGs, WorkerNewContractorResponseAddressCountryGt, WorkerNewContractorResponseAddressCountryGu, WorkerNewContractorResponseAddressCountryGw, WorkerNewContractorResponseAddressCountryGy, WorkerNewContractorResponseAddressCountryHk, WorkerNewContractorResponseAddressCountryHm, WorkerNewContractorResponseAddressCountryHn, WorkerNewContractorResponseAddressCountryHr, WorkerNewContractorResponseAddressCountryHt, WorkerNewContractorResponseAddressCountryHu, WorkerNewContractorResponseAddressCountryID, WorkerNewContractorResponseAddressCountryIe, WorkerNewContractorResponseAddressCountryIl, WorkerNewContractorResponseAddressCountryIm, WorkerNewContractorResponseAddressCountryIn, WorkerNewContractorResponseAddressCountryIo, WorkerNewContractorResponseAddressCountryIq, WorkerNewContractorResponseAddressCountryIr, WorkerNewContractorResponseAddressCountryIs, WorkerNewContractorResponseAddressCountryIt, WorkerNewContractorResponseAddressCountryJe, WorkerNewContractorResponseAddressCountryJm, WorkerNewContractorResponseAddressCountryJo, WorkerNewContractorResponseAddressCountryJp, WorkerNewContractorResponseAddressCountryKe, WorkerNewContractorResponseAddressCountryKg, WorkerNewContractorResponseAddressCountryKh, WorkerNewContractorResponseAddressCountryKi, WorkerNewContractorResponseAddressCountryKm, WorkerNewContractorResponseAddressCountryKn, WorkerNewContractorResponseAddressCountryKp, WorkerNewContractorResponseAddressCountryKr, WorkerNewContractorResponseAddressCountryKw, WorkerNewContractorResponseAddressCountryKy, WorkerNewContractorResponseAddressCountryKz, WorkerNewContractorResponseAddressCountryLa, WorkerNewContractorResponseAddressCountryLb, WorkerNewContractorResponseAddressCountryLc, WorkerNewContractorResponseAddressCountryLi, WorkerNewContractorResponseAddressCountryLk, WorkerNewContractorResponseAddressCountryLr, WorkerNewContractorResponseAddressCountryLs, WorkerNewContractorResponseAddressCountryLt, WorkerNewContractorResponseAddressCountryLu, WorkerNewContractorResponseAddressCountryLv, WorkerNewContractorResponseAddressCountryLy, WorkerNewContractorResponseAddressCountryMa, WorkerNewContractorResponseAddressCountryMc, WorkerNewContractorResponseAddressCountryMd, WorkerNewContractorResponseAddressCountryMe, WorkerNewContractorResponseAddressCountryMf, WorkerNewContractorResponseAddressCountryMg, WorkerNewContractorResponseAddressCountryMh, WorkerNewContractorResponseAddressCountryMk, WorkerNewContractorResponseAddressCountryMl, WorkerNewContractorResponseAddressCountryMm, WorkerNewContractorResponseAddressCountryMn, WorkerNewContractorResponseAddressCountryMo, WorkerNewContractorResponseAddressCountryMp, WorkerNewContractorResponseAddressCountryMq, WorkerNewContractorResponseAddressCountryMr, WorkerNewContractorResponseAddressCountryMs, WorkerNewContractorResponseAddressCountryMt, WorkerNewContractorResponseAddressCountryMu, WorkerNewContractorResponseAddressCountryMv, WorkerNewContractorResponseAddressCountryMw, WorkerNewContractorResponseAddressCountryMx, WorkerNewContractorResponseAddressCountryMy, WorkerNewContractorResponseAddressCountryMz, WorkerNewContractorResponseAddressCountryNa, WorkerNewContractorResponseAddressCountryNc, WorkerNewContractorResponseAddressCountryNe, WorkerNewContractorResponseAddressCountryNf, WorkerNewContractorResponseAddressCountryNg, WorkerNewContractorResponseAddressCountryNi, WorkerNewContractorResponseAddressCountryNl, WorkerNewContractorResponseAddressCountryNo, WorkerNewContractorResponseAddressCountryNp, WorkerNewContractorResponseAddressCountryNr, WorkerNewContractorResponseAddressCountryNu, WorkerNewContractorResponseAddressCountryNz, WorkerNewContractorResponseAddressCountryOm, WorkerNewContractorResponseAddressCountryPa, WorkerNewContractorResponseAddressCountryPe, WorkerNewContractorResponseAddressCountryPf, WorkerNewContractorResponseAddressCountryPg, WorkerNewContractorResponseAddressCountryPh, WorkerNewContractorResponseAddressCountryPk, WorkerNewContractorResponseAddressCountryPl, WorkerNewContractorResponseAddressCountryPm, WorkerNewContractorResponseAddressCountryPn, WorkerNewContractorResponseAddressCountryPr, WorkerNewContractorResponseAddressCountryPs, WorkerNewContractorResponseAddressCountryPt, WorkerNewContractorResponseAddressCountryPw, WorkerNewContractorResponseAddressCountryPy, WorkerNewContractorResponseAddressCountryQa, WorkerNewContractorResponseAddressCountryRe, WorkerNewContractorResponseAddressCountryRo, WorkerNewContractorResponseAddressCountryRs, WorkerNewContractorResponseAddressCountryRu, WorkerNewContractorResponseAddressCountryRw, WorkerNewContractorResponseAddressCountrySa, WorkerNewContractorResponseAddressCountrySb, WorkerNewContractorResponseAddressCountrySc, WorkerNewContractorResponseAddressCountrySd, WorkerNewContractorResponseAddressCountrySe, WorkerNewContractorResponseAddressCountrySg, WorkerNewContractorResponseAddressCountrySh, WorkerNewContractorResponseAddressCountrySi, WorkerNewContractorResponseAddressCountrySj, WorkerNewContractorResponseAddressCountrySk, WorkerNewContractorResponseAddressCountrySl, WorkerNewContractorResponseAddressCountrySm, WorkerNewContractorResponseAddressCountrySn, WorkerNewContractorResponseAddressCountrySo, WorkerNewContractorResponseAddressCountrySr, WorkerNewContractorResponseAddressCountrySS, WorkerNewContractorResponseAddressCountrySt, WorkerNewContractorResponseAddressCountrySv, WorkerNewContractorResponseAddressCountrySx, WorkerNewContractorResponseAddressCountrySy, WorkerNewContractorResponseAddressCountrySz, WorkerNewContractorResponseAddressCountryTc, WorkerNewContractorResponseAddressCountryTd, WorkerNewContractorResponseAddressCountryTf, WorkerNewContractorResponseAddressCountryTg, WorkerNewContractorResponseAddressCountryTh, WorkerNewContractorResponseAddressCountryTj, WorkerNewContractorResponseAddressCountryTk, WorkerNewContractorResponseAddressCountryTl, WorkerNewContractorResponseAddressCountryTm, WorkerNewContractorResponseAddressCountryTn, WorkerNewContractorResponseAddressCountryTo, WorkerNewContractorResponseAddressCountryTr, WorkerNewContractorResponseAddressCountryTt, WorkerNewContractorResponseAddressCountryTv, WorkerNewContractorResponseAddressCountryTw, WorkerNewContractorResponseAddressCountryTz, WorkerNewContractorResponseAddressCountryUa, WorkerNewContractorResponseAddressCountryUg, WorkerNewContractorResponseAddressCountryUm, WorkerNewContractorResponseAddressCountryUs, WorkerNewContractorResponseAddressCountryUy, WorkerNewContractorResponseAddressCountryUz, WorkerNewContractorResponseAddressCountryVa, WorkerNewContractorResponseAddressCountryVc, WorkerNewContractorResponseAddressCountryVe, WorkerNewContractorResponseAddressCountryVg, WorkerNewContractorResponseAddressCountryVi, WorkerNewContractorResponseAddressCountryVn, WorkerNewContractorResponseAddressCountryVu, WorkerNewContractorResponseAddressCountryWf, WorkerNewContractorResponseAddressCountryWs, WorkerNewContractorResponseAddressCountryXk, WorkerNewContractorResponseAddressCountryYe, WorkerNewContractorResponseAddressCountryYt, WorkerNewContractorResponseAddressCountryZa, WorkerNewContractorResponseAddressCountryZm, WorkerNewContractorResponseAddressCountryZw:
 		return true
 	}
 	return false
@@ -4164,269 +4231,6 @@ func (r WorkerNewContractorResponseLevelTrack) IsKnown() bool {
 	return false
 }
 
-type WorkerInviteResponseAddressCountry string
-
-const (
-	WorkerInviteResponseAddressCountryAd WorkerInviteResponseAddressCountry = "AD"
-	WorkerInviteResponseAddressCountryAe WorkerInviteResponseAddressCountry = "AE"
-	WorkerInviteResponseAddressCountryAf WorkerInviteResponseAddressCountry = "AF"
-	WorkerInviteResponseAddressCountryAg WorkerInviteResponseAddressCountry = "AG"
-	WorkerInviteResponseAddressCountryAI WorkerInviteResponseAddressCountry = "AI"
-	WorkerInviteResponseAddressCountryAl WorkerInviteResponseAddressCountry = "AL"
-	WorkerInviteResponseAddressCountryAm WorkerInviteResponseAddressCountry = "AM"
-	WorkerInviteResponseAddressCountryAo WorkerInviteResponseAddressCountry = "AO"
-	WorkerInviteResponseAddressCountryAq WorkerInviteResponseAddressCountry = "AQ"
-	WorkerInviteResponseAddressCountryAr WorkerInviteResponseAddressCountry = "AR"
-	WorkerInviteResponseAddressCountryAs WorkerInviteResponseAddressCountry = "AS"
-	WorkerInviteResponseAddressCountryAt WorkerInviteResponseAddressCountry = "AT"
-	WorkerInviteResponseAddressCountryAu WorkerInviteResponseAddressCountry = "AU"
-	WorkerInviteResponseAddressCountryAw WorkerInviteResponseAddressCountry = "AW"
-	WorkerInviteResponseAddressCountryAx WorkerInviteResponseAddressCountry = "AX"
-	WorkerInviteResponseAddressCountryAz WorkerInviteResponseAddressCountry = "AZ"
-	WorkerInviteResponseAddressCountryBa WorkerInviteResponseAddressCountry = "BA"
-	WorkerInviteResponseAddressCountryBb WorkerInviteResponseAddressCountry = "BB"
-	WorkerInviteResponseAddressCountryBd WorkerInviteResponseAddressCountry = "BD"
-	WorkerInviteResponseAddressCountryBe WorkerInviteResponseAddressCountry = "BE"
-	WorkerInviteResponseAddressCountryBf WorkerInviteResponseAddressCountry = "BF"
-	WorkerInviteResponseAddressCountryBg WorkerInviteResponseAddressCountry = "BG"
-	WorkerInviteResponseAddressCountryBh WorkerInviteResponseAddressCountry = "BH"
-	WorkerInviteResponseAddressCountryBi WorkerInviteResponseAddressCountry = "BI"
-	WorkerInviteResponseAddressCountryBj WorkerInviteResponseAddressCountry = "BJ"
-	WorkerInviteResponseAddressCountryBl WorkerInviteResponseAddressCountry = "BL"
-	WorkerInviteResponseAddressCountryBm WorkerInviteResponseAddressCountry = "BM"
-	WorkerInviteResponseAddressCountryBn WorkerInviteResponseAddressCountry = "BN"
-	WorkerInviteResponseAddressCountryBo WorkerInviteResponseAddressCountry = "BO"
-	WorkerInviteResponseAddressCountryBq WorkerInviteResponseAddressCountry = "BQ"
-	WorkerInviteResponseAddressCountryBr WorkerInviteResponseAddressCountry = "BR"
-	WorkerInviteResponseAddressCountryBs WorkerInviteResponseAddressCountry = "BS"
-	WorkerInviteResponseAddressCountryBt WorkerInviteResponseAddressCountry = "BT"
-	WorkerInviteResponseAddressCountryBv WorkerInviteResponseAddressCountry = "BV"
-	WorkerInviteResponseAddressCountryBw WorkerInviteResponseAddressCountry = "BW"
-	WorkerInviteResponseAddressCountryBy WorkerInviteResponseAddressCountry = "BY"
-	WorkerInviteResponseAddressCountryBz WorkerInviteResponseAddressCountry = "BZ"
-	WorkerInviteResponseAddressCountryCa WorkerInviteResponseAddressCountry = "CA"
-	WorkerInviteResponseAddressCountryCc WorkerInviteResponseAddressCountry = "CC"
-	WorkerInviteResponseAddressCountryCd WorkerInviteResponseAddressCountry = "CD"
-	WorkerInviteResponseAddressCountryCf WorkerInviteResponseAddressCountry = "CF"
-	WorkerInviteResponseAddressCountryCg WorkerInviteResponseAddressCountry = "CG"
-	WorkerInviteResponseAddressCountryCh WorkerInviteResponseAddressCountry = "CH"
-	WorkerInviteResponseAddressCountryCi WorkerInviteResponseAddressCountry = "CI"
-	WorkerInviteResponseAddressCountryCk WorkerInviteResponseAddressCountry = "CK"
-	WorkerInviteResponseAddressCountryCl WorkerInviteResponseAddressCountry = "CL"
-	WorkerInviteResponseAddressCountryCm WorkerInviteResponseAddressCountry = "CM"
-	WorkerInviteResponseAddressCountryCn WorkerInviteResponseAddressCountry = "CN"
-	WorkerInviteResponseAddressCountryCo WorkerInviteResponseAddressCountry = "CO"
-	WorkerInviteResponseAddressCountryCr WorkerInviteResponseAddressCountry = "CR"
-	WorkerInviteResponseAddressCountryCu WorkerInviteResponseAddressCountry = "CU"
-	WorkerInviteResponseAddressCountryCv WorkerInviteResponseAddressCountry = "CV"
-	WorkerInviteResponseAddressCountryCw WorkerInviteResponseAddressCountry = "CW"
-	WorkerInviteResponseAddressCountryCx WorkerInviteResponseAddressCountry = "CX"
-	WorkerInviteResponseAddressCountryCy WorkerInviteResponseAddressCountry = "CY"
-	WorkerInviteResponseAddressCountryCz WorkerInviteResponseAddressCountry = "CZ"
-	WorkerInviteResponseAddressCountryDe WorkerInviteResponseAddressCountry = "DE"
-	WorkerInviteResponseAddressCountryDj WorkerInviteResponseAddressCountry = "DJ"
-	WorkerInviteResponseAddressCountryDk WorkerInviteResponseAddressCountry = "DK"
-	WorkerInviteResponseAddressCountryDm WorkerInviteResponseAddressCountry = "DM"
-	WorkerInviteResponseAddressCountryDo WorkerInviteResponseAddressCountry = "DO"
-	WorkerInviteResponseAddressCountryDz WorkerInviteResponseAddressCountry = "DZ"
-	WorkerInviteResponseAddressCountryEc WorkerInviteResponseAddressCountry = "EC"
-	WorkerInviteResponseAddressCountryEe WorkerInviteResponseAddressCountry = "EE"
-	WorkerInviteResponseAddressCountryEg WorkerInviteResponseAddressCountry = "EG"
-	WorkerInviteResponseAddressCountryEh WorkerInviteResponseAddressCountry = "EH"
-	WorkerInviteResponseAddressCountryEr WorkerInviteResponseAddressCountry = "ER"
-	WorkerInviteResponseAddressCountryEs WorkerInviteResponseAddressCountry = "ES"
-	WorkerInviteResponseAddressCountryEt WorkerInviteResponseAddressCountry = "ET"
-	WorkerInviteResponseAddressCountryFi WorkerInviteResponseAddressCountry = "FI"
-	WorkerInviteResponseAddressCountryFj WorkerInviteResponseAddressCountry = "FJ"
-	WorkerInviteResponseAddressCountryFk WorkerInviteResponseAddressCountry = "FK"
-	WorkerInviteResponseAddressCountryFm WorkerInviteResponseAddressCountry = "FM"
-	WorkerInviteResponseAddressCountryFo WorkerInviteResponseAddressCountry = "FO"
-	WorkerInviteResponseAddressCountryFr WorkerInviteResponseAddressCountry = "FR"
-	WorkerInviteResponseAddressCountryGa WorkerInviteResponseAddressCountry = "GA"
-	WorkerInviteResponseAddressCountryGB WorkerInviteResponseAddressCountry = "GB"
-	WorkerInviteResponseAddressCountryGd WorkerInviteResponseAddressCountry = "GD"
-	WorkerInviteResponseAddressCountryGe WorkerInviteResponseAddressCountry = "GE"
-	WorkerInviteResponseAddressCountryGf WorkerInviteResponseAddressCountry = "GF"
-	WorkerInviteResponseAddressCountryGg WorkerInviteResponseAddressCountry = "GG"
-	WorkerInviteResponseAddressCountryGh WorkerInviteResponseAddressCountry = "GH"
-	WorkerInviteResponseAddressCountryGi WorkerInviteResponseAddressCountry = "GI"
-	WorkerInviteResponseAddressCountryGl WorkerInviteResponseAddressCountry = "GL"
-	WorkerInviteResponseAddressCountryGm WorkerInviteResponseAddressCountry = "GM"
-	WorkerInviteResponseAddressCountryGn WorkerInviteResponseAddressCountry = "GN"
-	WorkerInviteResponseAddressCountryGp WorkerInviteResponseAddressCountry = "GP"
-	WorkerInviteResponseAddressCountryGq WorkerInviteResponseAddressCountry = "GQ"
-	WorkerInviteResponseAddressCountryGr WorkerInviteResponseAddressCountry = "GR"
-	WorkerInviteResponseAddressCountryGs WorkerInviteResponseAddressCountry = "GS"
-	WorkerInviteResponseAddressCountryGt WorkerInviteResponseAddressCountry = "GT"
-	WorkerInviteResponseAddressCountryGu WorkerInviteResponseAddressCountry = "GU"
-	WorkerInviteResponseAddressCountryGw WorkerInviteResponseAddressCountry = "GW"
-	WorkerInviteResponseAddressCountryGy WorkerInviteResponseAddressCountry = "GY"
-	WorkerInviteResponseAddressCountryHk WorkerInviteResponseAddressCountry = "HK"
-	WorkerInviteResponseAddressCountryHm WorkerInviteResponseAddressCountry = "HM"
-	WorkerInviteResponseAddressCountryHn WorkerInviteResponseAddressCountry = "HN"
-	WorkerInviteResponseAddressCountryHr WorkerInviteResponseAddressCountry = "HR"
-	WorkerInviteResponseAddressCountryHt WorkerInviteResponseAddressCountry = "HT"
-	WorkerInviteResponseAddressCountryHu WorkerInviteResponseAddressCountry = "HU"
-	WorkerInviteResponseAddressCountryID WorkerInviteResponseAddressCountry = "ID"
-	WorkerInviteResponseAddressCountryIe WorkerInviteResponseAddressCountry = "IE"
-	WorkerInviteResponseAddressCountryIl WorkerInviteResponseAddressCountry = "IL"
-	WorkerInviteResponseAddressCountryIm WorkerInviteResponseAddressCountry = "IM"
-	WorkerInviteResponseAddressCountryIn WorkerInviteResponseAddressCountry = "IN"
-	WorkerInviteResponseAddressCountryIo WorkerInviteResponseAddressCountry = "IO"
-	WorkerInviteResponseAddressCountryIq WorkerInviteResponseAddressCountry = "IQ"
-	WorkerInviteResponseAddressCountryIr WorkerInviteResponseAddressCountry = "IR"
-	WorkerInviteResponseAddressCountryIs WorkerInviteResponseAddressCountry = "IS"
-	WorkerInviteResponseAddressCountryIt WorkerInviteResponseAddressCountry = "IT"
-	WorkerInviteResponseAddressCountryJe WorkerInviteResponseAddressCountry = "JE"
-	WorkerInviteResponseAddressCountryJm WorkerInviteResponseAddressCountry = "JM"
-	WorkerInviteResponseAddressCountryJo WorkerInviteResponseAddressCountry = "JO"
-	WorkerInviteResponseAddressCountryJp WorkerInviteResponseAddressCountry = "JP"
-	WorkerInviteResponseAddressCountryKe WorkerInviteResponseAddressCountry = "KE"
-	WorkerInviteResponseAddressCountryKg WorkerInviteResponseAddressCountry = "KG"
-	WorkerInviteResponseAddressCountryKh WorkerInviteResponseAddressCountry = "KH"
-	WorkerInviteResponseAddressCountryKi WorkerInviteResponseAddressCountry = "KI"
-	WorkerInviteResponseAddressCountryKm WorkerInviteResponseAddressCountry = "KM"
-	WorkerInviteResponseAddressCountryKn WorkerInviteResponseAddressCountry = "KN"
-	WorkerInviteResponseAddressCountryKp WorkerInviteResponseAddressCountry = "KP"
-	WorkerInviteResponseAddressCountryKr WorkerInviteResponseAddressCountry = "KR"
-	WorkerInviteResponseAddressCountryKw WorkerInviteResponseAddressCountry = "KW"
-	WorkerInviteResponseAddressCountryKy WorkerInviteResponseAddressCountry = "KY"
-	WorkerInviteResponseAddressCountryKz WorkerInviteResponseAddressCountry = "KZ"
-	WorkerInviteResponseAddressCountryLa WorkerInviteResponseAddressCountry = "LA"
-	WorkerInviteResponseAddressCountryLb WorkerInviteResponseAddressCountry = "LB"
-	WorkerInviteResponseAddressCountryLc WorkerInviteResponseAddressCountry = "LC"
-	WorkerInviteResponseAddressCountryLi WorkerInviteResponseAddressCountry = "LI"
-	WorkerInviteResponseAddressCountryLk WorkerInviteResponseAddressCountry = "LK"
-	WorkerInviteResponseAddressCountryLr WorkerInviteResponseAddressCountry = "LR"
-	WorkerInviteResponseAddressCountryLs WorkerInviteResponseAddressCountry = "LS"
-	WorkerInviteResponseAddressCountryLt WorkerInviteResponseAddressCountry = "LT"
-	WorkerInviteResponseAddressCountryLu WorkerInviteResponseAddressCountry = "LU"
-	WorkerInviteResponseAddressCountryLv WorkerInviteResponseAddressCountry = "LV"
-	WorkerInviteResponseAddressCountryLy WorkerInviteResponseAddressCountry = "LY"
-	WorkerInviteResponseAddressCountryMa WorkerInviteResponseAddressCountry = "MA"
-	WorkerInviteResponseAddressCountryMc WorkerInviteResponseAddressCountry = "MC"
-	WorkerInviteResponseAddressCountryMd WorkerInviteResponseAddressCountry = "MD"
-	WorkerInviteResponseAddressCountryMe WorkerInviteResponseAddressCountry = "ME"
-	WorkerInviteResponseAddressCountryMf WorkerInviteResponseAddressCountry = "MF"
-	WorkerInviteResponseAddressCountryMg WorkerInviteResponseAddressCountry = "MG"
-	WorkerInviteResponseAddressCountryMh WorkerInviteResponseAddressCountry = "MH"
-	WorkerInviteResponseAddressCountryMk WorkerInviteResponseAddressCountry = "MK"
-	WorkerInviteResponseAddressCountryMl WorkerInviteResponseAddressCountry = "ML"
-	WorkerInviteResponseAddressCountryMm WorkerInviteResponseAddressCountry = "MM"
-	WorkerInviteResponseAddressCountryMn WorkerInviteResponseAddressCountry = "MN"
-	WorkerInviteResponseAddressCountryMo WorkerInviteResponseAddressCountry = "MO"
-	WorkerInviteResponseAddressCountryMp WorkerInviteResponseAddressCountry = "MP"
-	WorkerInviteResponseAddressCountryMq WorkerInviteResponseAddressCountry = "MQ"
-	WorkerInviteResponseAddressCountryMr WorkerInviteResponseAddressCountry = "MR"
-	WorkerInviteResponseAddressCountryMs WorkerInviteResponseAddressCountry = "MS"
-	WorkerInviteResponseAddressCountryMt WorkerInviteResponseAddressCountry = "MT"
-	WorkerInviteResponseAddressCountryMu WorkerInviteResponseAddressCountry = "MU"
-	WorkerInviteResponseAddressCountryMv WorkerInviteResponseAddressCountry = "MV"
-	WorkerInviteResponseAddressCountryMw WorkerInviteResponseAddressCountry = "MW"
-	WorkerInviteResponseAddressCountryMx WorkerInviteResponseAddressCountry = "MX"
-	WorkerInviteResponseAddressCountryMy WorkerInviteResponseAddressCountry = "MY"
-	WorkerInviteResponseAddressCountryMz WorkerInviteResponseAddressCountry = "MZ"
-	WorkerInviteResponseAddressCountryNa WorkerInviteResponseAddressCountry = "NA"
-	WorkerInviteResponseAddressCountryNc WorkerInviteResponseAddressCountry = "NC"
-	WorkerInviteResponseAddressCountryNe WorkerInviteResponseAddressCountry = "NE"
-	WorkerInviteResponseAddressCountryNf WorkerInviteResponseAddressCountry = "NF"
-	WorkerInviteResponseAddressCountryNg WorkerInviteResponseAddressCountry = "NG"
-	WorkerInviteResponseAddressCountryNi WorkerInviteResponseAddressCountry = "NI"
-	WorkerInviteResponseAddressCountryNl WorkerInviteResponseAddressCountry = "NL"
-	WorkerInviteResponseAddressCountryNo WorkerInviteResponseAddressCountry = "NO"
-	WorkerInviteResponseAddressCountryNp WorkerInviteResponseAddressCountry = "NP"
-	WorkerInviteResponseAddressCountryNr WorkerInviteResponseAddressCountry = "NR"
-	WorkerInviteResponseAddressCountryNu WorkerInviteResponseAddressCountry = "NU"
-	WorkerInviteResponseAddressCountryNz WorkerInviteResponseAddressCountry = "NZ"
-	WorkerInviteResponseAddressCountryOm WorkerInviteResponseAddressCountry = "OM"
-	WorkerInviteResponseAddressCountryPa WorkerInviteResponseAddressCountry = "PA"
-	WorkerInviteResponseAddressCountryPe WorkerInviteResponseAddressCountry = "PE"
-	WorkerInviteResponseAddressCountryPf WorkerInviteResponseAddressCountry = "PF"
-	WorkerInviteResponseAddressCountryPg WorkerInviteResponseAddressCountry = "PG"
-	WorkerInviteResponseAddressCountryPh WorkerInviteResponseAddressCountry = "PH"
-	WorkerInviteResponseAddressCountryPk WorkerInviteResponseAddressCountry = "PK"
-	WorkerInviteResponseAddressCountryPl WorkerInviteResponseAddressCountry = "PL"
-	WorkerInviteResponseAddressCountryPm WorkerInviteResponseAddressCountry = "PM"
-	WorkerInviteResponseAddressCountryPn WorkerInviteResponseAddressCountry = "PN"
-	WorkerInviteResponseAddressCountryPr WorkerInviteResponseAddressCountry = "PR"
-	WorkerInviteResponseAddressCountryPs WorkerInviteResponseAddressCountry = "PS"
-	WorkerInviteResponseAddressCountryPt WorkerInviteResponseAddressCountry = "PT"
-	WorkerInviteResponseAddressCountryPw WorkerInviteResponseAddressCountry = "PW"
-	WorkerInviteResponseAddressCountryPy WorkerInviteResponseAddressCountry = "PY"
-	WorkerInviteResponseAddressCountryQa WorkerInviteResponseAddressCountry = "QA"
-	WorkerInviteResponseAddressCountryRe WorkerInviteResponseAddressCountry = "RE"
-	WorkerInviteResponseAddressCountryRo WorkerInviteResponseAddressCountry = "RO"
-	WorkerInviteResponseAddressCountryRs WorkerInviteResponseAddressCountry = "RS"
-	WorkerInviteResponseAddressCountryRu WorkerInviteResponseAddressCountry = "RU"
-	WorkerInviteResponseAddressCountryRw WorkerInviteResponseAddressCountry = "RW"
-	WorkerInviteResponseAddressCountrySa WorkerInviteResponseAddressCountry = "SA"
-	WorkerInviteResponseAddressCountrySb WorkerInviteResponseAddressCountry = "SB"
-	WorkerInviteResponseAddressCountrySc WorkerInviteResponseAddressCountry = "SC"
-	WorkerInviteResponseAddressCountrySd WorkerInviteResponseAddressCountry = "SD"
-	WorkerInviteResponseAddressCountrySe WorkerInviteResponseAddressCountry = "SE"
-	WorkerInviteResponseAddressCountrySg WorkerInviteResponseAddressCountry = "SG"
-	WorkerInviteResponseAddressCountrySh WorkerInviteResponseAddressCountry = "SH"
-	WorkerInviteResponseAddressCountrySi WorkerInviteResponseAddressCountry = "SI"
-	WorkerInviteResponseAddressCountrySj WorkerInviteResponseAddressCountry = "SJ"
-	WorkerInviteResponseAddressCountrySk WorkerInviteResponseAddressCountry = "SK"
-	WorkerInviteResponseAddressCountrySl WorkerInviteResponseAddressCountry = "SL"
-	WorkerInviteResponseAddressCountrySm WorkerInviteResponseAddressCountry = "SM"
-	WorkerInviteResponseAddressCountrySn WorkerInviteResponseAddressCountry = "SN"
-	WorkerInviteResponseAddressCountrySo WorkerInviteResponseAddressCountry = "SO"
-	WorkerInviteResponseAddressCountrySr WorkerInviteResponseAddressCountry = "SR"
-	WorkerInviteResponseAddressCountrySS WorkerInviteResponseAddressCountry = "SS"
-	WorkerInviteResponseAddressCountrySt WorkerInviteResponseAddressCountry = "ST"
-	WorkerInviteResponseAddressCountrySv WorkerInviteResponseAddressCountry = "SV"
-	WorkerInviteResponseAddressCountrySx WorkerInviteResponseAddressCountry = "SX"
-	WorkerInviteResponseAddressCountrySy WorkerInviteResponseAddressCountry = "SY"
-	WorkerInviteResponseAddressCountrySz WorkerInviteResponseAddressCountry = "SZ"
-	WorkerInviteResponseAddressCountryTc WorkerInviteResponseAddressCountry = "TC"
-	WorkerInviteResponseAddressCountryTd WorkerInviteResponseAddressCountry = "TD"
-	WorkerInviteResponseAddressCountryTf WorkerInviteResponseAddressCountry = "TF"
-	WorkerInviteResponseAddressCountryTg WorkerInviteResponseAddressCountry = "TG"
-	WorkerInviteResponseAddressCountryTh WorkerInviteResponseAddressCountry = "TH"
-	WorkerInviteResponseAddressCountryTj WorkerInviteResponseAddressCountry = "TJ"
-	WorkerInviteResponseAddressCountryTk WorkerInviteResponseAddressCountry = "TK"
-	WorkerInviteResponseAddressCountryTl WorkerInviteResponseAddressCountry = "TL"
-	WorkerInviteResponseAddressCountryTm WorkerInviteResponseAddressCountry = "TM"
-	WorkerInviteResponseAddressCountryTn WorkerInviteResponseAddressCountry = "TN"
-	WorkerInviteResponseAddressCountryTo WorkerInviteResponseAddressCountry = "TO"
-	WorkerInviteResponseAddressCountryTr WorkerInviteResponseAddressCountry = "TR"
-	WorkerInviteResponseAddressCountryTt WorkerInviteResponseAddressCountry = "TT"
-	WorkerInviteResponseAddressCountryTv WorkerInviteResponseAddressCountry = "TV"
-	WorkerInviteResponseAddressCountryTw WorkerInviteResponseAddressCountry = "TW"
-	WorkerInviteResponseAddressCountryTz WorkerInviteResponseAddressCountry = "TZ"
-	WorkerInviteResponseAddressCountryUa WorkerInviteResponseAddressCountry = "UA"
-	WorkerInviteResponseAddressCountryUg WorkerInviteResponseAddressCountry = "UG"
-	WorkerInviteResponseAddressCountryUm WorkerInviteResponseAddressCountry = "UM"
-	WorkerInviteResponseAddressCountryUs WorkerInviteResponseAddressCountry = "US"
-	WorkerInviteResponseAddressCountryUy WorkerInviteResponseAddressCountry = "UY"
-	WorkerInviteResponseAddressCountryUz WorkerInviteResponseAddressCountry = "UZ"
-	WorkerInviteResponseAddressCountryVa WorkerInviteResponseAddressCountry = "VA"
-	WorkerInviteResponseAddressCountryVc WorkerInviteResponseAddressCountry = "VC"
-	WorkerInviteResponseAddressCountryVe WorkerInviteResponseAddressCountry = "VE"
-	WorkerInviteResponseAddressCountryVg WorkerInviteResponseAddressCountry = "VG"
-	WorkerInviteResponseAddressCountryVi WorkerInviteResponseAddressCountry = "VI"
-	WorkerInviteResponseAddressCountryVn WorkerInviteResponseAddressCountry = "VN"
-	WorkerInviteResponseAddressCountryVu WorkerInviteResponseAddressCountry = "VU"
-	WorkerInviteResponseAddressCountryWf WorkerInviteResponseAddressCountry = "WF"
-	WorkerInviteResponseAddressCountryWs WorkerInviteResponseAddressCountry = "WS"
-	WorkerInviteResponseAddressCountryXk WorkerInviteResponseAddressCountry = "XK"
-	WorkerInviteResponseAddressCountryYe WorkerInviteResponseAddressCountry = "YE"
-	WorkerInviteResponseAddressCountryYt WorkerInviteResponseAddressCountry = "YT"
-	WorkerInviteResponseAddressCountryZa WorkerInviteResponseAddressCountry = "ZA"
-	WorkerInviteResponseAddressCountryZm WorkerInviteResponseAddressCountry = "ZM"
-	WorkerInviteResponseAddressCountryZw WorkerInviteResponseAddressCountry = "ZW"
-)
-
-func (r WorkerInviteResponseAddressCountry) IsKnown() bool {
-	switch r {
-	case WorkerInviteResponseAddressCountryAd, WorkerInviteResponseAddressCountryAe, WorkerInviteResponseAddressCountryAf, WorkerInviteResponseAddressCountryAg, WorkerInviteResponseAddressCountryAI, WorkerInviteResponseAddressCountryAl, WorkerInviteResponseAddressCountryAm, WorkerInviteResponseAddressCountryAo, WorkerInviteResponseAddressCountryAq, WorkerInviteResponseAddressCountryAr, WorkerInviteResponseAddressCountryAs, WorkerInviteResponseAddressCountryAt, WorkerInviteResponseAddressCountryAu, WorkerInviteResponseAddressCountryAw, WorkerInviteResponseAddressCountryAx, WorkerInviteResponseAddressCountryAz, WorkerInviteResponseAddressCountryBa, WorkerInviteResponseAddressCountryBb, WorkerInviteResponseAddressCountryBd, WorkerInviteResponseAddressCountryBe, WorkerInviteResponseAddressCountryBf, WorkerInviteResponseAddressCountryBg, WorkerInviteResponseAddressCountryBh, WorkerInviteResponseAddressCountryBi, WorkerInviteResponseAddressCountryBj, WorkerInviteResponseAddressCountryBl, WorkerInviteResponseAddressCountryBm, WorkerInviteResponseAddressCountryBn, WorkerInviteResponseAddressCountryBo, WorkerInviteResponseAddressCountryBq, WorkerInviteResponseAddressCountryBr, WorkerInviteResponseAddressCountryBs, WorkerInviteResponseAddressCountryBt, WorkerInviteResponseAddressCountryBv, WorkerInviteResponseAddressCountryBw, WorkerInviteResponseAddressCountryBy, WorkerInviteResponseAddressCountryBz, WorkerInviteResponseAddressCountryCa, WorkerInviteResponseAddressCountryCc, WorkerInviteResponseAddressCountryCd, WorkerInviteResponseAddressCountryCf, WorkerInviteResponseAddressCountryCg, WorkerInviteResponseAddressCountryCh, WorkerInviteResponseAddressCountryCi, WorkerInviteResponseAddressCountryCk, WorkerInviteResponseAddressCountryCl, WorkerInviteResponseAddressCountryCm, WorkerInviteResponseAddressCountryCn, WorkerInviteResponseAddressCountryCo, WorkerInviteResponseAddressCountryCr, WorkerInviteResponseAddressCountryCu, WorkerInviteResponseAddressCountryCv, WorkerInviteResponseAddressCountryCw, WorkerInviteResponseAddressCountryCx, WorkerInviteResponseAddressCountryCy, WorkerInviteResponseAddressCountryCz, WorkerInviteResponseAddressCountryDe, WorkerInviteResponseAddressCountryDj, WorkerInviteResponseAddressCountryDk, WorkerInviteResponseAddressCountryDm, WorkerInviteResponseAddressCountryDo, WorkerInviteResponseAddressCountryDz, WorkerInviteResponseAddressCountryEc, WorkerInviteResponseAddressCountryEe, WorkerInviteResponseAddressCountryEg, WorkerInviteResponseAddressCountryEh, WorkerInviteResponseAddressCountryEr, WorkerInviteResponseAddressCountryEs, WorkerInviteResponseAddressCountryEt, WorkerInviteResponseAddressCountryFi, WorkerInviteResponseAddressCountryFj, WorkerInviteResponseAddressCountryFk, WorkerInviteResponseAddressCountryFm, WorkerInviteResponseAddressCountryFo, WorkerInviteResponseAddressCountryFr, WorkerInviteResponseAddressCountryGa, WorkerInviteResponseAddressCountryGB, WorkerInviteResponseAddressCountryGd, WorkerInviteResponseAddressCountryGe, WorkerInviteResponseAddressCountryGf, WorkerInviteResponseAddressCountryGg, WorkerInviteResponseAddressCountryGh, WorkerInviteResponseAddressCountryGi, WorkerInviteResponseAddressCountryGl, WorkerInviteResponseAddressCountryGm, WorkerInviteResponseAddressCountryGn, WorkerInviteResponseAddressCountryGp, WorkerInviteResponseAddressCountryGq, WorkerInviteResponseAddressCountryGr, WorkerInviteResponseAddressCountryGs, WorkerInviteResponseAddressCountryGt, WorkerInviteResponseAddressCountryGu, WorkerInviteResponseAddressCountryGw, WorkerInviteResponseAddressCountryGy, WorkerInviteResponseAddressCountryHk, WorkerInviteResponseAddressCountryHm, WorkerInviteResponseAddressCountryHn, WorkerInviteResponseAddressCountryHr, WorkerInviteResponseAddressCountryHt, WorkerInviteResponseAddressCountryHu, WorkerInviteResponseAddressCountryID, WorkerInviteResponseAddressCountryIe, WorkerInviteResponseAddressCountryIl, WorkerInviteResponseAddressCountryIm, WorkerInviteResponseAddressCountryIn, WorkerInviteResponseAddressCountryIo, WorkerInviteResponseAddressCountryIq, WorkerInviteResponseAddressCountryIr, WorkerInviteResponseAddressCountryIs, WorkerInviteResponseAddressCountryIt, WorkerInviteResponseAddressCountryJe, WorkerInviteResponseAddressCountryJm, WorkerInviteResponseAddressCountryJo, WorkerInviteResponseAddressCountryJp, WorkerInviteResponseAddressCountryKe, WorkerInviteResponseAddressCountryKg, WorkerInviteResponseAddressCountryKh, WorkerInviteResponseAddressCountryKi, WorkerInviteResponseAddressCountryKm, WorkerInviteResponseAddressCountryKn, WorkerInviteResponseAddressCountryKp, WorkerInviteResponseAddressCountryKr, WorkerInviteResponseAddressCountryKw, WorkerInviteResponseAddressCountryKy, WorkerInviteResponseAddressCountryKz, WorkerInviteResponseAddressCountryLa, WorkerInviteResponseAddressCountryLb, WorkerInviteResponseAddressCountryLc, WorkerInviteResponseAddressCountryLi, WorkerInviteResponseAddressCountryLk, WorkerInviteResponseAddressCountryLr, WorkerInviteResponseAddressCountryLs, WorkerInviteResponseAddressCountryLt, WorkerInviteResponseAddressCountryLu, WorkerInviteResponseAddressCountryLv, WorkerInviteResponseAddressCountryLy, WorkerInviteResponseAddressCountryMa, WorkerInviteResponseAddressCountryMc, WorkerInviteResponseAddressCountryMd, WorkerInviteResponseAddressCountryMe, WorkerInviteResponseAddressCountryMf, WorkerInviteResponseAddressCountryMg, WorkerInviteResponseAddressCountryMh, WorkerInviteResponseAddressCountryMk, WorkerInviteResponseAddressCountryMl, WorkerInviteResponseAddressCountryMm, WorkerInviteResponseAddressCountryMn, WorkerInviteResponseAddressCountryMo, WorkerInviteResponseAddressCountryMp, WorkerInviteResponseAddressCountryMq, WorkerInviteResponseAddressCountryMr, WorkerInviteResponseAddressCountryMs, WorkerInviteResponseAddressCountryMt, WorkerInviteResponseAddressCountryMu, WorkerInviteResponseAddressCountryMv, WorkerInviteResponseAddressCountryMw, WorkerInviteResponseAddressCountryMx, WorkerInviteResponseAddressCountryMy, WorkerInviteResponseAddressCountryMz, WorkerInviteResponseAddressCountryNa, WorkerInviteResponseAddressCountryNc, WorkerInviteResponseAddressCountryNe, WorkerInviteResponseAddressCountryNf, WorkerInviteResponseAddressCountryNg, WorkerInviteResponseAddressCountryNi, WorkerInviteResponseAddressCountryNl, WorkerInviteResponseAddressCountryNo, WorkerInviteResponseAddressCountryNp, WorkerInviteResponseAddressCountryNr, WorkerInviteResponseAddressCountryNu, WorkerInviteResponseAddressCountryNz, WorkerInviteResponseAddressCountryOm, WorkerInviteResponseAddressCountryPa, WorkerInviteResponseAddressCountryPe, WorkerInviteResponseAddressCountryPf, WorkerInviteResponseAddressCountryPg, WorkerInviteResponseAddressCountryPh, WorkerInviteResponseAddressCountryPk, WorkerInviteResponseAddressCountryPl, WorkerInviteResponseAddressCountryPm, WorkerInviteResponseAddressCountryPn, WorkerInviteResponseAddressCountryPr, WorkerInviteResponseAddressCountryPs, WorkerInviteResponseAddressCountryPt, WorkerInviteResponseAddressCountryPw, WorkerInviteResponseAddressCountryPy, WorkerInviteResponseAddressCountryQa, WorkerInviteResponseAddressCountryRe, WorkerInviteResponseAddressCountryRo, WorkerInviteResponseAddressCountryRs, WorkerInviteResponseAddressCountryRu, WorkerInviteResponseAddressCountryRw, WorkerInviteResponseAddressCountrySa, WorkerInviteResponseAddressCountrySb, WorkerInviteResponseAddressCountrySc, WorkerInviteResponseAddressCountrySd, WorkerInviteResponseAddressCountrySe, WorkerInviteResponseAddressCountrySg, WorkerInviteResponseAddressCountrySh, WorkerInviteResponseAddressCountrySi, WorkerInviteResponseAddressCountrySj, WorkerInviteResponseAddressCountrySk, WorkerInviteResponseAddressCountrySl, WorkerInviteResponseAddressCountrySm, WorkerInviteResponseAddressCountrySn, WorkerInviteResponseAddressCountrySo, WorkerInviteResponseAddressCountrySr, WorkerInviteResponseAddressCountrySS, WorkerInviteResponseAddressCountrySt, WorkerInviteResponseAddressCountrySv, WorkerInviteResponseAddressCountrySx, WorkerInviteResponseAddressCountrySy, WorkerInviteResponseAddressCountrySz, WorkerInviteResponseAddressCountryTc, WorkerInviteResponseAddressCountryTd, WorkerInviteResponseAddressCountryTf, WorkerInviteResponseAddressCountryTg, WorkerInviteResponseAddressCountryTh, WorkerInviteResponseAddressCountryTj, WorkerInviteResponseAddressCountryTk, WorkerInviteResponseAddressCountryTl, WorkerInviteResponseAddressCountryTm, WorkerInviteResponseAddressCountryTn, WorkerInviteResponseAddressCountryTo, WorkerInviteResponseAddressCountryTr, WorkerInviteResponseAddressCountryTt, WorkerInviteResponseAddressCountryTv, WorkerInviteResponseAddressCountryTw, WorkerInviteResponseAddressCountryTz, WorkerInviteResponseAddressCountryUa, WorkerInviteResponseAddressCountryUg, WorkerInviteResponseAddressCountryUm, WorkerInviteResponseAddressCountryUs, WorkerInviteResponseAddressCountryUy, WorkerInviteResponseAddressCountryUz, WorkerInviteResponseAddressCountryVa, WorkerInviteResponseAddressCountryVc, WorkerInviteResponseAddressCountryVe, WorkerInviteResponseAddressCountryVg, WorkerInviteResponseAddressCountryVi, WorkerInviteResponseAddressCountryVn, WorkerInviteResponseAddressCountryVu, WorkerInviteResponseAddressCountryWf, WorkerInviteResponseAddressCountryWs, WorkerInviteResponseAddressCountryXk, WorkerInviteResponseAddressCountryYe, WorkerInviteResponseAddressCountryYt, WorkerInviteResponseAddressCountryZa, WorkerInviteResponseAddressCountryZm, WorkerInviteResponseAddressCountryZw:
-		return true
-	}
-	return false
-}
-
 type WorkerInviteResponsePrimaryWorkplaceType string
 
 const (
@@ -4453,285 +4257,6 @@ const (
 func (r WorkerInviteResponseLevelTrack) IsKnown() bool {
 	switch r {
 	case WorkerInviteResponseLevelTrackIc, WorkerInviteResponseLevelTrackManager, WorkerInviteResponseLevelTrackExecutive:
-		return true
-	}
-	return false
-}
-
-func (r PublicTextWorkerCustomField) implementsPublicWorkerCustomField() {}
-
-func (r PublicNumberWorkerCustomField) implementsPublicWorkerCustomField() {}
-
-func (r PublicDateWorkerCustomField) implementsPublicWorkerCustomField() {}
-
-func (r PublicBooleanWorkerCustomField) implementsPublicWorkerCustomField() {}
-
-func (r PublicCurrencyWorkerCustomField) implementsPublicWorkerCustomField() {}
-
-func (r PublicPercentageWorkerCustomField) implementsPublicWorkerCustomField() {}
-
-func (r PublicSelectWorkerCustomField) implementsPublicWorkerCustomField() {}
-
-func (r PublicMultiSelectWorkerCustomField) implementsPublicWorkerCustomField() {}
-
-type WorkerListResponseDataAddressCountry string
-
-const (
-	WorkerListResponseDataAddressCountryAd WorkerListResponseDataAddressCountry = "AD"
-	WorkerListResponseDataAddressCountryAe WorkerListResponseDataAddressCountry = "AE"
-	WorkerListResponseDataAddressCountryAf WorkerListResponseDataAddressCountry = "AF"
-	WorkerListResponseDataAddressCountryAg WorkerListResponseDataAddressCountry = "AG"
-	WorkerListResponseDataAddressCountryAI WorkerListResponseDataAddressCountry = "AI"
-	WorkerListResponseDataAddressCountryAl WorkerListResponseDataAddressCountry = "AL"
-	WorkerListResponseDataAddressCountryAm WorkerListResponseDataAddressCountry = "AM"
-	WorkerListResponseDataAddressCountryAo WorkerListResponseDataAddressCountry = "AO"
-	WorkerListResponseDataAddressCountryAq WorkerListResponseDataAddressCountry = "AQ"
-	WorkerListResponseDataAddressCountryAr WorkerListResponseDataAddressCountry = "AR"
-	WorkerListResponseDataAddressCountryAs WorkerListResponseDataAddressCountry = "AS"
-	WorkerListResponseDataAddressCountryAt WorkerListResponseDataAddressCountry = "AT"
-	WorkerListResponseDataAddressCountryAu WorkerListResponseDataAddressCountry = "AU"
-	WorkerListResponseDataAddressCountryAw WorkerListResponseDataAddressCountry = "AW"
-	WorkerListResponseDataAddressCountryAx WorkerListResponseDataAddressCountry = "AX"
-	WorkerListResponseDataAddressCountryAz WorkerListResponseDataAddressCountry = "AZ"
-	WorkerListResponseDataAddressCountryBa WorkerListResponseDataAddressCountry = "BA"
-	WorkerListResponseDataAddressCountryBb WorkerListResponseDataAddressCountry = "BB"
-	WorkerListResponseDataAddressCountryBd WorkerListResponseDataAddressCountry = "BD"
-	WorkerListResponseDataAddressCountryBe WorkerListResponseDataAddressCountry = "BE"
-	WorkerListResponseDataAddressCountryBf WorkerListResponseDataAddressCountry = "BF"
-	WorkerListResponseDataAddressCountryBg WorkerListResponseDataAddressCountry = "BG"
-	WorkerListResponseDataAddressCountryBh WorkerListResponseDataAddressCountry = "BH"
-	WorkerListResponseDataAddressCountryBi WorkerListResponseDataAddressCountry = "BI"
-	WorkerListResponseDataAddressCountryBj WorkerListResponseDataAddressCountry = "BJ"
-	WorkerListResponseDataAddressCountryBl WorkerListResponseDataAddressCountry = "BL"
-	WorkerListResponseDataAddressCountryBm WorkerListResponseDataAddressCountry = "BM"
-	WorkerListResponseDataAddressCountryBn WorkerListResponseDataAddressCountry = "BN"
-	WorkerListResponseDataAddressCountryBo WorkerListResponseDataAddressCountry = "BO"
-	WorkerListResponseDataAddressCountryBq WorkerListResponseDataAddressCountry = "BQ"
-	WorkerListResponseDataAddressCountryBr WorkerListResponseDataAddressCountry = "BR"
-	WorkerListResponseDataAddressCountryBs WorkerListResponseDataAddressCountry = "BS"
-	WorkerListResponseDataAddressCountryBt WorkerListResponseDataAddressCountry = "BT"
-	WorkerListResponseDataAddressCountryBv WorkerListResponseDataAddressCountry = "BV"
-	WorkerListResponseDataAddressCountryBw WorkerListResponseDataAddressCountry = "BW"
-	WorkerListResponseDataAddressCountryBy WorkerListResponseDataAddressCountry = "BY"
-	WorkerListResponseDataAddressCountryBz WorkerListResponseDataAddressCountry = "BZ"
-	WorkerListResponseDataAddressCountryCa WorkerListResponseDataAddressCountry = "CA"
-	WorkerListResponseDataAddressCountryCc WorkerListResponseDataAddressCountry = "CC"
-	WorkerListResponseDataAddressCountryCd WorkerListResponseDataAddressCountry = "CD"
-	WorkerListResponseDataAddressCountryCf WorkerListResponseDataAddressCountry = "CF"
-	WorkerListResponseDataAddressCountryCg WorkerListResponseDataAddressCountry = "CG"
-	WorkerListResponseDataAddressCountryCh WorkerListResponseDataAddressCountry = "CH"
-	WorkerListResponseDataAddressCountryCi WorkerListResponseDataAddressCountry = "CI"
-	WorkerListResponseDataAddressCountryCk WorkerListResponseDataAddressCountry = "CK"
-	WorkerListResponseDataAddressCountryCl WorkerListResponseDataAddressCountry = "CL"
-	WorkerListResponseDataAddressCountryCm WorkerListResponseDataAddressCountry = "CM"
-	WorkerListResponseDataAddressCountryCn WorkerListResponseDataAddressCountry = "CN"
-	WorkerListResponseDataAddressCountryCo WorkerListResponseDataAddressCountry = "CO"
-	WorkerListResponseDataAddressCountryCr WorkerListResponseDataAddressCountry = "CR"
-	WorkerListResponseDataAddressCountryCu WorkerListResponseDataAddressCountry = "CU"
-	WorkerListResponseDataAddressCountryCv WorkerListResponseDataAddressCountry = "CV"
-	WorkerListResponseDataAddressCountryCw WorkerListResponseDataAddressCountry = "CW"
-	WorkerListResponseDataAddressCountryCx WorkerListResponseDataAddressCountry = "CX"
-	WorkerListResponseDataAddressCountryCy WorkerListResponseDataAddressCountry = "CY"
-	WorkerListResponseDataAddressCountryCz WorkerListResponseDataAddressCountry = "CZ"
-	WorkerListResponseDataAddressCountryDe WorkerListResponseDataAddressCountry = "DE"
-	WorkerListResponseDataAddressCountryDj WorkerListResponseDataAddressCountry = "DJ"
-	WorkerListResponseDataAddressCountryDk WorkerListResponseDataAddressCountry = "DK"
-	WorkerListResponseDataAddressCountryDm WorkerListResponseDataAddressCountry = "DM"
-	WorkerListResponseDataAddressCountryDo WorkerListResponseDataAddressCountry = "DO"
-	WorkerListResponseDataAddressCountryDz WorkerListResponseDataAddressCountry = "DZ"
-	WorkerListResponseDataAddressCountryEc WorkerListResponseDataAddressCountry = "EC"
-	WorkerListResponseDataAddressCountryEe WorkerListResponseDataAddressCountry = "EE"
-	WorkerListResponseDataAddressCountryEg WorkerListResponseDataAddressCountry = "EG"
-	WorkerListResponseDataAddressCountryEh WorkerListResponseDataAddressCountry = "EH"
-	WorkerListResponseDataAddressCountryEr WorkerListResponseDataAddressCountry = "ER"
-	WorkerListResponseDataAddressCountryEs WorkerListResponseDataAddressCountry = "ES"
-	WorkerListResponseDataAddressCountryEt WorkerListResponseDataAddressCountry = "ET"
-	WorkerListResponseDataAddressCountryFi WorkerListResponseDataAddressCountry = "FI"
-	WorkerListResponseDataAddressCountryFj WorkerListResponseDataAddressCountry = "FJ"
-	WorkerListResponseDataAddressCountryFk WorkerListResponseDataAddressCountry = "FK"
-	WorkerListResponseDataAddressCountryFm WorkerListResponseDataAddressCountry = "FM"
-	WorkerListResponseDataAddressCountryFo WorkerListResponseDataAddressCountry = "FO"
-	WorkerListResponseDataAddressCountryFr WorkerListResponseDataAddressCountry = "FR"
-	WorkerListResponseDataAddressCountryGa WorkerListResponseDataAddressCountry = "GA"
-	WorkerListResponseDataAddressCountryGB WorkerListResponseDataAddressCountry = "GB"
-	WorkerListResponseDataAddressCountryGd WorkerListResponseDataAddressCountry = "GD"
-	WorkerListResponseDataAddressCountryGe WorkerListResponseDataAddressCountry = "GE"
-	WorkerListResponseDataAddressCountryGf WorkerListResponseDataAddressCountry = "GF"
-	WorkerListResponseDataAddressCountryGg WorkerListResponseDataAddressCountry = "GG"
-	WorkerListResponseDataAddressCountryGh WorkerListResponseDataAddressCountry = "GH"
-	WorkerListResponseDataAddressCountryGi WorkerListResponseDataAddressCountry = "GI"
-	WorkerListResponseDataAddressCountryGl WorkerListResponseDataAddressCountry = "GL"
-	WorkerListResponseDataAddressCountryGm WorkerListResponseDataAddressCountry = "GM"
-	WorkerListResponseDataAddressCountryGn WorkerListResponseDataAddressCountry = "GN"
-	WorkerListResponseDataAddressCountryGp WorkerListResponseDataAddressCountry = "GP"
-	WorkerListResponseDataAddressCountryGq WorkerListResponseDataAddressCountry = "GQ"
-	WorkerListResponseDataAddressCountryGr WorkerListResponseDataAddressCountry = "GR"
-	WorkerListResponseDataAddressCountryGs WorkerListResponseDataAddressCountry = "GS"
-	WorkerListResponseDataAddressCountryGt WorkerListResponseDataAddressCountry = "GT"
-	WorkerListResponseDataAddressCountryGu WorkerListResponseDataAddressCountry = "GU"
-	WorkerListResponseDataAddressCountryGw WorkerListResponseDataAddressCountry = "GW"
-	WorkerListResponseDataAddressCountryGy WorkerListResponseDataAddressCountry = "GY"
-	WorkerListResponseDataAddressCountryHk WorkerListResponseDataAddressCountry = "HK"
-	WorkerListResponseDataAddressCountryHm WorkerListResponseDataAddressCountry = "HM"
-	WorkerListResponseDataAddressCountryHn WorkerListResponseDataAddressCountry = "HN"
-	WorkerListResponseDataAddressCountryHr WorkerListResponseDataAddressCountry = "HR"
-	WorkerListResponseDataAddressCountryHt WorkerListResponseDataAddressCountry = "HT"
-	WorkerListResponseDataAddressCountryHu WorkerListResponseDataAddressCountry = "HU"
-	WorkerListResponseDataAddressCountryID WorkerListResponseDataAddressCountry = "ID"
-	WorkerListResponseDataAddressCountryIe WorkerListResponseDataAddressCountry = "IE"
-	WorkerListResponseDataAddressCountryIl WorkerListResponseDataAddressCountry = "IL"
-	WorkerListResponseDataAddressCountryIm WorkerListResponseDataAddressCountry = "IM"
-	WorkerListResponseDataAddressCountryIn WorkerListResponseDataAddressCountry = "IN"
-	WorkerListResponseDataAddressCountryIo WorkerListResponseDataAddressCountry = "IO"
-	WorkerListResponseDataAddressCountryIq WorkerListResponseDataAddressCountry = "IQ"
-	WorkerListResponseDataAddressCountryIr WorkerListResponseDataAddressCountry = "IR"
-	WorkerListResponseDataAddressCountryIs WorkerListResponseDataAddressCountry = "IS"
-	WorkerListResponseDataAddressCountryIt WorkerListResponseDataAddressCountry = "IT"
-	WorkerListResponseDataAddressCountryJe WorkerListResponseDataAddressCountry = "JE"
-	WorkerListResponseDataAddressCountryJm WorkerListResponseDataAddressCountry = "JM"
-	WorkerListResponseDataAddressCountryJo WorkerListResponseDataAddressCountry = "JO"
-	WorkerListResponseDataAddressCountryJp WorkerListResponseDataAddressCountry = "JP"
-	WorkerListResponseDataAddressCountryKe WorkerListResponseDataAddressCountry = "KE"
-	WorkerListResponseDataAddressCountryKg WorkerListResponseDataAddressCountry = "KG"
-	WorkerListResponseDataAddressCountryKh WorkerListResponseDataAddressCountry = "KH"
-	WorkerListResponseDataAddressCountryKi WorkerListResponseDataAddressCountry = "KI"
-	WorkerListResponseDataAddressCountryKm WorkerListResponseDataAddressCountry = "KM"
-	WorkerListResponseDataAddressCountryKn WorkerListResponseDataAddressCountry = "KN"
-	WorkerListResponseDataAddressCountryKp WorkerListResponseDataAddressCountry = "KP"
-	WorkerListResponseDataAddressCountryKr WorkerListResponseDataAddressCountry = "KR"
-	WorkerListResponseDataAddressCountryKw WorkerListResponseDataAddressCountry = "KW"
-	WorkerListResponseDataAddressCountryKy WorkerListResponseDataAddressCountry = "KY"
-	WorkerListResponseDataAddressCountryKz WorkerListResponseDataAddressCountry = "KZ"
-	WorkerListResponseDataAddressCountryLa WorkerListResponseDataAddressCountry = "LA"
-	WorkerListResponseDataAddressCountryLb WorkerListResponseDataAddressCountry = "LB"
-	WorkerListResponseDataAddressCountryLc WorkerListResponseDataAddressCountry = "LC"
-	WorkerListResponseDataAddressCountryLi WorkerListResponseDataAddressCountry = "LI"
-	WorkerListResponseDataAddressCountryLk WorkerListResponseDataAddressCountry = "LK"
-	WorkerListResponseDataAddressCountryLr WorkerListResponseDataAddressCountry = "LR"
-	WorkerListResponseDataAddressCountryLs WorkerListResponseDataAddressCountry = "LS"
-	WorkerListResponseDataAddressCountryLt WorkerListResponseDataAddressCountry = "LT"
-	WorkerListResponseDataAddressCountryLu WorkerListResponseDataAddressCountry = "LU"
-	WorkerListResponseDataAddressCountryLv WorkerListResponseDataAddressCountry = "LV"
-	WorkerListResponseDataAddressCountryLy WorkerListResponseDataAddressCountry = "LY"
-	WorkerListResponseDataAddressCountryMa WorkerListResponseDataAddressCountry = "MA"
-	WorkerListResponseDataAddressCountryMc WorkerListResponseDataAddressCountry = "MC"
-	WorkerListResponseDataAddressCountryMd WorkerListResponseDataAddressCountry = "MD"
-	WorkerListResponseDataAddressCountryMe WorkerListResponseDataAddressCountry = "ME"
-	WorkerListResponseDataAddressCountryMf WorkerListResponseDataAddressCountry = "MF"
-	WorkerListResponseDataAddressCountryMg WorkerListResponseDataAddressCountry = "MG"
-	WorkerListResponseDataAddressCountryMh WorkerListResponseDataAddressCountry = "MH"
-	WorkerListResponseDataAddressCountryMk WorkerListResponseDataAddressCountry = "MK"
-	WorkerListResponseDataAddressCountryMl WorkerListResponseDataAddressCountry = "ML"
-	WorkerListResponseDataAddressCountryMm WorkerListResponseDataAddressCountry = "MM"
-	WorkerListResponseDataAddressCountryMn WorkerListResponseDataAddressCountry = "MN"
-	WorkerListResponseDataAddressCountryMo WorkerListResponseDataAddressCountry = "MO"
-	WorkerListResponseDataAddressCountryMp WorkerListResponseDataAddressCountry = "MP"
-	WorkerListResponseDataAddressCountryMq WorkerListResponseDataAddressCountry = "MQ"
-	WorkerListResponseDataAddressCountryMr WorkerListResponseDataAddressCountry = "MR"
-	WorkerListResponseDataAddressCountryMs WorkerListResponseDataAddressCountry = "MS"
-	WorkerListResponseDataAddressCountryMt WorkerListResponseDataAddressCountry = "MT"
-	WorkerListResponseDataAddressCountryMu WorkerListResponseDataAddressCountry = "MU"
-	WorkerListResponseDataAddressCountryMv WorkerListResponseDataAddressCountry = "MV"
-	WorkerListResponseDataAddressCountryMw WorkerListResponseDataAddressCountry = "MW"
-	WorkerListResponseDataAddressCountryMx WorkerListResponseDataAddressCountry = "MX"
-	WorkerListResponseDataAddressCountryMy WorkerListResponseDataAddressCountry = "MY"
-	WorkerListResponseDataAddressCountryMz WorkerListResponseDataAddressCountry = "MZ"
-	WorkerListResponseDataAddressCountryNa WorkerListResponseDataAddressCountry = "NA"
-	WorkerListResponseDataAddressCountryNc WorkerListResponseDataAddressCountry = "NC"
-	WorkerListResponseDataAddressCountryNe WorkerListResponseDataAddressCountry = "NE"
-	WorkerListResponseDataAddressCountryNf WorkerListResponseDataAddressCountry = "NF"
-	WorkerListResponseDataAddressCountryNg WorkerListResponseDataAddressCountry = "NG"
-	WorkerListResponseDataAddressCountryNi WorkerListResponseDataAddressCountry = "NI"
-	WorkerListResponseDataAddressCountryNl WorkerListResponseDataAddressCountry = "NL"
-	WorkerListResponseDataAddressCountryNo WorkerListResponseDataAddressCountry = "NO"
-	WorkerListResponseDataAddressCountryNp WorkerListResponseDataAddressCountry = "NP"
-	WorkerListResponseDataAddressCountryNr WorkerListResponseDataAddressCountry = "NR"
-	WorkerListResponseDataAddressCountryNu WorkerListResponseDataAddressCountry = "NU"
-	WorkerListResponseDataAddressCountryNz WorkerListResponseDataAddressCountry = "NZ"
-	WorkerListResponseDataAddressCountryOm WorkerListResponseDataAddressCountry = "OM"
-	WorkerListResponseDataAddressCountryPa WorkerListResponseDataAddressCountry = "PA"
-	WorkerListResponseDataAddressCountryPe WorkerListResponseDataAddressCountry = "PE"
-	WorkerListResponseDataAddressCountryPf WorkerListResponseDataAddressCountry = "PF"
-	WorkerListResponseDataAddressCountryPg WorkerListResponseDataAddressCountry = "PG"
-	WorkerListResponseDataAddressCountryPh WorkerListResponseDataAddressCountry = "PH"
-	WorkerListResponseDataAddressCountryPk WorkerListResponseDataAddressCountry = "PK"
-	WorkerListResponseDataAddressCountryPl WorkerListResponseDataAddressCountry = "PL"
-	WorkerListResponseDataAddressCountryPm WorkerListResponseDataAddressCountry = "PM"
-	WorkerListResponseDataAddressCountryPn WorkerListResponseDataAddressCountry = "PN"
-	WorkerListResponseDataAddressCountryPr WorkerListResponseDataAddressCountry = "PR"
-	WorkerListResponseDataAddressCountryPs WorkerListResponseDataAddressCountry = "PS"
-	WorkerListResponseDataAddressCountryPt WorkerListResponseDataAddressCountry = "PT"
-	WorkerListResponseDataAddressCountryPw WorkerListResponseDataAddressCountry = "PW"
-	WorkerListResponseDataAddressCountryPy WorkerListResponseDataAddressCountry = "PY"
-	WorkerListResponseDataAddressCountryQa WorkerListResponseDataAddressCountry = "QA"
-	WorkerListResponseDataAddressCountryRe WorkerListResponseDataAddressCountry = "RE"
-	WorkerListResponseDataAddressCountryRo WorkerListResponseDataAddressCountry = "RO"
-	WorkerListResponseDataAddressCountryRs WorkerListResponseDataAddressCountry = "RS"
-	WorkerListResponseDataAddressCountryRu WorkerListResponseDataAddressCountry = "RU"
-	WorkerListResponseDataAddressCountryRw WorkerListResponseDataAddressCountry = "RW"
-	WorkerListResponseDataAddressCountrySa WorkerListResponseDataAddressCountry = "SA"
-	WorkerListResponseDataAddressCountrySb WorkerListResponseDataAddressCountry = "SB"
-	WorkerListResponseDataAddressCountrySc WorkerListResponseDataAddressCountry = "SC"
-	WorkerListResponseDataAddressCountrySd WorkerListResponseDataAddressCountry = "SD"
-	WorkerListResponseDataAddressCountrySe WorkerListResponseDataAddressCountry = "SE"
-	WorkerListResponseDataAddressCountrySg WorkerListResponseDataAddressCountry = "SG"
-	WorkerListResponseDataAddressCountrySh WorkerListResponseDataAddressCountry = "SH"
-	WorkerListResponseDataAddressCountrySi WorkerListResponseDataAddressCountry = "SI"
-	WorkerListResponseDataAddressCountrySj WorkerListResponseDataAddressCountry = "SJ"
-	WorkerListResponseDataAddressCountrySk WorkerListResponseDataAddressCountry = "SK"
-	WorkerListResponseDataAddressCountrySl WorkerListResponseDataAddressCountry = "SL"
-	WorkerListResponseDataAddressCountrySm WorkerListResponseDataAddressCountry = "SM"
-	WorkerListResponseDataAddressCountrySn WorkerListResponseDataAddressCountry = "SN"
-	WorkerListResponseDataAddressCountrySo WorkerListResponseDataAddressCountry = "SO"
-	WorkerListResponseDataAddressCountrySr WorkerListResponseDataAddressCountry = "SR"
-	WorkerListResponseDataAddressCountrySS WorkerListResponseDataAddressCountry = "SS"
-	WorkerListResponseDataAddressCountrySt WorkerListResponseDataAddressCountry = "ST"
-	WorkerListResponseDataAddressCountrySv WorkerListResponseDataAddressCountry = "SV"
-	WorkerListResponseDataAddressCountrySx WorkerListResponseDataAddressCountry = "SX"
-	WorkerListResponseDataAddressCountrySy WorkerListResponseDataAddressCountry = "SY"
-	WorkerListResponseDataAddressCountrySz WorkerListResponseDataAddressCountry = "SZ"
-	WorkerListResponseDataAddressCountryTc WorkerListResponseDataAddressCountry = "TC"
-	WorkerListResponseDataAddressCountryTd WorkerListResponseDataAddressCountry = "TD"
-	WorkerListResponseDataAddressCountryTf WorkerListResponseDataAddressCountry = "TF"
-	WorkerListResponseDataAddressCountryTg WorkerListResponseDataAddressCountry = "TG"
-	WorkerListResponseDataAddressCountryTh WorkerListResponseDataAddressCountry = "TH"
-	WorkerListResponseDataAddressCountryTj WorkerListResponseDataAddressCountry = "TJ"
-	WorkerListResponseDataAddressCountryTk WorkerListResponseDataAddressCountry = "TK"
-	WorkerListResponseDataAddressCountryTl WorkerListResponseDataAddressCountry = "TL"
-	WorkerListResponseDataAddressCountryTm WorkerListResponseDataAddressCountry = "TM"
-	WorkerListResponseDataAddressCountryTn WorkerListResponseDataAddressCountry = "TN"
-	WorkerListResponseDataAddressCountryTo WorkerListResponseDataAddressCountry = "TO"
-	WorkerListResponseDataAddressCountryTr WorkerListResponseDataAddressCountry = "TR"
-	WorkerListResponseDataAddressCountryTt WorkerListResponseDataAddressCountry = "TT"
-	WorkerListResponseDataAddressCountryTv WorkerListResponseDataAddressCountry = "TV"
-	WorkerListResponseDataAddressCountryTw WorkerListResponseDataAddressCountry = "TW"
-	WorkerListResponseDataAddressCountryTz WorkerListResponseDataAddressCountry = "TZ"
-	WorkerListResponseDataAddressCountryUa WorkerListResponseDataAddressCountry = "UA"
-	WorkerListResponseDataAddressCountryUg WorkerListResponseDataAddressCountry = "UG"
-	WorkerListResponseDataAddressCountryUm WorkerListResponseDataAddressCountry = "UM"
-	WorkerListResponseDataAddressCountryUs WorkerListResponseDataAddressCountry = "US"
-	WorkerListResponseDataAddressCountryUy WorkerListResponseDataAddressCountry = "UY"
-	WorkerListResponseDataAddressCountryUz WorkerListResponseDataAddressCountry = "UZ"
-	WorkerListResponseDataAddressCountryVa WorkerListResponseDataAddressCountry = "VA"
-	WorkerListResponseDataAddressCountryVc WorkerListResponseDataAddressCountry = "VC"
-	WorkerListResponseDataAddressCountryVe WorkerListResponseDataAddressCountry = "VE"
-	WorkerListResponseDataAddressCountryVg WorkerListResponseDataAddressCountry = "VG"
-	WorkerListResponseDataAddressCountryVi WorkerListResponseDataAddressCountry = "VI"
-	WorkerListResponseDataAddressCountryVn WorkerListResponseDataAddressCountry = "VN"
-	WorkerListResponseDataAddressCountryVu WorkerListResponseDataAddressCountry = "VU"
-	WorkerListResponseDataAddressCountryWf WorkerListResponseDataAddressCountry = "WF"
-	WorkerListResponseDataAddressCountryWs WorkerListResponseDataAddressCountry = "WS"
-	WorkerListResponseDataAddressCountryXk WorkerListResponseDataAddressCountry = "XK"
-	WorkerListResponseDataAddressCountryYe WorkerListResponseDataAddressCountry = "YE"
-	WorkerListResponseDataAddressCountryYt WorkerListResponseDataAddressCountry = "YT"
-	WorkerListResponseDataAddressCountryZa WorkerListResponseDataAddressCountry = "ZA"
-	WorkerListResponseDataAddressCountryZm WorkerListResponseDataAddressCountry = "ZM"
-	WorkerListResponseDataAddressCountryZw WorkerListResponseDataAddressCountry = "ZW"
-)
-
-func (r WorkerListResponseDataAddressCountry) IsKnown() bool {
-	switch r {
-	case WorkerListResponseDataAddressCountryAd, WorkerListResponseDataAddressCountryAe, WorkerListResponseDataAddressCountryAf, WorkerListResponseDataAddressCountryAg, WorkerListResponseDataAddressCountryAI, WorkerListResponseDataAddressCountryAl, WorkerListResponseDataAddressCountryAm, WorkerListResponseDataAddressCountryAo, WorkerListResponseDataAddressCountryAq, WorkerListResponseDataAddressCountryAr, WorkerListResponseDataAddressCountryAs, WorkerListResponseDataAddressCountryAt, WorkerListResponseDataAddressCountryAu, WorkerListResponseDataAddressCountryAw, WorkerListResponseDataAddressCountryAx, WorkerListResponseDataAddressCountryAz, WorkerListResponseDataAddressCountryBa, WorkerListResponseDataAddressCountryBb, WorkerListResponseDataAddressCountryBd, WorkerListResponseDataAddressCountryBe, WorkerListResponseDataAddressCountryBf, WorkerListResponseDataAddressCountryBg, WorkerListResponseDataAddressCountryBh, WorkerListResponseDataAddressCountryBi, WorkerListResponseDataAddressCountryBj, WorkerListResponseDataAddressCountryBl, WorkerListResponseDataAddressCountryBm, WorkerListResponseDataAddressCountryBn, WorkerListResponseDataAddressCountryBo, WorkerListResponseDataAddressCountryBq, WorkerListResponseDataAddressCountryBr, WorkerListResponseDataAddressCountryBs, WorkerListResponseDataAddressCountryBt, WorkerListResponseDataAddressCountryBv, WorkerListResponseDataAddressCountryBw, WorkerListResponseDataAddressCountryBy, WorkerListResponseDataAddressCountryBz, WorkerListResponseDataAddressCountryCa, WorkerListResponseDataAddressCountryCc, WorkerListResponseDataAddressCountryCd, WorkerListResponseDataAddressCountryCf, WorkerListResponseDataAddressCountryCg, WorkerListResponseDataAddressCountryCh, WorkerListResponseDataAddressCountryCi, WorkerListResponseDataAddressCountryCk, WorkerListResponseDataAddressCountryCl, WorkerListResponseDataAddressCountryCm, WorkerListResponseDataAddressCountryCn, WorkerListResponseDataAddressCountryCo, WorkerListResponseDataAddressCountryCr, WorkerListResponseDataAddressCountryCu, WorkerListResponseDataAddressCountryCv, WorkerListResponseDataAddressCountryCw, WorkerListResponseDataAddressCountryCx, WorkerListResponseDataAddressCountryCy, WorkerListResponseDataAddressCountryCz, WorkerListResponseDataAddressCountryDe, WorkerListResponseDataAddressCountryDj, WorkerListResponseDataAddressCountryDk, WorkerListResponseDataAddressCountryDm, WorkerListResponseDataAddressCountryDo, WorkerListResponseDataAddressCountryDz, WorkerListResponseDataAddressCountryEc, WorkerListResponseDataAddressCountryEe, WorkerListResponseDataAddressCountryEg, WorkerListResponseDataAddressCountryEh, WorkerListResponseDataAddressCountryEr, WorkerListResponseDataAddressCountryEs, WorkerListResponseDataAddressCountryEt, WorkerListResponseDataAddressCountryFi, WorkerListResponseDataAddressCountryFj, WorkerListResponseDataAddressCountryFk, WorkerListResponseDataAddressCountryFm, WorkerListResponseDataAddressCountryFo, WorkerListResponseDataAddressCountryFr, WorkerListResponseDataAddressCountryGa, WorkerListResponseDataAddressCountryGB, WorkerListResponseDataAddressCountryGd, WorkerListResponseDataAddressCountryGe, WorkerListResponseDataAddressCountryGf, WorkerListResponseDataAddressCountryGg, WorkerListResponseDataAddressCountryGh, WorkerListResponseDataAddressCountryGi, WorkerListResponseDataAddressCountryGl, WorkerListResponseDataAddressCountryGm, WorkerListResponseDataAddressCountryGn, WorkerListResponseDataAddressCountryGp, WorkerListResponseDataAddressCountryGq, WorkerListResponseDataAddressCountryGr, WorkerListResponseDataAddressCountryGs, WorkerListResponseDataAddressCountryGt, WorkerListResponseDataAddressCountryGu, WorkerListResponseDataAddressCountryGw, WorkerListResponseDataAddressCountryGy, WorkerListResponseDataAddressCountryHk, WorkerListResponseDataAddressCountryHm, WorkerListResponseDataAddressCountryHn, WorkerListResponseDataAddressCountryHr, WorkerListResponseDataAddressCountryHt, WorkerListResponseDataAddressCountryHu, WorkerListResponseDataAddressCountryID, WorkerListResponseDataAddressCountryIe, WorkerListResponseDataAddressCountryIl, WorkerListResponseDataAddressCountryIm, WorkerListResponseDataAddressCountryIn, WorkerListResponseDataAddressCountryIo, WorkerListResponseDataAddressCountryIq, WorkerListResponseDataAddressCountryIr, WorkerListResponseDataAddressCountryIs, WorkerListResponseDataAddressCountryIt, WorkerListResponseDataAddressCountryJe, WorkerListResponseDataAddressCountryJm, WorkerListResponseDataAddressCountryJo, WorkerListResponseDataAddressCountryJp, WorkerListResponseDataAddressCountryKe, WorkerListResponseDataAddressCountryKg, WorkerListResponseDataAddressCountryKh, WorkerListResponseDataAddressCountryKi, WorkerListResponseDataAddressCountryKm, WorkerListResponseDataAddressCountryKn, WorkerListResponseDataAddressCountryKp, WorkerListResponseDataAddressCountryKr, WorkerListResponseDataAddressCountryKw, WorkerListResponseDataAddressCountryKy, WorkerListResponseDataAddressCountryKz, WorkerListResponseDataAddressCountryLa, WorkerListResponseDataAddressCountryLb, WorkerListResponseDataAddressCountryLc, WorkerListResponseDataAddressCountryLi, WorkerListResponseDataAddressCountryLk, WorkerListResponseDataAddressCountryLr, WorkerListResponseDataAddressCountryLs, WorkerListResponseDataAddressCountryLt, WorkerListResponseDataAddressCountryLu, WorkerListResponseDataAddressCountryLv, WorkerListResponseDataAddressCountryLy, WorkerListResponseDataAddressCountryMa, WorkerListResponseDataAddressCountryMc, WorkerListResponseDataAddressCountryMd, WorkerListResponseDataAddressCountryMe, WorkerListResponseDataAddressCountryMf, WorkerListResponseDataAddressCountryMg, WorkerListResponseDataAddressCountryMh, WorkerListResponseDataAddressCountryMk, WorkerListResponseDataAddressCountryMl, WorkerListResponseDataAddressCountryMm, WorkerListResponseDataAddressCountryMn, WorkerListResponseDataAddressCountryMo, WorkerListResponseDataAddressCountryMp, WorkerListResponseDataAddressCountryMq, WorkerListResponseDataAddressCountryMr, WorkerListResponseDataAddressCountryMs, WorkerListResponseDataAddressCountryMt, WorkerListResponseDataAddressCountryMu, WorkerListResponseDataAddressCountryMv, WorkerListResponseDataAddressCountryMw, WorkerListResponseDataAddressCountryMx, WorkerListResponseDataAddressCountryMy, WorkerListResponseDataAddressCountryMz, WorkerListResponseDataAddressCountryNa, WorkerListResponseDataAddressCountryNc, WorkerListResponseDataAddressCountryNe, WorkerListResponseDataAddressCountryNf, WorkerListResponseDataAddressCountryNg, WorkerListResponseDataAddressCountryNi, WorkerListResponseDataAddressCountryNl, WorkerListResponseDataAddressCountryNo, WorkerListResponseDataAddressCountryNp, WorkerListResponseDataAddressCountryNr, WorkerListResponseDataAddressCountryNu, WorkerListResponseDataAddressCountryNz, WorkerListResponseDataAddressCountryOm, WorkerListResponseDataAddressCountryPa, WorkerListResponseDataAddressCountryPe, WorkerListResponseDataAddressCountryPf, WorkerListResponseDataAddressCountryPg, WorkerListResponseDataAddressCountryPh, WorkerListResponseDataAddressCountryPk, WorkerListResponseDataAddressCountryPl, WorkerListResponseDataAddressCountryPm, WorkerListResponseDataAddressCountryPn, WorkerListResponseDataAddressCountryPr, WorkerListResponseDataAddressCountryPs, WorkerListResponseDataAddressCountryPt, WorkerListResponseDataAddressCountryPw, WorkerListResponseDataAddressCountryPy, WorkerListResponseDataAddressCountryQa, WorkerListResponseDataAddressCountryRe, WorkerListResponseDataAddressCountryRo, WorkerListResponseDataAddressCountryRs, WorkerListResponseDataAddressCountryRu, WorkerListResponseDataAddressCountryRw, WorkerListResponseDataAddressCountrySa, WorkerListResponseDataAddressCountrySb, WorkerListResponseDataAddressCountrySc, WorkerListResponseDataAddressCountrySd, WorkerListResponseDataAddressCountrySe, WorkerListResponseDataAddressCountrySg, WorkerListResponseDataAddressCountrySh, WorkerListResponseDataAddressCountrySi, WorkerListResponseDataAddressCountrySj, WorkerListResponseDataAddressCountrySk, WorkerListResponseDataAddressCountrySl, WorkerListResponseDataAddressCountrySm, WorkerListResponseDataAddressCountrySn, WorkerListResponseDataAddressCountrySo, WorkerListResponseDataAddressCountrySr, WorkerListResponseDataAddressCountrySS, WorkerListResponseDataAddressCountrySt, WorkerListResponseDataAddressCountrySv, WorkerListResponseDataAddressCountrySx, WorkerListResponseDataAddressCountrySy, WorkerListResponseDataAddressCountrySz, WorkerListResponseDataAddressCountryTc, WorkerListResponseDataAddressCountryTd, WorkerListResponseDataAddressCountryTf, WorkerListResponseDataAddressCountryTg, WorkerListResponseDataAddressCountryTh, WorkerListResponseDataAddressCountryTj, WorkerListResponseDataAddressCountryTk, WorkerListResponseDataAddressCountryTl, WorkerListResponseDataAddressCountryTm, WorkerListResponseDataAddressCountryTn, WorkerListResponseDataAddressCountryTo, WorkerListResponseDataAddressCountryTr, WorkerListResponseDataAddressCountryTt, WorkerListResponseDataAddressCountryTv, WorkerListResponseDataAddressCountryTw, WorkerListResponseDataAddressCountryTz, WorkerListResponseDataAddressCountryUa, WorkerListResponseDataAddressCountryUg, WorkerListResponseDataAddressCountryUm, WorkerListResponseDataAddressCountryUs, WorkerListResponseDataAddressCountryUy, WorkerListResponseDataAddressCountryUz, WorkerListResponseDataAddressCountryVa, WorkerListResponseDataAddressCountryVc, WorkerListResponseDataAddressCountryVe, WorkerListResponseDataAddressCountryVg, WorkerListResponseDataAddressCountryVi, WorkerListResponseDataAddressCountryVn, WorkerListResponseDataAddressCountryVu, WorkerListResponseDataAddressCountryWf, WorkerListResponseDataAddressCountryWs, WorkerListResponseDataAddressCountryXk, WorkerListResponseDataAddressCountryYe, WorkerListResponseDataAddressCountryYt, WorkerListResponseDataAddressCountryZa, WorkerListResponseDataAddressCountryZm, WorkerListResponseDataAddressCountryZw:
 		return true
 	}
 	return false

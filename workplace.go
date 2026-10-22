@@ -81,8 +81,11 @@ func (r *WorkplaceService) List(ctx context.Context, query WorkplaceListParams, 
 //			Line1:      sdk.F[string]("x"),
 //			City:       sdk.F[string](""),
 //			PostalCode: sdk.F[string](""),
+//			State:      sdk.F[sdk.WorkplaceNewParamsAddressState](sdk.WorkplaceNewParamsAddressState("AL")),
+//			Country:    sdk.F[sdk.WorkplaceNewParamsAddressCountry](sdk.WorkplaceNewParamsAddressCountry("US")),
 //		}),
 //		Name: sdk.F[string]("x"),
+//		Type: sdk.F[sdk.WorkplaceNewParamsType](sdk.WorkplaceNewParamsType("remote")),
 //	})
 //	if err != nil {
 //		panic(err)
@@ -129,8 +132,10 @@ func (r *WorkplaceService) Update(ctx context.Context, id string, body Workplace
 }
 
 type WorkplaceListParams struct {
-	Limit    param.Field[string] `query:"limit" api:"required"`
-	AfterID  param.Field[string] `query:"afterId"`
+	Limit param.Field[string] `query:"limit" api:"required"`
+	// Public workplace identifier
+	AfterID param.Field[string] `query:"afterId"`
+	// Public workplace identifier
 	BeforeID param.Field[string] `query:"beforeId"`
 }
 
@@ -268,17 +273,17 @@ func (r WorkplaceUpdateParams) MarshalJSON() (data []byte, err error) {
 }
 
 type WorkplaceListResponse struct {
-	HasMore bool                        `json:"hasMore" api:"required"`
 	Count   int64                       `json:"count" api:"required"`
 	Data    []WorkplaceListResponseData `json:"data" api:"required"`
+	HasMore bool                        `json:"hasMore" api:"required"`
 	JSON    workplaceListResponseJSON   `json:"-"`
 }
 
 // workplaceListResponseJSON contains the JSON metadata for the struct [WorkplaceListResponse]
 type workplaceListResponseJSON struct {
-	HasMore     apijson.Field
 	Count       apijson.Field
 	Data        apijson.Field
+	HasMore     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -293,24 +298,24 @@ func (r workplaceListResponseJSON) RawJSON() string {
 
 type WorkplaceNewResponse struct {
 	// Public workplace identifier
-	ID     string                     `json:"id" api:"required"`
-	Name   string                     `json:"name" api:"required"`
-	Type   WorkplaceNewResponseType   `json:"type" api:"required"`
-	Status WorkplaceNewResponseStatus `json:"status" api:"required"`
+	ID string `json:"id" api:"required"`
 	// A valid US address
 	Address   WorkplaceNewResponseAddress `json:"address" api:"required"`
 	CreatedAt string                      `json:"createdAt" api:"required"`
+	Name      string                      `json:"name" api:"required"`
+	Status    WorkplaceNewResponseStatus  `json:"status" api:"required"`
+	Type      WorkplaceNewResponseType    `json:"type" api:"required"`
 	JSON      workplaceNewResponseJSON    `json:"-"`
 }
 
 // workplaceNewResponseJSON contains the JSON metadata for the struct [WorkplaceNewResponse]
 type workplaceNewResponseJSON struct {
 	ID          apijson.Field
-	Name        apijson.Field
-	Type        apijson.Field
-	Status      apijson.Field
 	Address     apijson.Field
 	CreatedAt   apijson.Field
+	Name        apijson.Field
+	Status      apijson.Field
+	Type        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -325,24 +330,24 @@ func (r workplaceNewResponseJSON) RawJSON() string {
 
 type WorkplaceUpdateResponse struct {
 	// Public workplace identifier
-	ID     string                        `json:"id" api:"required"`
-	Name   string                        `json:"name" api:"required"`
-	Type   WorkplaceUpdateResponseType   `json:"type" api:"required"`
-	Status WorkplaceUpdateResponseStatus `json:"status" api:"required"`
+	ID string `json:"id" api:"required"`
 	// A valid US address
 	Address   WorkplaceUpdateResponseAddress `json:"address" api:"required"`
 	CreatedAt string                         `json:"createdAt" api:"required"`
+	Name      string                         `json:"name" api:"required"`
+	Status    WorkplaceUpdateResponseStatus  `json:"status" api:"required"`
+	Type      WorkplaceUpdateResponseType    `json:"type" api:"required"`
 	JSON      workplaceUpdateResponseJSON    `json:"-"`
 }
 
 // workplaceUpdateResponseJSON contains the JSON metadata for the struct [WorkplaceUpdateResponse]
 type workplaceUpdateResponseJSON struct {
 	ID          apijson.Field
-	Name        apijson.Field
-	Type        apijson.Field
-	Status      apijson.Field
 	Address     apijson.Field
 	CreatedAt   apijson.Field
+	Name        apijson.Field
+	Status      apijson.Field
+	Type        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -357,24 +362,24 @@ func (r workplaceUpdateResponseJSON) RawJSON() string {
 
 type WorkplaceListResponseData struct {
 	// Public workplace identifier
-	ID     string                          `json:"id" api:"required"`
-	Name   string                          `json:"name" api:"required"`
-	Type   WorkplaceListResponseDataType   `json:"type" api:"required"`
-	Status WorkplaceListResponseDataStatus `json:"status" api:"required"`
+	ID string `json:"id" api:"required"`
 	// A valid US address
 	Address   WorkplaceListResponseDataAddress `json:"address" api:"required"`
 	CreatedAt string                           `json:"createdAt" api:"required"`
+	Name      string                           `json:"name" api:"required"`
+	Status    WorkplaceListResponseDataStatus  `json:"status" api:"required"`
+	Type      WorkplaceListResponseDataType    `json:"type" api:"required"`
 	JSON      workplaceListResponseDataJSON    `json:"-"`
 }
 
 // workplaceListResponseDataJSON contains the JSON metadata for the struct [WorkplaceListResponseData]
 type workplaceListResponseDataJSON struct {
 	ID          apijson.Field
-	Name        apijson.Field
-	Type        apijson.Field
-	Status      apijson.Field
 	Address     apijson.Field
 	CreatedAt   apijson.Field
+	Name        apijson.Field
+	Status      apijson.Field
+	Type        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -418,22 +423,22 @@ func (r WorkplaceNewResponseStatus) IsKnown() bool {
 }
 
 type WorkplaceNewResponseAddress struct {
-	Line1      string                             `json:"line1" api:"required"`
 	City       string                             `json:"city" api:"required"`
+	Country    WorkplaceNewResponseAddressCountry `json:"country" api:"required"`
+	Line1      string                             `json:"line1" api:"required"`
 	PostalCode string                             `json:"postalCode" api:"required"`
 	State      WorkplaceNewResponseAddressState   `json:"state" api:"required"`
-	Country    WorkplaceNewResponseAddressCountry `json:"country" api:"required"`
 	Line2      string                             `json:"line2" api:"nullable"`
 	JSON       workplaceNewResponseAddressJSON    `json:"-"`
 }
 
 // workplaceNewResponseAddressJSON contains the JSON metadata for the struct [WorkplaceNewResponseAddress]
 type workplaceNewResponseAddressJSON struct {
-	Line1       apijson.Field
 	City        apijson.Field
+	Country     apijson.Field
+	Line1       apijson.Field
 	PostalCode  apijson.Field
 	State       apijson.Field
-	Country     apijson.Field
 	Line2       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -478,22 +483,22 @@ func (r WorkplaceUpdateResponseStatus) IsKnown() bool {
 }
 
 type WorkplaceUpdateResponseAddress struct {
-	Line1      string                                `json:"line1" api:"required"`
 	City       string                                `json:"city" api:"required"`
+	Country    WorkplaceUpdateResponseAddressCountry `json:"country" api:"required"`
+	Line1      string                                `json:"line1" api:"required"`
 	PostalCode string                                `json:"postalCode" api:"required"`
 	State      WorkplaceUpdateResponseAddressState   `json:"state" api:"required"`
-	Country    WorkplaceUpdateResponseAddressCountry `json:"country" api:"required"`
 	Line2      string                                `json:"line2" api:"nullable"`
 	JSON       workplaceUpdateResponseAddressJSON    `json:"-"`
 }
 
 // workplaceUpdateResponseAddressJSON contains the JSON metadata for the struct [WorkplaceUpdateResponseAddress]
 type workplaceUpdateResponseAddressJSON struct {
-	Line1       apijson.Field
 	City        apijson.Field
+	Country     apijson.Field
+	Line1       apijson.Field
 	PostalCode  apijson.Field
 	State       apijson.Field
-	Country     apijson.Field
 	Line2       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -538,22 +543,22 @@ func (r WorkplaceListResponseDataStatus) IsKnown() bool {
 }
 
 type WorkplaceListResponseDataAddress struct {
-	Line1      string                                  `json:"line1" api:"required"`
 	City       string                                  `json:"city" api:"required"`
+	Country    WorkplaceListResponseDataAddressCountry `json:"country" api:"required"`
+	Line1      string                                  `json:"line1" api:"required"`
 	PostalCode string                                  `json:"postalCode" api:"required"`
 	State      WorkplaceListResponseDataAddressState   `json:"state" api:"required"`
-	Country    WorkplaceListResponseDataAddressCountry `json:"country" api:"required"`
 	Line2      string                                  `json:"line2" api:"nullable"`
 	JSON       workplaceListResponseDataAddressJSON    `json:"-"`
 }
 
 // workplaceListResponseDataAddressJSON contains the JSON metadata for the struct [WorkplaceListResponseDataAddress]
 type workplaceListResponseDataAddressJSON struct {
-	Line1       apijson.Field
 	City        apijson.Field
+	Country     apijson.Field
+	Line1       apijson.Field
 	PostalCode  apijson.Field
 	State       apijson.Field
-	Country     apijson.Field
 	Line2       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field

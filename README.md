@@ -1,8 +1,8 @@
-# warp
+# Warp
 
-This library provides convenient access to the warp REST API from Go.
+This library provides convenient access to the Warp REST API from Go.
 
-The full API of this library can be found in [api.md](./api.md).
+The REST API documentation can be found on [docs.warp.co](https://docs.warp.co). The full API of this library can be found in [api.md](./api.md).
 
 <br />
 
@@ -73,7 +73,7 @@ Pass credentials to the generated client constructor. Environment variables are 
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
-| `option.WithAPIKey` | `string \| provider` | - | The API key for header authorization. Defaults to WARP_API_KEY. |
+| `option.WithAPIKey` | `func(string) option.RequestOption` | - | The API key for header authorization. Defaults to WARP_API_KEY. |
 
 Declared schemes:
 
@@ -93,7 +93,7 @@ healthPlan, err := client.Benefits.HealthPlans.List(context.Background(), sdk.Be
 if err != nil {
 	var apiErr *sdk.Error
 	if errors.As(err, &apiErr) {
-		fmt.Println(apiErr.StatusCode, apiErr.RawJSON())
+		fmt.Println(apiErr.StatusCode, apiErr.JSON.RawJSON())
 	}
 	panic(err)
 }
@@ -151,7 +151,7 @@ Generated clients support request timeouts and retry temporary failures such as 
 ## Helpers
 
 - Pass `option.WithResponseInto(&raw)` to capture the underlying `*http.Response` for a request.
-- Use the generated `String`, `Int`, `Bool`, `Float`, `Time`, `Opt`, and `Ptr` helpers when setting optional params.
+- Use the generated `F`, `Null`, `Raw`, `Int`, `String`, `Float`, `Bool`, and `FileParam` helpers when setting optional params.
 
 <br />
 

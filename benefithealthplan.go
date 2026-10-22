@@ -73,7 +73,7 @@ func (r *BenefitHealthPlanService) List(ctx context.Context, query BenefitHealth
 //
 // Returns:
 //
-//	*PublicHealthPlan: A company health plan available through Warp.
+//	*PublicHealthPlan
 //
 // Example:
 //
@@ -98,36 +98,36 @@ type PublicHealthPlan struct {
 	// The tag of a company health plan.
 	ID string `json:"id" api:"required"`
 	// The insurance carrier underwriting the health plan.
-	Carrier PublicHealthPlanCarrier `json:"carrier" api:"required"`
-	// The health coverage type.
-	Type PublicHealthPlanType `json:"type" api:"required"`
-	// The company-facing plan name.
-	Name string `json:"name" api:"required"`
+	Carrier            PublicHealthPlanCarrier `json:"carrier" api:"required"`
+	CreatedAt          string                  `json:"createdAt" api:"required"`
+	EffectiveEndDate   string                  `json:"effectiveEndDate" api:"required,nullable"`
+	EffectiveStartDate string                  `json:"effectiveStartDate" api:"required"`
 	// The carrier-assigned group number.
 	GroupNumber string `json:"groupNumber" api:"required,nullable"`
+	// The company-facing plan name.
+	Name string `json:"name" api:"required"`
 	// The plan network structure.
-	NetworkType        PublicHealthPlanNetworkType `json:"networkType" api:"required,nullable"`
-	EffectiveStartDate string                      `json:"effectiveStartDate" api:"required"`
-	EffectiveEndDate   string                      `json:"effectiveEndDate" api:"required,nullable"`
+	NetworkType PublicHealthPlanNetworkType `json:"networkType" api:"required,nullable"`
 	// The public lifecycle status of a health plan.
-	Status    PublicHealthPlanStatus `json:"status" api:"required"`
-	CreatedAt string                 `json:"createdAt" api:"required"`
-	UpdatedAt string                 `json:"updatedAt" api:"required"`
-	JSON      publicHealthPlanJSON   `json:"-"`
+	Status PublicHealthPlanStatus `json:"status" api:"required"`
+	// The health coverage type.
+	Type      PublicHealthPlanType `json:"type" api:"required"`
+	UpdatedAt string               `json:"updatedAt" api:"required"`
+	JSON      publicHealthPlanJSON `json:"-"`
 }
 
 // publicHealthPlanJSON contains the JSON metadata for the struct [PublicHealthPlan]
 type publicHealthPlanJSON struct {
 	ID                 apijson.Field
 	Carrier            apijson.Field
-	Type               apijson.Field
-	Name               apijson.Field
-	GroupNumber        apijson.Field
-	NetworkType        apijson.Field
-	EffectiveStartDate apijson.Field
-	EffectiveEndDate   apijson.Field
-	Status             apijson.Field
 	CreatedAt          apijson.Field
+	EffectiveEndDate   apijson.Field
+	EffectiveStartDate apijson.Field
+	GroupNumber        apijson.Field
+	Name               apijson.Field
+	NetworkType        apijson.Field
+	Status             apijson.Field
+	Type               apijson.Field
 	UpdatedAt          apijson.Field
 	raw                string
 	ExtraFields        map[string]apijson.Field
@@ -150,11 +150,14 @@ const (
 	PublicHealthPlanTypeLife                PublicHealthPlanType = "life"
 	PublicHealthPlanTypeShortTermDisability PublicHealthPlanType = "short_term_disability"
 	PublicHealthPlanTypeLongTermDisability  PublicHealthPlanType = "long_term_disability"
+	PublicHealthPlanTypeAccident            PublicHealthPlanType = "accident"
+	PublicHealthPlanTypeCriticalIllness     PublicHealthPlanType = "critical_illness"
+	PublicHealthPlanTypeHospital            PublicHealthPlanType = "hospital"
 )
 
 func (r PublicHealthPlanType) IsKnown() bool {
 	switch r {
-	case PublicHealthPlanTypeMedical, PublicHealthPlanTypeDental, PublicHealthPlanTypeVision, PublicHealthPlanTypeLife, PublicHealthPlanTypeShortTermDisability, PublicHealthPlanTypeLongTermDisability:
+	case PublicHealthPlanTypeMedical, PublicHealthPlanTypeDental, PublicHealthPlanTypeVision, PublicHealthPlanTypeLife, PublicHealthPlanTypeShortTermDisability, PublicHealthPlanTypeLongTermDisability, PublicHealthPlanTypeAccident, PublicHealthPlanTypeCriticalIllness, PublicHealthPlanTypeHospital:
 		return true
 	}
 	return false
@@ -219,9 +222,11 @@ func (r PublicHealthPlanStatus) IsKnown() bool {
 }
 
 type BenefitHealthPlanListParams struct {
-	Limit      param.Field[string]                            `query:"limit" api:"required"`
-	Statuses   param.Field[[]PublicHealthPlanStatus]          `query:"statuses" api:"required"`
-	AfterID    param.Field[string]                            `query:"afterId"`
+	Limit    param.Field[string]                   `query:"limit" api:"required"`
+	Statuses param.Field[[]PublicHealthPlanStatus] `query:"statuses" api:"required"`
+	// The tag of a company health plan.
+	AfterID param.Field[string] `query:"afterId"`
+	// The tag of a company health plan.
 	BeforeID   param.Field[string]                            `query:"beforeId"`
 	CarrierIDs param.Field[[]string]                          `query:"carrierIds"`
 	Types      param.Field[[]BenefitHealthPlanListParamsType] `query:"types"`
@@ -244,28 +249,31 @@ const (
 	BenefitHealthPlanListParamsTypeLife                BenefitHealthPlanListParamsType = "life"
 	BenefitHealthPlanListParamsTypeShortTermDisability BenefitHealthPlanListParamsType = "short_term_disability"
 	BenefitHealthPlanListParamsTypeLongTermDisability  BenefitHealthPlanListParamsType = "long_term_disability"
+	BenefitHealthPlanListParamsTypeAccident            BenefitHealthPlanListParamsType = "accident"
+	BenefitHealthPlanListParamsTypeCriticalIllness     BenefitHealthPlanListParamsType = "critical_illness"
+	BenefitHealthPlanListParamsTypeHospital            BenefitHealthPlanListParamsType = "hospital"
 )
 
 func (r BenefitHealthPlanListParamsType) IsKnown() bool {
 	switch r {
-	case BenefitHealthPlanListParamsTypeMedical, BenefitHealthPlanListParamsTypeDental, BenefitHealthPlanListParamsTypeVision, BenefitHealthPlanListParamsTypeLife, BenefitHealthPlanListParamsTypeShortTermDisability, BenefitHealthPlanListParamsTypeLongTermDisability:
+	case BenefitHealthPlanListParamsTypeMedical, BenefitHealthPlanListParamsTypeDental, BenefitHealthPlanListParamsTypeVision, BenefitHealthPlanListParamsTypeLife, BenefitHealthPlanListParamsTypeShortTermDisability, BenefitHealthPlanListParamsTypeLongTermDisability, BenefitHealthPlanListParamsTypeAccident, BenefitHealthPlanListParamsTypeCriticalIllness, BenefitHealthPlanListParamsTypeHospital:
 		return true
 	}
 	return false
 }
 
 type BenefitHealthPlanListResponse struct {
-	HasMore bool                              `json:"hasMore" api:"required"`
 	Count   int64                             `json:"count" api:"required"`
 	Data    []PublicHealthPlan                `json:"data" api:"required"`
+	HasMore bool                              `json:"hasMore" api:"required"`
 	JSON    benefitHealthPlanListResponseJSON `json:"-"`
 }
 
 // benefitHealthPlanListResponseJSON contains the JSON metadata for the struct [BenefitHealthPlanListResponse]
 type benefitHealthPlanListResponseJSON struct {
-	HasMore     apijson.Field
 	Count       apijson.Field
 	Data        apijson.Field
+	HasMore     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }

@@ -63,6 +63,37 @@ func (r *BenefitRetirementPlanService) List(ctx context.Context, query BenefitRe
 	return res, err
 }
 
+// Create a retirement plan for a company on the manual retirement channel.
+//
+// Parameters:
+//
+//	ctx: Context for the request.
+//	body: BenefitRetirementPlanNewParams request parameters.
+//	opts: Options to apply to this request.
+//
+// Returns:
+//
+//	*PublicRetirementPlan1
+//
+// Example:
+//
+//	retirementPlan, err := client.Benefits.RetirementPlans.New(context.Background(), sdk.BenefitRetirementPlanNewParams{
+//		EffectiveStartDate: sdk.F[string](""),
+//		Name:               sdk.F[string]("x"),
+//		Type:               sdk.F[sdk.BenefitRetirementPlanNewParamsType](sdk.BenefitRetirementPlanNewParamsType("401k")),
+//	})
+//	if err != nil {
+//		panic(err)
+//	}
+//
+//	fmt.Println(retirementPlan)
+func (r *BenefitRetirementPlanService) New(ctx context.Context, body BenefitRetirementPlanNewParams, opts ...option.RequestOption) (res *PublicRetirementPlan1, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "v1/benefits/retirement_plans"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return res, err
+}
+
 // Get a company retirement plan by id, regardless of status.
 //
 // Parameters:
@@ -73,7 +104,7 @@ func (r *BenefitRetirementPlanService) List(ctx context.Context, query BenefitRe
 //
 // Returns:
 //
-//	*PublicRetirementPlan: A company retirement plan available through Warp.
+//	*PublicRetirementPlan
 //
 // Example:
 //
@@ -94,35 +125,67 @@ func (r *BenefitRetirementPlanService) Get(ctx context.Context, id string, opts 
 	return res, err
 }
 
+// Update a retirement plan for a company on the manual retirement channel.
+//
+// Parameters:
+//
+//	ctx: Context for the request.
+//	id: The tag of a company retirement plan.
+//	body: BenefitRetirementPlanUpdateParams request parameters.
+//	opts: Options to apply to this request.
+//
+// Returns:
+//
+//	*PublicRetirementPlan
+//
+// Example:
+//
+//	retirementPlan, err := client.Benefits.RetirementPlans.Update(context.Background(), "crpl_1234", sdk.BenefitRetirementPlanUpdateParams{})
+//	if err != nil {
+//		panic(err)
+//	}
+//
+//	fmt.Println(retirementPlan)
+func (r *BenefitRetirementPlanService) Update(ctx context.Context, id string, body BenefitRetirementPlanUpdateParams, opts ...option.RequestOption) (res *PublicRetirementPlan, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return nil, err
+	}
+	path := fmt.Sprintf("v1/benefits/retirement_plans/%s", url.PathEscape(id))
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, body, &res, opts...)
+	return res, err
+}
+
 type PublicRetirementPlan struct {
 	// The tag of a company retirement plan.
-	ID string `json:"id" api:"required"`
-	// The retirement plan type.
-	Type PublicRetirementPlanType `json:"type" api:"required"`
+	ID                 string `json:"id" api:"required"`
+	CreatedAt          string `json:"createdAt" api:"required"`
+	EffectiveEndDate   string `json:"effectiveEndDate" api:"required,nullable"`
+	EffectiveStartDate string `json:"effectiveStartDate" api:"required"`
 	// The company-facing plan name.
 	Name string `json:"name" api:"required"`
 	// The system administering the plan. Manual plans are administered by the company
 	// outside a connected provider.
-	Provider           PublicRetirementPlanProvider `json:"provider" api:"required"`
-	EffectiveStartDate string                       `json:"effectiveStartDate" api:"required"`
-	EffectiveEndDate   string                       `json:"effectiveEndDate" api:"required,nullable"`
+	Provider PublicRetirementPlanProvider `json:"provider" api:"required"`
 	// The public lifecycle status of a retirement plan.
-	Status    PublicRetirementPlanStatus `json:"status" api:"required"`
-	CreatedAt string                     `json:"createdAt" api:"required"`
-	UpdatedAt string                     `json:"updatedAt" api:"required"`
-	JSON      publicRetirementPlanJSON   `json:"-"`
+	Status PublicRetirementPlanStatus `json:"status" api:"required"`
+	// The retirement plan type.
+	Type      PublicRetirementPlanType `json:"type" api:"required"`
+	UpdatedAt string                   `json:"updatedAt" api:"required"`
+	JSON      publicRetirementPlanJSON `json:"-"`
 }
 
 // publicRetirementPlanJSON contains the JSON metadata for the struct [PublicRetirementPlan]
 type publicRetirementPlanJSON struct {
 	ID                 apijson.Field
-	Type               apijson.Field
+	CreatedAt          apijson.Field
+	EffectiveEndDate   apijson.Field
+	EffectiveStartDate apijson.Field
 	Name               apijson.Field
 	Provider           apijson.Field
-	EffectiveStartDate apijson.Field
-	EffectiveEndDate   apijson.Field
 	Status             apijson.Field
-	CreatedAt          apijson.Field
+	Type               apijson.Field
 	UpdatedAt          apijson.Field
 	raw                string
 	ExtraFields        map[string]apijson.Field
@@ -152,6 +215,69 @@ const (
 func (r PublicRetirementPlanType) IsKnown() bool {
 	switch r {
 	case PublicRetirementPlanType401k, PublicRetirementPlanTypeRoth401k, PublicRetirementPlanType403b, PublicRetirementPlanTypeRoth403b, PublicRetirementPlanType457, PublicRetirementPlanTypeRoth457, PublicRetirementPlanTypeSimpleIra, PublicRetirementPlanTypeRothSimpleIra:
+		return true
+	}
+	return false
+}
+
+type PublicRetirementPlan1 struct {
+	// The tag of a company retirement plan.
+	ID                 string `json:"id" api:"required"`
+	CreatedAt          string `json:"createdAt" api:"required"`
+	EffectiveEndDate   string `json:"effectiveEndDate" api:"required,nullable"`
+	EffectiveStartDate string `json:"effectiveStartDate" api:"required"`
+	// The company-facing plan name.
+	Name string `json:"name" api:"required"`
+	// The system administering the plan. Manual plans are administered by the company
+	// outside a connected provider.
+	Provider PublicRetirementPlanProvider `json:"provider" api:"required"`
+	// The public lifecycle status of a retirement plan.
+	Status PublicRetirementPlanStatus `json:"status" api:"required"`
+	// The retirement plan type.
+	Type      PublicRetirementPlan1Type `json:"type" api:"required"`
+	UpdatedAt string                    `json:"updatedAt" api:"required"`
+	JSON      publicRetirementPlan1JSON `json:"-"`
+}
+
+// publicRetirementPlan1JSON contains the JSON metadata for the struct [PublicRetirementPlan1]
+type publicRetirementPlan1JSON struct {
+	ID                 apijson.Field
+	CreatedAt          apijson.Field
+	EffectiveEndDate   apijson.Field
+	EffectiveStartDate apijson.Field
+	Name               apijson.Field
+	Provider           apijson.Field
+	Status             apijson.Field
+	Type               apijson.Field
+	UpdatedAt          apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
+}
+
+func (r *PublicRetirementPlan1) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicRetirementPlan1JSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicRetirementPlan1Type string
+
+const (
+	PublicRetirementPlan1Type401k          PublicRetirementPlan1Type = "401k"
+	PublicRetirementPlan1TypeRoth401k      PublicRetirementPlan1Type = "roth_401k"
+	PublicRetirementPlan1Type403b          PublicRetirementPlan1Type = "403b"
+	PublicRetirementPlan1TypeRoth403b      PublicRetirementPlan1Type = "roth_403b"
+	PublicRetirementPlan1Type457           PublicRetirementPlan1Type = "457"
+	PublicRetirementPlan1TypeRoth457       PublicRetirementPlan1Type = "roth_457"
+	PublicRetirementPlan1TypeSimpleIra     PublicRetirementPlan1Type = "simple_ira"
+	PublicRetirementPlan1TypeRothSimpleIra PublicRetirementPlan1Type = "roth_simple_ira"
+)
+
+func (r PublicRetirementPlan1Type) IsKnown() bool {
+	switch r {
+	case PublicRetirementPlan1Type401k, PublicRetirementPlan1TypeRoth401k, PublicRetirementPlan1Type403b, PublicRetirementPlan1TypeRoth403b, PublicRetirementPlan1Type457, PublicRetirementPlan1TypeRoth457, PublicRetirementPlan1TypeSimpleIra, PublicRetirementPlan1TypeRothSimpleIra:
 		return true
 	}
 	return false
@@ -189,9 +315,11 @@ func (r PublicRetirementPlanStatus) IsKnown() bool {
 }
 
 type BenefitRetirementPlanListParams struct {
-	Limit    param.Field[string]                                `query:"limit" api:"required"`
-	Statuses param.Field[[]PublicRetirementPlanStatus]          `query:"statuses" api:"required"`
-	AfterID  param.Field[string]                                `query:"afterId"`
+	Limit    param.Field[string]                       `query:"limit" api:"required"`
+	Statuses param.Field[[]PublicRetirementPlanStatus] `query:"statuses" api:"required"`
+	// The tag of a company retirement plan.
+	AfterID param.Field[string] `query:"afterId"`
+	// The tag of a company retirement plan.
 	BeforeID param.Field[string]                                `query:"beforeId"`
 	Types    param.Field[[]BenefitRetirementPlanListParamsType] `query:"types"`
 }
@@ -225,18 +353,59 @@ func (r BenefitRetirementPlanListParamsType) IsKnown() bool {
 	return false
 }
 
+type BenefitRetirementPlanNewParams struct {
+	EffectiveStartDate param.Field[string]                             `json:"effectiveStartDate" api:"required"`
+	Name               param.Field[string]                             `json:"name" api:"required"`
+	Type               param.Field[BenefitRetirementPlanNewParamsType] `json:"type" api:"required"`
+}
+
+func (r BenefitRetirementPlanNewParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type BenefitRetirementPlanNewParamsType string
+
+const (
+	BenefitRetirementPlanNewParamsType401k          BenefitRetirementPlanNewParamsType = "401k"
+	BenefitRetirementPlanNewParamsTypeRoth401k      BenefitRetirementPlanNewParamsType = "roth_401k"
+	BenefitRetirementPlanNewParamsType403b          BenefitRetirementPlanNewParamsType = "403b"
+	BenefitRetirementPlanNewParamsTypeRoth403b      BenefitRetirementPlanNewParamsType = "roth_403b"
+	BenefitRetirementPlanNewParamsType457           BenefitRetirementPlanNewParamsType = "457"
+	BenefitRetirementPlanNewParamsTypeRoth457       BenefitRetirementPlanNewParamsType = "roth_457"
+	BenefitRetirementPlanNewParamsTypeSimpleIra     BenefitRetirementPlanNewParamsType = "simple_ira"
+	BenefitRetirementPlanNewParamsTypeRothSimpleIra BenefitRetirementPlanNewParamsType = "roth_simple_ira"
+)
+
+func (r BenefitRetirementPlanNewParamsType) IsKnown() bool {
+	switch r {
+	case BenefitRetirementPlanNewParamsType401k, BenefitRetirementPlanNewParamsTypeRoth401k, BenefitRetirementPlanNewParamsType403b, BenefitRetirementPlanNewParamsTypeRoth403b, BenefitRetirementPlanNewParamsType457, BenefitRetirementPlanNewParamsTypeRoth457, BenefitRetirementPlanNewParamsTypeSimpleIra, BenefitRetirementPlanNewParamsTypeRothSimpleIra:
+		return true
+	}
+	return false
+}
+
+type BenefitRetirementPlanUpdateParams struct {
+	EffectiveEndDate   param.Field[string] `json:"effectiveEndDate"`
+	EffectiveStartDate param.Field[string] `json:"effectiveStartDate"`
+	Name               param.Field[string] `json:"name"`
+}
+
+func (r BenefitRetirementPlanUpdateParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
 type BenefitRetirementPlanListResponse struct {
-	HasMore bool                                  `json:"hasMore" api:"required"`
 	Count   int64                                 `json:"count" api:"required"`
 	Data    []PublicRetirementPlan                `json:"data" api:"required"`
+	HasMore bool                                  `json:"hasMore" api:"required"`
 	JSON    benefitRetirementPlanListResponseJSON `json:"-"`
 }
 
 // benefitRetirementPlanListResponseJSON contains the JSON metadata for the struct [BenefitRetirementPlanListResponse]
 type benefitRetirementPlanListResponseJSON struct {
-	HasMore     apijson.Field
 	Count       apijson.Field
 	Data        apijson.Field
+	HasMore     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
