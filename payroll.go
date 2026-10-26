@@ -645,12 +645,12 @@ const (
 	PublicPaycheckWorkerWorkerTypeUsW2             PublicPaycheckWorkerWorkerType = "us_w2"
 	PublicPaycheckWorkerWorkerTypeUs1099           PublicPaycheckWorkerWorkerType = "us_1099"
 	PublicPaycheckWorkerWorkerTypeGlobalContractor PublicPaycheckWorkerWorkerType = "global_contractor"
-	PublicPaycheckWorkerWorkerTypeGlobalEmployee   PublicPaycheckWorkerWorkerType = "global_employee"
+	PublicPaycheckWorkerWorkerTypeEorEmployee      PublicPaycheckWorkerWorkerType = "eor_employee"
 )
 
 func (r PublicPaycheckWorkerWorkerType) IsKnown() bool {
 	switch r {
-	case PublicPaycheckWorkerWorkerTypeUsW2, PublicPaycheckWorkerWorkerTypeUs1099, PublicPaycheckWorkerWorkerTypeGlobalContractor, PublicPaycheckWorkerWorkerTypeGlobalEmployee:
+	case PublicPaycheckWorkerWorkerTypeUsW2, PublicPaycheckWorkerWorkerTypeUs1099, PublicPaycheckWorkerWorkerTypeGlobalContractor, PublicPaycheckWorkerWorkerTypeEorEmployee:
 		return true
 	}
 	return false
@@ -1631,7 +1631,7 @@ type PayrollListParams struct {
 // URLQuery serializes [PayrollListParams]'s query parameters as `url.Values`.
 func (r PayrollListParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -1671,7 +1671,7 @@ type PayrollListPaychecksParams struct {
 // URLQuery serializes [PayrollListPaychecksParams]'s query parameters as `url.Values`.
 func (r PayrollListPaychecksParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -1682,12 +1682,12 @@ const (
 	PayrollListPaychecksParamsWorkerTypeUsW2             PayrollListPaychecksParamsWorkerType = "us_w2"
 	PayrollListPaychecksParamsWorkerTypeUs1099           PayrollListPaychecksParamsWorkerType = "us_1099"
 	PayrollListPaychecksParamsWorkerTypeGlobalContractor PayrollListPaychecksParamsWorkerType = "global_contractor"
-	PayrollListPaychecksParamsWorkerTypeGlobalEmployee   PayrollListPaychecksParamsWorkerType = "global_employee"
+	PayrollListPaychecksParamsWorkerTypeEorEmployee      PayrollListPaychecksParamsWorkerType = "eor_employee"
 )
 
 func (r PayrollListPaychecksParamsWorkerType) IsKnown() bool {
 	switch r {
-	case PayrollListPaychecksParamsWorkerTypeUsW2, PayrollListPaychecksParamsWorkerTypeUs1099, PayrollListPaychecksParamsWorkerTypeGlobalContractor, PayrollListPaychecksParamsWorkerTypeGlobalEmployee:
+	case PayrollListPaychecksParamsWorkerTypeUsW2, PayrollListPaychecksParamsWorkerTypeUs1099, PayrollListPaychecksParamsWorkerTypeGlobalContractor, PayrollListPaychecksParamsWorkerTypeEorEmployee:
 		return true
 	}
 	return false

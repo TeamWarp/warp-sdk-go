@@ -133,7 +133,7 @@ type TimeOffListAssignmentsParams struct {
 // URLQuery serializes [TimeOffListAssignmentsParams]'s query parameters as `url.Values`.
 func (r TimeOffListAssignmentsParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -153,7 +153,7 @@ type TimeOffListBalancesParams struct {
 // URLQuery serializes [TimeOffListBalancesParams]'s query parameters as `url.Values`.
 func (r TimeOffListBalancesParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -174,7 +174,7 @@ type TimeOffListRequestsParams struct {
 // URLQuery serializes [TimeOffListRequestsParams]'s query parameters as `url.Values`.
 func (r TimeOffListRequestsParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }

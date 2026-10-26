@@ -327,7 +327,7 @@ type BenefitRetirementPlanListParams struct {
 // URLQuery serializes [BenefitRetirementPlanListParams]'s query parameters as `url.Values`.
 func (r BenefitRetirementPlanListParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }

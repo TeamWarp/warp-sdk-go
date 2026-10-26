@@ -744,7 +744,7 @@ type BenefitDeductionListParams struct {
 // URLQuery serializes [BenefitDeductionListParams]'s query parameters as `url.Values`.
 func (r BenefitDeductionListParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
