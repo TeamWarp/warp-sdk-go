@@ -179,7 +179,7 @@ type BankAccountListParams struct {
 // URLQuery serializes [BankAccountListParams]'s query parameters as `url.Values`.
 func (r BankAccountListParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }

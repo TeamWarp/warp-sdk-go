@@ -102,7 +102,7 @@ type TimeOffPolicyListParams struct {
 // URLQuery serializes [TimeOffPolicyListParams]'s query parameters as `url.Values`.
 func (r TimeOffPolicyListParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }

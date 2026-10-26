@@ -162,7 +162,7 @@ type I9VerificationListParams struct {
 // URLQuery serializes [I9VerificationListParams]'s query parameters as `url.Values`.
 func (r I9VerificationListParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }

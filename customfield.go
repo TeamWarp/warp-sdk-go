@@ -955,7 +955,7 @@ type CustomFieldListValuesParams struct {
 // URLQuery serializes [CustomFieldListValuesParams]'s query parameters as `url.Values`.
 func (r CustomFieldListValuesParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -1262,7 +1262,7 @@ type CustomFieldClearValueParams struct {
 // URLQuery serializes [CustomFieldClearValueParams]'s query parameters as `url.Values`.
 func (r CustomFieldClearValueParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
