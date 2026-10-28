@@ -186,7 +186,7 @@ type PublicBenefitDeduction struct {
 	// The deduction name shown in payroll and benefits surfaces.
 	Name string `json:"name" api:"required"`
 	// The associated benefit plan, or null for a planless payroll deduction.
-	Plan PublicBenefitDeductionPlan2 `json:"plan" api:"required,nullable"`
+	Plan PublicBenefitDeductionPlan `json:"plan" api:"required,nullable"`
 	// Whether the deduction recurs or applies once.
 	Recurrence PublicBenefitDeductionRecurrence `json:"recurrence" api:"required"`
 	// The public lifecycle status of the current deduction version.
@@ -298,7 +298,7 @@ type PublicBenefitDeduction1 struct {
 	// The deduction name shown in payroll and benefits surfaces.
 	Name string `json:"name" api:"required"`
 	// The associated benefit plan, or null for a planless payroll deduction.
-	Plan PublicBenefitDeductionPlan2 `json:"plan" api:"required,nullable"`
+	Plan PublicBenefitDeductionPlan `json:"plan" api:"required,nullable"`
 	// Whether the deduction recurs or applies once.
 	Recurrence PublicBenefitDeduction1Recurrence `json:"recurrence" api:"required"`
 	// The public lifecycle status of the current deduction version.
@@ -1578,6 +1578,42 @@ func (r BenefitDeductionUpdateParamsStatus) IsKnown() bool {
 	return false
 }
 
+type PublicBenefitDeductionPlan struct {
+	// The tag of a company health plan.
+	ID string `json:"id" api:"required"`
+	// The associated health plan name.
+	Name  string                         `json:"name" api:"required"`
+	Type  PublicBenefitDeductionPlanType `json:"type" api:"required"`
+	JSON  publicBenefitDeductionPlanJSON `json:"-"`
+	union PublicBenefitDeductionPlanUnion
+}
+
+// publicBenefitDeductionPlanJSON contains the JSON metadata for the struct [PublicBenefitDeductionPlan]
+type publicBenefitDeductionPlanJSON struct {
+	ID          apijson.Field
+	Name        apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r publicBenefitDeductionPlanJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *PublicBenefitDeductionPlan) UnmarshalJSON(data []byte) (err error) {
+	*r = PublicBenefitDeductionPlan{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+func (r PublicBenefitDeductionPlan) AsUnion() PublicBenefitDeductionPlanUnion {
+	return r.union
+}
+
 type PublicBenefitDeductionCalculation struct {
 	// A monetary amount with its currency and server-formatted display value.
 	EmployeeContribution interface{} `json:"employeeContribution" api:"required"`
@@ -1641,40 +1677,38 @@ func (r benefitDeductionListResponseJSON) RawJSON() string {
 	return r.raw
 }
 
-type PublicBenefitDeductionPlan2 struct {
-	// The tag of a company health plan.
-	ID string `json:"id" api:"required"`
-	// The associated health plan name.
-	Name  string                          `json:"name" api:"required"`
-	Type  PublicBenefitDeductionPlan2Type `json:"type" api:"required"`
-	JSON  publicBenefitDeductionPlan2JSON `json:"-"`
-	union PublicBenefitDeductionPlan2Union
+type PublicBenefitDeductionPlanUnion interface {
+	implementsPublicBenefitDeductionPlan()
 }
 
-// publicBenefitDeductionPlan2JSON contains the JSON metadata for the struct [PublicBenefitDeductionPlan2]
-type publicBenefitDeductionPlan2JSON struct {
-	ID          apijson.Field
-	Name        apijson.Field
-	Type        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*PublicBenefitDeductionPlanUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(HealthPlanReference{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(RetirementPlanReference{}),
+		},
+	)
 }
 
-func (r publicBenefitDeductionPlan2JSON) RawJSON() string {
-	return r.raw
-}
+type PublicBenefitDeductionPlanType string
 
-func (r *PublicBenefitDeductionPlan2) UnmarshalJSON(data []byte) (err error) {
-	*r = PublicBenefitDeductionPlan2{}
-	err = apijson.UnmarshalRoot(data, &r.union)
-	if err != nil {
-		return err
+const (
+	PublicBenefitDeductionPlanTypeHealthPlan     PublicBenefitDeductionPlanType = "health_plan"
+	PublicBenefitDeductionPlanTypeRetirementPlan PublicBenefitDeductionPlanType = "retirement_plan"
+)
+
+func (r PublicBenefitDeductionPlanType) IsKnown() bool {
+	switch r {
+	case PublicBenefitDeductionPlanTypeHealthPlan, PublicBenefitDeductionPlanTypeRetirementPlan:
+		return true
 	}
-	return apijson.Port(r.union, &r)
-}
-
-func (r PublicBenefitDeductionPlan2) AsUnion() PublicBenefitDeductionPlan2Union {
-	return r.union
+	return false
 }
 
 type PublicBenefitDeductionCalculationUnion interface {
@@ -1726,47 +1760,13 @@ func (r PublicBenefitDeductionCalculationFrequency) IsKnown() bool {
 	return false
 }
 
-type PublicBenefitDeductionPlan2Union interface {
-	implementsPublicBenefitDeductionPlan2()
-}
+func (r HealthPlanReference) implementsPublicBenefitDeductionPlan() {}
 
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeOf((*PublicBenefitDeductionPlan2Union)(nil)).Elem(),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(HealthPlanReference{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(RetirementPlanReference{}),
-		},
-	)
-}
-
-type PublicBenefitDeductionPlan2Type string
-
-const (
-	PublicBenefitDeductionPlan2TypeHealthPlan     PublicBenefitDeductionPlan2Type = "health_plan"
-	PublicBenefitDeductionPlan2TypeRetirementPlan PublicBenefitDeductionPlan2Type = "retirement_plan"
-)
-
-func (r PublicBenefitDeductionPlan2Type) IsKnown() bool {
-	switch r {
-	case PublicBenefitDeductionPlan2TypeHealthPlan, PublicBenefitDeductionPlan2TypeRetirementPlan:
-		return true
-	}
-	return false
-}
+func (r RetirementPlanReference) implementsPublicBenefitDeductionPlan() {}
 
 func (r FixedAmountBenefitCalculation) implementsPublicBenefitDeductionCalculation() {}
 
 func (r PercentageBenefitCalculation) implementsPublicBenefitDeductionCalculation() {}
-
-func (r HealthPlanReference) implementsPublicBenefitDeductionPlan2() {}
-
-func (r RetirementPlanReference) implementsPublicBenefitDeductionPlan2() {}
 
 type BenefitMoneyInputParam struct {
 	// minor units — cents, e.g. 2345 for $23.45
