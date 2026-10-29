@@ -344,7 +344,9 @@ func (r PublicPayrollSubtype) IsKnown() bool {
 type PublicPayrollStatus string
 
 const (
+	PublicPayrollStatusPreparing     PublicPayrollStatus = "preparing"
 	PublicPayrollStatusDraft         PublicPayrollStatus = "draft"
+	PublicPayrollStatusApproving     PublicPayrollStatus = "approving"
 	PublicPayrollStatusPending       PublicPayrollStatus = "pending"
 	PublicPayrollStatusProcessing    PublicPayrollStatus = "processing"
 	PublicPayrollStatusPartiallyPaid PublicPayrollStatus = "partially_paid"
@@ -355,7 +357,7 @@ const (
 
 func (r PublicPayrollStatus) IsKnown() bool {
 	switch r {
-	case PublicPayrollStatusDraft, PublicPayrollStatusPending, PublicPayrollStatusProcessing, PublicPayrollStatusPartiallyPaid, PublicPayrollStatusProcessed, PublicPayrollStatusFailed, PublicPayrollStatusVoided:
+	case PublicPayrollStatusPreparing, PublicPayrollStatusDraft, PublicPayrollStatusApproving, PublicPayrollStatusPending, PublicPayrollStatusProcessing, PublicPayrollStatusPartiallyPaid, PublicPayrollStatusProcessed, PublicPayrollStatusFailed, PublicPayrollStatusVoided:
 		return true
 	}
 	return false
@@ -491,8 +493,8 @@ type PublicPayrollDetailTotals struct {
 	// The provider-calculated amount to send for workers: gross pay plus
 	// reimbursements, less worker taxes, deductions, and benefit contributions. It
 	// excludes payment execution fees and may differ from recomputed totals because of
-	// provider and FX rounding.
-	NetPay PublicCurrencyMoneyAmount1 `json:"netPay" api:"required"`
+	// provider and FX rounding. Null when any paycheck net pay is not yet known.
+	NetPay PublicCurrencyMoneyAmount1 `json:"netPay" api:"required,nullable"`
 	// Non-benefit amounts deducted from worker pay after taxes, reducing net pay.
 	PostTaxDeductions PublicCurrencyMoneyAmount6 `json:"postTaxDeductions" api:"required"`
 	// Non-benefit amounts deducted from worker pay before taxes, reducing taxable pay
@@ -726,8 +728,8 @@ type PublicFundingPayrollTotals struct {
 	// The provider-calculated amount to send for workers: gross pay plus
 	// reimbursements, less worker taxes, deductions, and benefit contributions. It
 	// excludes payment execution fees and may differ from recomputed totals because of
-	// provider and FX rounding.
-	NetPay PublicCurrencyMoneyAmount1 `json:"netPay" api:"required"`
+	// provider and FX rounding. Null when any paycheck net pay is not yet known.
+	NetPay PublicCurrencyMoneyAmount1 `json:"netPay" api:"required,nullable"`
 	// Non-benefit amounts deducted from worker pay after taxes, reducing net pay.
 	PostTaxDeductions PublicCurrencyMoneyAmount6 `json:"postTaxDeductions" api:"required"`
 	// Non-benefit amounts deducted from worker pay before taxes, reducing taxable pay
@@ -1094,8 +1096,9 @@ type PublicPaycheckCurrencyTotals struct {
 	GrossPay PublicCurrencyMoneyAmount13 `json:"grossPay" api:"required"`
 	// Calculated net pay after reimbursements, worker taxes, deductions, and benefit
 	// contributions. It excludes payment execution fees and may differ from the amount
-	// the worker ultimately receives.
-	NetPay PublicCurrencyMoneyAmount12 `json:"netPay" api:"required"`
+	// the worker ultimately receives. Null in both calculation and funding currencies
+	// until net pay is known in both.
+	NetPay PublicCurrencyMoneyAmount12 `json:"netPay" api:"required,nullable"`
 	// Non-benefit amounts deducted from the worker's pay after taxes, reducing net
 	// pay.
 	PostTaxDeductions PublicCurrencyMoneyAmount18 `json:"postTaxDeductions" api:"required"`
@@ -1364,8 +1367,9 @@ type PublicPaycheckSummaryCurrencyTotals struct {
 	Currency interface{} `json:"currency" api:"required"`
 	// Calculated net pay after reimbursements, worker taxes, deductions, and benefit
 	// contributions. It excludes payment execution fees and may differ from the amount
-	// the worker ultimately receives.
-	NetPay PublicCurrencyMoneyAmount12             `json:"netPay" api:"required"`
+	// the worker ultimately receives. Null in both calculation and funding currencies
+	// until net pay is known in both.
+	NetPay PublicCurrencyMoneyAmount12             `json:"netPay" api:"required,nullable"`
 	JSON   publicPaycheckSummaryCurrencyTotalsJSON `json:"-"`
 }
 
