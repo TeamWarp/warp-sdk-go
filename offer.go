@@ -693,16 +693,20 @@ func (r OfferNewParamsWorkerType) IsKnown() bool {
 }
 
 type OfferNewParamsCompensation struct {
-	PayBasis              param.Field[OfferNewParamsCompensationPayBasis]    `json:"payBasis" api:"required"`
-	PayCurrency           param.Field[OfferNewParamsCompensationPayCurrency] `json:"payCurrency" api:"required"`
-	PayRate               param.Field[float64]                               `json:"payRate" api:"required"`
-	CliffMonths           param.Field[int64]                                 `json:"cliffMonths"`
-	PayType               param.Field[OfferNewParamsCompensationPayType]     `json:"payType"`
-	PayVariableRate       param.Field[float64]                               `json:"payVariableRate"`
-	RelocationBonus       param.Field[float64]                               `json:"relocationBonus"`
-	SignOnBonus           param.Field[float64]                               `json:"signOnBonus"`
-	StockOptions          param.Field[int64]                                 `json:"stockOptions"`
-	VestingScheduleMonths param.Field[int64]                                 `json:"vestingScheduleMonths"`
+	PayBasis    param.Field[OfferNewParamsCompensationPayBasis]    `json:"payBasis" api:"required"`
+	PayCurrency param.Field[OfferNewParamsCompensationPayCurrency] `json:"payCurrency" api:"required"`
+	// major units (dollars), e.g. 23.45
+	PayRate     param.Field[float64]                           `json:"payRate" api:"required"`
+	CliffMonths param.Field[int64]                             `json:"cliffMonths"`
+	PayType     param.Field[OfferNewParamsCompensationPayType] `json:"payType"`
+	// major units (dollars), e.g. 23.45
+	PayVariableRate param.Field[float64] `json:"payVariableRate"`
+	// major units (dollars), e.g. 23.45
+	RelocationBonus param.Field[float64] `json:"relocationBonus"`
+	// major units (dollars), e.g. 23.45
+	SignOnBonus           param.Field[float64] `json:"signOnBonus"`
+	StockOptions          param.Field[int64]   `json:"stockOptions"`
+	VestingScheduleMonths param.Field[int64]   `json:"vestingScheduleMonths"`
 }
 
 func (r OfferNewParamsCompensation) MarshalJSON() (data []byte, err error) {

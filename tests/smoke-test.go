@@ -1146,7 +1146,7 @@ func _smokeCase84() {
 func _smokeCase85() {
 	worker, err := client.Workers.NewEmployee(context.Background(), sdk.WorkerNewEmployeeParams{
 		Compensation: sdk.F[sdk.WorkerNewEmployeeParamsCompensation](sdk.WorkerNewEmployeeParamsCompensation{
-			Amount: sdk.F[float64](1),
+			Amount: sdk.F[float64](85000),
 			Per:    sdk.F[sdk.WorkerNewEmployeeParamsCompensationPer](sdk.WorkerNewEmployeeParamsCompensationPer("hour")),
 		}),
 		DepartmentID: sdk.F[string]("dpt_1234"),
@@ -1171,7 +1171,7 @@ func _smokeCase85() {
 func _smokeCase86() {
 	worker, err := client.Workers.NewEmployee(context.Background(), sdk.WorkerNewEmployeeParams{
 		Compensation: sdk.F[sdk.WorkerNewEmployeeParamsCompensation](sdk.WorkerNewEmployeeParamsCompensation{
-			Amount: sdk.F[float64](1),
+			Amount: sdk.F[float64](85000),
 			Per:    sdk.F[sdk.WorkerNewEmployeeParamsCompensationPer](sdk.WorkerNewEmployeeParamsCompensationPer("hour")),
 		}),
 		DepartmentID: sdk.F[string]("dpt_1234"),
@@ -1232,7 +1232,7 @@ func _smokeCase88() {
 		BusinessName: sdk.F[string]("Galt Enterprises, LLC"),
 		Compensation: sdk.F[sdk.WorkerNewContractorParamsCompensation](sdk.WorkerNewContractorParamsCompensation{
 			Currency: sdk.F[sdk.WorkerNewContractorParamsCompensationCurrency](sdk.WorkerNewContractorParamsCompensationCurrency("USD")),
-			Amount:   sdk.F[float64](1),
+			Amount:   sdk.F[float64](5000),
 			Per:      sdk.F[sdk.WorkerNewContractorParamsCompensationPer](sdk.WorkerNewContractorParamsCompensationPer("year")),
 		}),
 		LevelID:     sdk.F[string]("jlvl_1234"),
