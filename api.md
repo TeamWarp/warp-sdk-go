@@ -1253,7 +1253,7 @@ Create a new US employee. The worker will be created in draft status and must be
 ```go
 worker, err := client.Workers.NewEmployee(context.Background(), sdk.WorkerNewEmployeeParams{
 	Compensation: sdk.F[sdk.WorkerNewEmployeeParamsCompensation](sdk.WorkerNewEmployeeParamsCompensation{
-		Amount: sdk.F[float64](1),
+		Amount: sdk.F[float64](85000),
 		Per:    sdk.F[sdk.WorkerNewEmployeeParamsCompensationPer](sdk.WorkerNewEmployeeParamsCompensationPer("hour")),
 	}),
 	DepartmentID: sdk.F[string]("dpt_1234"),

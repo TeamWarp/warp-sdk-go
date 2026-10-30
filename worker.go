@@ -203,7 +203,7 @@ func (r *WorkerService) List(ctx context.Context, query WorkerListParams, opts .
 //
 //	worker, err := client.Workers.NewEmployee(context.Background(), sdk.WorkerNewEmployeeParams{
 //		Compensation: sdk.F[sdk.WorkerNewEmployeeParamsCompensation](sdk.WorkerNewEmployeeParamsCompensation{
-//			Amount: sdk.F[float64](1),
+//			Amount: sdk.F[float64](85000),
 //			Per:    sdk.F[sdk.WorkerNewEmployeeParamsCompensationPer](sdk.WorkerNewEmployeeParamsCompensationPer("hour")),
 //		}),
 //		DepartmentID: sdk.F[string]("dpt_1234"),
@@ -1693,6 +1693,7 @@ func (r WorkerNewEmployeeParamsWorkLocationRemoteWorkLocationState) IsKnown() bo
 }
 
 type WorkerNewEmployeeParamsCompensation struct {
+	// The pay amount. Interpreted based on the "per" field.
 	Amount param.Field[float64] `json:"amount" api:"required"`
 	// Whether the amount is per hour or per year.
 	Per param.Field[WorkerNewEmployeeParamsCompensationPer] `json:"per" api:"required"`
@@ -2051,6 +2052,7 @@ func (r WorkerNewContractorParamsWorkCountry) IsKnown() bool {
 }
 
 type WorkerNewContractorParamsCompensation struct {
+	// The pay amount. Interpreted based on the "per" field.
 	Amount   param.Field[float64]                                       `json:"amount" api:"required"`
 	Currency param.Field[WorkerNewContractorParamsCompensationCurrency] `json:"currency" api:"required"`
 	// The pay period for the compensation amount.
