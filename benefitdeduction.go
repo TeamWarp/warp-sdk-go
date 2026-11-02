@@ -66,6 +66,49 @@ func (r *BenefitDeductionService) List(ctx context.Context, query BenefitDeducti
 	return res, err
 }
 
+// Create a benefit deduction for a worker.
+//
+// Parameters:
+//
+//	ctx: Context for the request.
+//	body: BenefitDeductionNewParams request parameters.
+//	opts: Options to apply to this request.
+//
+// Returns:
+//
+//	*PublicBenefitDeduction1
+//
+// Example:
+//
+//	deduction, err := client.Benefits.Deductions.New(context.Background(), sdk.BenefitDeductionNewParams{
+//		Calculation: sdk.F[sdk.BenefitDeductionNewParamsCalculationUnion](sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInput{
+//			Type:      sdk.F[sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInputType](sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInputType("fixed_amount")),
+//			Frequency: sdk.F[sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInputFrequency](sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInputFrequency("monthly")),
+//			EmployeeContribution: sdk.F[sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContribution](sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContribution{
+//				Amount:   sdk.F[int64](0),
+//				Currency: sdk.F[sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency](sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency("USD")),
+//			}),
+//			EmployerContribution: sdk.F[sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContribution](sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContribution{
+//				Amount:   sdk.F[int64](0),
+//				Currency: sdk.F[sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency](sdk.BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency("USD")),
+//			}),
+//		}),
+//		EffectiveStartDate: sdk.F[string](""),
+//		Type:               sdk.F[sdk.BenefitDeductionNewParamsType](sdk.BenefitDeductionNewParamsType("medical")),
+//		WorkerID:           sdk.F[string]("wrk_1234"),
+//	})
+//	if err != nil {
+//		panic(err)
+//	}
+//
+//	fmt.Println(deduction)
+func (r *BenefitDeductionService) New(ctx context.Context, body BenefitDeductionNewParams, opts ...option.RequestOption) (res *PublicBenefitDeduction1, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "v1/benefits/deductions"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return res, err
+}
+
 // Get the current version of a company benefit deduction by id.
 //
 // Parameters:
@@ -76,7 +119,7 @@ func (r *BenefitDeductionService) List(ctx context.Context, query BenefitDeducti
 //
 // Returns:
 //
-//	*PublicBenefitDeduction: The current version of a stable payroll benefit deduction.
+//	*PublicBenefitDeduction
 //
 // Example:
 //
@@ -97,48 +140,80 @@ func (r *BenefitDeductionService) Get(ctx context.Context, id string, opts ...op
 	return res, err
 }
 
+// Update a benefit deduction. The calculation type cannot change.
+//
+// Parameters:
+//
+//	ctx: Context for the request.
+//	id: The version-group tag of a payroll benefit deduction. Stable across edits.
+//	body: BenefitDeductionUpdateParams request parameters.
+//	opts: Options to apply to this request.
+//
+// Returns:
+//
+//	*PublicBenefitDeduction
+//
+// Example:
+//
+//	deduction, err := client.Benefits.Deductions.Update(context.Background(), "pbdg_1234", sdk.BenefitDeductionUpdateParams{})
+//	if err != nil {
+//		panic(err)
+//	}
+//
+//	fmt.Println(deduction)
+func (r *BenefitDeductionService) Update(ctx context.Context, id string, body BenefitDeductionUpdateParams, opts ...option.RequestOption) (res *PublicBenefitDeduction, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return nil, err
+	}
+	path := fmt.Sprintf("v1/benefits/deductions/%s", url.PathEscape(id))
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, body, &res, opts...)
+	return res, err
+}
+
 type PublicBenefitDeduction struct {
 	// Stable identifier shared by every internal version of this deduction.
 	ID string `json:"id" api:"required"`
-	// Basic identifying information for a worker associated with another resource.
-	Worker PublicWorkerReference `json:"worker" api:"required"`
-	// The deduction name shown in payroll and benefits surfaces.
-	Name string `json:"name" api:"required"`
+	// How the employee and employer contributions are calculated.
+	Calculation PublicBenefitDeductionCalculation `json:"calculation" api:"required"`
 	// The broad reporting category. The type field identifies the specific payroll
 	// deduction.
-	Category PublicBenefitDeductionCategory `json:"category" api:"required"`
-	// The specific payroll deduction type within the broader category.
-	Type PublicBenefitDeductionType `json:"type" api:"required"`
+	Category           PublicBenefitDeductionCategory `json:"category" api:"required"`
+	CreatedAt          string                         `json:"createdAt" api:"required"`
+	EffectiveEndDate   string                         `json:"effectiveEndDate" api:"required,nullable"`
+	EffectiveStartDate string                         `json:"effectiveStartDate" api:"required"`
+	// The deduction name shown in payroll and benefits surfaces.
+	Name string `json:"name" api:"required"`
+	// The associated benefit plan, or null for a planless payroll deduction.
+	Plan PublicBenefitDeductionPlan `json:"plan" api:"required,nullable"`
 	// Whether the deduction recurs or applies once.
 	Recurrence PublicBenefitDeductionRecurrence `json:"recurrence" api:"required"`
-	// The associated benefit plan, or null for a planless payroll deduction.
-	Plan PublicBenefitDeductionPlan2 `json:"plan" api:"required,nullable"`
-	// How the employee and employer contributions are calculated.
-	Calculation        PublicBenefitDeductionCalculation `json:"calculation" api:"required"`
-	EffectiveStartDate string                            `json:"effectiveStartDate" api:"required"`
-	EffectiveEndDate   string                            `json:"effectiveEndDate" api:"required,nullable"`
 	// The public lifecycle status of the current deduction version.
-	Status    PublicBenefitDeductionStatus `json:"status" api:"required"`
-	CreatedAt string                       `json:"createdAt" api:"required"`
-	UpdatedAt string                       `json:"updatedAt" api:"required"`
-	JSON      publicBenefitDeductionJSON   `json:"-"`
+	Status PublicBenefitDeductionStatus `json:"status" api:"required"`
+	// The specific payroll deduction type within the broader category.
+	Type      PublicBenefitDeductionType `json:"type" api:"required"`
+	UpdatedAt string                     `json:"updatedAt" api:"required"`
+	// Basic identifying information for a worker associated with another resource.
+	Worker PublicWorkerReference      `json:"worker" api:"required"`
+	JSON   publicBenefitDeductionJSON `json:"-"`
 }
 
 // publicBenefitDeductionJSON contains the JSON metadata for the struct [PublicBenefitDeduction]
 type publicBenefitDeductionJSON struct {
 	ID                 apijson.Field
-	Worker             apijson.Field
-	Name               apijson.Field
-	Category           apijson.Field
-	Type               apijson.Field
-	Recurrence         apijson.Field
-	Plan               apijson.Field
 	Calculation        apijson.Field
-	EffectiveStartDate apijson.Field
-	EffectiveEndDate   apijson.Field
-	Status             apijson.Field
+	Category           apijson.Field
 	CreatedAt          apijson.Field
+	EffectiveEndDate   apijson.Field
+	EffectiveStartDate apijson.Field
+	Name               apijson.Field
+	Plan               apijson.Field
+	Recurrence         apijson.Field
+	Status             apijson.Field
+	Type               apijson.Field
 	UpdatedAt          apijson.Field
+	Worker             apijson.Field
 	raw                string
 	ExtraFields        map[string]apijson.Field
 }
@@ -209,6 +284,118 @@ func (r PublicBenefitDeductionRecurrence) IsKnown() bool {
 	return false
 }
 
+type PublicBenefitDeduction1 struct {
+	// Stable identifier shared by every internal version of this deduction.
+	ID string `json:"id" api:"required"`
+	// How the employee and employer contributions are calculated.
+	Calculation PublicBenefitDeductionCalculation `json:"calculation" api:"required"`
+	// The broad reporting category. The type field identifies the specific payroll
+	// deduction.
+	Category           PublicBenefitDeductionCategory `json:"category" api:"required"`
+	CreatedAt          string                         `json:"createdAt" api:"required"`
+	EffectiveEndDate   string                         `json:"effectiveEndDate" api:"required,nullable"`
+	EffectiveStartDate string                         `json:"effectiveStartDate" api:"required"`
+	// The deduction name shown in payroll and benefits surfaces.
+	Name string `json:"name" api:"required"`
+	// The associated benefit plan, or null for a planless payroll deduction.
+	Plan PublicBenefitDeductionPlan `json:"plan" api:"required,nullable"`
+	// Whether the deduction recurs or applies once.
+	Recurrence PublicBenefitDeduction1Recurrence `json:"recurrence" api:"required"`
+	// The public lifecycle status of the current deduction version.
+	Status PublicBenefitDeductionStatus `json:"status" api:"required"`
+	// The specific payroll deduction type within the broader category.
+	Type      PublicBenefitDeduction1Type `json:"type" api:"required"`
+	UpdatedAt string                      `json:"updatedAt" api:"required"`
+	// Basic identifying information for a worker associated with another resource.
+	Worker PublicWorkerReference       `json:"worker" api:"required"`
+	JSON   publicBenefitDeduction1JSON `json:"-"`
+}
+
+// publicBenefitDeduction1JSON contains the JSON metadata for the struct [PublicBenefitDeduction1]
+type publicBenefitDeduction1JSON struct {
+	ID                 apijson.Field
+	Calculation        apijson.Field
+	Category           apijson.Field
+	CreatedAt          apijson.Field
+	EffectiveEndDate   apijson.Field
+	EffectiveStartDate apijson.Field
+	Name               apijson.Field
+	Plan               apijson.Field
+	Recurrence         apijson.Field
+	Status             apijson.Field
+	Type               apijson.Field
+	UpdatedAt          apijson.Field
+	Worker             apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
+}
+
+func (r *PublicBenefitDeduction1) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicBenefitDeduction1JSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicBenefitDeduction1Type string
+
+const (
+	PublicBenefitDeduction1TypeMedical             PublicBenefitDeduction1Type = "medical"
+	PublicBenefitDeduction1TypeDental              PublicBenefitDeduction1Type = "dental"
+	PublicBenefitDeduction1TypeVision              PublicBenefitDeduction1Type = "vision"
+	PublicBenefitDeduction1TypeLife                PublicBenefitDeduction1Type = "life"
+	PublicBenefitDeduction1TypeShortTermDisability PublicBenefitDeduction1Type = "short_term_disability"
+	PublicBenefitDeduction1TypeLongTermDisability  PublicBenefitDeduction1Type = "long_term_disability"
+	PublicBenefitDeduction1Type401k                PublicBenefitDeduction1Type = "401k"
+	PublicBenefitDeduction1TypeRoth401k            PublicBenefitDeduction1Type = "roth_401k"
+	PublicBenefitDeduction1Type403b                PublicBenefitDeduction1Type = "403b"
+	PublicBenefitDeduction1TypeRoth403b            PublicBenefitDeduction1Type = "roth_403b"
+	PublicBenefitDeduction1Type457                 PublicBenefitDeduction1Type = "457"
+	PublicBenefitDeduction1TypeRoth457             PublicBenefitDeduction1Type = "roth_457"
+	PublicBenefitDeduction1TypeHsa                 PublicBenefitDeduction1Type = "hsa"
+	PublicBenefitDeduction1TypeFsaMedical          PublicBenefitDeduction1Type = "fsa_medical"
+	PublicBenefitDeduction1TypeFsaDependentCare    PublicBenefitDeduction1Type = "fsa_dependent_care"
+	PublicBenefitDeduction1TypeTransit             PublicBenefitDeduction1Type = "transit"
+	PublicBenefitDeduction1TypeParking             PublicBenefitDeduction1Type = "parking"
+	PublicBenefitDeduction1TypeAccident            PublicBenefitDeduction1Type = "accident"
+	PublicBenefitDeduction1TypeCancer              PublicBenefitDeduction1Type = "cancer"
+	PublicBenefitDeduction1TypeCriticalIllness     PublicBenefitDeduction1Type = "critical_illness"
+	PublicBenefitDeduction1TypeHospital            PublicBenefitDeduction1Type = "hospital"
+	PublicBenefitDeduction1TypeMedicalOther        PublicBenefitDeduction1Type = "medical_other"
+	PublicBenefitDeduction1TypeSimpleIra           PublicBenefitDeduction1Type = "simple_ira"
+	PublicBenefitDeduction1TypeRothSimpleIra       PublicBenefitDeduction1Type = "roth_simple_ira"
+	PublicBenefitDeduction1TypeNqdc                PublicBenefitDeduction1Type = "nqdc"
+	PublicBenefitDeduction1TypeNontaxableFringe    PublicBenefitDeduction1Type = "nontaxable_fringe"
+	PublicBenefitDeduction1TypePucc                PublicBenefitDeduction1Type = "pucc"
+	PublicBenefitDeduction1TypeVoluntary           PublicBenefitDeduction1Type = "voluntary"
+	PublicBenefitDeduction1TypePostTax             PublicBenefitDeduction1Type = "post_tax"
+	PublicBenefitDeduction1TypeOther               PublicBenefitDeduction1Type = "other"
+)
+
+func (r PublicBenefitDeduction1Type) IsKnown() bool {
+	switch r {
+	case PublicBenefitDeduction1TypeMedical, PublicBenefitDeduction1TypeDental, PublicBenefitDeduction1TypeVision, PublicBenefitDeduction1TypeLife, PublicBenefitDeduction1TypeShortTermDisability, PublicBenefitDeduction1TypeLongTermDisability, PublicBenefitDeduction1Type401k, PublicBenefitDeduction1TypeRoth401k, PublicBenefitDeduction1Type403b, PublicBenefitDeduction1TypeRoth403b, PublicBenefitDeduction1Type457, PublicBenefitDeduction1TypeRoth457, PublicBenefitDeduction1TypeHsa, PublicBenefitDeduction1TypeFsaMedical, PublicBenefitDeduction1TypeFsaDependentCare, PublicBenefitDeduction1TypeTransit, PublicBenefitDeduction1TypeParking, PublicBenefitDeduction1TypeAccident, PublicBenefitDeduction1TypeCancer, PublicBenefitDeduction1TypeCriticalIllness, PublicBenefitDeduction1TypeHospital, PublicBenefitDeduction1TypeMedicalOther, PublicBenefitDeduction1TypeSimpleIra, PublicBenefitDeduction1TypeRothSimpleIra, PublicBenefitDeduction1TypeNqdc, PublicBenefitDeduction1TypeNontaxableFringe, PublicBenefitDeduction1TypePucc, PublicBenefitDeduction1TypeVoluntary, PublicBenefitDeduction1TypePostTax, PublicBenefitDeduction1TypeOther:
+		return true
+	}
+	return false
+}
+
+type PublicBenefitDeduction1Recurrence string
+
+const (
+	PublicBenefitDeduction1RecurrenceRecurring PublicBenefitDeduction1Recurrence = "recurring"
+	PublicBenefitDeduction1RecurrenceOneTime   PublicBenefitDeduction1Recurrence = "one_time"
+)
+
+func (r PublicBenefitDeduction1Recurrence) IsKnown() bool {
+	switch r {
+	case PublicBenefitDeduction1RecurrenceRecurring, PublicBenefitDeduction1RecurrenceOneTime:
+		return true
+	}
+	return false
+}
+
 type PublicWorkerReference struct {
 	// The worker id.
 	ID string `json:"id" api:"required"`
@@ -274,19 +461,19 @@ func (r PublicBenefitDeductionStatus) IsKnown() bool {
 }
 
 type HealthPlanReference struct {
-	Type HealthPlanReferenceType `json:"type" api:"required"`
 	// The tag of a company health plan.
 	ID string `json:"id" api:"required"`
 	// The associated health plan name.
 	Name string                  `json:"name" api:"required"`
+	Type HealthPlanReferenceType `json:"type" api:"required"`
 	JSON healthPlanReferenceJSON `json:"-"`
 }
 
 // healthPlanReferenceJSON contains the JSON metadata for the struct [HealthPlanReference]
 type healthPlanReferenceJSON struct {
-	Type        apijson.Field
 	ID          apijson.Field
 	Name        apijson.Field
+	Type        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -314,19 +501,19 @@ func (r HealthPlanReferenceType) IsKnown() bool {
 }
 
 type RetirementPlanReference struct {
-	Type RetirementPlanReferenceType `json:"type" api:"required"`
 	// The tag of a company retirement plan.
 	ID string `json:"id" api:"required"`
 	// The associated retirement plan name.
 	Name string                      `json:"name" api:"required"`
+	Type RetirementPlanReferenceType `json:"type" api:"required"`
 	JSON retirementPlanReferenceJSON `json:"-"`
 }
 
 // retirementPlanReferenceJSON contains the JSON metadata for the struct [RetirementPlanReference]
 type retirementPlanReferenceJSON struct {
-	Type        apijson.Field
 	ID          apijson.Field
 	Name        apijson.Field
+	Type        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -354,22 +541,22 @@ func (r RetirementPlanReferenceType) IsKnown() bool {
 }
 
 type FixedAmountBenefitCalculation struct {
-	Type FixedAmountBenefitCalculationType `json:"type" api:"required"`
-	// The fixed-amount expression frequency. Null for a one-time deduction.
-	Frequency FixedAmountBenefitCalculationFrequency `json:"frequency" api:"required,nullable"`
 	// A monetary amount with its currency and server-formatted display value.
 	EmployeeContribution PublicMoneyAmount `json:"employeeContribution" api:"required"`
 	// A monetary amount with its currency and server-formatted display value.
-	EmployerContribution PublicMoneyAmount                 `json:"employerContribution" api:"required"`
-	JSON                 fixedAmountBenefitCalculationJSON `json:"-"`
+	EmployerContribution PublicMoneyAmount `json:"employerContribution" api:"required"`
+	// The fixed-amount expression frequency. Null for a one-time deduction.
+	Frequency FixedAmountBenefitCalculationFrequency `json:"frequency" api:"required,nullable"`
+	Type      FixedAmountBenefitCalculationType      `json:"type" api:"required"`
+	JSON      fixedAmountBenefitCalculationJSON      `json:"-"`
 }
 
 // fixedAmountBenefitCalculationJSON contains the JSON metadata for the struct [FixedAmountBenefitCalculation]
 type fixedAmountBenefitCalculationJSON struct {
-	Type                 apijson.Field
-	Frequency            apijson.Field
 	EmployeeContribution apijson.Field
 	EmployerContribution apijson.Field
+	Frequency            apijson.Field
+	Type                 apijson.Field
 	raw                  string
 	ExtraFields          map[string]apijson.Field
 }
@@ -412,19 +599,19 @@ func (r FixedAmountBenefitCalculationFrequency) IsKnown() bool {
 }
 
 type PercentageBenefitCalculation struct {
-	Type PercentageBenefitCalculationType `json:"type" api:"required"`
 	// A contribution expressed as a percentage of eligible earnings.
 	EmployeeContribution PercentageContribution `json:"employeeContribution" api:"required"`
 	// A contribution expressed as a percentage of eligible earnings.
 	EmployerContribution PercentageContribution           `json:"employerContribution" api:"required"`
+	Type                 PercentageBenefitCalculationType `json:"type" api:"required"`
 	JSON                 percentageBenefitCalculationJSON `json:"-"`
 }
 
 // percentageBenefitCalculationJSON contains the JSON metadata for the struct [PercentageBenefitCalculation]
 type percentageBenefitCalculationJSON struct {
-	Type                 apijson.Field
 	EmployeeContribution apijson.Field
 	EmployerContribution apijson.Field
+	Type                 apijson.Field
 	raw                  string
 	ExtraFields          map[string]apijson.Field
 }
@@ -452,16 +639,16 @@ func (r PercentageBenefitCalculationType) IsKnown() bool {
 }
 
 type PercentageContribution struct {
-	Percentage interface{} `json:"percentage" api:"required"`
 	// The server-formatted percentage, for example "3%".
-	Display string                     `json:"display" api:"required"`
-	JSON    percentageContributionJSON `json:"-"`
+	Display    string                     `json:"display" api:"required"`
+	Percentage interface{}                `json:"percentage" api:"required"`
+	JSON       percentageContributionJSON `json:"-"`
 }
 
 // percentageContributionJSON contains the JSON metadata for the struct [PercentageContribution]
 type percentageContributionJSON struct {
-	Percentage  apijson.Field
 	Display     apijson.Field
+	Percentage  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -474,10 +661,78 @@ func (r percentageContributionJSON) RawJSON() string {
 	return r.raw
 }
 
+type FixedAmountBenefitInputParam struct {
+	// A non-negative amount in cents. Currently only USD is accepted.
+	EmployeeContribution param.Field[BenefitMoneyInputParam] `json:"employeeContribution" api:"required"`
+	// A non-negative amount in cents. Currently only USD is accepted.
+	EmployerContribution param.Field[BenefitMoneyInputParam]           `json:"employerContribution" api:"required"`
+	Frequency            param.Field[FixedAmountBenefitInputFrequency] `json:"frequency" api:"required"`
+	Type                 param.Field[FixedAmountBenefitInputType]      `json:"type" api:"required"`
+}
+
+func (r FixedAmountBenefitInputParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type FixedAmountBenefitInputType string
+
+const (
+	FixedAmountBenefitInputTypeFixedAmount FixedAmountBenefitInputType = "fixed_amount"
+)
+
+func (r FixedAmountBenefitInputType) IsKnown() bool {
+	switch r {
+	case FixedAmountBenefitInputTypeFixedAmount:
+		return true
+	}
+	return false
+}
+
+type FixedAmountBenefitInputFrequency string
+
+const (
+	FixedAmountBenefitInputFrequencyMonthly     FixedAmountBenefitInputFrequency = "monthly"
+	FixedAmountBenefitInputFrequencyPerPaycheck FixedAmountBenefitInputFrequency = "per_paycheck"
+)
+
+func (r FixedAmountBenefitInputFrequency) IsKnown() bool {
+	switch r {
+	case FixedAmountBenefitInputFrequencyMonthly, FixedAmountBenefitInputFrequencyPerPaycheck:
+		return true
+	}
+	return false
+}
+
+type PercentageBenefitInputParam struct {
+	EmployeeContribution param.Field[BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployeeContribution] `json:"employeeContribution" api:"required"`
+	EmployerContribution param.Field[BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployerContribution] `json:"employerContribution" api:"required"`
+	Type                 param.Field[PercentageBenefitInputType]                                                     `json:"type" api:"required"`
+}
+
+func (r PercentageBenefitInputParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type PercentageBenefitInputType string
+
+const (
+	PercentageBenefitInputTypePercentage PercentageBenefitInputType = "percentage"
+)
+
+func (r PercentageBenefitInputType) IsKnown() bool {
+	switch r {
+	case PercentageBenefitInputTypePercentage:
+		return true
+	}
+	return false
+}
+
 type BenefitDeductionListParams struct {
-	Limit             param.Field[string]                           `query:"limit" api:"required"`
-	Statuses          param.Field[[]PublicBenefitDeductionStatus]   `query:"statuses" api:"required"`
-	AfterID           param.Field[string]                           `query:"afterId"`
+	Limit    param.Field[string]                         `query:"limit" api:"required"`
+	Statuses param.Field[[]PublicBenefitDeductionStatus] `query:"statuses" api:"required"`
+	// The version-group tag of a payroll benefit deduction. Stable across edits.
+	AfterID param.Field[string] `query:"afterId"`
+	// The version-group tag of a payroll benefit deduction. Stable across edits.
 	BeforeID          param.Field[string]                           `query:"beforeId"`
 	Categories        param.Field[[]PublicBenefitDeductionCategory] `query:"categories"`
 	HealthPlanIDs     param.Field[[]string]                         `query:"healthPlanIds"`
@@ -489,7 +744,7 @@ type BenefitDeductionListParams struct {
 // URLQuery serializes [BenefitDeductionListParams]'s query parameters as `url.Values`.
 func (r BenefitDeductionListParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -537,12 +792,834 @@ func (r BenefitDeductionListParamsType) IsKnown() bool {
 	return false
 }
 
+type BenefitDeductionNewParams struct {
+	// Both contributions must be supplied.
+	Calculation        param.Field[BenefitDeductionNewParamsCalculationUnion] `json:"calculation" api:"required"`
+	EffectiveStartDate param.Field[string]                                    `json:"effectiveStartDate" api:"required"`
+	// The payroll deduction type to create.
+	Type param.Field[BenefitDeductionNewParamsType] `json:"type" api:"required"`
+	// The id of the worker.
+	WorkerID         param.Field[string] `json:"workerId" api:"required"`
+	EffectiveEndDate param.Field[string] `json:"effectiveEndDate"`
+	Name             param.Field[string] `json:"name"`
+	// A matching company plan, or null for a planless deduction.
+	Plan       param.Field[BenefitDeductionNewParamsPlanUnion]  `json:"plan"`
+	Recurrence param.Field[BenefitDeductionNewParamsRecurrence] `json:"recurrence"`
+}
+
+func (r BenefitDeductionNewParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type BenefitDeductionNewParamsType string
+
+const (
+	BenefitDeductionNewParamsTypeMedical             BenefitDeductionNewParamsType = "medical"
+	BenefitDeductionNewParamsTypeDental              BenefitDeductionNewParamsType = "dental"
+	BenefitDeductionNewParamsTypeVision              BenefitDeductionNewParamsType = "vision"
+	BenefitDeductionNewParamsTypeLife                BenefitDeductionNewParamsType = "life"
+	BenefitDeductionNewParamsTypeShortTermDisability BenefitDeductionNewParamsType = "short_term_disability"
+	BenefitDeductionNewParamsTypeLongTermDisability  BenefitDeductionNewParamsType = "long_term_disability"
+	BenefitDeductionNewParamsType401k                BenefitDeductionNewParamsType = "401k"
+	BenefitDeductionNewParamsTypeRoth401k            BenefitDeductionNewParamsType = "roth_401k"
+	BenefitDeductionNewParamsType403b                BenefitDeductionNewParamsType = "403b"
+	BenefitDeductionNewParamsTypeRoth403b            BenefitDeductionNewParamsType = "roth_403b"
+	BenefitDeductionNewParamsType457                 BenefitDeductionNewParamsType = "457"
+	BenefitDeductionNewParamsTypeRoth457             BenefitDeductionNewParamsType = "roth_457"
+	BenefitDeductionNewParamsTypeSimpleIra           BenefitDeductionNewParamsType = "simple_ira"
+	BenefitDeductionNewParamsTypeRothSimpleIra       BenefitDeductionNewParamsType = "roth_simple_ira"
+	BenefitDeductionNewParamsTypeHsa                 BenefitDeductionNewParamsType = "hsa"
+	BenefitDeductionNewParamsTypeFsaMedical          BenefitDeductionNewParamsType = "fsa_medical"
+	BenefitDeductionNewParamsTypeFsaDependentCare    BenefitDeductionNewParamsType = "fsa_dependent_care"
+	BenefitDeductionNewParamsTypeTransit             BenefitDeductionNewParamsType = "transit"
+	BenefitDeductionNewParamsTypeParking             BenefitDeductionNewParamsType = "parking"
+	BenefitDeductionNewParamsTypeAccident            BenefitDeductionNewParamsType = "accident"
+	BenefitDeductionNewParamsTypeCancer              BenefitDeductionNewParamsType = "cancer"
+	BenefitDeductionNewParamsTypeCriticalIllness     BenefitDeductionNewParamsType = "critical_illness"
+	BenefitDeductionNewParamsTypeHospital            BenefitDeductionNewParamsType = "hospital"
+	BenefitDeductionNewParamsTypeMedicalOther        BenefitDeductionNewParamsType = "medical_other"
+	BenefitDeductionNewParamsTypeNqdc                BenefitDeductionNewParamsType = "nqdc"
+	BenefitDeductionNewParamsTypeNontaxableFringe    BenefitDeductionNewParamsType = "nontaxable_fringe"
+)
+
+func (r BenefitDeductionNewParamsType) IsKnown() bool {
+	switch r {
+	case BenefitDeductionNewParamsTypeMedical, BenefitDeductionNewParamsTypeDental, BenefitDeductionNewParamsTypeVision, BenefitDeductionNewParamsTypeLife, BenefitDeductionNewParamsTypeShortTermDisability, BenefitDeductionNewParamsTypeLongTermDisability, BenefitDeductionNewParamsType401k, BenefitDeductionNewParamsTypeRoth401k, BenefitDeductionNewParamsType403b, BenefitDeductionNewParamsTypeRoth403b, BenefitDeductionNewParamsType457, BenefitDeductionNewParamsTypeRoth457, BenefitDeductionNewParamsTypeSimpleIra, BenefitDeductionNewParamsTypeRothSimpleIra, BenefitDeductionNewParamsTypeHsa, BenefitDeductionNewParamsTypeFsaMedical, BenefitDeductionNewParamsTypeFsaDependentCare, BenefitDeductionNewParamsTypeTransit, BenefitDeductionNewParamsTypeParking, BenefitDeductionNewParamsTypeAccident, BenefitDeductionNewParamsTypeCancer, BenefitDeductionNewParamsTypeCriticalIllness, BenefitDeductionNewParamsTypeHospital, BenefitDeductionNewParamsTypeMedicalOther, BenefitDeductionNewParamsTypeNqdc, BenefitDeductionNewParamsTypeNontaxableFringe:
+		return true
+	}
+	return false
+}
+
+type BenefitDeductionNewParamsPlanUnion struct {
+	OfBenefitDeductionNewParamsPlanVariant0 *BenefitDeductionNewParamsPlanVariant0 `json:",omitzero,inline"`
+	OfBenefitDeductionNewParamsPlanVariant1 *BenefitDeductionNewParamsPlanVariant1 `json:",omitzero,inline"`
+	paramUnion
+}
+
+func (u BenefitDeductionNewParamsPlanUnion) MarshalJSON() ([]byte, error) {
+	return param.MarshalUnion(u, u.OfBenefitDeductionNewParamsPlanVariant0, u.OfBenefitDeductionNewParamsPlanVariant1)
+}
+func (u *BenefitDeductionNewParamsPlanUnion) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, u)
+}
+
+type BenefitDeductionNewParamsPlanVariant0 struct {
+	// The tag of a company health plan.
+	ID   param.Field[string]                                    `json:"id" api:"required"`
+	Type param.Field[BenefitDeductionNewParamsPlanVariant0Type] `json:"type" api:"required"`
+}
+
+func (r BenefitDeductionNewParamsPlanVariant0) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type BenefitDeductionNewParamsPlanVariant1 struct {
+	// The tag of a company retirement plan.
+	ID   param.Field[string]                                    `json:"id" api:"required"`
+	Type param.Field[BenefitDeductionNewParamsPlanVariant1Type] `json:"type" api:"required"`
+}
+
+func (r BenefitDeductionNewParamsPlanVariant1) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type BenefitDeductionNewParamsPlanVariant0Type string
+
+const (
+	BenefitDeductionNewParamsPlanVariant0TypeHealthPlan BenefitDeductionNewParamsPlanVariant0Type = "health_plan"
+)
+
+func (r BenefitDeductionNewParamsPlanVariant0Type) IsKnown() bool {
+	switch r {
+	case BenefitDeductionNewParamsPlanVariant0TypeHealthPlan:
+		return true
+	}
+	return false
+}
+
+type BenefitDeductionNewParamsPlanVariant1Type string
+
+const (
+	BenefitDeductionNewParamsPlanVariant1TypeRetirementPlan BenefitDeductionNewParamsPlanVariant1Type = "retirement_plan"
+)
+
+func (r BenefitDeductionNewParamsPlanVariant1Type) IsKnown() bool {
+	switch r {
+	case BenefitDeductionNewParamsPlanVariant1TypeRetirementPlan:
+		return true
+	}
+	return false
+}
+
+type BenefitDeductionNewParamsCalculation struct {
+	EmployeeContribution param.Field[interface{}]                                   `json:"employeeContribution" api:"required"`
+	EmployerContribution param.Field[interface{}]                                   `json:"employerContribution" api:"required"`
+	Type                 param.Field[BenefitDeductionNewParamsCalculationType]      `json:"type" api:"required"`
+	Frequency            param.Field[BenefitDeductionNewParamsCalculationFrequency] `json:"frequency"`
+}
+
+func (r BenefitDeductionNewParamsCalculation) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r BenefitDeductionNewParamsCalculation) implementsBenefitDeductionNewParamsCalculationUnion() {}
+
+// Satisfied by [BenefitDeductionNewParamsCalculationFixedAmountBenefitInput], [BenefitDeductionNewParamsCalculationPercentageBenefitInput], [BenefitDeductionNewParamsCalculation].
+type BenefitDeductionNewParamsCalculationUnion interface {
+	implementsBenefitDeductionNewParamsCalculationUnion()
+}
+
+func (r BenefitDeductionNewParamsCalculationFixedAmountBenefitInput) implementsBenefitDeductionNewParamsCalculationUnion() {
+}
+
+func (r BenefitDeductionNewParamsCalculationPercentageBenefitInput) implementsBenefitDeductionNewParamsCalculationUnion() {
+}
+
+type BenefitDeductionNewParamsCalculationType string
+
+const (
+	BenefitDeductionNewParamsCalculationTypeFixedAmount BenefitDeductionNewParamsCalculationType = "fixed_amount"
+	BenefitDeductionNewParamsCalculationTypePercentage  BenefitDeductionNewParamsCalculationType = "percentage"
+)
+
+func (r BenefitDeductionNewParamsCalculationType) IsKnown() bool {
+	switch r {
+	case BenefitDeductionNewParamsCalculationTypeFixedAmount, BenefitDeductionNewParamsCalculationTypePercentage:
+		return true
+	}
+	return false
+}
+
+type BenefitDeductionNewParamsCalculationFrequency string
+
+const (
+	BenefitDeductionNewParamsCalculationFrequencyMonthly     BenefitDeductionNewParamsCalculationFrequency = "monthly"
+	BenefitDeductionNewParamsCalculationFrequencyPerPaycheck BenefitDeductionNewParamsCalculationFrequency = "per_paycheck"
+)
+
+func (r BenefitDeductionNewParamsCalculationFrequency) IsKnown() bool {
+	switch r {
+	case BenefitDeductionNewParamsCalculationFrequencyMonthly, BenefitDeductionNewParamsCalculationFrequencyPerPaycheck:
+		return true
+	}
+	return false
+}
+
+type BenefitDeductionNewParamsCalculationFixedAmountBenefitInput struct {
+	// A non-negative amount in cents. Currently only USD is accepted.
+	EmployeeContribution param.Field[BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContribution] `json:"employeeContribution" api:"required"`
+	// A non-negative amount in cents. Currently only USD is accepted.
+	EmployerContribution param.Field[BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContribution] `json:"employerContribution" api:"required"`
+	Frequency            param.Field[BenefitDeductionNewParamsCalculationFixedAmountBenefitInputFrequency]            `json:"frequency" api:"required"`
+	Type                 param.Field[BenefitDeductionNewParamsCalculationFixedAmountBenefitInputType]                 `json:"type" api:"required"`
+}
+
+func (r BenefitDeductionNewParamsCalculationFixedAmountBenefitInput) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type BenefitDeductionNewParamsCalculationPercentageBenefitInput struct {
+	EmployeeContribution param.Field[BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployeeContribution] `json:"employeeContribution" api:"required"`
+	EmployerContribution param.Field[BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployerContribution] `json:"employerContribution" api:"required"`
+	Type                 param.Field[BenefitDeductionNewParamsCalculationPercentageBenefitInputType]                 `json:"type" api:"required"`
+}
+
+func (r BenefitDeductionNewParamsCalculationPercentageBenefitInput) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type BenefitDeductionNewParamsCalculationFixedAmountBenefitInputType string
+
+const (
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputTypeFixedAmount BenefitDeductionNewParamsCalculationFixedAmountBenefitInputType = "fixed_amount"
+)
+
+func (r BenefitDeductionNewParamsCalculationFixedAmountBenefitInputType) IsKnown() bool {
+	switch r {
+	case BenefitDeductionNewParamsCalculationFixedAmountBenefitInputTypeFixedAmount:
+		return true
+	}
+	return false
+}
+
+type BenefitDeductionNewParamsCalculationFixedAmountBenefitInputFrequency string
+
+const (
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputFrequencyMonthly     BenefitDeductionNewParamsCalculationFixedAmountBenefitInputFrequency = "monthly"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputFrequencyPerPaycheck BenefitDeductionNewParamsCalculationFixedAmountBenefitInputFrequency = "per_paycheck"
+)
+
+func (r BenefitDeductionNewParamsCalculationFixedAmountBenefitInputFrequency) IsKnown() bool {
+	switch r {
+	case BenefitDeductionNewParamsCalculationFixedAmountBenefitInputFrequencyMonthly, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputFrequencyPerPaycheck:
+		return true
+	}
+	return false
+}
+
+type BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContribution struct {
+	// minor units — cents, e.g. 2345 for $23.45
+	Amount   param.Field[int64]                                                                                   `json:"amount" api:"required"`
+	Currency param.Field[BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency] `json:"currency" api:"required"`
+}
+
+func (r BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContribution) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency string
+
+const (
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyUsd BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "USD"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyAud BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "AUD"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyBgn BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "BGN"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyBrl BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "BRL"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyCad BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "CAD"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyChf BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "CHF"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyCzk BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "CZK"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyDkk BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "DKK"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyEur BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "EUR"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyGbp BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "GBP"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyHkd BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "HKD"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyHuf BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "HUF"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyIdr BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "IDR"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyInr BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "INR"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyJpy BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "JPY"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyMyr BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "MYR"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyNok BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "NOK"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyNzd BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "NZD"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyCny BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "CNY"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyPln BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "PLN"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyRon BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "RON"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyTry BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "TRY"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencySek BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "SEK"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencySgd BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "SGD"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyAed BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "AED"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyArs BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "ARS"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyBdt BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "BDT"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyBwp BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "BWP"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyClp BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "CLP"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyCop BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "COP"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyCrc BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "CRC"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyEgp BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "EGP"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyFjd BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "FJD"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyGel BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "GEL"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyGhs BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "GHS"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyIls BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "ILS"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyKes BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "KES"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyKrw BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "KRW"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyLkr BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "LKR"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyMad BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "MAD"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyMxn BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "MXN"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyNpr BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "NPR"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyPhp BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "PHP"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyPkr BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "PKR"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyThb BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "THB"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyUah BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "UAH"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyUgx BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "UGX"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyUyu BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "UYU"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyVnd BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "VND"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyZar BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "ZAR"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyZmw BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "ZMW"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyTnd BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "TND"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyNgn BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "NGN"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyRsd BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "RSD"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyTwd BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "TWD"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyGtq BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "GTQ"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyHnl BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "HNL"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyDop BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "DOP"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencySar BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "SAR"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyXaf BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "XAF"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyPen BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "PEN"
+)
+
+func (r BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency) IsKnown() bool {
+	switch r {
+	case BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyUsd, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyAud, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyBgn, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyBrl, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyCad, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyChf, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyCzk, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyDkk, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyEur, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyGbp, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyHkd, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyHuf, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyIdr, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyInr, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyJpy, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyMyr, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyNok, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyNzd, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyCny, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyPln, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyRon, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyTry, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencySek, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencySgd, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyAed, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyArs, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyBdt, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyBwp, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyClp, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyCop, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyCrc, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyEgp, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyFjd, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyGel, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyGhs, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyIls, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyKes, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyKrw, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyLkr, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyMad, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyMxn, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyNpr, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyPhp, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyPkr, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyThb, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyUah, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyUgx, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyUyu, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyVnd, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyZar, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyZmw, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyTnd, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyNgn, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyRsd, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyTwd, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyGtq, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyHnl, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyDop, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencySar, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyXaf, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyPen:
+		return true
+	}
+	return false
+}
+
+type BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContribution struct {
+	// minor units — cents, e.g. 2345 for $23.45
+	Amount   param.Field[int64]                                                                                   `json:"amount" api:"required"`
+	Currency param.Field[BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency] `json:"currency" api:"required"`
+}
+
+func (r BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContribution) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency string
+
+const (
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyUsd BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "USD"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyAud BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "AUD"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyBgn BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "BGN"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyBrl BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "BRL"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyCad BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "CAD"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyChf BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "CHF"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyCzk BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "CZK"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyDkk BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "DKK"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyEur BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "EUR"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyGbp BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "GBP"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyHkd BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "HKD"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyHuf BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "HUF"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyIdr BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "IDR"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyInr BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "INR"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyJpy BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "JPY"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyMyr BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "MYR"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyNok BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "NOK"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyNzd BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "NZD"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyCny BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "CNY"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyPln BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "PLN"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyRon BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "RON"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyTry BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "TRY"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencySek BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "SEK"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencySgd BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "SGD"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyAed BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "AED"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyArs BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "ARS"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyBdt BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "BDT"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyBwp BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "BWP"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyClp BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "CLP"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyCop BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "COP"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyCrc BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "CRC"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyEgp BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "EGP"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyFjd BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "FJD"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyGel BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "GEL"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyGhs BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "GHS"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyIls BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "ILS"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyKes BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "KES"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyKrw BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "KRW"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyLkr BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "LKR"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyMad BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "MAD"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyMxn BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "MXN"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyNpr BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "NPR"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyPhp BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "PHP"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyPkr BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "PKR"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyThb BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "THB"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyUah BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "UAH"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyUgx BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "UGX"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyUyu BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "UYU"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyVnd BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "VND"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyZar BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "ZAR"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyZmw BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "ZMW"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyTnd BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "TND"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyNgn BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "NGN"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyRsd BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "RSD"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyTwd BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "TWD"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyGtq BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "GTQ"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyHnl BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "HNL"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyDop BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "DOP"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencySar BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "SAR"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyXaf BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "XAF"
+	BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyPen BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "PEN"
+)
+
+func (r BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency) IsKnown() bool {
+	switch r {
+	case BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyUsd, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyAud, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyBgn, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyBrl, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyCad, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyChf, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyCzk, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyDkk, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyEur, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyGbp, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyHkd, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyHuf, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyIdr, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyInr, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyJpy, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyMyr, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyNok, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyNzd, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyCny, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyPln, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyRon, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyTry, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencySek, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencySgd, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyAed, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyArs, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyBdt, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyBwp, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyClp, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyCop, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyCrc, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyEgp, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyFjd, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyGel, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyGhs, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyIls, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyKes, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyKrw, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyLkr, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyMad, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyMxn, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyNpr, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyPhp, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyPkr, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyThb, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyUah, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyUgx, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyUyu, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyVnd, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyZar, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyZmw, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyTnd, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyNgn, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyRsd, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyTwd, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyGtq, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyHnl, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyDop, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencySar, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyXaf, BenefitDeductionNewParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyPen:
+		return true
+	}
+	return false
+}
+
+type BenefitDeductionNewParamsCalculationPercentageBenefitInputType string
+
+const (
+	BenefitDeductionNewParamsCalculationPercentageBenefitInputTypePercentage BenefitDeductionNewParamsCalculationPercentageBenefitInputType = "percentage"
+)
+
+func (r BenefitDeductionNewParamsCalculationPercentageBenefitInputType) IsKnown() bool {
+	switch r {
+	case BenefitDeductionNewParamsCalculationPercentageBenefitInputTypePercentage:
+		return true
+	}
+	return false
+}
+
+type BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployeeContribution struct {
+	Percentage param.Field[interface{}] `json:"percentage" api:"required"`
+}
+
+func (r BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployeeContribution) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployerContribution struct {
+	Percentage param.Field[interface{}] `json:"percentage" api:"required"`
+}
+
+func (r BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployerContribution) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type BenefitDeductionNewParamsRecurrence string
+
+const (
+	BenefitDeductionNewParamsRecurrenceRecurring BenefitDeductionNewParamsRecurrence = "recurring"
+	BenefitDeductionNewParamsRecurrenceOneTime   BenefitDeductionNewParamsRecurrence = "one_time"
+)
+
+func (r BenefitDeductionNewParamsRecurrence) IsKnown() bool {
+	switch r {
+	case BenefitDeductionNewParamsRecurrenceRecurring, BenefitDeductionNewParamsRecurrenceOneTime:
+		return true
+	}
+	return false
+}
+
+type BenefitDeductionUpdateParams struct {
+	// Both contributions must be supplied.
+	Calculation      param.Field[BenefitDeductionUpdateParamsCalculationUnion] `json:"calculation"`
+	EffectiveEndDate param.Field[string]                                       `json:"effectiveEndDate"`
+	Name             param.Field[string]                                       `json:"name"`
+	Recurrence       param.Field[BenefitDeductionUpdateParamsRecurrence]       `json:"recurrence"`
+	Status           param.Field[BenefitDeductionUpdateParamsStatus]           `json:"status"`
+}
+
+func (r BenefitDeductionUpdateParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type BenefitDeductionUpdateParamsCalculation struct {
+	EmployeeContribution param.Field[interface{}]                                      `json:"employeeContribution" api:"required"`
+	EmployerContribution param.Field[interface{}]                                      `json:"employerContribution" api:"required"`
+	Type                 param.Field[BenefitDeductionUpdateParamsCalculationType]      `json:"type" api:"required"`
+	Frequency            param.Field[BenefitDeductionUpdateParamsCalculationFrequency] `json:"frequency"`
+}
+
+func (r BenefitDeductionUpdateParamsCalculation) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r BenefitDeductionUpdateParamsCalculation) implementsBenefitDeductionUpdateParamsCalculationUnion() {
+}
+
+// Satisfied by [BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInput], [BenefitDeductionUpdateParamsCalculationPercentageBenefitInput], [BenefitDeductionUpdateParamsCalculation].
+type BenefitDeductionUpdateParamsCalculationUnion interface {
+	implementsBenefitDeductionUpdateParamsCalculationUnion()
+}
+
+func (r BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInput) implementsBenefitDeductionUpdateParamsCalculationUnion() {
+}
+
+func (r BenefitDeductionUpdateParamsCalculationPercentageBenefitInput) implementsBenefitDeductionUpdateParamsCalculationUnion() {
+}
+
+type BenefitDeductionUpdateParamsCalculationType string
+
+const (
+	BenefitDeductionUpdateParamsCalculationTypeFixedAmount BenefitDeductionUpdateParamsCalculationType = "fixed_amount"
+	BenefitDeductionUpdateParamsCalculationTypePercentage  BenefitDeductionUpdateParamsCalculationType = "percentage"
+)
+
+func (r BenefitDeductionUpdateParamsCalculationType) IsKnown() bool {
+	switch r {
+	case BenefitDeductionUpdateParamsCalculationTypeFixedAmount, BenefitDeductionUpdateParamsCalculationTypePercentage:
+		return true
+	}
+	return false
+}
+
+type BenefitDeductionUpdateParamsCalculationFrequency string
+
+const (
+	BenefitDeductionUpdateParamsCalculationFrequencyMonthly     BenefitDeductionUpdateParamsCalculationFrequency = "monthly"
+	BenefitDeductionUpdateParamsCalculationFrequencyPerPaycheck BenefitDeductionUpdateParamsCalculationFrequency = "per_paycheck"
+)
+
+func (r BenefitDeductionUpdateParamsCalculationFrequency) IsKnown() bool {
+	switch r {
+	case BenefitDeductionUpdateParamsCalculationFrequencyMonthly, BenefitDeductionUpdateParamsCalculationFrequencyPerPaycheck:
+		return true
+	}
+	return false
+}
+
+type BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInput struct {
+	// A non-negative amount in cents. Currently only USD is accepted.
+	EmployeeContribution param.Field[BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContribution] `json:"employeeContribution" api:"required"`
+	// A non-negative amount in cents. Currently only USD is accepted.
+	EmployerContribution param.Field[BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContribution] `json:"employerContribution" api:"required"`
+	Frequency            param.Field[BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputFrequency]            `json:"frequency" api:"required"`
+	Type                 param.Field[BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputType]                 `json:"type" api:"required"`
+}
+
+func (r BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInput) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type BenefitDeductionUpdateParamsCalculationPercentageBenefitInput struct {
+	EmployeeContribution param.Field[BenefitDeductionUpdateParamsCalculationPercentageBenefitInputEmployeeContribution] `json:"employeeContribution" api:"required"`
+	EmployerContribution param.Field[BenefitDeductionUpdateParamsCalculationPercentageBenefitInputEmployerContribution] `json:"employerContribution" api:"required"`
+	Type                 param.Field[BenefitDeductionUpdateParamsCalculationPercentageBenefitInputType]                 `json:"type" api:"required"`
+}
+
+func (r BenefitDeductionUpdateParamsCalculationPercentageBenefitInput) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputType string
+
+const (
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputTypeFixedAmount BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputType = "fixed_amount"
+)
+
+func (r BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputType) IsKnown() bool {
+	switch r {
+	case BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputTypeFixedAmount:
+		return true
+	}
+	return false
+}
+
+type BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputFrequency string
+
+const (
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputFrequencyMonthly     BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputFrequency = "monthly"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputFrequencyPerPaycheck BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputFrequency = "per_paycheck"
+)
+
+func (r BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputFrequency) IsKnown() bool {
+	switch r {
+	case BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputFrequencyMonthly, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputFrequencyPerPaycheck:
+		return true
+	}
+	return false
+}
+
+type BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContribution struct {
+	// minor units — cents, e.g. 2345 for $23.45
+	Amount   param.Field[int64]                                                                                      `json:"amount" api:"required"`
+	Currency param.Field[BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency] `json:"currency" api:"required"`
+}
+
+func (r BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContribution) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency string
+
+const (
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyUsd BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "USD"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyAud BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "AUD"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyBgn BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "BGN"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyBrl BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "BRL"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyCad BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "CAD"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyChf BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "CHF"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyCzk BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "CZK"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyDkk BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "DKK"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyEur BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "EUR"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyGbp BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "GBP"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyHkd BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "HKD"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyHuf BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "HUF"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyIdr BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "IDR"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyInr BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "INR"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyJpy BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "JPY"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyMyr BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "MYR"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyNok BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "NOK"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyNzd BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "NZD"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyCny BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "CNY"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyPln BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "PLN"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyRon BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "RON"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyTry BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "TRY"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencySek BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "SEK"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencySgd BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "SGD"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyAed BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "AED"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyArs BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "ARS"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyBdt BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "BDT"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyBwp BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "BWP"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyClp BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "CLP"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyCop BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "COP"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyCrc BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "CRC"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyEgp BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "EGP"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyFjd BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "FJD"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyGel BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "GEL"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyGhs BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "GHS"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyIls BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "ILS"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyKes BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "KES"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyKrw BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "KRW"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyLkr BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "LKR"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyMad BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "MAD"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyMxn BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "MXN"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyNpr BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "NPR"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyPhp BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "PHP"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyPkr BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "PKR"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyThb BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "THB"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyUah BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "UAH"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyUgx BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "UGX"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyUyu BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "UYU"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyVnd BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "VND"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyZar BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "ZAR"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyZmw BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "ZMW"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyTnd BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "TND"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyNgn BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "NGN"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyRsd BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "RSD"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyTwd BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "TWD"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyGtq BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "GTQ"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyHnl BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "HNL"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyDop BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "DOP"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencySar BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "SAR"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyXaf BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "XAF"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyPen BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency = "PEN"
+)
+
+func (r BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrency) IsKnown() bool {
+	switch r {
+	case BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyUsd, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyAud, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyBgn, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyBrl, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyCad, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyChf, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyCzk, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyDkk, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyEur, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyGbp, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyHkd, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyHuf, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyIdr, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyInr, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyJpy, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyMyr, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyNok, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyNzd, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyCny, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyPln, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyRon, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyTry, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencySek, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencySgd, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyAed, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyArs, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyBdt, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyBwp, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyClp, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyCop, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyCrc, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyEgp, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyFjd, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyGel, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyGhs, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyIls, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyKes, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyKrw, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyLkr, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyMad, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyMxn, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyNpr, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyPhp, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyPkr, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyThb, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyUah, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyUgx, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyUyu, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyVnd, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyZar, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyZmw, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyTnd, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyNgn, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyRsd, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyTwd, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyGtq, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyHnl, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyDop, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencySar, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyXaf, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployeeContributionCurrencyPen:
+		return true
+	}
+	return false
+}
+
+type BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContribution struct {
+	// minor units — cents, e.g. 2345 for $23.45
+	Amount   param.Field[int64]                                                                                      `json:"amount" api:"required"`
+	Currency param.Field[BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency] `json:"currency" api:"required"`
+}
+
+func (r BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContribution) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency string
+
+const (
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyUsd BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "USD"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyAud BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "AUD"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyBgn BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "BGN"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyBrl BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "BRL"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyCad BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "CAD"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyChf BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "CHF"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyCzk BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "CZK"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyDkk BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "DKK"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyEur BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "EUR"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyGbp BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "GBP"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyHkd BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "HKD"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyHuf BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "HUF"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyIdr BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "IDR"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyInr BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "INR"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyJpy BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "JPY"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyMyr BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "MYR"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyNok BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "NOK"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyNzd BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "NZD"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyCny BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "CNY"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyPln BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "PLN"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyRon BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "RON"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyTry BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "TRY"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencySek BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "SEK"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencySgd BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "SGD"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyAed BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "AED"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyArs BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "ARS"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyBdt BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "BDT"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyBwp BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "BWP"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyClp BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "CLP"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyCop BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "COP"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyCrc BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "CRC"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyEgp BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "EGP"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyFjd BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "FJD"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyGel BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "GEL"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyGhs BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "GHS"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyIls BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "ILS"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyKes BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "KES"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyKrw BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "KRW"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyLkr BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "LKR"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyMad BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "MAD"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyMxn BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "MXN"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyNpr BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "NPR"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyPhp BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "PHP"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyPkr BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "PKR"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyThb BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "THB"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyUah BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "UAH"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyUgx BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "UGX"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyUyu BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "UYU"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyVnd BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "VND"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyZar BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "ZAR"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyZmw BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "ZMW"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyTnd BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "TND"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyNgn BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "NGN"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyRsd BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "RSD"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyTwd BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "TWD"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyGtq BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "GTQ"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyHnl BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "HNL"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyDop BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "DOP"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencySar BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "SAR"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyXaf BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "XAF"
+	BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyPen BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency = "PEN"
+)
+
+func (r BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrency) IsKnown() bool {
+	switch r {
+	case BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyUsd, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyAud, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyBgn, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyBrl, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyCad, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyChf, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyCzk, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyDkk, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyEur, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyGbp, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyHkd, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyHuf, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyIdr, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyInr, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyJpy, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyMyr, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyNok, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyNzd, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyCny, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyPln, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyRon, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyTry, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencySek, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencySgd, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyAed, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyArs, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyBdt, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyBwp, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyClp, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyCop, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyCrc, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyEgp, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyFjd, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyGel, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyGhs, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyIls, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyKes, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyKrw, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyLkr, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyMad, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyMxn, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyNpr, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyPhp, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyPkr, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyThb, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyUah, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyUgx, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyUyu, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyVnd, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyZar, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyZmw, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyTnd, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyNgn, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyRsd, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyTwd, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyGtq, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyHnl, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyDop, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencySar, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyXaf, BenefitDeductionUpdateParamsCalculationFixedAmountBenefitInputEmployerContributionCurrencyPen:
+		return true
+	}
+	return false
+}
+
+type BenefitDeductionUpdateParamsCalculationPercentageBenefitInputType string
+
+const (
+	BenefitDeductionUpdateParamsCalculationPercentageBenefitInputTypePercentage BenefitDeductionUpdateParamsCalculationPercentageBenefitInputType = "percentage"
+)
+
+func (r BenefitDeductionUpdateParamsCalculationPercentageBenefitInputType) IsKnown() bool {
+	switch r {
+	case BenefitDeductionUpdateParamsCalculationPercentageBenefitInputTypePercentage:
+		return true
+	}
+	return false
+}
+
+type BenefitDeductionUpdateParamsCalculationPercentageBenefitInputEmployeeContribution struct {
+	Percentage param.Field[interface{}] `json:"percentage" api:"required"`
+}
+
+func (r BenefitDeductionUpdateParamsCalculationPercentageBenefitInputEmployeeContribution) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type BenefitDeductionUpdateParamsCalculationPercentageBenefitInputEmployerContribution struct {
+	Percentage param.Field[interface{}] `json:"percentage" api:"required"`
+}
+
+func (r BenefitDeductionUpdateParamsCalculationPercentageBenefitInputEmployerContribution) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type BenefitDeductionUpdateParamsRecurrence string
+
+const (
+	BenefitDeductionUpdateParamsRecurrenceRecurring BenefitDeductionUpdateParamsRecurrence = "recurring"
+	BenefitDeductionUpdateParamsRecurrenceOneTime   BenefitDeductionUpdateParamsRecurrence = "one_time"
+)
+
+func (r BenefitDeductionUpdateParamsRecurrence) IsKnown() bool {
+	switch r {
+	case BenefitDeductionUpdateParamsRecurrenceRecurring, BenefitDeductionUpdateParamsRecurrenceOneTime:
+		return true
+	}
+	return false
+}
+
+type BenefitDeductionUpdateParamsStatus string
+
+const (
+	BenefitDeductionUpdateParamsStatusActive     BenefitDeductionUpdateParamsStatus = "active"
+	BenefitDeductionUpdateParamsStatusTerminated BenefitDeductionUpdateParamsStatus = "terminated"
+)
+
+func (r BenefitDeductionUpdateParamsStatus) IsKnown() bool {
+	switch r {
+	case BenefitDeductionUpdateParamsStatusActive, BenefitDeductionUpdateParamsStatusTerminated:
+		return true
+	}
+	return false
+}
+
+type PublicBenefitDeductionPlan struct {
+	// The tag of a company health plan.
+	ID string `json:"id" api:"required"`
+	// The associated health plan name.
+	Name  string                         `json:"name" api:"required"`
+	Type  PublicBenefitDeductionPlanType `json:"type" api:"required"`
+	JSON  publicBenefitDeductionPlanJSON `json:"-"`
+	union PublicBenefitDeductionPlanUnion
+}
+
+// publicBenefitDeductionPlanJSON contains the JSON metadata for the struct [PublicBenefitDeductionPlan]
+type publicBenefitDeductionPlanJSON struct {
+	ID          apijson.Field
+	Name        apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r publicBenefitDeductionPlanJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *PublicBenefitDeductionPlan) UnmarshalJSON(data []byte) (err error) {
+	*r = PublicBenefitDeductionPlan{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+func (r PublicBenefitDeductionPlan) AsUnion() PublicBenefitDeductionPlanUnion {
+	return r.union
+}
+
 type PublicBenefitDeductionCalculation struct {
-	Type PublicBenefitDeductionCalculationType `json:"type" api:"required"`
 	// A monetary amount with its currency and server-formatted display value.
 	EmployeeContribution interface{} `json:"employeeContribution" api:"required"`
 	// A monetary amount with its currency and server-formatted display value.
-	EmployerContribution interface{} `json:"employerContribution" api:"required"`
+	EmployerContribution interface{}                           `json:"employerContribution" api:"required"`
+	Type                 PublicBenefitDeductionCalculationType `json:"type" api:"required"`
 	// The fixed-amount expression frequency. Null for a one-time deduction.
 	Frequency PublicBenefitDeductionCalculationFrequency `json:"frequency" api:"nullable"`
 	JSON      publicBenefitDeductionCalculationJSON      `json:"-"`
@@ -551,9 +1628,9 @@ type PublicBenefitDeductionCalculation struct {
 
 // publicBenefitDeductionCalculationJSON contains the JSON metadata for the struct [PublicBenefitDeductionCalculation]
 type publicBenefitDeductionCalculationJSON struct {
-	Type                 apijson.Field
 	EmployeeContribution apijson.Field
 	EmployerContribution apijson.Field
+	Type                 apijson.Field
 	Frequency            apijson.Field
 	raw                  string
 	ExtraFields          map[string]apijson.Field
@@ -577,17 +1654,17 @@ func (r PublicBenefitDeductionCalculation) AsUnion() PublicBenefitDeductionCalcu
 }
 
 type BenefitDeductionListResponse struct {
-	HasMore bool                             `json:"hasMore" api:"required"`
 	Count   int64                            `json:"count" api:"required"`
 	Data    []PublicBenefitDeduction         `json:"data" api:"required"`
+	HasMore bool                             `json:"hasMore" api:"required"`
 	JSON    benefitDeductionListResponseJSON `json:"-"`
 }
 
 // benefitDeductionListResponseJSON contains the JSON metadata for the struct [BenefitDeductionListResponse]
 type benefitDeductionListResponseJSON struct {
-	HasMore     apijson.Field
 	Count       apijson.Field
 	Data        apijson.Field
+	HasMore     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -600,40 +1677,38 @@ func (r benefitDeductionListResponseJSON) RawJSON() string {
 	return r.raw
 }
 
-type PublicBenefitDeductionPlan2 struct {
-	Type PublicBenefitDeductionPlan2Type `json:"type" api:"required"`
-	// The tag of a company health plan.
-	ID string `json:"id" api:"required"`
-	// The associated health plan name.
-	Name  string                          `json:"name" api:"required"`
-	JSON  publicBenefitDeductionPlan2JSON `json:"-"`
-	union PublicBenefitDeductionPlan2Union
+type PublicBenefitDeductionPlanUnion interface {
+	implementsPublicBenefitDeductionPlan()
 }
 
-// publicBenefitDeductionPlan2JSON contains the JSON metadata for the struct [PublicBenefitDeductionPlan2]
-type publicBenefitDeductionPlan2JSON struct {
-	Type        apijson.Field
-	ID          apijson.Field
-	Name        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*PublicBenefitDeductionPlanUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(HealthPlanReference{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(RetirementPlanReference{}),
+		},
+	)
 }
 
-func (r publicBenefitDeductionPlan2JSON) RawJSON() string {
-	return r.raw
-}
+type PublicBenefitDeductionPlanType string
 
-func (r *PublicBenefitDeductionPlan2) UnmarshalJSON(data []byte) (err error) {
-	*r = PublicBenefitDeductionPlan2{}
-	err = apijson.UnmarshalRoot(data, &r.union)
-	if err != nil {
-		return err
+const (
+	PublicBenefitDeductionPlanTypeHealthPlan     PublicBenefitDeductionPlanType = "health_plan"
+	PublicBenefitDeductionPlanTypeRetirementPlan PublicBenefitDeductionPlanType = "retirement_plan"
+)
+
+func (r PublicBenefitDeductionPlanType) IsKnown() bool {
+	switch r {
+	case PublicBenefitDeductionPlanTypeHealthPlan, PublicBenefitDeductionPlanTypeRetirementPlan:
+		return true
 	}
-	return apijson.Port(r.union, &r)
-}
-
-func (r PublicBenefitDeductionPlan2) AsUnion() PublicBenefitDeductionPlan2Union {
-	return r.union
+	return false
 }
 
 type PublicBenefitDeductionCalculationUnion interface {
@@ -643,16 +1718,14 @@ type PublicBenefitDeductionCalculationUnion interface {
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeOf((*PublicBenefitDeductionCalculationUnion)(nil)).Elem(),
-		"type",
+		"",
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(FixedAmountBenefitCalculation{}),
-			DiscriminatorValue: "fixed_amount",
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(FixedAmountBenefitCalculation{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(PercentageBenefitCalculation{}),
-			DiscriminatorValue: "percentage",
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(PercentageBenefitCalculation{}),
 		},
 	)
 }
@@ -687,46 +1760,94 @@ func (r PublicBenefitDeductionCalculationFrequency) IsKnown() bool {
 	return false
 }
 
-type PublicBenefitDeductionPlan2Union interface {
-	implementsPublicBenefitDeductionPlan2()
-}
+func (r HealthPlanReference) implementsPublicBenefitDeductionPlan() {}
 
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeOf((*PublicBenefitDeductionPlan2Union)(nil)).Elem(),
-		"type",
-		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(HealthPlanReference{}),
-			DiscriminatorValue: "health_plan",
-		},
-		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			Type:               reflect.TypeOf(RetirementPlanReference{}),
-			DiscriminatorValue: "retirement_plan",
-		},
-	)
-}
-
-type PublicBenefitDeductionPlan2Type string
-
-const (
-	PublicBenefitDeductionPlan2TypeHealthPlan     PublicBenefitDeductionPlan2Type = "health_plan"
-	PublicBenefitDeductionPlan2TypeRetirementPlan PublicBenefitDeductionPlan2Type = "retirement_plan"
-)
-
-func (r PublicBenefitDeductionPlan2Type) IsKnown() bool {
-	switch r {
-	case PublicBenefitDeductionPlan2TypeHealthPlan, PublicBenefitDeductionPlan2TypeRetirementPlan:
-		return true
-	}
-	return false
-}
+func (r RetirementPlanReference) implementsPublicBenefitDeductionPlan() {}
 
 func (r FixedAmountBenefitCalculation) implementsPublicBenefitDeductionCalculation() {}
 
 func (r PercentageBenefitCalculation) implementsPublicBenefitDeductionCalculation() {}
 
-func (r HealthPlanReference) implementsPublicBenefitDeductionPlan2() {}
+type BenefitMoneyInputParam struct {
+	// minor units — cents, e.g. 2345 for $23.45
+	Amount   param.Field[int64]                     `json:"amount" api:"required"`
+	Currency param.Field[BenefitMoneyInputCurrency] `json:"currency" api:"required"`
+}
 
-func (r RetirementPlanReference) implementsPublicBenefitDeductionPlan2() {}
+func (r BenefitMoneyInputParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type BenefitMoneyInputCurrency string
+
+const (
+	BenefitMoneyInputCurrencyUsd BenefitMoneyInputCurrency = "USD"
+	BenefitMoneyInputCurrencyAud BenefitMoneyInputCurrency = "AUD"
+	BenefitMoneyInputCurrencyBgn BenefitMoneyInputCurrency = "BGN"
+	BenefitMoneyInputCurrencyBrl BenefitMoneyInputCurrency = "BRL"
+	BenefitMoneyInputCurrencyCad BenefitMoneyInputCurrency = "CAD"
+	BenefitMoneyInputCurrencyChf BenefitMoneyInputCurrency = "CHF"
+	BenefitMoneyInputCurrencyCzk BenefitMoneyInputCurrency = "CZK"
+	BenefitMoneyInputCurrencyDkk BenefitMoneyInputCurrency = "DKK"
+	BenefitMoneyInputCurrencyEur BenefitMoneyInputCurrency = "EUR"
+	BenefitMoneyInputCurrencyGbp BenefitMoneyInputCurrency = "GBP"
+	BenefitMoneyInputCurrencyHkd BenefitMoneyInputCurrency = "HKD"
+	BenefitMoneyInputCurrencyHuf BenefitMoneyInputCurrency = "HUF"
+	BenefitMoneyInputCurrencyIdr BenefitMoneyInputCurrency = "IDR"
+	BenefitMoneyInputCurrencyInr BenefitMoneyInputCurrency = "INR"
+	BenefitMoneyInputCurrencyJpy BenefitMoneyInputCurrency = "JPY"
+	BenefitMoneyInputCurrencyMyr BenefitMoneyInputCurrency = "MYR"
+	BenefitMoneyInputCurrencyNok BenefitMoneyInputCurrency = "NOK"
+	BenefitMoneyInputCurrencyNzd BenefitMoneyInputCurrency = "NZD"
+	BenefitMoneyInputCurrencyCny BenefitMoneyInputCurrency = "CNY"
+	BenefitMoneyInputCurrencyPln BenefitMoneyInputCurrency = "PLN"
+	BenefitMoneyInputCurrencyRon BenefitMoneyInputCurrency = "RON"
+	BenefitMoneyInputCurrencyTry BenefitMoneyInputCurrency = "TRY"
+	BenefitMoneyInputCurrencySek BenefitMoneyInputCurrency = "SEK"
+	BenefitMoneyInputCurrencySgd BenefitMoneyInputCurrency = "SGD"
+	BenefitMoneyInputCurrencyAed BenefitMoneyInputCurrency = "AED"
+	BenefitMoneyInputCurrencyArs BenefitMoneyInputCurrency = "ARS"
+	BenefitMoneyInputCurrencyBdt BenefitMoneyInputCurrency = "BDT"
+	BenefitMoneyInputCurrencyBwp BenefitMoneyInputCurrency = "BWP"
+	BenefitMoneyInputCurrencyClp BenefitMoneyInputCurrency = "CLP"
+	BenefitMoneyInputCurrencyCop BenefitMoneyInputCurrency = "COP"
+	BenefitMoneyInputCurrencyCrc BenefitMoneyInputCurrency = "CRC"
+	BenefitMoneyInputCurrencyEgp BenefitMoneyInputCurrency = "EGP"
+	BenefitMoneyInputCurrencyFjd BenefitMoneyInputCurrency = "FJD"
+	BenefitMoneyInputCurrencyGel BenefitMoneyInputCurrency = "GEL"
+	BenefitMoneyInputCurrencyGhs BenefitMoneyInputCurrency = "GHS"
+	BenefitMoneyInputCurrencyIls BenefitMoneyInputCurrency = "ILS"
+	BenefitMoneyInputCurrencyKes BenefitMoneyInputCurrency = "KES"
+	BenefitMoneyInputCurrencyKrw BenefitMoneyInputCurrency = "KRW"
+	BenefitMoneyInputCurrencyLkr BenefitMoneyInputCurrency = "LKR"
+	BenefitMoneyInputCurrencyMad BenefitMoneyInputCurrency = "MAD"
+	BenefitMoneyInputCurrencyMxn BenefitMoneyInputCurrency = "MXN"
+	BenefitMoneyInputCurrencyNpr BenefitMoneyInputCurrency = "NPR"
+	BenefitMoneyInputCurrencyPhp BenefitMoneyInputCurrency = "PHP"
+	BenefitMoneyInputCurrencyPkr BenefitMoneyInputCurrency = "PKR"
+	BenefitMoneyInputCurrencyThb BenefitMoneyInputCurrency = "THB"
+	BenefitMoneyInputCurrencyUah BenefitMoneyInputCurrency = "UAH"
+	BenefitMoneyInputCurrencyUgx BenefitMoneyInputCurrency = "UGX"
+	BenefitMoneyInputCurrencyUyu BenefitMoneyInputCurrency = "UYU"
+	BenefitMoneyInputCurrencyVnd BenefitMoneyInputCurrency = "VND"
+	BenefitMoneyInputCurrencyZar BenefitMoneyInputCurrency = "ZAR"
+	BenefitMoneyInputCurrencyZmw BenefitMoneyInputCurrency = "ZMW"
+	BenefitMoneyInputCurrencyTnd BenefitMoneyInputCurrency = "TND"
+	BenefitMoneyInputCurrencyNgn BenefitMoneyInputCurrency = "NGN"
+	BenefitMoneyInputCurrencyRsd BenefitMoneyInputCurrency = "RSD"
+	BenefitMoneyInputCurrencyTwd BenefitMoneyInputCurrency = "TWD"
+	BenefitMoneyInputCurrencyGtq BenefitMoneyInputCurrency = "GTQ"
+	BenefitMoneyInputCurrencyHnl BenefitMoneyInputCurrency = "HNL"
+	BenefitMoneyInputCurrencyDop BenefitMoneyInputCurrency = "DOP"
+	BenefitMoneyInputCurrencySar BenefitMoneyInputCurrency = "SAR"
+	BenefitMoneyInputCurrencyXaf BenefitMoneyInputCurrency = "XAF"
+	BenefitMoneyInputCurrencyPen BenefitMoneyInputCurrency = "PEN"
+)
+
+func (r BenefitMoneyInputCurrency) IsKnown() bool {
+	switch r {
+	case BenefitMoneyInputCurrencyUsd, BenefitMoneyInputCurrencyAud, BenefitMoneyInputCurrencyBgn, BenefitMoneyInputCurrencyBrl, BenefitMoneyInputCurrencyCad, BenefitMoneyInputCurrencyChf, BenefitMoneyInputCurrencyCzk, BenefitMoneyInputCurrencyDkk, BenefitMoneyInputCurrencyEur, BenefitMoneyInputCurrencyGbp, BenefitMoneyInputCurrencyHkd, BenefitMoneyInputCurrencyHuf, BenefitMoneyInputCurrencyIdr, BenefitMoneyInputCurrencyInr, BenefitMoneyInputCurrencyJpy, BenefitMoneyInputCurrencyMyr, BenefitMoneyInputCurrencyNok, BenefitMoneyInputCurrencyNzd, BenefitMoneyInputCurrencyCny, BenefitMoneyInputCurrencyPln, BenefitMoneyInputCurrencyRon, BenefitMoneyInputCurrencyTry, BenefitMoneyInputCurrencySek, BenefitMoneyInputCurrencySgd, BenefitMoneyInputCurrencyAed, BenefitMoneyInputCurrencyArs, BenefitMoneyInputCurrencyBdt, BenefitMoneyInputCurrencyBwp, BenefitMoneyInputCurrencyClp, BenefitMoneyInputCurrencyCop, BenefitMoneyInputCurrencyCrc, BenefitMoneyInputCurrencyEgp, BenefitMoneyInputCurrencyFjd, BenefitMoneyInputCurrencyGel, BenefitMoneyInputCurrencyGhs, BenefitMoneyInputCurrencyIls, BenefitMoneyInputCurrencyKes, BenefitMoneyInputCurrencyKrw, BenefitMoneyInputCurrencyLkr, BenefitMoneyInputCurrencyMad, BenefitMoneyInputCurrencyMxn, BenefitMoneyInputCurrencyNpr, BenefitMoneyInputCurrencyPhp, BenefitMoneyInputCurrencyPkr, BenefitMoneyInputCurrencyThb, BenefitMoneyInputCurrencyUah, BenefitMoneyInputCurrencyUgx, BenefitMoneyInputCurrencyUyu, BenefitMoneyInputCurrencyVnd, BenefitMoneyInputCurrencyZar, BenefitMoneyInputCurrencyZmw, BenefitMoneyInputCurrencyTnd, BenefitMoneyInputCurrencyNgn, BenefitMoneyInputCurrencyRsd, BenefitMoneyInputCurrencyTwd, BenefitMoneyInputCurrencyGtq, BenefitMoneyInputCurrencyHnl, BenefitMoneyInputCurrencyDop, BenefitMoneyInputCurrencySar, BenefitMoneyInputCurrencyXaf, BenefitMoneyInputCurrencyPen:
+		return true
+	}
+	return false
+}

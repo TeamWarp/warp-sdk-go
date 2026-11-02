@@ -17,18 +17,22 @@ import (
 // interacting with the warp API. You should not instantiate this client
 // directly, and instead use the [NewClient] method instead.
 type Client struct {
-	Options      []option.RequestOption
-	Benefits     *BenefitService
-	CustomFields *CustomFieldService
-	Departments  *DepartmentService
-	Levels       *LevelService
-	Offers       *OfferService
-	PayRates     *PayRateService
-	Payroll      *PayrollService
-	TimeOff      *TimeOffService
-	Workers      *WorkerService
-	Workplaces   *WorkplaceService
-	Webhooks     *WebhookService
+	Options         []option.RequestOption
+	Benefits        *BenefitService
+	Company         *CompanyService
+	CustomFields    *CustomFieldService
+	Departments     *DepartmentService
+	I9Verifications *I9VerificationService
+	BankAccounts    *BankAccountService
+	Levels          *LevelService
+	Offers          *OfferService
+	PayRates        *PayRateService
+	PaySplits       *PaySplitService
+	Payroll         *PayrollService
+	TimeOff         *TimeOffService
+	Workers         *WorkerService
+	Workplaces      *WorkplaceService
+	Webhooks        *WebhookService
 }
 
 // DefaultClientOptions read from the environment. This should be used to initialize
@@ -65,11 +69,15 @@ func NewClient(opts ...option.RequestOption) (r *Client) {
 	r = &Client{Options: opts}
 
 	r.Benefits = NewBenefitService(opts...)
+	r.Company = NewCompanyService(opts...)
 	r.CustomFields = NewCustomFieldService(opts...)
 	r.Departments = NewDepartmentService(opts...)
+	r.I9Verifications = NewI9VerificationService(opts...)
+	r.BankAccounts = NewBankAccountService(opts...)
 	r.Levels = NewLevelService(opts...)
 	r.Offers = NewOfferService(opts...)
 	r.PayRates = NewPayRateService(opts...)
+	r.PaySplits = NewPaySplitService(opts...)
 	r.Payroll = NewPayrollService(opts...)
 	r.TimeOff = NewTimeOffService(opts...)
 	r.Workers = NewWorkerService(opts...)

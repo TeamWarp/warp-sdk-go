@@ -83,12 +83,15 @@ func (r *OfferService) List(ctx context.Context, query OfferListParams, opts ...
 //			Email:     sdk.F[string]("john@joinwarp.com"),
 //		}),
 //		Compensation: sdk.F[sdk.OfferNewParamsCompensation](sdk.OfferNewParamsCompensation{
-//			PayRate: sdk.F[float64](0),
+//			PayBasis:    sdk.F[sdk.OfferNewParamsCompensationPayBasis](sdk.OfferNewParamsCompensationPayBasis("year")),
+//			PayCurrency: sdk.F[sdk.OfferNewParamsCompensationPayCurrency](sdk.OfferNewParamsCompensationPayCurrency("USD")),
+//			PayRate:     sdk.F[float64](1),
 //		}),
 //		Position: sdk.F[sdk.OfferNewParamsPosition](sdk.OfferNewParamsPosition{
 //			Title:     sdk.F[string]("x"),
 //			StartDate: sdk.F[string](""),
 //		}),
+//		WorkerType: sdk.F[sdk.OfferNewParamsWorkerType](sdk.OfferNewParamsWorkerType("employee")),
 //	})
 //	if err != nil {
 //		panic(err)
@@ -117,7 +120,9 @@ func (r *OfferService) New(ctx context.Context, body OfferNewParams, opts ...opt
 //
 // Example:
 //
-//	offer, err := client.Offers.Void(context.Background(), "offr_1234", sdk.OfferVoidParams{})
+//	offer, err := client.Offers.Void(context.Background(), "offr_1234", sdk.OfferVoidParams{
+//		VoidReason: sdk.F[sdk.OfferVoidParamsVoidReason](sdk.OfferVoidParamsVoidReason("candidate_declined")),
+//	})
 //	if err != nil {
 //		panic(err)
 //	}
@@ -200,7 +205,7 @@ func (r *OfferService) Resend(ctx context.Context, id string, opts ...option.Req
 }
 
 type PublicMoneyAmount struct {
-	// Amount in the currency base unit, e.g. cents for USD.
+	// minor units — cents, e.g. 2345 for $23.45
 	Amount   int64                     `json:"amount" api:"required"`
 	Currency PublicMoneyAmountCurrency `json:"currency" api:"required"`
 	// The server-formatted display string for the amount in its currency.
@@ -300,9 +305,12 @@ func (r PublicMoneyAmountCurrency) IsKnown() bool {
 }
 
 type OfferListParams struct {
-	Limit          param.Field[string]                      `query:"limit" api:"required"`
-	AfterID        param.Field[string]                      `query:"afterId"`
-	BeforeID       param.Field[string]                      `query:"beforeId"`
+	Limit param.Field[string] `query:"limit" api:"required"`
+	// The tag of the offer.
+	AfterID param.Field[string] `query:"afterId"`
+	// The tag of the offer.
+	BeforeID param.Field[string] `query:"beforeId"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
 	CandidateEmail param.Field[string]                      `query:"candidateEmail" format:"email"`
 	Statuses       param.Field[[]OfferListParamsStatus]     `query:"statuses"`
 	WorkerTypes    param.Field[[]OfferListParamsWorkerType] `query:"workerTypes"`
@@ -311,7 +319,7 @@ type OfferListParams struct {
 // URLQuery serializes [OfferListParams]'s query parameters as `url.Values`.
 func (r OfferListParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -323,11 +331,12 @@ const (
 	OfferListParamsStatusSent     OfferListParamsStatus = "sent"
 	OfferListParamsStatusAccepted OfferListParamsStatus = "accepted"
 	OfferListParamsStatusVoid     OfferListParamsStatus = "void"
+	OfferListParamsStatusExpired  OfferListParamsStatus = "expired"
 )
 
 func (r OfferListParamsStatus) IsKnown() bool {
 	switch r {
-	case OfferListParamsStatusDraft, OfferListParamsStatusSent, OfferListParamsStatusAccepted, OfferListParamsStatusVoid:
+	case OfferListParamsStatusDraft, OfferListParamsStatusSent, OfferListParamsStatusAccepted, OfferListParamsStatusVoid, OfferListParamsStatusExpired:
 		return true
 	}
 	return false
@@ -355,11 +364,15 @@ type OfferNewParams struct {
 	Position                    param.Field[OfferNewParamsPosition]                    `json:"position" api:"required"`
 	WorkerType                  param.Field[OfferNewParamsWorkerType]                  `json:"workerType" api:"required"`
 	BackgroundCheckWorkLocation param.Field[OfferNewParamsBackgroundCheckWorkLocation] `json:"backgroundCheckWorkLocation"`
-	DepartmentID                param.Field[string]                                    `json:"departmentId"`
-	ExpirationTime              param.Field[string]                                    `json:"expirationTime"`
-	LevelID                     param.Field[string]                                    `json:"levelId"`
-	ManagerID                   param.Field[string]                                    `json:"managerId"`
-	WorkplaceID                 param.Field[string]                                    `json:"workplaceId"`
+	// The unique public id of the department
+	DepartmentID   param.Field[string] `json:"departmentId"`
+	ExpirationTime param.Field[string] `json:"expirationTime"`
+	// The unique public id of the job level
+	LevelID param.Field[string] `json:"levelId"`
+	// The id of the worker.
+	ManagerID param.Field[string] `json:"managerId"`
+	// Public workplace identifier
+	WorkplaceID param.Field[string] `json:"workplaceId"`
 }
 
 func (r OfferNewParams) MarshalJSON() (data []byte, err error) {
@@ -388,8 +401,10 @@ func (r OfferNewParamsCandidateContractorDetails) MarshalJSON() (data []byte, er
 }
 
 type OfferNewParamsPosition struct {
-	StartDate   param.Field[string]                        `json:"startDate" api:"required"`
-	Title       param.Field[string]                        `json:"title" api:"required"`
+	StartDate param.Field[string] `json:"startDate" api:"required"`
+	Title     param.Field[string] `json:"title" api:"required"`
+	// Required when workerType is global_contractor. Ignored for employee and
+	// us_contractor offers.
 	Country     param.Field[OfferNewParamsPositionCountry] `json:"country"`
 	ScopeOfWork param.Field[string]                        `json:"scopeOfWork"`
 }
@@ -678,16 +693,20 @@ func (r OfferNewParamsWorkerType) IsKnown() bool {
 }
 
 type OfferNewParamsCompensation struct {
-	PayBasis              param.Field[OfferNewParamsCompensationPayBasis]    `json:"payBasis" api:"required"`
-	PayCurrency           param.Field[OfferNewParamsCompensationPayCurrency] `json:"payCurrency" api:"required"`
-	PayRate               param.Field[float64]                               `json:"payRate" api:"required"`
-	CliffMonths           param.Field[int64]                                 `json:"cliffMonths"`
-	PayType               param.Field[OfferNewParamsCompensationPayType]     `json:"payType"`
-	PayVariableRate       param.Field[float64]                               `json:"payVariableRate"`
-	RelocationBonus       param.Field[float64]                               `json:"relocationBonus"`
-	SignOnBonus           param.Field[float64]                               `json:"signOnBonus"`
-	StockOptions          param.Field[int64]                                 `json:"stockOptions"`
-	VestingScheduleMonths param.Field[int64]                                 `json:"vestingScheduleMonths"`
+	PayBasis    param.Field[OfferNewParamsCompensationPayBasis]    `json:"payBasis" api:"required"`
+	PayCurrency param.Field[OfferNewParamsCompensationPayCurrency] `json:"payCurrency" api:"required"`
+	// major units (dollars), e.g. 23.45
+	PayRate     param.Field[float64]                           `json:"payRate" api:"required"`
+	CliffMonths param.Field[int64]                             `json:"cliffMonths"`
+	PayType     param.Field[OfferNewParamsCompensationPayType] `json:"payType"`
+	// major units (dollars), e.g. 23.45
+	PayVariableRate param.Field[float64] `json:"payVariableRate"`
+	// major units (dollars), e.g. 23.45
+	RelocationBonus param.Field[float64] `json:"relocationBonus"`
+	// major units (dollars), e.g. 23.45
+	SignOnBonus           param.Field[float64] `json:"signOnBonus"`
+	StockOptions          param.Field[int64]   `json:"stockOptions"`
+	VestingScheduleMonths param.Field[int64]   `json:"vestingScheduleMonths"`
 }
 
 func (r OfferNewParamsCompensation) MarshalJSON() (data []byte, err error) {
@@ -844,17 +863,17 @@ func (r OfferExtendDeadlineParams) MarshalJSON() (data []byte, err error) {
 }
 
 type OfferListResponse struct {
-	HasMore bool                    `json:"hasMore" api:"required"`
 	Count   int64                   `json:"count" api:"required"`
 	Data    []OfferListResponseData `json:"data" api:"required"`
+	HasMore bool                    `json:"hasMore" api:"required"`
 	JSON    offerListResponseJSON   `json:"-"`
 }
 
 // offerListResponseJSON contains the JSON metadata for the struct [OfferListResponse]
 type offerListResponseJSON struct {
-	HasMore     apijson.Field
 	Count       apijson.Field
 	Data        apijson.Field
+	HasMore     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -869,46 +888,52 @@ func (r offerListResponseJSON) RawJSON() string {
 
 type OfferNewResponse struct {
 	// The tag of the offer.
-	ID         string                     `json:"id" api:"required"`
-	Status     OfferNewResponseStatus     `json:"status" api:"required"`
-	WorkerType OfferNewResponseWorkerType `json:"workerType" api:"required"`
-	Candidate  OfferNewResponseCandidate  `json:"candidate" api:"required"`
-	Position   OfferNewResponsePosition   `json:"position" api:"required"`
-	Department OfferNewResponseDepartment `json:"department" api:"required,nullable"`
-	Workplace  OfferNewResponseWorkplace  `json:"workplace" api:"required,nullable"`
-	Manager    OfferNewResponseManager    `json:"manager" api:"required,nullable"`
+	ID             string                       `json:"id" api:"required"`
+	Candidate      OfferNewResponseCandidate    `json:"candidate" api:"required"`
+	Compensation   OfferNewResponseCompensation `json:"compensation" api:"required"`
+	CreatedAt      string                       `json:"createdAt" api:"required"`
+	Department     OfferNewResponseDepartment   `json:"department" api:"required,nullable"`
+	ExpirationTime string                       `json:"expirationTime" api:"required,nullable"`
+	LastViewedAt   string                       `json:"lastViewedAt" api:"required,nullable"`
+	Manager        OfferNewResponseManager      `json:"manager" api:"required,nullable"`
+	// The candidate-facing offer portal URL. Null for offers that have not been sent.
+	OfferURL string                   `json:"offerUrl" api:"required,nullable"`
+	Position OfferNewResponsePosition `json:"position" api:"required"`
 	// Display name of the person or company that sent the offer. Null for offers not
 	// yet sent.
-	SentBy       string                       `json:"sentBy" api:"required,nullable"`
-	Compensation OfferNewResponseCompensation `json:"compensation" api:"required"`
-	// The candidate-facing offer portal URL. Null for offers that have not been sent.
-	OfferURL       string `json:"offerUrl" api:"required,nullable"`
-	ExpirationTime string `json:"expirationTime" api:"required,nullable"`
-	LastViewedAt   string `json:"lastViewedAt" api:"required,nullable"`
-	CreatedAt      string `json:"createdAt" api:"required"`
+	SentBy     string                     `json:"sentBy" api:"required,nullable"`
+	Status     OfferNewResponseStatus     `json:"status" api:"required"`
+	WorkerType OfferNewResponseWorkerType `json:"workerType" api:"required"`
+	Workplace  OfferNewResponseWorkplace  `json:"workplace" api:"required,nullable"`
 	// The offer's job level, or null if unassigned. Omitted when job levels are not
 	// enabled.
 	Level OfferNewResponseLevel `json:"level" api:"nullable"`
-	JSON  offerNewResponseJSON  `json:"-"`
+	// Additional notes explaining why the offer was voided.
+	VoidNotes string `json:"voidNotes" api:"nullable"`
+	// The reason the offer was voided. Null for offers that have not been voided.
+	VoidReason OfferNewResponseVoidReason `json:"voidReason" api:"nullable"`
+	JSON       offerNewResponseJSON       `json:"-"`
 }
 
 // offerNewResponseJSON contains the JSON metadata for the struct [OfferNewResponse]
 type offerNewResponseJSON struct {
 	ID             apijson.Field
-	Status         apijson.Field
-	WorkerType     apijson.Field
 	Candidate      apijson.Field
-	Position       apijson.Field
-	Department     apijson.Field
-	Workplace      apijson.Field
-	Manager        apijson.Field
-	SentBy         apijson.Field
 	Compensation   apijson.Field
-	OfferURL       apijson.Field
+	CreatedAt      apijson.Field
+	Department     apijson.Field
 	ExpirationTime apijson.Field
 	LastViewedAt   apijson.Field
-	CreatedAt      apijson.Field
+	Manager        apijson.Field
+	OfferURL       apijson.Field
+	Position       apijson.Field
+	SentBy         apijson.Field
+	Status         apijson.Field
+	WorkerType     apijson.Field
+	Workplace      apijson.Field
 	Level          apijson.Field
+	VoidNotes      apijson.Field
+	VoidReason     apijson.Field
 	raw            string
 	ExtraFields    map[string]apijson.Field
 }
@@ -923,46 +948,52 @@ func (r offerNewResponseJSON) RawJSON() string {
 
 type OfferVoidResponse struct {
 	// The tag of the offer.
-	ID         string                      `json:"id" api:"required"`
-	Status     OfferVoidResponseStatus     `json:"status" api:"required"`
-	WorkerType OfferVoidResponseWorkerType `json:"workerType" api:"required"`
-	Candidate  OfferVoidResponseCandidate  `json:"candidate" api:"required"`
-	Position   OfferVoidResponsePosition   `json:"position" api:"required"`
-	Department OfferVoidResponseDepartment `json:"department" api:"required,nullable"`
-	Workplace  OfferVoidResponseWorkplace  `json:"workplace" api:"required,nullable"`
-	Manager    OfferVoidResponseManager    `json:"manager" api:"required,nullable"`
+	ID             string                        `json:"id" api:"required"`
+	Candidate      OfferVoidResponseCandidate    `json:"candidate" api:"required"`
+	Compensation   OfferVoidResponseCompensation `json:"compensation" api:"required"`
+	CreatedAt      string                        `json:"createdAt" api:"required"`
+	Department     OfferVoidResponseDepartment   `json:"department" api:"required,nullable"`
+	ExpirationTime string                        `json:"expirationTime" api:"required,nullable"`
+	LastViewedAt   string                        `json:"lastViewedAt" api:"required,nullable"`
+	Manager        OfferVoidResponseManager      `json:"manager" api:"required,nullable"`
+	// The candidate-facing offer portal URL. Null for offers that have not been sent.
+	OfferURL string                    `json:"offerUrl" api:"required,nullable"`
+	Position OfferVoidResponsePosition `json:"position" api:"required"`
 	// Display name of the person or company that sent the offer. Null for offers not
 	// yet sent.
-	SentBy       string                        `json:"sentBy" api:"required,nullable"`
-	Compensation OfferVoidResponseCompensation `json:"compensation" api:"required"`
-	// The candidate-facing offer portal URL. Null for offers that have not been sent.
-	OfferURL       string `json:"offerUrl" api:"required,nullable"`
-	ExpirationTime string `json:"expirationTime" api:"required,nullable"`
-	LastViewedAt   string `json:"lastViewedAt" api:"required,nullable"`
-	CreatedAt      string `json:"createdAt" api:"required"`
+	SentBy     string                      `json:"sentBy" api:"required,nullable"`
+	Status     OfferVoidResponseStatus     `json:"status" api:"required"`
+	WorkerType OfferVoidResponseWorkerType `json:"workerType" api:"required"`
+	Workplace  OfferVoidResponseWorkplace  `json:"workplace" api:"required,nullable"`
 	// The offer's job level, or null if unassigned. Omitted when job levels are not
 	// enabled.
 	Level OfferVoidResponseLevel `json:"level" api:"nullable"`
-	JSON  offerVoidResponseJSON  `json:"-"`
+	// Additional notes explaining why the offer was voided.
+	VoidNotes string `json:"voidNotes" api:"nullable"`
+	// The reason the offer was voided. Null for offers that have not been voided.
+	VoidReason OfferVoidResponseVoidReason `json:"voidReason" api:"nullable"`
+	JSON       offerVoidResponseJSON       `json:"-"`
 }
 
 // offerVoidResponseJSON contains the JSON metadata for the struct [OfferVoidResponse]
 type offerVoidResponseJSON struct {
 	ID             apijson.Field
-	Status         apijson.Field
-	WorkerType     apijson.Field
 	Candidate      apijson.Field
-	Position       apijson.Field
-	Department     apijson.Field
-	Workplace      apijson.Field
-	Manager        apijson.Field
-	SentBy         apijson.Field
 	Compensation   apijson.Field
-	OfferURL       apijson.Field
+	CreatedAt      apijson.Field
+	Department     apijson.Field
 	ExpirationTime apijson.Field
 	LastViewedAt   apijson.Field
-	CreatedAt      apijson.Field
+	Manager        apijson.Field
+	OfferURL       apijson.Field
+	Position       apijson.Field
+	SentBy         apijson.Field
+	Status         apijson.Field
+	WorkerType     apijson.Field
+	Workplace      apijson.Field
 	Level          apijson.Field
+	VoidNotes      apijson.Field
+	VoidReason     apijson.Field
 	raw            string
 	ExtraFields    map[string]apijson.Field
 }
@@ -977,46 +1008,52 @@ func (r offerVoidResponseJSON) RawJSON() string {
 
 type OfferExtendDeadlineResponse struct {
 	// The tag of the offer.
-	ID         string                                `json:"id" api:"required"`
-	Status     OfferExtendDeadlineResponseStatus     `json:"status" api:"required"`
-	WorkerType OfferExtendDeadlineResponseWorkerType `json:"workerType" api:"required"`
-	Candidate  OfferExtendDeadlineResponseCandidate  `json:"candidate" api:"required"`
-	Position   OfferExtendDeadlineResponsePosition   `json:"position" api:"required"`
-	Department OfferExtendDeadlineResponseDepartment `json:"department" api:"required,nullable"`
-	Workplace  OfferExtendDeadlineResponseWorkplace  `json:"workplace" api:"required,nullable"`
-	Manager    OfferExtendDeadlineResponseManager    `json:"manager" api:"required,nullable"`
+	ID             string                                  `json:"id" api:"required"`
+	Candidate      OfferExtendDeadlineResponseCandidate    `json:"candidate" api:"required"`
+	Compensation   OfferExtendDeadlineResponseCompensation `json:"compensation" api:"required"`
+	CreatedAt      string                                  `json:"createdAt" api:"required"`
+	Department     OfferExtendDeadlineResponseDepartment   `json:"department" api:"required,nullable"`
+	ExpirationTime string                                  `json:"expirationTime" api:"required,nullable"`
+	LastViewedAt   string                                  `json:"lastViewedAt" api:"required,nullable"`
+	Manager        OfferExtendDeadlineResponseManager      `json:"manager" api:"required,nullable"`
+	// The candidate-facing offer portal URL. Null for offers that have not been sent.
+	OfferURL string                              `json:"offerUrl" api:"required,nullable"`
+	Position OfferExtendDeadlineResponsePosition `json:"position" api:"required"`
 	// Display name of the person or company that sent the offer. Null for offers not
 	// yet sent.
-	SentBy       string                                  `json:"sentBy" api:"required,nullable"`
-	Compensation OfferExtendDeadlineResponseCompensation `json:"compensation" api:"required"`
-	// The candidate-facing offer portal URL. Null for offers that have not been sent.
-	OfferURL       string `json:"offerUrl" api:"required,nullable"`
-	ExpirationTime string `json:"expirationTime" api:"required,nullable"`
-	LastViewedAt   string `json:"lastViewedAt" api:"required,nullable"`
-	CreatedAt      string `json:"createdAt" api:"required"`
+	SentBy     string                                `json:"sentBy" api:"required,nullable"`
+	Status     OfferExtendDeadlineResponseStatus     `json:"status" api:"required"`
+	WorkerType OfferExtendDeadlineResponseWorkerType `json:"workerType" api:"required"`
+	Workplace  OfferExtendDeadlineResponseWorkplace  `json:"workplace" api:"required,nullable"`
 	// The offer's job level, or null if unassigned. Omitted when job levels are not
 	// enabled.
 	Level OfferExtendDeadlineResponseLevel `json:"level" api:"nullable"`
-	JSON  offerExtendDeadlineResponseJSON  `json:"-"`
+	// Additional notes explaining why the offer was voided.
+	VoidNotes string `json:"voidNotes" api:"nullable"`
+	// The reason the offer was voided. Null for offers that have not been voided.
+	VoidReason OfferExtendDeadlineResponseVoidReason `json:"voidReason" api:"nullable"`
+	JSON       offerExtendDeadlineResponseJSON       `json:"-"`
 }
 
 // offerExtendDeadlineResponseJSON contains the JSON metadata for the struct [OfferExtendDeadlineResponse]
 type offerExtendDeadlineResponseJSON struct {
 	ID             apijson.Field
-	Status         apijson.Field
-	WorkerType     apijson.Field
 	Candidate      apijson.Field
-	Position       apijson.Field
-	Department     apijson.Field
-	Workplace      apijson.Field
-	Manager        apijson.Field
-	SentBy         apijson.Field
 	Compensation   apijson.Field
-	OfferURL       apijson.Field
+	CreatedAt      apijson.Field
+	Department     apijson.Field
 	ExpirationTime apijson.Field
 	LastViewedAt   apijson.Field
-	CreatedAt      apijson.Field
+	Manager        apijson.Field
+	OfferURL       apijson.Field
+	Position       apijson.Field
+	SentBy         apijson.Field
+	Status         apijson.Field
+	WorkerType     apijson.Field
+	Workplace      apijson.Field
 	Level          apijson.Field
+	VoidNotes      apijson.Field
+	VoidReason     apijson.Field
 	raw            string
 	ExtraFields    map[string]apijson.Field
 }
@@ -1031,46 +1068,52 @@ func (r offerExtendDeadlineResponseJSON) RawJSON() string {
 
 type OfferResendResponse struct {
 	// The tag of the offer.
-	ID         string                        `json:"id" api:"required"`
-	Status     OfferResendResponseStatus     `json:"status" api:"required"`
-	WorkerType OfferResendResponseWorkerType `json:"workerType" api:"required"`
-	Candidate  OfferResendResponseCandidate  `json:"candidate" api:"required"`
-	Position   OfferResendResponsePosition   `json:"position" api:"required"`
-	Department OfferResendResponseDepartment `json:"department" api:"required,nullable"`
-	Workplace  OfferResendResponseWorkplace  `json:"workplace" api:"required,nullable"`
-	Manager    OfferResendResponseManager    `json:"manager" api:"required,nullable"`
+	ID             string                          `json:"id" api:"required"`
+	Candidate      OfferResendResponseCandidate    `json:"candidate" api:"required"`
+	Compensation   OfferResendResponseCompensation `json:"compensation" api:"required"`
+	CreatedAt      string                          `json:"createdAt" api:"required"`
+	Department     OfferResendResponseDepartment   `json:"department" api:"required,nullable"`
+	ExpirationTime string                          `json:"expirationTime" api:"required,nullable"`
+	LastViewedAt   string                          `json:"lastViewedAt" api:"required,nullable"`
+	Manager        OfferResendResponseManager      `json:"manager" api:"required,nullable"`
+	// The candidate-facing offer portal URL. Null for offers that have not been sent.
+	OfferURL string                      `json:"offerUrl" api:"required,nullable"`
+	Position OfferResendResponsePosition `json:"position" api:"required"`
 	// Display name of the person or company that sent the offer. Null for offers not
 	// yet sent.
-	SentBy       string                          `json:"sentBy" api:"required,nullable"`
-	Compensation OfferResendResponseCompensation `json:"compensation" api:"required"`
-	// The candidate-facing offer portal URL. Null for offers that have not been sent.
-	OfferURL       string `json:"offerUrl" api:"required,nullable"`
-	ExpirationTime string `json:"expirationTime" api:"required,nullable"`
-	LastViewedAt   string `json:"lastViewedAt" api:"required,nullable"`
-	CreatedAt      string `json:"createdAt" api:"required"`
+	SentBy     string                        `json:"sentBy" api:"required,nullable"`
+	Status     OfferResendResponseStatus     `json:"status" api:"required"`
+	WorkerType OfferResendResponseWorkerType `json:"workerType" api:"required"`
+	Workplace  OfferResendResponseWorkplace  `json:"workplace" api:"required,nullable"`
 	// The offer's job level, or null if unassigned. Omitted when job levels are not
 	// enabled.
 	Level OfferResendResponseLevel `json:"level" api:"nullable"`
-	JSON  offerResendResponseJSON  `json:"-"`
+	// Additional notes explaining why the offer was voided.
+	VoidNotes string `json:"voidNotes" api:"nullable"`
+	// The reason the offer was voided. Null for offers that have not been voided.
+	VoidReason OfferResendResponseVoidReason `json:"voidReason" api:"nullable"`
+	JSON       offerResendResponseJSON       `json:"-"`
 }
 
 // offerResendResponseJSON contains the JSON metadata for the struct [OfferResendResponse]
 type offerResendResponseJSON struct {
 	ID             apijson.Field
-	Status         apijson.Field
-	WorkerType     apijson.Field
 	Candidate      apijson.Field
-	Position       apijson.Field
-	Department     apijson.Field
-	Workplace      apijson.Field
-	Manager        apijson.Field
-	SentBy         apijson.Field
 	Compensation   apijson.Field
-	OfferURL       apijson.Field
+	CreatedAt      apijson.Field
+	Department     apijson.Field
 	ExpirationTime apijson.Field
 	LastViewedAt   apijson.Field
-	CreatedAt      apijson.Field
+	Manager        apijson.Field
+	OfferURL       apijson.Field
+	Position       apijson.Field
+	SentBy         apijson.Field
+	Status         apijson.Field
+	WorkerType     apijson.Field
+	Workplace      apijson.Field
 	Level          apijson.Field
+	VoidNotes      apijson.Field
+	VoidReason     apijson.Field
 	raw            string
 	ExtraFields    map[string]apijson.Field
 }
@@ -1085,46 +1128,52 @@ func (r offerResendResponseJSON) RawJSON() string {
 
 type OfferListResponseData struct {
 	// The tag of the offer.
-	ID         string                          `json:"id" api:"required"`
-	Status     OfferListResponseDataStatus     `json:"status" api:"required"`
-	WorkerType OfferListResponseDataWorkerType `json:"workerType" api:"required"`
-	Candidate  OfferListResponseDataCandidate  `json:"candidate" api:"required"`
-	Position   OfferListResponseDataPosition   `json:"position" api:"required"`
-	Department OfferListResponseDataDepartment `json:"department" api:"required,nullable"`
-	Workplace  OfferListResponseDataWorkplace  `json:"workplace" api:"required,nullable"`
-	Manager    OfferListResponseDataManager    `json:"manager" api:"required,nullable"`
+	ID             string                            `json:"id" api:"required"`
+	Candidate      OfferListResponseDataCandidate    `json:"candidate" api:"required"`
+	Compensation   OfferListResponseDataCompensation `json:"compensation" api:"required"`
+	CreatedAt      string                            `json:"createdAt" api:"required"`
+	Department     OfferListResponseDataDepartment   `json:"department" api:"required,nullable"`
+	ExpirationTime string                            `json:"expirationTime" api:"required,nullable"`
+	LastViewedAt   string                            `json:"lastViewedAt" api:"required,nullable"`
+	Manager        OfferListResponseDataManager      `json:"manager" api:"required,nullable"`
+	// The candidate-facing offer portal URL. Null for offers that have not been sent.
+	OfferURL string                        `json:"offerUrl" api:"required,nullable"`
+	Position OfferListResponseDataPosition `json:"position" api:"required"`
 	// Display name of the person or company that sent the offer. Null for offers not
 	// yet sent.
-	SentBy       string                            `json:"sentBy" api:"required,nullable"`
-	Compensation OfferListResponseDataCompensation `json:"compensation" api:"required"`
-	// The candidate-facing offer portal URL. Null for offers that have not been sent.
-	OfferURL       string `json:"offerUrl" api:"required,nullable"`
-	ExpirationTime string `json:"expirationTime" api:"required,nullable"`
-	LastViewedAt   string `json:"lastViewedAt" api:"required,nullable"`
-	CreatedAt      string `json:"createdAt" api:"required"`
+	SentBy     string                          `json:"sentBy" api:"required,nullable"`
+	Status     OfferListResponseDataStatus     `json:"status" api:"required"`
+	WorkerType OfferListResponseDataWorkerType `json:"workerType" api:"required"`
+	Workplace  OfferListResponseDataWorkplace  `json:"workplace" api:"required,nullable"`
 	// The offer's job level, or null if unassigned. Omitted when job levels are not
 	// enabled.
 	Level OfferListResponseDataLevel `json:"level" api:"nullable"`
-	JSON  offerListResponseDataJSON  `json:"-"`
+	// Additional notes explaining why the offer was voided.
+	VoidNotes string `json:"voidNotes" api:"nullable"`
+	// The reason the offer was voided. Null for offers that have not been voided.
+	VoidReason OfferListResponseDataVoidReason `json:"voidReason" api:"nullable"`
+	JSON       offerListResponseDataJSON       `json:"-"`
 }
 
 // offerListResponseDataJSON contains the JSON metadata for the struct [OfferListResponseData]
 type offerListResponseDataJSON struct {
 	ID             apijson.Field
-	Status         apijson.Field
-	WorkerType     apijson.Field
 	Candidate      apijson.Field
-	Position       apijson.Field
-	Department     apijson.Field
-	Workplace      apijson.Field
-	Manager        apijson.Field
-	SentBy         apijson.Field
 	Compensation   apijson.Field
-	OfferURL       apijson.Field
+	CreatedAt      apijson.Field
+	Department     apijson.Field
 	ExpirationTime apijson.Field
 	LastViewedAt   apijson.Field
-	CreatedAt      apijson.Field
+	Manager        apijson.Field
+	OfferURL       apijson.Field
+	Position       apijson.Field
+	SentBy         apijson.Field
+	Status         apijson.Field
+	WorkerType     apijson.Field
+	Workplace      apijson.Field
 	Level          apijson.Field
+	VoidNotes      apijson.Field
+	VoidReason     apijson.Field
 	raw            string
 	ExtraFields    map[string]apijson.Field
 }
@@ -1144,11 +1193,28 @@ const (
 	OfferNewResponseStatusSent     OfferNewResponseStatus = "sent"
 	OfferNewResponseStatusAccepted OfferNewResponseStatus = "accepted"
 	OfferNewResponseStatusVoid     OfferNewResponseStatus = "void"
+	OfferNewResponseStatusExpired  OfferNewResponseStatus = "expired"
 )
 
 func (r OfferNewResponseStatus) IsKnown() bool {
 	switch r {
-	case OfferNewResponseStatusDraft, OfferNewResponseStatusSent, OfferNewResponseStatusAccepted, OfferNewResponseStatusVoid:
+	case OfferNewResponseStatusDraft, OfferNewResponseStatusSent, OfferNewResponseStatusAccepted, OfferNewResponseStatusVoid, OfferNewResponseStatusExpired:
+		return true
+	}
+	return false
+}
+
+type OfferNewResponseVoidReason string
+
+const (
+	OfferNewResponseVoidReasonReplaced          OfferNewResponseVoidReason = "replaced"
+	OfferNewResponseVoidReasonCandidateDeclined OfferNewResponseVoidReason = "candidate_declined"
+	OfferNewResponseVoidReasonOther             OfferNewResponseVoidReason = "other"
+)
+
+func (r OfferNewResponseVoidReason) IsKnown() bool {
+	switch r {
+	case OfferNewResponseVoidReasonReplaced, OfferNewResponseVoidReasonCandidateDeclined, OfferNewResponseVoidReasonOther:
 		return true
 	}
 	return false
@@ -1171,20 +1237,20 @@ func (r OfferNewResponseWorkerType) IsKnown() bool {
 }
 
 type OfferNewResponseCandidate struct {
-	FirstName string `json:"firstName" api:"required"`
-	LastName  string `json:"lastName" api:"required"`
-	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
-	Email             string                                     `json:"email" api:"required" format:"email"`
 	ContractorDetails OfferNewResponseCandidateContractorDetails `json:"contractorDetails" api:"required,nullable"`
-	JSON              offerNewResponseCandidateJSON              `json:"-"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	Email     string                        `json:"email" api:"required" format:"email"`
+	FirstName string                        `json:"firstName" api:"required"`
+	LastName  string                        `json:"lastName" api:"required"`
+	JSON      offerNewResponseCandidateJSON `json:"-"`
 }
 
 // offerNewResponseCandidateJSON contains the JSON metadata for the struct [OfferNewResponseCandidate]
 type offerNewResponseCandidateJSON struct {
+	ContractorDetails apijson.Field
+	Email             apijson.Field
 	FirstName         apijson.Field
 	LastName          apijson.Field
-	Email             apijson.Field
-	ContractorDetails apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
 }
@@ -1198,19 +1264,19 @@ func (r offerNewResponseCandidateJSON) RawJSON() string {
 }
 
 type OfferNewResponsePosition struct {
-	Title       string                          `json:"title" api:"required"`
-	StartDate   string                          `json:"startDate" api:"required"`
 	Country     OfferNewResponsePositionCountry `json:"country" api:"required"`
 	ScopeOfWork string                          `json:"scopeOfWork" api:"required,nullable"`
+	StartDate   string                          `json:"startDate" api:"required"`
+	Title       string                          `json:"title" api:"required"`
 	JSON        offerNewResponsePositionJSON    `json:"-"`
 }
 
 // offerNewResponsePositionJSON contains the JSON metadata for the struct [OfferNewResponsePosition]
 type offerNewResponsePositionJSON struct {
-	Title       apijson.Field
-	StartDate   apijson.Field
 	Country     apijson.Field
 	ScopeOfWork apijson.Field
+	StartDate   apijson.Field
+	Title       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1320,18 +1386,20 @@ func (r offerNewResponseLevelJSON) RawJSON() string {
 }
 
 type OfferNewResponseCompensation struct {
-	BasePay         OfferNewResponseCompensationBasePay `json:"basePay" api:"required"`
-	SignOnBonus     PublicMoneyAmount                   `json:"signOnBonus" api:"required,nullable"`
-	RelocationBonus PublicMoneyAmount                   `json:"relocationBonus" api:"required,nullable"`
-	Stock           OfferNewResponseCompensationStock   `json:"stock" api:"required,nullable"`
-	JSON            offerNewResponseCompensationJSON    `json:"-"`
+	BasePay OfferNewResponseCompensationBasePay `json:"basePay" api:"required"`
+	// A monetary amount with its currency and server-formatted display value.
+	RelocationBonus PublicMoneyAmount `json:"relocationBonus" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	SignOnBonus PublicMoneyAmount                 `json:"signOnBonus" api:"required,nullable"`
+	Stock       OfferNewResponseCompensationStock `json:"stock" api:"required,nullable"`
+	JSON        offerNewResponseCompensationJSON  `json:"-"`
 }
 
 // offerNewResponseCompensationJSON contains the JSON metadata for the struct [OfferNewResponseCompensation]
 type offerNewResponseCompensationJSON struct {
 	BasePay         apijson.Field
-	SignOnBonus     apijson.Field
 	RelocationBonus apijson.Field
+	SignOnBonus     apijson.Field
 	Stock           apijson.Field
 	raw             string
 	ExtraFields     map[string]apijson.Field
@@ -1352,11 +1420,28 @@ const (
 	OfferVoidResponseStatusSent     OfferVoidResponseStatus = "sent"
 	OfferVoidResponseStatusAccepted OfferVoidResponseStatus = "accepted"
 	OfferVoidResponseStatusVoid     OfferVoidResponseStatus = "void"
+	OfferVoidResponseStatusExpired  OfferVoidResponseStatus = "expired"
 )
 
 func (r OfferVoidResponseStatus) IsKnown() bool {
 	switch r {
-	case OfferVoidResponseStatusDraft, OfferVoidResponseStatusSent, OfferVoidResponseStatusAccepted, OfferVoidResponseStatusVoid:
+	case OfferVoidResponseStatusDraft, OfferVoidResponseStatusSent, OfferVoidResponseStatusAccepted, OfferVoidResponseStatusVoid, OfferVoidResponseStatusExpired:
+		return true
+	}
+	return false
+}
+
+type OfferVoidResponseVoidReason string
+
+const (
+	OfferVoidResponseVoidReasonReplaced          OfferVoidResponseVoidReason = "replaced"
+	OfferVoidResponseVoidReasonCandidateDeclined OfferVoidResponseVoidReason = "candidate_declined"
+	OfferVoidResponseVoidReasonOther             OfferVoidResponseVoidReason = "other"
+)
+
+func (r OfferVoidResponseVoidReason) IsKnown() bool {
+	switch r {
+	case OfferVoidResponseVoidReasonReplaced, OfferVoidResponseVoidReasonCandidateDeclined, OfferVoidResponseVoidReasonOther:
 		return true
 	}
 	return false
@@ -1379,20 +1464,20 @@ func (r OfferVoidResponseWorkerType) IsKnown() bool {
 }
 
 type OfferVoidResponseCandidate struct {
-	FirstName string `json:"firstName" api:"required"`
-	LastName  string `json:"lastName" api:"required"`
-	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
-	Email             string                                      `json:"email" api:"required" format:"email"`
 	ContractorDetails OfferVoidResponseCandidateContractorDetails `json:"contractorDetails" api:"required,nullable"`
-	JSON              offerVoidResponseCandidateJSON              `json:"-"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	Email     string                         `json:"email" api:"required" format:"email"`
+	FirstName string                         `json:"firstName" api:"required"`
+	LastName  string                         `json:"lastName" api:"required"`
+	JSON      offerVoidResponseCandidateJSON `json:"-"`
 }
 
 // offerVoidResponseCandidateJSON contains the JSON metadata for the struct [OfferVoidResponseCandidate]
 type offerVoidResponseCandidateJSON struct {
+	ContractorDetails apijson.Field
+	Email             apijson.Field
 	FirstName         apijson.Field
 	LastName          apijson.Field
-	Email             apijson.Field
-	ContractorDetails apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
 }
@@ -1406,19 +1491,19 @@ func (r offerVoidResponseCandidateJSON) RawJSON() string {
 }
 
 type OfferVoidResponsePosition struct {
-	Title       string                           `json:"title" api:"required"`
-	StartDate   string                           `json:"startDate" api:"required"`
 	Country     OfferVoidResponsePositionCountry `json:"country" api:"required"`
 	ScopeOfWork string                           `json:"scopeOfWork" api:"required,nullable"`
+	StartDate   string                           `json:"startDate" api:"required"`
+	Title       string                           `json:"title" api:"required"`
 	JSON        offerVoidResponsePositionJSON    `json:"-"`
 }
 
 // offerVoidResponsePositionJSON contains the JSON metadata for the struct [OfferVoidResponsePosition]
 type offerVoidResponsePositionJSON struct {
-	Title       apijson.Field
-	StartDate   apijson.Field
 	Country     apijson.Field
 	ScopeOfWork apijson.Field
+	StartDate   apijson.Field
+	Title       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1528,18 +1613,20 @@ func (r offerVoidResponseLevelJSON) RawJSON() string {
 }
 
 type OfferVoidResponseCompensation struct {
-	BasePay         OfferVoidResponseCompensationBasePay `json:"basePay" api:"required"`
-	SignOnBonus     PublicMoneyAmount                    `json:"signOnBonus" api:"required,nullable"`
-	RelocationBonus PublicMoneyAmount                    `json:"relocationBonus" api:"required,nullable"`
-	Stock           OfferVoidResponseCompensationStock   `json:"stock" api:"required,nullable"`
-	JSON            offerVoidResponseCompensationJSON    `json:"-"`
+	BasePay OfferVoidResponseCompensationBasePay `json:"basePay" api:"required"`
+	// A monetary amount with its currency and server-formatted display value.
+	RelocationBonus PublicMoneyAmount `json:"relocationBonus" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	SignOnBonus PublicMoneyAmount                  `json:"signOnBonus" api:"required,nullable"`
+	Stock       OfferVoidResponseCompensationStock `json:"stock" api:"required,nullable"`
+	JSON        offerVoidResponseCompensationJSON  `json:"-"`
 }
 
 // offerVoidResponseCompensationJSON contains the JSON metadata for the struct [OfferVoidResponseCompensation]
 type offerVoidResponseCompensationJSON struct {
 	BasePay         apijson.Field
-	SignOnBonus     apijson.Field
 	RelocationBonus apijson.Field
+	SignOnBonus     apijson.Field
 	Stock           apijson.Field
 	raw             string
 	ExtraFields     map[string]apijson.Field
@@ -1560,11 +1647,28 @@ const (
 	OfferExtendDeadlineResponseStatusSent     OfferExtendDeadlineResponseStatus = "sent"
 	OfferExtendDeadlineResponseStatusAccepted OfferExtendDeadlineResponseStatus = "accepted"
 	OfferExtendDeadlineResponseStatusVoid     OfferExtendDeadlineResponseStatus = "void"
+	OfferExtendDeadlineResponseStatusExpired  OfferExtendDeadlineResponseStatus = "expired"
 )
 
 func (r OfferExtendDeadlineResponseStatus) IsKnown() bool {
 	switch r {
-	case OfferExtendDeadlineResponseStatusDraft, OfferExtendDeadlineResponseStatusSent, OfferExtendDeadlineResponseStatusAccepted, OfferExtendDeadlineResponseStatusVoid:
+	case OfferExtendDeadlineResponseStatusDraft, OfferExtendDeadlineResponseStatusSent, OfferExtendDeadlineResponseStatusAccepted, OfferExtendDeadlineResponseStatusVoid, OfferExtendDeadlineResponseStatusExpired:
+		return true
+	}
+	return false
+}
+
+type OfferExtendDeadlineResponseVoidReason string
+
+const (
+	OfferExtendDeadlineResponseVoidReasonReplaced          OfferExtendDeadlineResponseVoidReason = "replaced"
+	OfferExtendDeadlineResponseVoidReasonCandidateDeclined OfferExtendDeadlineResponseVoidReason = "candidate_declined"
+	OfferExtendDeadlineResponseVoidReasonOther             OfferExtendDeadlineResponseVoidReason = "other"
+)
+
+func (r OfferExtendDeadlineResponseVoidReason) IsKnown() bool {
+	switch r {
+	case OfferExtendDeadlineResponseVoidReasonReplaced, OfferExtendDeadlineResponseVoidReasonCandidateDeclined, OfferExtendDeadlineResponseVoidReasonOther:
 		return true
 	}
 	return false
@@ -1587,20 +1691,20 @@ func (r OfferExtendDeadlineResponseWorkerType) IsKnown() bool {
 }
 
 type OfferExtendDeadlineResponseCandidate struct {
-	FirstName string `json:"firstName" api:"required"`
-	LastName  string `json:"lastName" api:"required"`
-	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
-	Email             string                                                `json:"email" api:"required" format:"email"`
 	ContractorDetails OfferExtendDeadlineResponseCandidateContractorDetails `json:"contractorDetails" api:"required,nullable"`
-	JSON              offerExtendDeadlineResponseCandidateJSON              `json:"-"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	Email     string                                   `json:"email" api:"required" format:"email"`
+	FirstName string                                   `json:"firstName" api:"required"`
+	LastName  string                                   `json:"lastName" api:"required"`
+	JSON      offerExtendDeadlineResponseCandidateJSON `json:"-"`
 }
 
 // offerExtendDeadlineResponseCandidateJSON contains the JSON metadata for the struct [OfferExtendDeadlineResponseCandidate]
 type offerExtendDeadlineResponseCandidateJSON struct {
+	ContractorDetails apijson.Field
+	Email             apijson.Field
 	FirstName         apijson.Field
 	LastName          apijson.Field
-	Email             apijson.Field
-	ContractorDetails apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
 }
@@ -1614,19 +1718,19 @@ func (r offerExtendDeadlineResponseCandidateJSON) RawJSON() string {
 }
 
 type OfferExtendDeadlineResponsePosition struct {
-	Title       string                                     `json:"title" api:"required"`
-	StartDate   string                                     `json:"startDate" api:"required"`
 	Country     OfferExtendDeadlineResponsePositionCountry `json:"country" api:"required"`
 	ScopeOfWork string                                     `json:"scopeOfWork" api:"required,nullable"`
+	StartDate   string                                     `json:"startDate" api:"required"`
+	Title       string                                     `json:"title" api:"required"`
 	JSON        offerExtendDeadlineResponsePositionJSON    `json:"-"`
 }
 
 // offerExtendDeadlineResponsePositionJSON contains the JSON metadata for the struct [OfferExtendDeadlineResponsePosition]
 type offerExtendDeadlineResponsePositionJSON struct {
-	Title       apijson.Field
-	StartDate   apijson.Field
 	Country     apijson.Field
 	ScopeOfWork apijson.Field
+	StartDate   apijson.Field
+	Title       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1736,18 +1840,20 @@ func (r offerExtendDeadlineResponseLevelJSON) RawJSON() string {
 }
 
 type OfferExtendDeadlineResponseCompensation struct {
-	BasePay         OfferExtendDeadlineResponseCompensationBasePay `json:"basePay" api:"required"`
-	SignOnBonus     PublicMoneyAmount                              `json:"signOnBonus" api:"required,nullable"`
-	RelocationBonus PublicMoneyAmount                              `json:"relocationBonus" api:"required,nullable"`
-	Stock           OfferExtendDeadlineResponseCompensationStock   `json:"stock" api:"required,nullable"`
-	JSON            offerExtendDeadlineResponseCompensationJSON    `json:"-"`
+	BasePay OfferExtendDeadlineResponseCompensationBasePay `json:"basePay" api:"required"`
+	// A monetary amount with its currency and server-formatted display value.
+	RelocationBonus PublicMoneyAmount `json:"relocationBonus" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	SignOnBonus PublicMoneyAmount                            `json:"signOnBonus" api:"required,nullable"`
+	Stock       OfferExtendDeadlineResponseCompensationStock `json:"stock" api:"required,nullable"`
+	JSON        offerExtendDeadlineResponseCompensationJSON  `json:"-"`
 }
 
 // offerExtendDeadlineResponseCompensationJSON contains the JSON metadata for the struct [OfferExtendDeadlineResponseCompensation]
 type offerExtendDeadlineResponseCompensationJSON struct {
 	BasePay         apijson.Field
-	SignOnBonus     apijson.Field
 	RelocationBonus apijson.Field
+	SignOnBonus     apijson.Field
 	Stock           apijson.Field
 	raw             string
 	ExtraFields     map[string]apijson.Field
@@ -1768,11 +1874,28 @@ const (
 	OfferResendResponseStatusSent     OfferResendResponseStatus = "sent"
 	OfferResendResponseStatusAccepted OfferResendResponseStatus = "accepted"
 	OfferResendResponseStatusVoid     OfferResendResponseStatus = "void"
+	OfferResendResponseStatusExpired  OfferResendResponseStatus = "expired"
 )
 
 func (r OfferResendResponseStatus) IsKnown() bool {
 	switch r {
-	case OfferResendResponseStatusDraft, OfferResendResponseStatusSent, OfferResendResponseStatusAccepted, OfferResendResponseStatusVoid:
+	case OfferResendResponseStatusDraft, OfferResendResponseStatusSent, OfferResendResponseStatusAccepted, OfferResendResponseStatusVoid, OfferResendResponseStatusExpired:
+		return true
+	}
+	return false
+}
+
+type OfferResendResponseVoidReason string
+
+const (
+	OfferResendResponseVoidReasonReplaced          OfferResendResponseVoidReason = "replaced"
+	OfferResendResponseVoidReasonCandidateDeclined OfferResendResponseVoidReason = "candidate_declined"
+	OfferResendResponseVoidReasonOther             OfferResendResponseVoidReason = "other"
+)
+
+func (r OfferResendResponseVoidReason) IsKnown() bool {
+	switch r {
+	case OfferResendResponseVoidReasonReplaced, OfferResendResponseVoidReasonCandidateDeclined, OfferResendResponseVoidReasonOther:
 		return true
 	}
 	return false
@@ -1795,20 +1918,20 @@ func (r OfferResendResponseWorkerType) IsKnown() bool {
 }
 
 type OfferResendResponseCandidate struct {
-	FirstName string `json:"firstName" api:"required"`
-	LastName  string `json:"lastName" api:"required"`
-	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
-	Email             string                                        `json:"email" api:"required" format:"email"`
 	ContractorDetails OfferResendResponseCandidateContractorDetails `json:"contractorDetails" api:"required,nullable"`
-	JSON              offerResendResponseCandidateJSON              `json:"-"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	Email     string                           `json:"email" api:"required" format:"email"`
+	FirstName string                           `json:"firstName" api:"required"`
+	LastName  string                           `json:"lastName" api:"required"`
+	JSON      offerResendResponseCandidateJSON `json:"-"`
 }
 
 // offerResendResponseCandidateJSON contains the JSON metadata for the struct [OfferResendResponseCandidate]
 type offerResendResponseCandidateJSON struct {
+	ContractorDetails apijson.Field
+	Email             apijson.Field
 	FirstName         apijson.Field
 	LastName          apijson.Field
-	Email             apijson.Field
-	ContractorDetails apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
 }
@@ -1822,19 +1945,19 @@ func (r offerResendResponseCandidateJSON) RawJSON() string {
 }
 
 type OfferResendResponsePosition struct {
-	Title       string                             `json:"title" api:"required"`
-	StartDate   string                             `json:"startDate" api:"required"`
 	Country     OfferResendResponsePositionCountry `json:"country" api:"required"`
 	ScopeOfWork string                             `json:"scopeOfWork" api:"required,nullable"`
+	StartDate   string                             `json:"startDate" api:"required"`
+	Title       string                             `json:"title" api:"required"`
 	JSON        offerResendResponsePositionJSON    `json:"-"`
 }
 
 // offerResendResponsePositionJSON contains the JSON metadata for the struct [OfferResendResponsePosition]
 type offerResendResponsePositionJSON struct {
-	Title       apijson.Field
-	StartDate   apijson.Field
 	Country     apijson.Field
 	ScopeOfWork apijson.Field
+	StartDate   apijson.Field
+	Title       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1944,18 +2067,20 @@ func (r offerResendResponseLevelJSON) RawJSON() string {
 }
 
 type OfferResendResponseCompensation struct {
-	BasePay         OfferResendResponseCompensationBasePay `json:"basePay" api:"required"`
-	SignOnBonus     PublicMoneyAmount                      `json:"signOnBonus" api:"required,nullable"`
-	RelocationBonus PublicMoneyAmount                      `json:"relocationBonus" api:"required,nullable"`
-	Stock           OfferResendResponseCompensationStock   `json:"stock" api:"required,nullable"`
-	JSON            offerResendResponseCompensationJSON    `json:"-"`
+	BasePay OfferResendResponseCompensationBasePay `json:"basePay" api:"required"`
+	// A monetary amount with its currency and server-formatted display value.
+	RelocationBonus PublicMoneyAmount `json:"relocationBonus" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	SignOnBonus PublicMoneyAmount                    `json:"signOnBonus" api:"required,nullable"`
+	Stock       OfferResendResponseCompensationStock `json:"stock" api:"required,nullable"`
+	JSON        offerResendResponseCompensationJSON  `json:"-"`
 }
 
 // offerResendResponseCompensationJSON contains the JSON metadata for the struct [OfferResendResponseCompensation]
 type offerResendResponseCompensationJSON struct {
 	BasePay         apijson.Field
-	SignOnBonus     apijson.Field
 	RelocationBonus apijson.Field
+	SignOnBonus     apijson.Field
 	Stock           apijson.Field
 	raw             string
 	ExtraFields     map[string]apijson.Field
@@ -1976,11 +2101,28 @@ const (
 	OfferListResponseDataStatusSent     OfferListResponseDataStatus = "sent"
 	OfferListResponseDataStatusAccepted OfferListResponseDataStatus = "accepted"
 	OfferListResponseDataStatusVoid     OfferListResponseDataStatus = "void"
+	OfferListResponseDataStatusExpired  OfferListResponseDataStatus = "expired"
 )
 
 func (r OfferListResponseDataStatus) IsKnown() bool {
 	switch r {
-	case OfferListResponseDataStatusDraft, OfferListResponseDataStatusSent, OfferListResponseDataStatusAccepted, OfferListResponseDataStatusVoid:
+	case OfferListResponseDataStatusDraft, OfferListResponseDataStatusSent, OfferListResponseDataStatusAccepted, OfferListResponseDataStatusVoid, OfferListResponseDataStatusExpired:
+		return true
+	}
+	return false
+}
+
+type OfferListResponseDataVoidReason string
+
+const (
+	OfferListResponseDataVoidReasonReplaced          OfferListResponseDataVoidReason = "replaced"
+	OfferListResponseDataVoidReasonCandidateDeclined OfferListResponseDataVoidReason = "candidate_declined"
+	OfferListResponseDataVoidReasonOther             OfferListResponseDataVoidReason = "other"
+)
+
+func (r OfferListResponseDataVoidReason) IsKnown() bool {
+	switch r {
+	case OfferListResponseDataVoidReasonReplaced, OfferListResponseDataVoidReasonCandidateDeclined, OfferListResponseDataVoidReasonOther:
 		return true
 	}
 	return false
@@ -2003,20 +2145,20 @@ func (r OfferListResponseDataWorkerType) IsKnown() bool {
 }
 
 type OfferListResponseDataCandidate struct {
-	FirstName string `json:"firstName" api:"required"`
-	LastName  string `json:"lastName" api:"required"`
-	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
-	Email             string                                          `json:"email" api:"required" format:"email"`
 	ContractorDetails OfferListResponseDataCandidateContractorDetails `json:"contractorDetails" api:"required,nullable"`
-	JSON              offerListResponseDataCandidateJSON              `json:"-"`
+	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
+	Email     string                             `json:"email" api:"required" format:"email"`
+	FirstName string                             `json:"firstName" api:"required"`
+	LastName  string                             `json:"lastName" api:"required"`
+	JSON      offerListResponseDataCandidateJSON `json:"-"`
 }
 
 // offerListResponseDataCandidateJSON contains the JSON metadata for the struct [OfferListResponseDataCandidate]
 type offerListResponseDataCandidateJSON struct {
+	ContractorDetails apijson.Field
+	Email             apijson.Field
 	FirstName         apijson.Field
 	LastName          apijson.Field
-	Email             apijson.Field
-	ContractorDetails apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
 }
@@ -2030,19 +2172,19 @@ func (r offerListResponseDataCandidateJSON) RawJSON() string {
 }
 
 type OfferListResponseDataPosition struct {
-	Title       string                               `json:"title" api:"required"`
-	StartDate   string                               `json:"startDate" api:"required"`
 	Country     OfferListResponseDataPositionCountry `json:"country" api:"required"`
 	ScopeOfWork string                               `json:"scopeOfWork" api:"required,nullable"`
+	StartDate   string                               `json:"startDate" api:"required"`
+	Title       string                               `json:"title" api:"required"`
 	JSON        offerListResponseDataPositionJSON    `json:"-"`
 }
 
 // offerListResponseDataPositionJSON contains the JSON metadata for the struct [OfferListResponseDataPosition]
 type offerListResponseDataPositionJSON struct {
-	Title       apijson.Field
-	StartDate   apijson.Field
 	Country     apijson.Field
 	ScopeOfWork apijson.Field
+	StartDate   apijson.Field
+	Title       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2152,18 +2294,20 @@ func (r offerListResponseDataLevelJSON) RawJSON() string {
 }
 
 type OfferListResponseDataCompensation struct {
-	BasePay         OfferListResponseDataCompensationBasePay `json:"basePay" api:"required"`
-	SignOnBonus     PublicMoneyAmount                        `json:"signOnBonus" api:"required,nullable"`
-	RelocationBonus PublicMoneyAmount                        `json:"relocationBonus" api:"required,nullable"`
-	Stock           OfferListResponseDataCompensationStock   `json:"stock" api:"required,nullable"`
-	JSON            offerListResponseDataCompensationJSON    `json:"-"`
+	BasePay OfferListResponseDataCompensationBasePay `json:"basePay" api:"required"`
+	// A monetary amount with its currency and server-formatted display value.
+	RelocationBonus PublicMoneyAmount `json:"relocationBonus" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	SignOnBonus PublicMoneyAmount                      `json:"signOnBonus" api:"required,nullable"`
+	Stock       OfferListResponseDataCompensationStock `json:"stock" api:"required,nullable"`
+	JSON        offerListResponseDataCompensationJSON  `json:"-"`
 }
 
 // offerListResponseDataCompensationJSON contains the JSON metadata for the struct [OfferListResponseDataCompensation]
 type offerListResponseDataCompensationJSON struct {
 	BasePay         apijson.Field
-	SignOnBonus     apijson.Field
 	RelocationBonus apijson.Field
+	SignOnBonus     apijson.Field
 	Stock           apijson.Field
 	raw             string
 	ExtraFields     map[string]apijson.Field
@@ -2480,11 +2624,12 @@ func (r OfferNewResponseLevelTrack) IsKnown() bool {
 
 type OfferNewResponseCompensationBasePay struct {
 	// A monetary amount with its currency and server-formatted display value.
-	Amount       PublicMoneyAmount                        `json:"amount" api:"required"`
-	Basis        OfferNewResponseCompensationBasePayBasis `json:"basis" api:"required"`
-	Type         OfferNewResponseCompensationBasePayType  `json:"type" api:"required,nullable"`
-	VariableRate PublicMoneyAmount                        `json:"variableRate" api:"required,nullable"`
-	JSON         offerNewResponseCompensationBasePayJSON  `json:"-"`
+	Amount PublicMoneyAmount                        `json:"amount" api:"required"`
+	Basis  OfferNewResponseCompensationBasePayBasis `json:"basis" api:"required"`
+	Type   OfferNewResponseCompensationBasePayType  `json:"type" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	VariableRate PublicMoneyAmount                       `json:"variableRate" api:"required,nullable"`
+	JSON         offerNewResponseCompensationBasePayJSON `json:"-"`
 }
 
 // offerNewResponseCompensationBasePayJSON contains the JSON metadata for the struct [OfferNewResponseCompensationBasePay]
@@ -2506,17 +2651,17 @@ func (r offerNewResponseCompensationBasePayJSON) RawJSON() string {
 }
 
 type OfferNewResponseCompensationStock struct {
+	CliffMonths           int64                                 `json:"cliffMonths" api:"required,nullable"`
 	Options               int64                                 `json:"options" api:"required"`
 	VestingScheduleMonths int64                                 `json:"vestingScheduleMonths" api:"required,nullable"`
-	CliffMonths           int64                                 `json:"cliffMonths" api:"required,nullable"`
 	JSON                  offerNewResponseCompensationStockJSON `json:"-"`
 }
 
 // offerNewResponseCompensationStockJSON contains the JSON metadata for the struct [OfferNewResponseCompensationStock]
 type offerNewResponseCompensationStockJSON struct {
+	CliffMonths           apijson.Field
 	Options               apijson.Field
 	VestingScheduleMonths apijson.Field
-	CliffMonths           apijson.Field
 	raw                   string
 	ExtraFields           map[string]apijson.Field
 }
@@ -2832,11 +2977,12 @@ func (r OfferVoidResponseLevelTrack) IsKnown() bool {
 
 type OfferVoidResponseCompensationBasePay struct {
 	// A monetary amount with its currency and server-formatted display value.
-	Amount       PublicMoneyAmount                         `json:"amount" api:"required"`
-	Basis        OfferVoidResponseCompensationBasePayBasis `json:"basis" api:"required"`
-	Type         OfferVoidResponseCompensationBasePayType  `json:"type" api:"required,nullable"`
-	VariableRate PublicMoneyAmount                         `json:"variableRate" api:"required,nullable"`
-	JSON         offerVoidResponseCompensationBasePayJSON  `json:"-"`
+	Amount PublicMoneyAmount                         `json:"amount" api:"required"`
+	Basis  OfferVoidResponseCompensationBasePayBasis `json:"basis" api:"required"`
+	Type   OfferVoidResponseCompensationBasePayType  `json:"type" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	VariableRate PublicMoneyAmount                        `json:"variableRate" api:"required,nullable"`
+	JSON         offerVoidResponseCompensationBasePayJSON `json:"-"`
 }
 
 // offerVoidResponseCompensationBasePayJSON contains the JSON metadata for the struct [OfferVoidResponseCompensationBasePay]
@@ -2858,17 +3004,17 @@ func (r offerVoidResponseCompensationBasePayJSON) RawJSON() string {
 }
 
 type OfferVoidResponseCompensationStock struct {
+	CliffMonths           int64                                  `json:"cliffMonths" api:"required,nullable"`
 	Options               int64                                  `json:"options" api:"required"`
 	VestingScheduleMonths int64                                  `json:"vestingScheduleMonths" api:"required,nullable"`
-	CliffMonths           int64                                  `json:"cliffMonths" api:"required,nullable"`
 	JSON                  offerVoidResponseCompensationStockJSON `json:"-"`
 }
 
 // offerVoidResponseCompensationStockJSON contains the JSON metadata for the struct [OfferVoidResponseCompensationStock]
 type offerVoidResponseCompensationStockJSON struct {
+	CliffMonths           apijson.Field
 	Options               apijson.Field
 	VestingScheduleMonths apijson.Field
-	CliffMonths           apijson.Field
 	raw                   string
 	ExtraFields           map[string]apijson.Field
 }
@@ -3184,11 +3330,12 @@ func (r OfferExtendDeadlineResponseLevelTrack) IsKnown() bool {
 
 type OfferExtendDeadlineResponseCompensationBasePay struct {
 	// A monetary amount with its currency and server-formatted display value.
-	Amount       PublicMoneyAmount                                   `json:"amount" api:"required"`
-	Basis        OfferExtendDeadlineResponseCompensationBasePayBasis `json:"basis" api:"required"`
-	Type         OfferExtendDeadlineResponseCompensationBasePayType  `json:"type" api:"required,nullable"`
-	VariableRate PublicMoneyAmount                                   `json:"variableRate" api:"required,nullable"`
-	JSON         offerExtendDeadlineResponseCompensationBasePayJSON  `json:"-"`
+	Amount PublicMoneyAmount                                   `json:"amount" api:"required"`
+	Basis  OfferExtendDeadlineResponseCompensationBasePayBasis `json:"basis" api:"required"`
+	Type   OfferExtendDeadlineResponseCompensationBasePayType  `json:"type" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	VariableRate PublicMoneyAmount                                  `json:"variableRate" api:"required,nullable"`
+	JSON         offerExtendDeadlineResponseCompensationBasePayJSON `json:"-"`
 }
 
 // offerExtendDeadlineResponseCompensationBasePayJSON contains the JSON metadata for the struct [OfferExtendDeadlineResponseCompensationBasePay]
@@ -3210,17 +3357,17 @@ func (r offerExtendDeadlineResponseCompensationBasePayJSON) RawJSON() string {
 }
 
 type OfferExtendDeadlineResponseCompensationStock struct {
+	CliffMonths           int64                                            `json:"cliffMonths" api:"required,nullable"`
 	Options               int64                                            `json:"options" api:"required"`
 	VestingScheduleMonths int64                                            `json:"vestingScheduleMonths" api:"required,nullable"`
-	CliffMonths           int64                                            `json:"cliffMonths" api:"required,nullable"`
 	JSON                  offerExtendDeadlineResponseCompensationStockJSON `json:"-"`
 }
 
 // offerExtendDeadlineResponseCompensationStockJSON contains the JSON metadata for the struct [OfferExtendDeadlineResponseCompensationStock]
 type offerExtendDeadlineResponseCompensationStockJSON struct {
+	CliffMonths           apijson.Field
 	Options               apijson.Field
 	VestingScheduleMonths apijson.Field
-	CliffMonths           apijson.Field
 	raw                   string
 	ExtraFields           map[string]apijson.Field
 }
@@ -3536,11 +3683,12 @@ func (r OfferResendResponseLevelTrack) IsKnown() bool {
 
 type OfferResendResponseCompensationBasePay struct {
 	// A monetary amount with its currency and server-formatted display value.
-	Amount       PublicMoneyAmount                           `json:"amount" api:"required"`
-	Basis        OfferResendResponseCompensationBasePayBasis `json:"basis" api:"required"`
-	Type         OfferResendResponseCompensationBasePayType  `json:"type" api:"required,nullable"`
-	VariableRate PublicMoneyAmount                           `json:"variableRate" api:"required,nullable"`
-	JSON         offerResendResponseCompensationBasePayJSON  `json:"-"`
+	Amount PublicMoneyAmount                           `json:"amount" api:"required"`
+	Basis  OfferResendResponseCompensationBasePayBasis `json:"basis" api:"required"`
+	Type   OfferResendResponseCompensationBasePayType  `json:"type" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	VariableRate PublicMoneyAmount                          `json:"variableRate" api:"required,nullable"`
+	JSON         offerResendResponseCompensationBasePayJSON `json:"-"`
 }
 
 // offerResendResponseCompensationBasePayJSON contains the JSON metadata for the struct [OfferResendResponseCompensationBasePay]
@@ -3562,17 +3710,17 @@ func (r offerResendResponseCompensationBasePayJSON) RawJSON() string {
 }
 
 type OfferResendResponseCompensationStock struct {
+	CliffMonths           int64                                    `json:"cliffMonths" api:"required,nullable"`
 	Options               int64                                    `json:"options" api:"required"`
 	VestingScheduleMonths int64                                    `json:"vestingScheduleMonths" api:"required,nullable"`
-	CliffMonths           int64                                    `json:"cliffMonths" api:"required,nullable"`
 	JSON                  offerResendResponseCompensationStockJSON `json:"-"`
 }
 
 // offerResendResponseCompensationStockJSON contains the JSON metadata for the struct [OfferResendResponseCompensationStock]
 type offerResendResponseCompensationStockJSON struct {
+	CliffMonths           apijson.Field
 	Options               apijson.Field
 	VestingScheduleMonths apijson.Field
-	CliffMonths           apijson.Field
 	raw                   string
 	ExtraFields           map[string]apijson.Field
 }
@@ -3888,11 +4036,12 @@ func (r OfferListResponseDataLevelTrack) IsKnown() bool {
 
 type OfferListResponseDataCompensationBasePay struct {
 	// A monetary amount with its currency and server-formatted display value.
-	Amount       PublicMoneyAmount                             `json:"amount" api:"required"`
-	Basis        OfferListResponseDataCompensationBasePayBasis `json:"basis" api:"required"`
-	Type         OfferListResponseDataCompensationBasePayType  `json:"type" api:"required,nullable"`
-	VariableRate PublicMoneyAmount                             `json:"variableRate" api:"required,nullable"`
-	JSON         offerListResponseDataCompensationBasePayJSON  `json:"-"`
+	Amount PublicMoneyAmount                             `json:"amount" api:"required"`
+	Basis  OfferListResponseDataCompensationBasePayBasis `json:"basis" api:"required"`
+	Type   OfferListResponseDataCompensationBasePayType  `json:"type" api:"required,nullable"`
+	// A monetary amount with its currency and server-formatted display value.
+	VariableRate PublicMoneyAmount                            `json:"variableRate" api:"required,nullable"`
+	JSON         offerListResponseDataCompensationBasePayJSON `json:"-"`
 }
 
 // offerListResponseDataCompensationBasePayJSON contains the JSON metadata for the struct [OfferListResponseDataCompensationBasePay]
@@ -3914,17 +4063,17 @@ func (r offerListResponseDataCompensationBasePayJSON) RawJSON() string {
 }
 
 type OfferListResponseDataCompensationStock struct {
+	CliffMonths           int64                                      `json:"cliffMonths" api:"required,nullable"`
 	Options               int64                                      `json:"options" api:"required"`
 	VestingScheduleMonths int64                                      `json:"vestingScheduleMonths" api:"required,nullable"`
-	CliffMonths           int64                                      `json:"cliffMonths" api:"required,nullable"`
 	JSON                  offerListResponseDataCompensationStockJSON `json:"-"`
 }
 
 // offerListResponseDataCompensationStockJSON contains the JSON metadata for the struct [OfferListResponseDataCompensationStock]
 type offerListResponseDataCompensationStockJSON struct {
+	CliffMonths           apijson.Field
 	Options               apijson.Field
 	VestingScheduleMonths apijson.Field
-	CliffMonths           apijson.Field
 	raw                   string
 	ExtraFields           map[string]apijson.Field
 }
