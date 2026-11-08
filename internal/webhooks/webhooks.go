@@ -30,6 +30,47 @@ const secretPrefix = "whsec_"
 // signatureVersion marks the HMAC scheme of one entry in the signature header.
 const signatureVersion = "v1"
 
+// The reasons a delivery is refused. Every error Verify returns for a refused
+// delivery matches exactly one of them, so callers branch with errors.Is. They
+// carry the names and messages of the Standard Webhooks Go library's sentinels,
+// which SDKs that verified through that library returned wrapped; the SDK
+// package re-exports them, because callers cannot import an internal package.
+var (
+	ErrRequiredHeaders     = errors.New("missing required headers")
+	ErrInvalidHeaders      = errors.New("invalid signature headers")
+	ErrNoMatchingSignature = errors.New("no matching signature found")
+	ErrMessageTooOld       = errors.New("message timestamp too old")
+	ErrMessageTooNew       = errors.New("message timestamp too new")
+)
+
+// verificationError is a refused delivery: its message says what was wrong in
+// the Standard Webhooks library's words, errors.Is matches the sentinel naming
+// the reason, and it unwraps to the error that caused it, when there is one.
+type verificationError struct {
+	message  string
+	sentinel error
+	cause    error
+}
+
+// refused builds the error for a delivery refused for the sentinel's reason,
+// worded as the Standard Webhooks library words its own: detail after an
+// "unable to verify payload" prefix.
+func refused(sentinel error, cause error, detail string) error {
+	return &verificationError{message: "unable to verify payload, err: " + detail, sentinel: sentinel, cause: cause}
+}
+
+// Error returns the message, worded as the library's.
+func (e *verificationError) Error() string { return e.message }
+
+// Is reports whether target is the sentinel naming this refusal, which is how
+// errors.Is matches it.
+func (e *verificationError) Is(target error) bool { return target == e.sentinel }
+
+// Unwrap returns the error that caused the refusal, if any, so errors.Unwrap
+// and errors.As still reach a timestamp's *strconv.NumError as they did when
+// it was wrapped with %w.
+func (e *verificationError) Unwrap() error { return e.cause }
+
 // The standard header names a delivery carries its id, timestamp and
 // signatures in.
 const (
@@ -55,13 +96,14 @@ func Verify(payload []byte, headers http.Header, secret string, now time.Time, t
 	timestamp := headers.Get(timestampHeader)
 	signatures := headers.Get(signatureHeader)
 	if id == "" || timestamp == "" || signatures == "" {
-		return fmt.Errorf("webhooks: delivery is missing the %s, %s or %s header", idHeader, timestampHeader, signatureHeader)
+		return refused(ErrRequiredHeaders, nil, ErrRequiredHeaders.Error())
 	}
 
 	sentAt, err := strconv.ParseInt(timestamp, 10, 64)
 	if err != nil {
-		// The wrapped strconv error already quotes the header's value.
-		return fmt.Errorf("webhooks: %s header is not a Unix timestamp: %w", timestampHeader, err)
+		// Worded as the library joins them: the strconv error, which quotes the
+		// header's value, then the sentinel's message on its own line.
+		return refused(ErrInvalidHeaders, err, "unable to parse timestamp header, err: "+errors.Join(err, ErrInvalidHeaders).Error())
 	}
 	if err := checkFreshness(time.Unix(sentAt, 0), now, tolerance); err != nil {
 		return err
@@ -72,7 +114,7 @@ func Verify(payload []byte, headers http.Header, secret string, now time.Time, t
 	// of "1614265330".
 	expected := sign(key, id, strconv.FormatInt(sentAt, 10), payload)
 	if !anySignatureMatches(signatures, expected) {
-		return errors.New("webhooks: no v1 signature matches the payload")
+		return refused(ErrNoMatchingSignature, nil, ErrNoMatchingSignature.Error())
 	}
 	return nil
 }
@@ -86,9 +128,9 @@ func checkFreshness(sentAt time.Time, now time.Time, tolerance time.Duration) er
 	}
 	switch {
 	case now.Sub(sentAt) > tolerance:
-		return fmt.Errorf("webhooks: delivery timestamp is more than %s in the past", tolerance)
+		return refused(ErrMessageTooOld, nil, ErrMessageTooOld.Error())
 	case sentAt.Sub(now) > tolerance:
-		return fmt.Errorf("webhooks: delivery timestamp is more than %s in the future", tolerance)
+		return refused(ErrMessageTooNew, nil, ErrMessageTooNew.Error())
 	}
 	return nil
 }
@@ -130,12 +172,12 @@ func Sign(id string, timestamp string, payload []byte, secret string) (string, e
 func decodeSecret(secret string) ([]byte, error) {
 	key, err := base64.StdEncoding.DecodeString(strings.TrimPrefix(secret, secretPrefix))
 	if err != nil {
-		return nil, fmt.Errorf("webhooks: signing secret is not valid base64: %w", err)
+		return nil, fmt.Errorf("unable to create webhook, err: %w", err)
 	}
 	// A bare "whsec_" decodes to an empty key, and an HMAC under an empty key
 	// is one anyone can compute, so refuse it rather than accept forgeries.
 	if len(key) == 0 {
-		return nil, errors.New("webhooks: signing secret is empty")
+		return nil, errors.New("unable to create webhook, err: signing secret is empty")
 	}
 	return key, nil
 }
