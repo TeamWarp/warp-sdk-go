@@ -63,7 +63,7 @@ func (r *BenefitRetirementPlanService) List(ctx context.Context, query BenefitRe
 	return res, err
 }
 
-// Create a retirement plan for a company on the manual retirement channel.
+// Create a retirement plan for a company on the manual or PayKonnect retirement channel.
 //
 // Parameters:
 //
@@ -125,7 +125,7 @@ func (r *BenefitRetirementPlanService) Get(ctx context.Context, id string, opts 
 	return res, err
 }
 
-// Update a retirement plan for a company on the manual retirement channel.
+// Update a retirement plan for a company on the manual or PayKonnect retirement channel.
 //
 // Parameters:
 //
@@ -166,7 +166,7 @@ type PublicRetirementPlan struct {
 	// The company-facing plan name.
 	Name string `json:"name" api:"required"`
 	// The system administering the plan. Manual plans are administered by the company
-	// outside a connected provider.
+	// outside a connected provider. PayKonnect plans are kept in sync by PayKonnect.
 	Provider PublicRetirementPlanProvider `json:"provider" api:"required"`
 	// The public lifecycle status of a retirement plan.
 	Status PublicRetirementPlanStatus `json:"status" api:"required"`
@@ -229,7 +229,7 @@ type PublicRetirementPlan1 struct {
 	// The company-facing plan name.
 	Name string `json:"name" api:"required"`
 	// The system administering the plan. Manual plans are administered by the company
-	// outside a connected provider.
+	// outside a connected provider. PayKonnect plans are kept in sync by PayKonnect.
 	Provider PublicRetirementPlanProvider `json:"provider" api:"required"`
 	// The public lifecycle status of a retirement plan.
 	Status PublicRetirementPlanStatus `json:"status" api:"required"`
@@ -289,11 +289,12 @@ const (
 	PublicRetirementPlanProviderManual        PublicRetirementPlanProvider = "manual"
 	PublicRetirementPlanProviderHumanInterest PublicRetirementPlanProvider = "human_interest"
 	PublicRetirementPlanProviderAccrue        PublicRetirementPlanProvider = "accrue"
+	PublicRetirementPlanProviderPaykonnect    PublicRetirementPlanProvider = "paykonnect"
 )
 
 func (r PublicRetirementPlanProvider) IsKnown() bool {
 	switch r {
-	case PublicRetirementPlanProviderManual, PublicRetirementPlanProviderHumanInterest, PublicRetirementPlanProviderAccrue:
+	case PublicRetirementPlanProviderManual, PublicRetirementPlanProviderHumanInterest, PublicRetirementPlanProviderAccrue, PublicRetirementPlanProviderPaykonnect:
 		return true
 	}
 	return false
