@@ -153,11 +153,12 @@ const (
 	PublicHealthPlanTypeAccident            PublicHealthPlanType = "accident"
 	PublicHealthPlanTypeCriticalIllness     PublicHealthPlanType = "critical_illness"
 	PublicHealthPlanTypeHospital            PublicHealthPlanType = "hospital"
+	PublicHealthPlanTypeVoluntaryLife       PublicHealthPlanType = "voluntary_life"
 )
 
 func (r PublicHealthPlanType) IsKnown() bool {
 	switch r {
-	case PublicHealthPlanTypeMedical, PublicHealthPlanTypeDental, PublicHealthPlanTypeVision, PublicHealthPlanTypeLife, PublicHealthPlanTypeShortTermDisability, PublicHealthPlanTypeLongTermDisability, PublicHealthPlanTypeAccident, PublicHealthPlanTypeCriticalIllness, PublicHealthPlanTypeHospital:
+	case PublicHealthPlanTypeMedical, PublicHealthPlanTypeDental, PublicHealthPlanTypeVision, PublicHealthPlanTypeLife, PublicHealthPlanTypeShortTermDisability, PublicHealthPlanTypeLongTermDisability, PublicHealthPlanTypeAccident, PublicHealthPlanTypeCriticalIllness, PublicHealthPlanTypeHospital, PublicHealthPlanTypeVoluntaryLife:
 		return true
 	}
 	return false
@@ -252,11 +253,12 @@ const (
 	BenefitHealthPlanListParamsTypeAccident            BenefitHealthPlanListParamsType = "accident"
 	BenefitHealthPlanListParamsTypeCriticalIllness     BenefitHealthPlanListParamsType = "critical_illness"
 	BenefitHealthPlanListParamsTypeHospital            BenefitHealthPlanListParamsType = "hospital"
+	BenefitHealthPlanListParamsTypeVoluntaryLife       BenefitHealthPlanListParamsType = "voluntary_life"
 )
 
 func (r BenefitHealthPlanListParamsType) IsKnown() bool {
 	switch r {
-	case BenefitHealthPlanListParamsTypeMedical, BenefitHealthPlanListParamsTypeDental, BenefitHealthPlanListParamsTypeVision, BenefitHealthPlanListParamsTypeLife, BenefitHealthPlanListParamsTypeShortTermDisability, BenefitHealthPlanListParamsTypeLongTermDisability, BenefitHealthPlanListParamsTypeAccident, BenefitHealthPlanListParamsTypeCriticalIllness, BenefitHealthPlanListParamsTypeHospital:
+	case BenefitHealthPlanListParamsTypeMedical, BenefitHealthPlanListParamsTypeDental, BenefitHealthPlanListParamsTypeVision, BenefitHealthPlanListParamsTypeLife, BenefitHealthPlanListParamsTypeShortTermDisability, BenefitHealthPlanListParamsTypeLongTermDisability, BenefitHealthPlanListParamsTypeAccident, BenefitHealthPlanListParamsTypeCriticalIllness, BenefitHealthPlanListParamsTypeHospital, BenefitHealthPlanListParamsTypeVoluntaryLife:
 		return true
 	}
 	return false
