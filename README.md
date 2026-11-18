@@ -1,8 +1,8 @@
-# warp
+# Warp
 
-This library provides convenient access to the warp REST API from Go.
+This library provides convenient access to the Warp REST API from Go.
 
-The full API of this library can be found in [api.md](./api.md).
+The REST API documentation can be found on [docs.warp.co](https://docs.warp.co). The full API of this library can be found in [api.md](./api.md).
 
 <br />
 
@@ -16,6 +16,7 @@ The full API of this library can be found in [api.md](./api.md).
 - [Client Options](#client-options)
 - [Request Options](#request-options)
 - [Retries and Timeouts](#retries-and-timeouts)
+- [Webhooks](#webhooks)
 - [Helpers](#helpers)
 - [Logging](#logging)
 - [Requirements](#requirements)
@@ -73,7 +74,7 @@ Pass credentials to the generated client constructor. Environment variables are 
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
-| `option.WithAPIKey` | `string \| provider` | - | The API key for header authorization. Defaults to WARP_API_KEY. |
+| `option.WithAPIKey` | `func(string) option.RequestOption` | - | The API key for header authorization. Defaults to WARP_API_KEY. |
 
 Declared schemes:
 
@@ -93,7 +94,7 @@ healthPlan, err := client.Benefits.HealthPlans.List(context.Background(), sdk.Be
 if err != nil {
 	var apiErr *sdk.Error
 	if errors.As(err, &apiErr) {
-		fmt.Println(apiErr.StatusCode, apiErr.RawJSON())
+		fmt.Println(apiErr.StatusCode, apiErr.JSON.RawJSON())
 	}
 	panic(err)
 }
@@ -148,10 +149,31 @@ Generated clients support request timeouts and retry temporary failures such as 
 
 <br />
 
+## Webhooks
+
+The webhook helper verifies the signature of each delivery your server receives, then decodes its body into a typed event. Pass it the request body exactly as it arrived, before any JSON parsing, together with the request headers: the signature covers the raw body, so one that was parsed and re-serialized fails verification. A delivery whose signature does not verify is rejected before it is decoded.
+
+```go
+// `payload` is the raw request body; `r` is the *http.Request it arrived on.
+event, err := client.Webhooks.Unwrap(payload, r.Header)
+if err != nil {
+	// The signature did not verify, or the payload did not decode.
+}
+```
+
+The signing secret comes from the client's `option.WithWebhookSecret` option, which defaults to the `WARP_WEBHOOK_SECRET` environment variable. Pass `option.WithWebhookSecret(secret)` to use a different secret for one call.
+
+The same resource also has:
+
+- `client.Webhooks.VerifySignature(payload, r.Header, secret, time.Now())` checks a delivery's signature, and fails when it does not verify.
+- `client.Webhooks.ParseUnsafe(payload)` decodes a body into a typed event without checking its signature. Use it only for a body verified elsewhere, or in tests.
+
+<br />
+
 ## Helpers
 
 - Pass `option.WithResponseInto(&raw)` to capture the underlying `*http.Response` for a request.
-- Use the generated `String`, `Int`, `Bool`, `Float`, `Time`, `Opt`, and `Ptr` helpers when setting optional params.
+- Use the generated `F`, `Null`, `Raw`, `Int`, `String`, `Float`, `Bool`, and `FileParam` helpers when setting optional params.
 
 <br />
 
