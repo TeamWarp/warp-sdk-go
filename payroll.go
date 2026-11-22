@@ -331,11 +331,13 @@ const (
 	PublicPayrollSubtypeDismissal     PublicPayrollSubtype = "dismissal"
 	PublicPayrollSubtypeReimbursement PublicPayrollSubtype = "reimbursement"
 	PublicPayrollSubtypeManual        PublicPayrollSubtype = "manual"
+	PublicPayrollSubtypeBalancing     PublicPayrollSubtype = "balancing"
+	PublicPayrollSubtypeAmendment     PublicPayrollSubtype = "amendment"
 )
 
 func (r PublicPayrollSubtype) IsKnown() bool {
 	switch r {
-	case PublicPayrollSubtypeRegular, PublicPayrollSubtypeOffCycle, PublicPayrollSubtypeBonus, PublicPayrollSubtypeInvoice, PublicPayrollSubtypeContractor, PublicPayrollSubtypeDismissal, PublicPayrollSubtypeReimbursement, PublicPayrollSubtypeManual:
+	case PublicPayrollSubtypeRegular, PublicPayrollSubtypeOffCycle, PublicPayrollSubtypeBonus, PublicPayrollSubtypeInvoice, PublicPayrollSubtypeContractor, PublicPayrollSubtypeDismissal, PublicPayrollSubtypeReimbursement, PublicPayrollSubtypeManual, PublicPayrollSubtypeBalancing, PublicPayrollSubtypeAmendment:
 		return true
 	}
 	return false
