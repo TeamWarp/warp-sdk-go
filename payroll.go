@@ -484,11 +484,11 @@ func (r PublicPayFrequency) IsKnown() bool {
 type PublicPayrollDetailTotals struct {
 	// The provider-reported amount the employer must fund for the payroll, when
 	// available.
-	CashRequirement PublicCurrencyMoneyAmount11 `json:"cashRequirement" api:"required,nullable"`
+	CashRequirement PublicPayrollDetailTotalsCashRequirement `json:"cashRequirement" api:"required,nullable"`
 	// Amounts the employer pays toward worker benefits in addition to gross pay.
-	EmployerBenefitContributions PublicCurrencyMoneyAmount8 `json:"employerBenefitContributions" api:"required"`
+	EmployerBenefitContributions PublicCurrencyMoneyAmount5 `json:"employerBenefitContributions" api:"required"`
 	// Payroll taxes paid by the employer in addition to gross pay.
-	EmployerTaxes PublicCurrencyMoneyAmount4 `json:"employerTaxes" api:"required"`
+	EmployerTaxes PublicPayrollDetailTotalsEmployerTaxes `json:"employerTaxes" api:"required"`
 	// Gross earnings before worker taxes, deductions, and benefit contributions.
 	// Reimbursements are reported separately.
 	GrossPay PublicCurrencyMoneyAmount `json:"grossPay" api:"required"`
@@ -496,25 +496,25 @@ type PublicPayrollDetailTotals struct {
 	// reimbursements, less worker taxes, deductions, and benefit contributions. It
 	// excludes payment execution fees and may differ from recomputed totals because of
 	// provider and FX rounding. Null when any paycheck net pay is not yet known.
-	NetPay PublicCurrencyMoneyAmount1 `json:"netPay" api:"required,nullable"`
+	NetPay PublicPayrollDetailTotalsNetPay `json:"netPay" api:"required,nullable"`
 	// Non-benefit amounts deducted from worker pay after taxes, reducing net pay.
-	PostTaxDeductions PublicCurrencyMoneyAmount6 `json:"postTaxDeductions" api:"required"`
+	PostTaxDeductions PublicCurrencyMoneyAmount3 `json:"postTaxDeductions" api:"required"`
 	// Non-benefit amounts deducted from worker pay before taxes, reducing taxable pay
 	// and net pay.
-	PreTaxDeductions PublicCurrencyMoneyAmount5 `json:"preTaxDeductions" api:"required"`
+	PreTaxDeductions PublicCurrencyMoneyAmount2 `json:"preTaxDeductions" api:"required"`
 	// Amounts reimbursed to workers in addition to gross pay. Reimbursements increase
 	// net pay and employer cost.
-	Reimbursements PublicCurrencyMoneyAmount2 `json:"reimbursements" api:"required"`
+	Reimbursements PublicCurrencyMoneyAmount1 `json:"reimbursements" api:"required"`
 	// The employer's total payroll cost: gross pay, reimbursements, employer taxes,
 	// employer benefit contributions, and transaction fees.
-	TotalCost PublicCurrencyMoneyAmount10 `json:"totalCost" api:"required"`
+	TotalCost PublicPayrollDetailTotalsTotalCost `json:"totalCost" api:"required"`
 	// Banking and transaction fees paid by the employer to fund and pay the payroll.
-	TransactionFees PublicCurrencyMoneyAmount9 `json:"transactionFees" api:"required"`
+	TransactionFees PublicCurrencyMoneyAmount6 `json:"transactionFees" api:"required"`
 	// Amounts workers pay toward benefits, deducted from their pay.
-	WorkerBenefitContributions PublicCurrencyMoneyAmount7 `json:"workerBenefitContributions" api:"required"`
+	WorkerBenefitContributions PublicCurrencyMoneyAmount4 `json:"workerBenefitContributions" api:"required"`
 	// Payroll taxes withheld from worker pay, reducing net pay.
-	WorkerTaxes PublicCurrencyMoneyAmount3    `json:"workerTaxes" api:"required"`
-	JSON        publicPayrollDetailTotalsJSON `json:"-"`
+	WorkerTaxes PublicPayrollDetailTotalsWorkerTaxes `json:"workerTaxes" api:"required"`
+	JSON        publicPayrollDetailTotalsJSON        `json:"-"`
 }
 
 // publicPayrollDetailTotalsJSON contains the JSON metadata for the struct [PublicPayrollDetailTotals]
@@ -721,9 +721,9 @@ func (r publicPaycheckDetailTotalsJSON) RawJSON() string {
 
 type PublicFundingPayrollTotals struct {
 	// Amounts the employer pays toward worker benefits in addition to gross pay.
-	EmployerBenefitContributions PublicCurrencyMoneyAmount8 `json:"employerBenefitContributions" api:"required"`
+	EmployerBenefitContributions PublicCurrencyMoneyAmount5 `json:"employerBenefitContributions" api:"required"`
 	// Payroll taxes paid by the employer in addition to gross pay.
-	EmployerTaxes PublicCurrencyMoneyAmount4 `json:"employerTaxes" api:"required"`
+	EmployerTaxes PublicFundingPayrollTotalsEmployerTaxes `json:"employerTaxes" api:"required"`
 	// Gross earnings before worker taxes, deductions, and benefit contributions.
 	// Reimbursements are reported separately.
 	GrossPay PublicCurrencyMoneyAmount `json:"grossPay" api:"required"`
@@ -731,25 +731,25 @@ type PublicFundingPayrollTotals struct {
 	// reimbursements, less worker taxes, deductions, and benefit contributions. It
 	// excludes payment execution fees and may differ from recomputed totals because of
 	// provider and FX rounding. Null when any paycheck net pay is not yet known.
-	NetPay PublicCurrencyMoneyAmount1 `json:"netPay" api:"required,nullable"`
+	NetPay PublicFundingPayrollTotalsNetPay `json:"netPay" api:"required,nullable"`
 	// Non-benefit amounts deducted from worker pay after taxes, reducing net pay.
-	PostTaxDeductions PublicCurrencyMoneyAmount6 `json:"postTaxDeductions" api:"required"`
+	PostTaxDeductions PublicCurrencyMoneyAmount3 `json:"postTaxDeductions" api:"required"`
 	// Non-benefit amounts deducted from worker pay before taxes, reducing taxable pay
 	// and net pay.
-	PreTaxDeductions PublicCurrencyMoneyAmount5 `json:"preTaxDeductions" api:"required"`
+	PreTaxDeductions PublicCurrencyMoneyAmount2 `json:"preTaxDeductions" api:"required"`
 	// Amounts reimbursed to workers in addition to gross pay. Reimbursements increase
 	// net pay and employer cost.
-	Reimbursements PublicCurrencyMoneyAmount2 `json:"reimbursements" api:"required"`
+	Reimbursements PublicCurrencyMoneyAmount1 `json:"reimbursements" api:"required"`
 	// The employer's total payroll cost: gross pay, reimbursements, employer taxes,
 	// employer benefit contributions, and transaction fees.
-	TotalCost PublicCurrencyMoneyAmount10 `json:"totalCost" api:"required"`
+	TotalCost PublicFundingPayrollTotalsTotalCost `json:"totalCost" api:"required"`
 	// Banking and transaction fees paid by the employer to fund and pay the payroll.
-	TransactionFees PublicCurrencyMoneyAmount9 `json:"transactionFees" api:"required"`
+	TransactionFees PublicCurrencyMoneyAmount6 `json:"transactionFees" api:"required"`
 	// Amounts workers pay toward benefits, deducted from their pay.
-	WorkerBenefitContributions PublicCurrencyMoneyAmount7 `json:"workerBenefitContributions" api:"required"`
+	WorkerBenefitContributions PublicCurrencyMoneyAmount4 `json:"workerBenefitContributions" api:"required"`
 	// Payroll taxes withheld from worker pay, reducing net pay.
-	WorkerTaxes PublicCurrencyMoneyAmount3     `json:"workerTaxes" api:"required"`
-	JSON        publicFundingPayrollTotalsJSON `json:"-"`
+	WorkerTaxes PublicFundingPayrollTotalsWorkerTaxes `json:"workerTaxes" api:"required"`
+	JSON        publicFundingPayrollTotalsJSON        `json:"-"`
 }
 
 // publicFundingPayrollTotalsJSON contains the JSON metadata for the struct [PublicFundingPayrollTotals]
@@ -1090,31 +1090,31 @@ func (r publicPaycheckSummaryTotalsJSON) RawJSON() string {
 type PublicPaycheckCurrencyTotals struct {
 	Currency interface{} `json:"currency" api:"required"`
 	// Amounts the employer pays toward the worker's benefits in addition to gross pay.
-	EmployerBenefitContributions PublicCurrencyMoneyAmount20 `json:"employerBenefitContributions" api:"required"`
+	EmployerBenefitContributions PublicCurrencyMoneyAmount12 `json:"employerBenefitContributions" api:"required"`
 	// Payroll taxes paid by the employer in addition to gross pay.
-	EmployerTaxes PublicCurrencyMoneyAmount16 `json:"employerTaxes" api:"required"`
+	EmployerTaxes PublicPaycheckCurrencyTotalsEmployerTaxes `json:"employerTaxes" api:"required"`
 	// Gross earnings before worker taxes, deductions, and benefit contributions.
 	// Reimbursements are reported separately.
-	GrossPay PublicCurrencyMoneyAmount13 `json:"grossPay" api:"required"`
+	GrossPay PublicCurrencyMoneyAmount7 `json:"grossPay" api:"required"`
 	// Calculated net pay after reimbursements, worker taxes, deductions, and benefit
 	// contributions. It excludes payment execution fees and may differ from the amount
 	// the worker ultimately receives. Null in both calculation and funding currencies
 	// until net pay is known in both.
-	NetPay PublicCurrencyMoneyAmount12 `json:"netPay" api:"required,nullable"`
+	NetPay PublicPaycheckCurrencyTotalsNetPay `json:"netPay" api:"required,nullable"`
 	// Non-benefit amounts deducted from the worker's pay after taxes, reducing net
 	// pay.
-	PostTaxDeductions PublicCurrencyMoneyAmount18 `json:"postTaxDeductions" api:"required"`
+	PostTaxDeductions PublicCurrencyMoneyAmount10 `json:"postTaxDeductions" api:"required"`
 	// Non-benefit amounts deducted from the worker's pay before taxes, reducing
 	// taxable pay and net pay.
-	PreTaxDeductions PublicCurrencyMoneyAmount17 `json:"preTaxDeductions" api:"required"`
+	PreTaxDeductions PublicCurrencyMoneyAmount9 `json:"preTaxDeductions" api:"required"`
 	// Amounts reimbursed to the worker in addition to gross pay. Reimbursements
 	// increase net pay and employer cost.
-	Reimbursements PublicCurrencyMoneyAmount14 `json:"reimbursements" api:"required"`
+	Reimbursements PublicCurrencyMoneyAmount8 `json:"reimbursements" api:"required"`
 	// Amounts the worker pays toward benefits, deducted from their pay.
-	WorkerBenefitContributions PublicCurrencyMoneyAmount19 `json:"workerBenefitContributions" api:"required"`
+	WorkerBenefitContributions PublicCurrencyMoneyAmount11 `json:"workerBenefitContributions" api:"required"`
 	// Payroll taxes withheld from the worker's pay, reducing net pay.
-	WorkerTaxes PublicCurrencyMoneyAmount15      `json:"workerTaxes" api:"required"`
-	JSON        publicPaycheckCurrencyTotalsJSON `json:"-"`
+	WorkerTaxes PublicPaycheckCurrencyTotalsWorkerTaxes `json:"workerTaxes" api:"required"`
+	JSON        publicPaycheckCurrencyTotalsJSON        `json:"-"`
 }
 
 // publicPaycheckCurrencyTotalsJSON contains the JSON metadata for the struct [PublicPaycheckCurrencyTotals]
@@ -1339,40 +1339,14 @@ func (r PublicTaxPayer) IsKnown() bool {
 	return false
 }
 
-type PublicPayrollMoneyAmount5 struct {
-	// minor units — cents, e.g. 2345 for $23.45
-	Amount   int64       `json:"amount" api:"required"`
-	Currency interface{} `json:"currency" api:"required"`
-	// The server-formatted display string for the amount in its currency.
-	Display string                        `json:"display" api:"required"`
-	JSON    publicPayrollMoneyAmount5JSON `json:"-"`
-}
-
-// publicPayrollMoneyAmount5JSON contains the JSON metadata for the struct [PublicPayrollMoneyAmount5]
-type publicPayrollMoneyAmount5JSON struct {
-	Amount      apijson.Field
-	Currency    apijson.Field
-	Display     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PublicPayrollMoneyAmount5) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r publicPayrollMoneyAmount5JSON) RawJSON() string {
-	return r.raw
-}
-
 type PublicPaycheckSummaryCurrencyTotals struct {
 	Currency interface{} `json:"currency" api:"required"`
 	// Calculated net pay after reimbursements, worker taxes, deductions, and benefit
 	// contributions. It excludes payment execution fees and may differ from the amount
 	// the worker ultimately receives. Null in both calculation and funding currencies
 	// until net pay is known in both.
-	NetPay PublicCurrencyMoneyAmount12             `json:"netPay" api:"required,nullable"`
-	JSON   publicPaycheckSummaryCurrencyTotalsJSON `json:"-"`
+	NetPay PublicPaycheckSummaryCurrencyTotalsNetPay `json:"netPay" api:"required,nullable"`
+	JSON   publicPaycheckSummaryCurrencyTotalsJSON   `json:"-"`
 }
 
 // publicPaycheckSummaryCurrencyTotalsJSON contains the JSON metadata for the struct [PublicPaycheckSummaryCurrencyTotals]
@@ -1388,30 +1362,6 @@ func (r *PublicPaycheckSummaryCurrencyTotals) UnmarshalJSON(data []byte) (err er
 }
 
 func (r publicPaycheckSummaryCurrencyTotalsJSON) RawJSON() string {
-	return r.raw
-}
-
-type PublicCurrencyMoneyAmount13 struct {
-	// minor units — cents, e.g. 2345 for $23.45
-	Amount int64 `json:"amount" api:"required"`
-	// The server-formatted display string for the amount in its currency.
-	Display string                          `json:"display" api:"required"`
-	JSON    publicCurrencyMoneyAmount13JSON `json:"-"`
-}
-
-// publicCurrencyMoneyAmount13JSON contains the JSON metadata for the struct [PublicCurrencyMoneyAmount13]
-type publicCurrencyMoneyAmount13JSON struct {
-	Amount      apijson.Field
-	Display     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PublicCurrencyMoneyAmount13) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r publicCurrencyMoneyAmount13JSON) RawJSON() string {
 	return r.raw
 }
 
@@ -1436,174 +1386,6 @@ func (r *PublicCurrencyMoneyAmount12) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r publicCurrencyMoneyAmount12JSON) RawJSON() string {
-	return r.raw
-}
-
-type PublicCurrencyMoneyAmount14 struct {
-	// minor units — cents, e.g. 2345 for $23.45
-	Amount int64 `json:"amount" api:"required"`
-	// The server-formatted display string for the amount in its currency.
-	Display string                          `json:"display" api:"required"`
-	JSON    publicCurrencyMoneyAmount14JSON `json:"-"`
-}
-
-// publicCurrencyMoneyAmount14JSON contains the JSON metadata for the struct [PublicCurrencyMoneyAmount14]
-type publicCurrencyMoneyAmount14JSON struct {
-	Amount      apijson.Field
-	Display     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PublicCurrencyMoneyAmount14) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r publicCurrencyMoneyAmount14JSON) RawJSON() string {
-	return r.raw
-}
-
-type PublicCurrencyMoneyAmount15 struct {
-	// minor units — cents, e.g. 2345 for $23.45
-	Amount int64 `json:"amount" api:"required"`
-	// The server-formatted display string for the amount in its currency.
-	Display string                          `json:"display" api:"required"`
-	JSON    publicCurrencyMoneyAmount15JSON `json:"-"`
-}
-
-// publicCurrencyMoneyAmount15JSON contains the JSON metadata for the struct [PublicCurrencyMoneyAmount15]
-type publicCurrencyMoneyAmount15JSON struct {
-	Amount      apijson.Field
-	Display     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PublicCurrencyMoneyAmount15) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r publicCurrencyMoneyAmount15JSON) RawJSON() string {
-	return r.raw
-}
-
-type PublicCurrencyMoneyAmount16 struct {
-	// minor units — cents, e.g. 2345 for $23.45
-	Amount int64 `json:"amount" api:"required"`
-	// The server-formatted display string for the amount in its currency.
-	Display string                          `json:"display" api:"required"`
-	JSON    publicCurrencyMoneyAmount16JSON `json:"-"`
-}
-
-// publicCurrencyMoneyAmount16JSON contains the JSON metadata for the struct [PublicCurrencyMoneyAmount16]
-type publicCurrencyMoneyAmount16JSON struct {
-	Amount      apijson.Field
-	Display     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PublicCurrencyMoneyAmount16) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r publicCurrencyMoneyAmount16JSON) RawJSON() string {
-	return r.raw
-}
-
-type PublicCurrencyMoneyAmount17 struct {
-	// minor units — cents, e.g. 2345 for $23.45
-	Amount int64 `json:"amount" api:"required"`
-	// The server-formatted display string for the amount in its currency.
-	Display string                          `json:"display" api:"required"`
-	JSON    publicCurrencyMoneyAmount17JSON `json:"-"`
-}
-
-// publicCurrencyMoneyAmount17JSON contains the JSON metadata for the struct [PublicCurrencyMoneyAmount17]
-type publicCurrencyMoneyAmount17JSON struct {
-	Amount      apijson.Field
-	Display     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PublicCurrencyMoneyAmount17) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r publicCurrencyMoneyAmount17JSON) RawJSON() string {
-	return r.raw
-}
-
-type PublicCurrencyMoneyAmount18 struct {
-	// minor units — cents, e.g. 2345 for $23.45
-	Amount int64 `json:"amount" api:"required"`
-	// The server-formatted display string for the amount in its currency.
-	Display string                          `json:"display" api:"required"`
-	JSON    publicCurrencyMoneyAmount18JSON `json:"-"`
-}
-
-// publicCurrencyMoneyAmount18JSON contains the JSON metadata for the struct [PublicCurrencyMoneyAmount18]
-type publicCurrencyMoneyAmount18JSON struct {
-	Amount      apijson.Field
-	Display     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PublicCurrencyMoneyAmount18) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r publicCurrencyMoneyAmount18JSON) RawJSON() string {
-	return r.raw
-}
-
-type PublicCurrencyMoneyAmount19 struct {
-	// minor units — cents, e.g. 2345 for $23.45
-	Amount int64 `json:"amount" api:"required"`
-	// The server-formatted display string for the amount in its currency.
-	Display string                          `json:"display" api:"required"`
-	JSON    publicCurrencyMoneyAmount19JSON `json:"-"`
-}
-
-// publicCurrencyMoneyAmount19JSON contains the JSON metadata for the struct [PublicCurrencyMoneyAmount19]
-type publicCurrencyMoneyAmount19JSON struct {
-	Amount      apijson.Field
-	Display     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PublicCurrencyMoneyAmount19) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r publicCurrencyMoneyAmount19JSON) RawJSON() string {
-	return r.raw
-}
-
-type PublicCurrencyMoneyAmount20 struct {
-	// minor units — cents, e.g. 2345 for $23.45
-	Amount int64 `json:"amount" api:"required"`
-	// The server-formatted display string for the amount in its currency.
-	Display string                          `json:"display" api:"required"`
-	JSON    publicCurrencyMoneyAmount20JSON `json:"-"`
-}
-
-// publicCurrencyMoneyAmount20JSON contains the JSON metadata for the struct [PublicCurrencyMoneyAmount20]
-type publicCurrencyMoneyAmount20JSON struct {
-	Amount      apijson.Field
-	Display     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PublicCurrencyMoneyAmount20) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r publicCurrencyMoneyAmount20JSON) RawJSON() string {
 	return r.raw
 }
 
@@ -1729,6 +1511,318 @@ func (r *PublicPaycheckDetailYearToDate) UnmarshalJSON(data []byte) (err error) 
 }
 
 func (r publicPaycheckDetailYearToDateJSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicPayrollDetailTotalsCashRequirement struct {
+	// minor units — cents, e.g. 2345 for $23.45
+	Amount int64 `json:"amount" api:"required"`
+	// The server-formatted display string for the amount in its currency.
+	Display string                                       `json:"display" api:"required"`
+	JSON    publicPayrollDetailTotalsCashRequirementJSON `json:"-"`
+}
+
+// publicPayrollDetailTotalsCashRequirementJSON contains the JSON metadata for the struct [PublicPayrollDetailTotalsCashRequirement]
+type publicPayrollDetailTotalsCashRequirementJSON struct {
+	Amount      apijson.Field
+	Display     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicPayrollDetailTotalsCashRequirement) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicPayrollDetailTotalsCashRequirementJSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicPayrollDetailTotalsNetPay struct {
+	// minor units — cents, e.g. 2345 for $23.45
+	Amount int64 `json:"amount" api:"required"`
+	// The server-formatted display string for the amount in its currency.
+	Display string                              `json:"display" api:"required"`
+	JSON    publicPayrollDetailTotalsNetPayJSON `json:"-"`
+}
+
+// publicPayrollDetailTotalsNetPayJSON contains the JSON metadata for the struct [PublicPayrollDetailTotalsNetPay]
+type publicPayrollDetailTotalsNetPayJSON struct {
+	Amount      apijson.Field
+	Display     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicPayrollDetailTotalsNetPay) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicPayrollDetailTotalsNetPayJSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicPayrollDetailTotalsWorkerTaxes struct {
+	// minor units — cents, e.g. 2345 for $23.45
+	Amount int64 `json:"amount" api:"required"`
+	// The server-formatted display string for the amount in its currency.
+	Display string                                   `json:"display" api:"required"`
+	JSON    publicPayrollDetailTotalsWorkerTaxesJSON `json:"-"`
+}
+
+// publicPayrollDetailTotalsWorkerTaxesJSON contains the JSON metadata for the struct [PublicPayrollDetailTotalsWorkerTaxes]
+type publicPayrollDetailTotalsWorkerTaxesJSON struct {
+	Amount      apijson.Field
+	Display     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicPayrollDetailTotalsWorkerTaxes) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicPayrollDetailTotalsWorkerTaxesJSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicPayrollDetailTotalsEmployerTaxes struct {
+	// minor units — cents, e.g. 2345 for $23.45
+	Amount int64 `json:"amount" api:"required"`
+	// The server-formatted display string for the amount in its currency.
+	Display string                                     `json:"display" api:"required"`
+	JSON    publicPayrollDetailTotalsEmployerTaxesJSON `json:"-"`
+}
+
+// publicPayrollDetailTotalsEmployerTaxesJSON contains the JSON metadata for the struct [PublicPayrollDetailTotalsEmployerTaxes]
+type publicPayrollDetailTotalsEmployerTaxesJSON struct {
+	Amount      apijson.Field
+	Display     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicPayrollDetailTotalsEmployerTaxes) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicPayrollDetailTotalsEmployerTaxesJSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicPayrollDetailTotalsTotalCost struct {
+	// minor units — cents, e.g. 2345 for $23.45
+	Amount int64 `json:"amount" api:"required"`
+	// The server-formatted display string for the amount in its currency.
+	Display string                                 `json:"display" api:"required"`
+	JSON    publicPayrollDetailTotalsTotalCostJSON `json:"-"`
+}
+
+// publicPayrollDetailTotalsTotalCostJSON contains the JSON metadata for the struct [PublicPayrollDetailTotalsTotalCost]
+type publicPayrollDetailTotalsTotalCostJSON struct {
+	Amount      apijson.Field
+	Display     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicPayrollDetailTotalsTotalCost) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicPayrollDetailTotalsTotalCostJSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicFundingPayrollTotalsNetPay struct {
+	// minor units — cents, e.g. 2345 for $23.45
+	Amount int64 `json:"amount" api:"required"`
+	// The server-formatted display string for the amount in its currency.
+	Display string                               `json:"display" api:"required"`
+	JSON    publicFundingPayrollTotalsNetPayJSON `json:"-"`
+}
+
+// publicFundingPayrollTotalsNetPayJSON contains the JSON metadata for the struct [PublicFundingPayrollTotalsNetPay]
+type publicFundingPayrollTotalsNetPayJSON struct {
+	Amount      apijson.Field
+	Display     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicFundingPayrollTotalsNetPay) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicFundingPayrollTotalsNetPayJSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicFundingPayrollTotalsWorkerTaxes struct {
+	// minor units — cents, e.g. 2345 for $23.45
+	Amount int64 `json:"amount" api:"required"`
+	// The server-formatted display string for the amount in its currency.
+	Display string                                    `json:"display" api:"required"`
+	JSON    publicFundingPayrollTotalsWorkerTaxesJSON `json:"-"`
+}
+
+// publicFundingPayrollTotalsWorkerTaxesJSON contains the JSON metadata for the struct [PublicFundingPayrollTotalsWorkerTaxes]
+type publicFundingPayrollTotalsWorkerTaxesJSON struct {
+	Amount      apijson.Field
+	Display     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicFundingPayrollTotalsWorkerTaxes) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicFundingPayrollTotalsWorkerTaxesJSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicFundingPayrollTotalsEmployerTaxes struct {
+	// minor units — cents, e.g. 2345 for $23.45
+	Amount int64 `json:"amount" api:"required"`
+	// The server-formatted display string for the amount in its currency.
+	Display string                                      `json:"display" api:"required"`
+	JSON    publicFundingPayrollTotalsEmployerTaxesJSON `json:"-"`
+}
+
+// publicFundingPayrollTotalsEmployerTaxesJSON contains the JSON metadata for the struct [PublicFundingPayrollTotalsEmployerTaxes]
+type publicFundingPayrollTotalsEmployerTaxesJSON struct {
+	Amount      apijson.Field
+	Display     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicFundingPayrollTotalsEmployerTaxes) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicFundingPayrollTotalsEmployerTaxesJSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicFundingPayrollTotalsTotalCost struct {
+	// minor units — cents, e.g. 2345 for $23.45
+	Amount int64 `json:"amount" api:"required"`
+	// The server-formatted display string for the amount in its currency.
+	Display string                                  `json:"display" api:"required"`
+	JSON    publicFundingPayrollTotalsTotalCostJSON `json:"-"`
+}
+
+// publicFundingPayrollTotalsTotalCostJSON contains the JSON metadata for the struct [PublicFundingPayrollTotalsTotalCost]
+type publicFundingPayrollTotalsTotalCostJSON struct {
+	Amount      apijson.Field
+	Display     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicFundingPayrollTotalsTotalCost) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicFundingPayrollTotalsTotalCostJSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicPaycheckCurrencyTotalsNetPay struct {
+	// minor units — cents, e.g. 2345 for $23.45
+	Amount int64 `json:"amount" api:"required"`
+	// The server-formatted display string for the amount in its currency.
+	Display string                                 `json:"display" api:"required"`
+	JSON    publicPaycheckCurrencyTotalsNetPayJSON `json:"-"`
+}
+
+// publicPaycheckCurrencyTotalsNetPayJSON contains the JSON metadata for the struct [PublicPaycheckCurrencyTotalsNetPay]
+type publicPaycheckCurrencyTotalsNetPayJSON struct {
+	Amount      apijson.Field
+	Display     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicPaycheckCurrencyTotalsNetPay) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicPaycheckCurrencyTotalsNetPayJSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicPaycheckCurrencyTotalsWorkerTaxes struct {
+	// minor units — cents, e.g. 2345 for $23.45
+	Amount int64 `json:"amount" api:"required"`
+	// The server-formatted display string for the amount in its currency.
+	Display string                                      `json:"display" api:"required"`
+	JSON    publicPaycheckCurrencyTotalsWorkerTaxesJSON `json:"-"`
+}
+
+// publicPaycheckCurrencyTotalsWorkerTaxesJSON contains the JSON metadata for the struct [PublicPaycheckCurrencyTotalsWorkerTaxes]
+type publicPaycheckCurrencyTotalsWorkerTaxesJSON struct {
+	Amount      apijson.Field
+	Display     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicPaycheckCurrencyTotalsWorkerTaxes) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicPaycheckCurrencyTotalsWorkerTaxesJSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicPaycheckCurrencyTotalsEmployerTaxes struct {
+	// minor units — cents, e.g. 2345 for $23.45
+	Amount int64 `json:"amount" api:"required"`
+	// The server-formatted display string for the amount in its currency.
+	Display string                                        `json:"display" api:"required"`
+	JSON    publicPaycheckCurrencyTotalsEmployerTaxesJSON `json:"-"`
+}
+
+// publicPaycheckCurrencyTotalsEmployerTaxesJSON contains the JSON metadata for the struct [PublicPaycheckCurrencyTotalsEmployerTaxes]
+type publicPaycheckCurrencyTotalsEmployerTaxesJSON struct {
+	Amount      apijson.Field
+	Display     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicPaycheckCurrencyTotalsEmployerTaxes) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicPaycheckCurrencyTotalsEmployerTaxesJSON) RawJSON() string {
+	return r.raw
+}
+
+type PublicPaycheckSummaryCurrencyTotalsNetPay struct {
+	// minor units — cents, e.g. 2345 for $23.45
+	Amount int64 `json:"amount" api:"required"`
+	// The server-formatted display string for the amount in its currency.
+	Display string                                        `json:"display" api:"required"`
+	JSON    publicPaycheckSummaryCurrencyTotalsNetPayJSON `json:"-"`
+}
+
+// publicPaycheckSummaryCurrencyTotalsNetPayJSON contains the JSON metadata for the struct [PublicPaycheckSummaryCurrencyTotalsNetPay]
+type publicPaycheckSummaryCurrencyTotalsNetPayJSON struct {
+	Amount      apijson.Field
+	Display     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PublicPaycheckSummaryCurrencyTotalsNetPay) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r publicPaycheckSummaryCurrencyTotalsNetPayJSON) RawJSON() string {
 	return r.raw
 }
 
