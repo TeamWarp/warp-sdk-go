@@ -116,27 +116,12 @@ func TestScalarSmokeCustomFieldService(t *testing.T) {
 			fmt.Println(customField)
 		}
 	})
-	scalarSmokeCase(t, "customFields.createOption:required", "createOption", "/v1/custom_fields/{id}/options", "createOption: required params", func() {
+	scalarSmokeCase(t, "customFields.createOption:single", "createOption", "/v1/custom_fields/{id}/options", "createOption", func() {
 		client := scalarSmokeClient
 		{
 			customField, err := client.CustomFields.NewOption(context.Background(), "cf_1234", sdk.CustomFieldNewOptionParams{
 				Label: sdk.F[string]("x"),
 				Value: sdk.F[string]("x"),
-			})
-			if err != nil {
-				panic(err)
-			}
-
-			fmt.Println(customField)
-		}
-	})
-	scalarSmokeCase(t, "customFields.createOption:all", "createOption", "/v1/custom_fields/{id}/options", "createOption: all params", func() {
-		client := scalarSmokeClient
-		{
-			customField, err := client.CustomFields.NewOption(context.Background(), "cf_1234", sdk.CustomFieldNewOptionParams{
-				Label:     sdk.F[string]("x"),
-				Value:     sdk.F[string]("x"),
-				SortOrder: sdk.F[interface{}](0),
 			})
 			if err != nil {
 				panic(err)
@@ -160,8 +145,7 @@ func TestScalarSmokeCustomFieldService(t *testing.T) {
 		client := scalarSmokeClient
 		{
 			customField, err := client.CustomFields.UpdateOption(context.Background(), "cfo_1234", sdk.CustomFieldUpdateOptionParams{
-				Label:     sdk.F[string]("x"),
-				SortOrder: sdk.F[interface{}](0),
+				Label: sdk.F[string]("x"),
 			})
 			if err != nil {
 				panic(err)

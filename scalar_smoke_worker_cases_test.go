@@ -170,7 +170,6 @@ func TestScalarSmokeWorkerService(t *testing.T) {
 				PaySchedule:       sdk.F[sdk.WorkerNewEmployeeParamsPaySchedule](sdk.WorkerNewEmployeeParamsPaySchedule("weekly")),
 				RequireI9:         sdk.F[bool](false),
 				StateRegistration: sdk.F[sdk.WorkerNewEmployeeParamsStateRegistration](sdk.WorkerNewEmployeeParamsStateRegistration("self_managed")),
-				StockOptions:      sdk.F[interface{}](10000),
 				WorkEmail:         sdk.F[string]("john@joinwarp.com"),
 			})
 			if err != nil {

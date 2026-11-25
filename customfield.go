@@ -18,6 +18,7 @@ import (
 	"github.com/TeamWarp/warp-go-sdk/internal/param"
 	"github.com/TeamWarp/warp-go-sdk/internal/requestconfig"
 	"github.com/TeamWarp/warp-go-sdk/option"
+	"github.com/TeamWarp/warp-go-sdk/shared"
 )
 
 // CustomFieldService contains methods and other services that help with interacting
@@ -439,9 +440,9 @@ func (r TextCustomFieldValueType) IsKnown() bool {
 }
 
 type NumberCustomFieldValue struct {
-	Type  NumberCustomFieldValueType `json:"type" api:"required"`
-	Value interface{}                `json:"value" api:"required"`
-	JSON  numberCustomFieldValueJSON `json:"-"`
+	Type  NumberCustomFieldValueType       `json:"type" api:"required"`
+	Value NumberCustomFieldValueValueUnion `json:"value" api:"required"`
+	JSON  numberCustomFieldValueJSON       `json:"-"`
 }
 
 // numberCustomFieldValueJSON contains the JSON metadata for the struct [NumberCustomFieldValue]
@@ -660,9 +661,9 @@ func (r CurrencyCustomFieldValueCurrencyCode) IsKnown() bool {
 }
 
 type PercentageCustomFieldValue struct {
-	Type  PercentageCustomFieldValueType `json:"type" api:"required"`
-	Value interface{}                    `json:"value" api:"required"`
-	JSON  percentageCustomFieldValueJSON `json:"-"`
+	Type  PercentageCustomFieldValueType       `json:"type" api:"required"`
+	Value PercentageCustomFieldValueValueUnion `json:"value" api:"required"`
+	JSON  percentageCustomFieldValueJSON       `json:"-"`
 }
 
 // percentageCustomFieldValueJSON contains the JSON metadata for the struct [PercentageCustomFieldValue]
@@ -855,13 +856,37 @@ func (r CustomFieldNewParamsInputBy) IsKnown() bool {
 }
 
 type CustomFieldNewParamsOption struct {
-	Label     param.Field[string]      `json:"label" api:"required"`
-	Value     param.Field[string]      `json:"value" api:"required"`
-	SortOrder param.Field[interface{}] `json:"sortOrder"`
+	Label     param.Field[string]                                    `json:"label" api:"required"`
+	Value     param.Field[string]                                    `json:"value" api:"required"`
+	SortOrder param.Field[CustomFieldNewParamsOptionsSortOrderUnion] `json:"sortOrder"`
 }
 
 func (r CustomFieldNewParamsOption) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+// Union satisfied by [shared.UnionFloat], [CustomFieldNewParamsOptionsSortOrderString].
+type CustomFieldNewParamsOptionsSortOrderUnion interface {
+	ImplementsCustomFieldNewParamsOptionsSortOrderUnion()
+}
+
+func (r CustomFieldNewParamsOptionsSortOrderString) ImplementsCustomFieldNewParamsOptionsSortOrderUnion() {
+}
+
+type CustomFieldNewParamsOptionsSortOrderString string
+
+const (
+	CustomFieldNewParamsOptionsSortOrderStringInfinity  CustomFieldNewParamsOptionsSortOrderString = "Infinity"
+	CustomFieldNewParamsOptionsSortOrderStringInfinity2 CustomFieldNewParamsOptionsSortOrderString = "-Infinity"
+	CustomFieldNewParamsOptionsSortOrderStringNaN       CustomFieldNewParamsOptionsSortOrderString = "NaN"
+)
+
+func (r CustomFieldNewParamsOptionsSortOrderString) IsKnown() bool {
+	switch r {
+	case CustomFieldNewParamsOptionsSortOrderStringInfinity, CustomFieldNewParamsOptionsSortOrderStringInfinity2, CustomFieldNewParamsOptionsSortOrderStringNaN:
+		return true
+	}
+	return false
 }
 
 type CustomFieldUpdateParams struct {
@@ -929,22 +954,70 @@ func (r CustomFieldUpdateParamsInputBy) IsKnown() bool {
 }
 
 type CustomFieldNewOptionParams struct {
-	Label     param.Field[string]      `json:"label" api:"required"`
-	Value     param.Field[string]      `json:"value" api:"required"`
-	SortOrder param.Field[interface{}] `json:"sortOrder"`
+	Label     param.Field[string]                                   `json:"label" api:"required"`
+	Value     param.Field[string]                                   `json:"value" api:"required"`
+	SortOrder param.Field[CustomFieldNewOptionParamsSortOrderUnion] `json:"sortOrder"`
 }
 
 func (r CustomFieldNewOptionParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
+// Union satisfied by [shared.UnionFloat], [CustomFieldNewOptionParamsSortOrderString].
+type CustomFieldNewOptionParamsSortOrderUnion interface {
+	ImplementsCustomFieldNewOptionParamsSortOrderUnion()
+}
+
+func (r CustomFieldNewOptionParamsSortOrderString) ImplementsCustomFieldNewOptionParamsSortOrderUnion() {
+}
+
+type CustomFieldNewOptionParamsSortOrderString string
+
+const (
+	CustomFieldNewOptionParamsSortOrderStringInfinity  CustomFieldNewOptionParamsSortOrderString = "Infinity"
+	CustomFieldNewOptionParamsSortOrderStringInfinity2 CustomFieldNewOptionParamsSortOrderString = "-Infinity"
+	CustomFieldNewOptionParamsSortOrderStringNaN       CustomFieldNewOptionParamsSortOrderString = "NaN"
+)
+
+func (r CustomFieldNewOptionParamsSortOrderString) IsKnown() bool {
+	switch r {
+	case CustomFieldNewOptionParamsSortOrderStringInfinity, CustomFieldNewOptionParamsSortOrderStringInfinity2, CustomFieldNewOptionParamsSortOrderStringNaN:
+		return true
+	}
+	return false
+}
+
 type CustomFieldUpdateOptionParams struct {
-	Label     param.Field[string]      `json:"label"`
-	SortOrder param.Field[interface{}] `json:"sortOrder"`
+	Label     param.Field[string]                                      `json:"label"`
+	SortOrder param.Field[CustomFieldUpdateOptionParamsSortOrderUnion] `json:"sortOrder"`
 }
 
 func (r CustomFieldUpdateOptionParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+// Union satisfied by [shared.UnionFloat], [CustomFieldUpdateOptionParamsSortOrderString].
+type CustomFieldUpdateOptionParamsSortOrderUnion interface {
+	ImplementsCustomFieldUpdateOptionParamsSortOrderUnion()
+}
+
+func (r CustomFieldUpdateOptionParamsSortOrderString) ImplementsCustomFieldUpdateOptionParamsSortOrderUnion() {
+}
+
+type CustomFieldUpdateOptionParamsSortOrderString string
+
+const (
+	CustomFieldUpdateOptionParamsSortOrderStringInfinity  CustomFieldUpdateOptionParamsSortOrderString = "Infinity"
+	CustomFieldUpdateOptionParamsSortOrderStringInfinity2 CustomFieldUpdateOptionParamsSortOrderString = "-Infinity"
+	CustomFieldUpdateOptionParamsSortOrderStringNaN       CustomFieldUpdateOptionParamsSortOrderString = "NaN"
+)
+
+func (r CustomFieldUpdateOptionParamsSortOrderString) IsKnown() bool {
+	switch r {
+	case CustomFieldUpdateOptionParamsSortOrderStringInfinity, CustomFieldUpdateOptionParamsSortOrderStringInfinity2, CustomFieldUpdateOptionParamsSortOrderStringNaN:
+		return true
+	}
+	return false
 }
 
 type CustomFieldListValuesParams struct {
@@ -1001,8 +1074,8 @@ func (r CustomFieldUpsertValueParamsValueVariant0) MarshalJSON() (data []byte, e
 }
 
 type CustomFieldUpsertValueParamsValueVariant1 struct {
-	Type  param.Field[CustomFieldUpsertValueParamsValueVariant1Type] `json:"type" api:"required"`
-	Value param.Field[interface{}]                                   `json:"value" api:"required"`
+	Type  param.Field[CustomFieldUpsertValueParamsValueVariant1Type]       `json:"type" api:"required"`
+	Value param.Field[CustomFieldUpsertValueParamsValueVariant1ValueUnion] `json:"value" api:"required"`
 }
 
 func (r CustomFieldUpsertValueParamsValueVariant1) MarshalJSON() (data []byte, err error) {
@@ -1039,8 +1112,8 @@ func (r CustomFieldUpsertValueParamsValueVariant4) MarshalJSON() (data []byte, e
 }
 
 type CustomFieldUpsertValueParamsValueVariant5 struct {
-	Type  param.Field[CustomFieldUpsertValueParamsValueVariant5Type] `json:"type" api:"required"`
-	Value param.Field[interface{}]                                   `json:"value" api:"required"`
+	Type  param.Field[CustomFieldUpsertValueParamsValueVariant5Type]       `json:"type" api:"required"`
+	Value param.Field[CustomFieldUpsertValueParamsValueVariant5ValueUnion] `json:"value" api:"required"`
 }
 
 func (r CustomFieldUpsertValueParamsValueVariant5) MarshalJSON() (data []byte, err error) {
@@ -1089,6 +1162,30 @@ const (
 func (r CustomFieldUpsertValueParamsValueVariant1Type) IsKnown() bool {
 	switch r {
 	case CustomFieldUpsertValueParamsValueVariant1TypeNumber:
+		return true
+	}
+	return false
+}
+
+// Union satisfied by [shared.UnionFloat], [CustomFieldUpsertValueParamsValueVariant1ValueString].
+type CustomFieldUpsertValueParamsValueVariant1ValueUnion interface {
+	ImplementsCustomFieldUpsertValueParamsValueVariant1ValueUnion()
+}
+
+func (r CustomFieldUpsertValueParamsValueVariant1ValueString) ImplementsCustomFieldUpsertValueParamsValueVariant1ValueUnion() {
+}
+
+type CustomFieldUpsertValueParamsValueVariant1ValueString string
+
+const (
+	CustomFieldUpsertValueParamsValueVariant1ValueStringInfinity  CustomFieldUpsertValueParamsValueVariant1ValueString = "Infinity"
+	CustomFieldUpsertValueParamsValueVariant1ValueStringInfinity2 CustomFieldUpsertValueParamsValueVariant1ValueString = "-Infinity"
+	CustomFieldUpsertValueParamsValueVariant1ValueStringNaN       CustomFieldUpsertValueParamsValueVariant1ValueString = "NaN"
+)
+
+func (r CustomFieldUpsertValueParamsValueVariant1ValueString) IsKnown() bool {
+	switch r {
+	case CustomFieldUpsertValueParamsValueVariant1ValueStringInfinity, CustomFieldUpsertValueParamsValueVariant1ValueStringInfinity2, CustomFieldUpsertValueParamsValueVariant1ValueStringNaN:
 		return true
 	}
 	return false
@@ -1219,6 +1316,30 @@ const (
 func (r CustomFieldUpsertValueParamsValueVariant5Type) IsKnown() bool {
 	switch r {
 	case CustomFieldUpsertValueParamsValueVariant5TypePercentage:
+		return true
+	}
+	return false
+}
+
+// Union satisfied by [shared.UnionFloat], [CustomFieldUpsertValueParamsValueVariant5ValueString].
+type CustomFieldUpsertValueParamsValueVariant5ValueUnion interface {
+	ImplementsCustomFieldUpsertValueParamsValueVariant5ValueUnion()
+}
+
+func (r CustomFieldUpsertValueParamsValueVariant5ValueString) ImplementsCustomFieldUpsertValueParamsValueVariant5ValueUnion() {
+}
+
+type CustomFieldUpsertValueParamsValueVariant5ValueString string
+
+const (
+	CustomFieldUpsertValueParamsValueVariant5ValueStringInfinity  CustomFieldUpsertValueParamsValueVariant5ValueString = "Infinity"
+	CustomFieldUpsertValueParamsValueVariant5ValueStringInfinity2 CustomFieldUpsertValueParamsValueVariant5ValueString = "-Infinity"
+	CustomFieldUpsertValueParamsValueVariant5ValueStringNaN       CustomFieldUpsertValueParamsValueVariant5ValueString = "NaN"
+)
+
+func (r CustomFieldUpsertValueParamsValueVariant5ValueString) IsKnown() bool {
+	switch r {
+	case CustomFieldUpsertValueParamsValueVariant5ValueStringInfinity, CustomFieldUpsertValueParamsValueVariant5ValueStringInfinity2, CustomFieldUpsertValueParamsValueVariant5ValueStringNaN:
 		return true
 	}
 	return false
@@ -1527,13 +1648,13 @@ func (r customFieldArchiveResponseJSON) RawJSON() string {
 
 type CustomFieldNewOptionResponse struct {
 	// The tag of a company custom worker field option.
-	ID        string                             `json:"id" api:"required"`
-	CreatedAt string                             `json:"createdAt" api:"required"`
-	Label     string                             `json:"label" api:"required"`
-	SortOrder interface{}                        `json:"sortOrder" api:"required"`
-	Status    CustomFieldNewOptionResponseStatus `json:"status" api:"required"`
-	Value     string                             `json:"value" api:"required"`
-	JSON      customFieldNewOptionResponseJSON   `json:"-"`
+	ID        string                                     `json:"id" api:"required"`
+	CreatedAt string                                     `json:"createdAt" api:"required"`
+	Label     string                                     `json:"label" api:"required"`
+	SortOrder CustomFieldNewOptionResponseSortOrderUnion `json:"sortOrder" api:"required"`
+	Status    CustomFieldNewOptionResponseStatus         `json:"status" api:"required"`
+	Value     string                                     `json:"value" api:"required"`
+	JSON      customFieldNewOptionResponseJSON           `json:"-"`
 }
 
 // customFieldNewOptionResponseJSON contains the JSON metadata for the struct [CustomFieldNewOptionResponse]
@@ -1558,13 +1679,13 @@ func (r customFieldNewOptionResponseJSON) RawJSON() string {
 
 type CustomFieldUpdateOptionResponse struct {
 	// The tag of a company custom worker field option.
-	ID        string                                `json:"id" api:"required"`
-	CreatedAt string                                `json:"createdAt" api:"required"`
-	Label     string                                `json:"label" api:"required"`
-	SortOrder interface{}                           `json:"sortOrder" api:"required"`
-	Status    CustomFieldUpdateOptionResponseStatus `json:"status" api:"required"`
-	Value     string                                `json:"value" api:"required"`
-	JSON      customFieldUpdateOptionResponseJSON   `json:"-"`
+	ID        string                                        `json:"id" api:"required"`
+	CreatedAt string                                        `json:"createdAt" api:"required"`
+	Label     string                                        `json:"label" api:"required"`
+	SortOrder CustomFieldUpdateOptionResponseSortOrderUnion `json:"sortOrder" api:"required"`
+	Status    CustomFieldUpdateOptionResponseStatus         `json:"status" api:"required"`
+	Value     string                                        `json:"value" api:"required"`
+	JSON      customFieldUpdateOptionResponseJSON           `json:"-"`
 }
 
 // customFieldUpdateOptionResponseJSON contains the JSON metadata for the struct [CustomFieldUpdateOptionResponse]
@@ -1589,13 +1710,13 @@ func (r customFieldUpdateOptionResponseJSON) RawJSON() string {
 
 type CustomFieldArchiveOptionResponse struct {
 	// The tag of a company custom worker field option.
-	ID        string                                 `json:"id" api:"required"`
-	CreatedAt string                                 `json:"createdAt" api:"required"`
-	Label     string                                 `json:"label" api:"required"`
-	SortOrder interface{}                            `json:"sortOrder" api:"required"`
-	Status    CustomFieldArchiveOptionResponseStatus `json:"status" api:"required"`
-	Value     string                                 `json:"value" api:"required"`
-	JSON      customFieldArchiveOptionResponseJSON   `json:"-"`
+	ID        string                                         `json:"id" api:"required"`
+	CreatedAt string                                         `json:"createdAt" api:"required"`
+	Label     string                                         `json:"label" api:"required"`
+	SortOrder CustomFieldArchiveOptionResponseSortOrderUnion `json:"sortOrder" api:"required"`
+	Status    CustomFieldArchiveOptionResponseStatus         `json:"status" api:"required"`
+	Value     string                                         `json:"value" api:"required"`
+	JSON      customFieldArchiveOptionResponseJSON           `json:"-"`
 }
 
 // customFieldArchiveOptionResponseJSON contains the JSON metadata for the struct [CustomFieldArchiveOptionResponse]
@@ -1680,15 +1801,59 @@ func (r customFieldUpsertValueResponseJSON) RawJSON() string {
 	return r.raw
 }
 
+// Union satisfied by [shared.UnionFloat], [NumberCustomFieldValueValueString].
+type NumberCustomFieldValueValueUnion interface {
+	ImplementsNumberCustomFieldValueValueUnion()
+}
+
+func (r NumberCustomFieldValueValueString) ImplementsNumberCustomFieldValueValueUnion() {}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*NumberCustomFieldValueValueUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(NumberCustomFieldValueValueString("")),
+		},
+	)
+}
+
+// Union satisfied by [shared.UnionFloat], [PercentageCustomFieldValueValueString].
+type PercentageCustomFieldValueValueUnion interface {
+	ImplementsPercentageCustomFieldValueValueUnion()
+}
+
+func (r PercentageCustomFieldValueValueString) ImplementsPercentageCustomFieldValueValueUnion() {}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*PercentageCustomFieldValueValueUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(PercentageCustomFieldValueValueString("")),
+		},
+	)
+}
+
 type SelectCustomFieldValueOption struct {
 	// The tag of a company custom worker field option.
-	ID        string                             `json:"id" api:"required"`
-	CreatedAt string                             `json:"createdAt" api:"required"`
-	Label     string                             `json:"label" api:"required"`
-	SortOrder interface{}                        `json:"sortOrder" api:"required"`
-	Status    SelectCustomFieldValueOptionStatus `json:"status" api:"required"`
-	Value     string                             `json:"value" api:"required"`
-	JSON      selectCustomFieldValueOptionJSON   `json:"-"`
+	ID        string                                     `json:"id" api:"required"`
+	CreatedAt string                                     `json:"createdAt" api:"required"`
+	Label     string                                     `json:"label" api:"required"`
+	SortOrder SelectCustomFieldValueOptionSortOrderUnion `json:"sortOrder" api:"required"`
+	Status    SelectCustomFieldValueOptionStatus         `json:"status" api:"required"`
+	Value     string                                     `json:"value" api:"required"`
+	JSON      selectCustomFieldValueOptionJSON           `json:"-"`
 }
 
 // selectCustomFieldValueOptionJSON contains the JSON metadata for the struct [SelectCustomFieldValueOption]
@@ -1713,13 +1878,13 @@ func (r selectCustomFieldValueOptionJSON) RawJSON() string {
 
 type MultiSelectCustomFieldValueOption struct {
 	// The tag of a company custom worker field option.
-	ID        string                                   `json:"id" api:"required"`
-	CreatedAt string                                   `json:"createdAt" api:"required"`
-	Label     string                                   `json:"label" api:"required"`
-	SortOrder interface{}                              `json:"sortOrder" api:"required"`
-	Status    MultiSelectCustomFieldValueOptionsStatus `json:"status" api:"required"`
-	Value     string                                   `json:"value" api:"required"`
-	JSON      multiSelectCustomFieldValueOptionJSON    `json:"-"`
+	ID        string                                           `json:"id" api:"required"`
+	CreatedAt string                                           `json:"createdAt" api:"required"`
+	Label     string                                           `json:"label" api:"required"`
+	SortOrder MultiSelectCustomFieldValueOptionsSortOrderUnion `json:"sortOrder" api:"required"`
+	Status    MultiSelectCustomFieldValueOptionsStatus         `json:"status" api:"required"`
+	Value     string                                           `json:"value" api:"required"`
+	JSON      multiSelectCustomFieldValueOptionJSON            `json:"-"`
 }
 
 // multiSelectCustomFieldValueOptionJSON contains the JSON metadata for the struct [MultiSelectCustomFieldValueOption]
@@ -2140,13 +2305,13 @@ func (r CustomFieldGetResponseInputBy) IsKnown() bool {
 
 type CustomFieldGetResponseOption struct {
 	// The tag of a company custom worker field option.
-	ID        string                              `json:"id" api:"required"`
-	CreatedAt string                              `json:"createdAt" api:"required"`
-	Label     string                              `json:"label" api:"required"`
-	SortOrder interface{}                         `json:"sortOrder" api:"required"`
-	Status    CustomFieldGetResponseOptionsStatus `json:"status" api:"required"`
-	Value     string                              `json:"value" api:"required"`
-	JSON      customFieldGetResponseOptionJSON    `json:"-"`
+	ID        string                                      `json:"id" api:"required"`
+	CreatedAt string                                      `json:"createdAt" api:"required"`
+	Label     string                                      `json:"label" api:"required"`
+	SortOrder CustomFieldGetResponseOptionsSortOrderUnion `json:"sortOrder" api:"required"`
+	Status    CustomFieldGetResponseOptionsStatus         `json:"status" api:"required"`
+	Value     string                                      `json:"value" api:"required"`
+	JSON      customFieldGetResponseOptionJSON            `json:"-"`
 }
 
 // customFieldGetResponseOptionJSON contains the JSON metadata for the struct [CustomFieldGetResponseOption]
@@ -2356,6 +2521,29 @@ func (r CustomFieldNewOptionResponseStatus) IsKnown() bool {
 	return false
 }
 
+// Union satisfied by [shared.UnionFloat], [CustomFieldNewOptionResponseSortOrderString].
+type CustomFieldNewOptionResponseSortOrderUnion interface {
+	ImplementsCustomFieldNewOptionResponseSortOrderUnion()
+}
+
+func (r CustomFieldNewOptionResponseSortOrderString) ImplementsCustomFieldNewOptionResponseSortOrderUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*CustomFieldNewOptionResponseSortOrderUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(CustomFieldNewOptionResponseSortOrderString("")),
+		},
+	)
+}
+
 type CustomFieldUpdateOptionResponseStatus string
 
 const (
@@ -2371,6 +2559,29 @@ func (r CustomFieldUpdateOptionResponseStatus) IsKnown() bool {
 	return false
 }
 
+// Union satisfied by [shared.UnionFloat], [CustomFieldUpdateOptionResponseSortOrderString].
+type CustomFieldUpdateOptionResponseSortOrderUnion interface {
+	ImplementsCustomFieldUpdateOptionResponseSortOrderUnion()
+}
+
+func (r CustomFieldUpdateOptionResponseSortOrderString) ImplementsCustomFieldUpdateOptionResponseSortOrderUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*CustomFieldUpdateOptionResponseSortOrderUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(CustomFieldUpdateOptionResponseSortOrderString("")),
+		},
+	)
+}
+
 type CustomFieldArchiveOptionResponseStatus string
 
 const (
@@ -2381,6 +2592,61 @@ const (
 func (r CustomFieldArchiveOptionResponseStatus) IsKnown() bool {
 	switch r {
 	case CustomFieldArchiveOptionResponseStatusActive, CustomFieldArchiveOptionResponseStatusArchived:
+		return true
+	}
+	return false
+}
+
+// Union satisfied by [shared.UnionFloat], [CustomFieldArchiveOptionResponseSortOrderString].
+type CustomFieldArchiveOptionResponseSortOrderUnion interface {
+	ImplementsCustomFieldArchiveOptionResponseSortOrderUnion()
+}
+
+func (r CustomFieldArchiveOptionResponseSortOrderString) ImplementsCustomFieldArchiveOptionResponseSortOrderUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*CustomFieldArchiveOptionResponseSortOrderUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(CustomFieldArchiveOptionResponseSortOrderString("")),
+		},
+	)
+}
+
+type NumberCustomFieldValueValueString string
+
+const (
+	NumberCustomFieldValueValueStringInfinity  NumberCustomFieldValueValueString = "Infinity"
+	NumberCustomFieldValueValueStringInfinity2 NumberCustomFieldValueValueString = "-Infinity"
+	NumberCustomFieldValueValueStringNaN       NumberCustomFieldValueValueString = "NaN"
+)
+
+func (r NumberCustomFieldValueValueString) IsKnown() bool {
+	switch r {
+	case NumberCustomFieldValueValueStringInfinity, NumberCustomFieldValueValueStringInfinity2, NumberCustomFieldValueValueStringNaN:
+		return true
+	}
+	return false
+}
+
+type PercentageCustomFieldValueValueString string
+
+const (
+	PercentageCustomFieldValueValueStringInfinity  PercentageCustomFieldValueValueString = "Infinity"
+	PercentageCustomFieldValueValueStringInfinity2 PercentageCustomFieldValueValueString = "-Infinity"
+	PercentageCustomFieldValueValueStringNaN       PercentageCustomFieldValueValueString = "NaN"
+)
+
+func (r PercentageCustomFieldValueValueString) IsKnown() bool {
+	switch r {
+	case PercentageCustomFieldValueValueStringInfinity, PercentageCustomFieldValueValueStringInfinity2, PercentageCustomFieldValueValueStringNaN:
 		return true
 	}
 	return false
@@ -2401,6 +2667,29 @@ func (r SelectCustomFieldValueOptionStatus) IsKnown() bool {
 	return false
 }
 
+// Union satisfied by [shared.UnionFloat], [SelectCustomFieldValueOptionSortOrderString].
+type SelectCustomFieldValueOptionSortOrderUnion interface {
+	ImplementsSelectCustomFieldValueOptionSortOrderUnion()
+}
+
+func (r SelectCustomFieldValueOptionSortOrderString) ImplementsSelectCustomFieldValueOptionSortOrderUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*SelectCustomFieldValueOptionSortOrderUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(SelectCustomFieldValueOptionSortOrderString("")),
+		},
+	)
+}
+
 type MultiSelectCustomFieldValueOptionsStatus string
 
 const (
@@ -2414,6 +2703,29 @@ func (r MultiSelectCustomFieldValueOptionsStatus) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+// Union satisfied by [shared.UnionFloat], [MultiSelectCustomFieldValueOptionsSortOrderString].
+type MultiSelectCustomFieldValueOptionsSortOrderUnion interface {
+	ImplementsMultiSelectCustomFieldValueOptionsSortOrderUnion()
+}
+
+func (r MultiSelectCustomFieldValueOptionsSortOrderString) ImplementsMultiSelectCustomFieldValueOptionsSortOrderUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*MultiSelectCustomFieldValueOptionsSortOrderUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(MultiSelectCustomFieldValueOptionsSortOrderString("")),
+		},
+	)
 }
 
 func (r TextCustomFieldValue) implementsPublicCustomFieldValueOutput() {}
@@ -2442,6 +2754,125 @@ const (
 func (r CustomFieldGetResponseOptionsStatus) IsKnown() bool {
 	switch r {
 	case CustomFieldGetResponseOptionsStatusActive, CustomFieldGetResponseOptionsStatusArchived:
+		return true
+	}
+	return false
+}
+
+// Union satisfied by [shared.UnionFloat], [CustomFieldGetResponseOptionsSortOrderString].
+type CustomFieldGetResponseOptionsSortOrderUnion interface {
+	ImplementsCustomFieldGetResponseOptionsSortOrderUnion()
+}
+
+func (r CustomFieldGetResponseOptionsSortOrderString) ImplementsCustomFieldGetResponseOptionsSortOrderUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*CustomFieldGetResponseOptionsSortOrderUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(CustomFieldGetResponseOptionsSortOrderString("")),
+		},
+	)
+}
+
+type CustomFieldNewOptionResponseSortOrderString string
+
+const (
+	CustomFieldNewOptionResponseSortOrderStringInfinity  CustomFieldNewOptionResponseSortOrderString = "Infinity"
+	CustomFieldNewOptionResponseSortOrderStringInfinity2 CustomFieldNewOptionResponseSortOrderString = "-Infinity"
+	CustomFieldNewOptionResponseSortOrderStringNaN       CustomFieldNewOptionResponseSortOrderString = "NaN"
+)
+
+func (r CustomFieldNewOptionResponseSortOrderString) IsKnown() bool {
+	switch r {
+	case CustomFieldNewOptionResponseSortOrderStringInfinity, CustomFieldNewOptionResponseSortOrderStringInfinity2, CustomFieldNewOptionResponseSortOrderStringNaN:
+		return true
+	}
+	return false
+}
+
+type CustomFieldUpdateOptionResponseSortOrderString string
+
+const (
+	CustomFieldUpdateOptionResponseSortOrderStringInfinity  CustomFieldUpdateOptionResponseSortOrderString = "Infinity"
+	CustomFieldUpdateOptionResponseSortOrderStringInfinity2 CustomFieldUpdateOptionResponseSortOrderString = "-Infinity"
+	CustomFieldUpdateOptionResponseSortOrderStringNaN       CustomFieldUpdateOptionResponseSortOrderString = "NaN"
+)
+
+func (r CustomFieldUpdateOptionResponseSortOrderString) IsKnown() bool {
+	switch r {
+	case CustomFieldUpdateOptionResponseSortOrderStringInfinity, CustomFieldUpdateOptionResponseSortOrderStringInfinity2, CustomFieldUpdateOptionResponseSortOrderStringNaN:
+		return true
+	}
+	return false
+}
+
+type CustomFieldArchiveOptionResponseSortOrderString string
+
+const (
+	CustomFieldArchiveOptionResponseSortOrderStringInfinity  CustomFieldArchiveOptionResponseSortOrderString = "Infinity"
+	CustomFieldArchiveOptionResponseSortOrderStringInfinity2 CustomFieldArchiveOptionResponseSortOrderString = "-Infinity"
+	CustomFieldArchiveOptionResponseSortOrderStringNaN       CustomFieldArchiveOptionResponseSortOrderString = "NaN"
+)
+
+func (r CustomFieldArchiveOptionResponseSortOrderString) IsKnown() bool {
+	switch r {
+	case CustomFieldArchiveOptionResponseSortOrderStringInfinity, CustomFieldArchiveOptionResponseSortOrderStringInfinity2, CustomFieldArchiveOptionResponseSortOrderStringNaN:
+		return true
+	}
+	return false
+}
+
+type SelectCustomFieldValueOptionSortOrderString string
+
+const (
+	SelectCustomFieldValueOptionSortOrderStringInfinity  SelectCustomFieldValueOptionSortOrderString = "Infinity"
+	SelectCustomFieldValueOptionSortOrderStringInfinity2 SelectCustomFieldValueOptionSortOrderString = "-Infinity"
+	SelectCustomFieldValueOptionSortOrderStringNaN       SelectCustomFieldValueOptionSortOrderString = "NaN"
+)
+
+func (r SelectCustomFieldValueOptionSortOrderString) IsKnown() bool {
+	switch r {
+	case SelectCustomFieldValueOptionSortOrderStringInfinity, SelectCustomFieldValueOptionSortOrderStringInfinity2, SelectCustomFieldValueOptionSortOrderStringNaN:
+		return true
+	}
+	return false
+}
+
+type MultiSelectCustomFieldValueOptionsSortOrderString string
+
+const (
+	MultiSelectCustomFieldValueOptionsSortOrderStringInfinity  MultiSelectCustomFieldValueOptionsSortOrderString = "Infinity"
+	MultiSelectCustomFieldValueOptionsSortOrderStringInfinity2 MultiSelectCustomFieldValueOptionsSortOrderString = "-Infinity"
+	MultiSelectCustomFieldValueOptionsSortOrderStringNaN       MultiSelectCustomFieldValueOptionsSortOrderString = "NaN"
+)
+
+func (r MultiSelectCustomFieldValueOptionsSortOrderString) IsKnown() bool {
+	switch r {
+	case MultiSelectCustomFieldValueOptionsSortOrderStringInfinity, MultiSelectCustomFieldValueOptionsSortOrderStringInfinity2, MultiSelectCustomFieldValueOptionsSortOrderStringNaN:
+		return true
+	}
+	return false
+}
+
+type CustomFieldGetResponseOptionsSortOrderString string
+
+const (
+	CustomFieldGetResponseOptionsSortOrderStringInfinity  CustomFieldGetResponseOptionsSortOrderString = "Infinity"
+	CustomFieldGetResponseOptionsSortOrderStringInfinity2 CustomFieldGetResponseOptionsSortOrderString = "-Infinity"
+	CustomFieldGetResponseOptionsSortOrderStringNaN       CustomFieldGetResponseOptionsSortOrderString = "NaN"
+)
+
+func (r CustomFieldGetResponseOptionsSortOrderString) IsKnown() bool {
+	switch r {
+	case CustomFieldGetResponseOptionsSortOrderStringInfinity, CustomFieldGetResponseOptionsSortOrderStringInfinity2, CustomFieldGetResponseOptionsSortOrderStringNaN:
 		return true
 	}
 	return false

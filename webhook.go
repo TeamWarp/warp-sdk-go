@@ -15,6 +15,7 @@ import (
 	"github.com/TeamWarp/warp-go-sdk/internal/requestconfig"
 	"github.com/TeamWarp/warp-go-sdk/internal/webhooks"
 	"github.com/TeamWarp/warp-go-sdk/option"
+	"github.com/TeamWarp/warp-go-sdk/shared"
 )
 
 // WebhookService contains methods that help with parsing and verifying inbound
@@ -128,16 +129,16 @@ func (r TimeOffRequestCreatedWebhookEventType) IsKnown() bool {
 }
 
 type TimeOffRequestCreatedWebhookEventData struct {
-	ID               string                                              `json:"id" api:"required"`
-	CreatedAt        string                                              `json:"createdAt" api:"required"`
-	EndAt            string                                              `json:"endAt" api:"required"`
-	EndRangeType     TimeOffRequestCreatedWebhookEventDataEndRangeType   `json:"endRangeType" api:"required"`
-	Reason           string                                              `json:"reason" api:"required,nullable"`
-	RequestedMinutes interface{}                                         `json:"requestedMinutes" api:"required"`
-	StartAt          string                                              `json:"startAt" api:"required"`
-	StartRangeType   TimeOffRequestCreatedWebhookEventDataStartRangeType `json:"startRangeType" api:"required"`
-	Status           TimeOffRequestCreatedWebhookEventDataStatus         `json:"status" api:"required"`
-	TimeOffPolicyID  string                                              `json:"timeOffPolicyId" api:"required"`
+	ID               string                                                     `json:"id" api:"required"`
+	CreatedAt        string                                                     `json:"createdAt" api:"required"`
+	EndAt            string                                                     `json:"endAt" api:"required"`
+	EndRangeType     TimeOffRequestCreatedWebhookEventDataEndRangeType          `json:"endRangeType" api:"required"`
+	Reason           string                                                     `json:"reason" api:"required,nullable"`
+	RequestedMinutes TimeOffRequestCreatedWebhookEventDataRequestedMinutesUnion `json:"requestedMinutes" api:"required"`
+	StartAt          string                                                     `json:"startAt" api:"required"`
+	StartRangeType   TimeOffRequestCreatedWebhookEventDataStartRangeType        `json:"startRangeType" api:"required"`
+	Status           TimeOffRequestCreatedWebhookEventDataStatus                `json:"status" api:"required"`
+	TimeOffPolicyID  string                                                     `json:"timeOffPolicyId" api:"required"`
 	// The time zone that the worker is requesting time off in.
 	TimeZone string `json:"timeZone" api:"required,nullable"`
 	// The id of the worker.
@@ -217,6 +218,45 @@ func (r TimeOffRequestCreatedWebhookEventDataEndRangeType) IsKnown() bool {
 	return false
 }
 
+// Union satisfied by [shared.UnionFloat], [TimeOffRequestCreatedWebhookEventDataRequestedMinutesString].
+type TimeOffRequestCreatedWebhookEventDataRequestedMinutesUnion interface {
+	ImplementsTimeOffRequestCreatedWebhookEventDataRequestedMinutesUnion()
+}
+
+func (r TimeOffRequestCreatedWebhookEventDataRequestedMinutesString) ImplementsTimeOffRequestCreatedWebhookEventDataRequestedMinutesUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*TimeOffRequestCreatedWebhookEventDataRequestedMinutesUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(TimeOffRequestCreatedWebhookEventDataRequestedMinutesString("")),
+		},
+	)
+}
+
+type TimeOffRequestCreatedWebhookEventDataRequestedMinutesString string
+
+const (
+	TimeOffRequestCreatedWebhookEventDataRequestedMinutesStringInfinity  TimeOffRequestCreatedWebhookEventDataRequestedMinutesString = "Infinity"
+	TimeOffRequestCreatedWebhookEventDataRequestedMinutesStringInfinity2 TimeOffRequestCreatedWebhookEventDataRequestedMinutesString = "-Infinity"
+	TimeOffRequestCreatedWebhookEventDataRequestedMinutesStringNaN       TimeOffRequestCreatedWebhookEventDataRequestedMinutesString = "NaN"
+)
+
+func (r TimeOffRequestCreatedWebhookEventDataRequestedMinutesString) IsKnown() bool {
+	switch r {
+	case TimeOffRequestCreatedWebhookEventDataRequestedMinutesStringInfinity, TimeOffRequestCreatedWebhookEventDataRequestedMinutesStringInfinity2, TimeOffRequestCreatedWebhookEventDataRequestedMinutesStringNaN:
+		return true
+	}
+	return false
+}
+
 type TimeOffRequestReviewedWebhookEvent struct {
 	// Unique event identifier (format: `<objectTag>:<uuid>`). Stable across retries.
 	ID   string                                 `json:"id" api:"required"`
@@ -261,16 +301,16 @@ func (r TimeOffRequestReviewedWebhookEventType) IsKnown() bool {
 }
 
 type TimeOffRequestReviewedWebhookEventData struct {
-	ID               string                                               `json:"id" api:"required"`
-	CreatedAt        string                                               `json:"createdAt" api:"required"`
-	EndAt            string                                               `json:"endAt" api:"required"`
-	EndRangeType     TimeOffRequestReviewedWebhookEventDataEndRangeType   `json:"endRangeType" api:"required"`
-	Reason           string                                               `json:"reason" api:"required,nullable"`
-	RequestedMinutes interface{}                                          `json:"requestedMinutes" api:"required"`
-	StartAt          string                                               `json:"startAt" api:"required"`
-	StartRangeType   TimeOffRequestReviewedWebhookEventDataStartRangeType `json:"startRangeType" api:"required"`
-	Status           TimeOffRequestReviewedWebhookEventDataStatus         `json:"status" api:"required"`
-	TimeOffPolicyID  string                                               `json:"timeOffPolicyId" api:"required"`
+	ID               string                                                      `json:"id" api:"required"`
+	CreatedAt        string                                                      `json:"createdAt" api:"required"`
+	EndAt            string                                                      `json:"endAt" api:"required"`
+	EndRangeType     TimeOffRequestReviewedWebhookEventDataEndRangeType          `json:"endRangeType" api:"required"`
+	Reason           string                                                      `json:"reason" api:"required,nullable"`
+	RequestedMinutes TimeOffRequestReviewedWebhookEventDataRequestedMinutesUnion `json:"requestedMinutes" api:"required"`
+	StartAt          string                                                      `json:"startAt" api:"required"`
+	StartRangeType   TimeOffRequestReviewedWebhookEventDataStartRangeType        `json:"startRangeType" api:"required"`
+	Status           TimeOffRequestReviewedWebhookEventDataStatus                `json:"status" api:"required"`
+	TimeOffPolicyID  string                                                      `json:"timeOffPolicyId" api:"required"`
 	// The time zone that the worker is requesting time off in.
 	TimeZone string `json:"timeZone" api:"required,nullable"`
 	// The id of the worker.
@@ -350,6 +390,45 @@ func (r TimeOffRequestReviewedWebhookEventDataEndRangeType) IsKnown() bool {
 	return false
 }
 
+// Union satisfied by [shared.UnionFloat], [TimeOffRequestReviewedWebhookEventDataRequestedMinutesString].
+type TimeOffRequestReviewedWebhookEventDataRequestedMinutesUnion interface {
+	ImplementsTimeOffRequestReviewedWebhookEventDataRequestedMinutesUnion()
+}
+
+func (r TimeOffRequestReviewedWebhookEventDataRequestedMinutesString) ImplementsTimeOffRequestReviewedWebhookEventDataRequestedMinutesUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*TimeOffRequestReviewedWebhookEventDataRequestedMinutesUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(TimeOffRequestReviewedWebhookEventDataRequestedMinutesString("")),
+		},
+	)
+}
+
+type TimeOffRequestReviewedWebhookEventDataRequestedMinutesString string
+
+const (
+	TimeOffRequestReviewedWebhookEventDataRequestedMinutesStringInfinity  TimeOffRequestReviewedWebhookEventDataRequestedMinutesString = "Infinity"
+	TimeOffRequestReviewedWebhookEventDataRequestedMinutesStringInfinity2 TimeOffRequestReviewedWebhookEventDataRequestedMinutesString = "-Infinity"
+	TimeOffRequestReviewedWebhookEventDataRequestedMinutesStringNaN       TimeOffRequestReviewedWebhookEventDataRequestedMinutesString = "NaN"
+)
+
+func (r TimeOffRequestReviewedWebhookEventDataRequestedMinutesString) IsKnown() bool {
+	switch r {
+	case TimeOffRequestReviewedWebhookEventDataRequestedMinutesStringInfinity, TimeOffRequestReviewedWebhookEventDataRequestedMinutesStringInfinity2, TimeOffRequestReviewedWebhookEventDataRequestedMinutesStringNaN:
+		return true
+	}
+	return false
+}
+
 type TimeOffRequestDeletedWebhookEvent struct {
 	// Unique event identifier (format: `<objectTag>:<uuid>`). Stable across retries.
 	ID   string                                `json:"id" api:"required"`
@@ -394,16 +473,16 @@ func (r TimeOffRequestDeletedWebhookEventType) IsKnown() bool {
 }
 
 type TimeOffRequestDeletedWebhookEventData struct {
-	ID               string                                              `json:"id" api:"required"`
-	CreatedAt        string                                              `json:"createdAt" api:"required"`
-	EndAt            string                                              `json:"endAt" api:"required"`
-	EndRangeType     TimeOffRequestDeletedWebhookEventDataEndRangeType   `json:"endRangeType" api:"required"`
-	Reason           string                                              `json:"reason" api:"required,nullable"`
-	RequestedMinutes interface{}                                         `json:"requestedMinutes" api:"required"`
-	StartAt          string                                              `json:"startAt" api:"required"`
-	StartRangeType   TimeOffRequestDeletedWebhookEventDataStartRangeType `json:"startRangeType" api:"required"`
-	Status           TimeOffRequestDeletedWebhookEventDataStatus         `json:"status" api:"required"`
-	TimeOffPolicyID  string                                              `json:"timeOffPolicyId" api:"required"`
+	ID               string                                                     `json:"id" api:"required"`
+	CreatedAt        string                                                     `json:"createdAt" api:"required"`
+	EndAt            string                                                     `json:"endAt" api:"required"`
+	EndRangeType     TimeOffRequestDeletedWebhookEventDataEndRangeType          `json:"endRangeType" api:"required"`
+	Reason           string                                                     `json:"reason" api:"required,nullable"`
+	RequestedMinutes TimeOffRequestDeletedWebhookEventDataRequestedMinutesUnion `json:"requestedMinutes" api:"required"`
+	StartAt          string                                                     `json:"startAt" api:"required"`
+	StartRangeType   TimeOffRequestDeletedWebhookEventDataStartRangeType        `json:"startRangeType" api:"required"`
+	Status           TimeOffRequestDeletedWebhookEventDataStatus                `json:"status" api:"required"`
+	TimeOffPolicyID  string                                                     `json:"timeOffPolicyId" api:"required"`
 	// The time zone that the worker is requesting time off in.
 	TimeZone string `json:"timeZone" api:"required,nullable"`
 	// The id of the worker.
@@ -478,6 +557,45 @@ const (
 func (r TimeOffRequestDeletedWebhookEventDataEndRangeType) IsKnown() bool {
 	switch r {
 	case TimeOffRequestDeletedWebhookEventDataEndRangeTypeDate, TimeOffRequestDeletedWebhookEventDataEndRangeTypeDatetime:
+		return true
+	}
+	return false
+}
+
+// Union satisfied by [shared.UnionFloat], [TimeOffRequestDeletedWebhookEventDataRequestedMinutesString].
+type TimeOffRequestDeletedWebhookEventDataRequestedMinutesUnion interface {
+	ImplementsTimeOffRequestDeletedWebhookEventDataRequestedMinutesUnion()
+}
+
+func (r TimeOffRequestDeletedWebhookEventDataRequestedMinutesString) ImplementsTimeOffRequestDeletedWebhookEventDataRequestedMinutesUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*TimeOffRequestDeletedWebhookEventDataRequestedMinutesUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(TimeOffRequestDeletedWebhookEventDataRequestedMinutesString("")),
+		},
+	)
+}
+
+type TimeOffRequestDeletedWebhookEventDataRequestedMinutesString string
+
+const (
+	TimeOffRequestDeletedWebhookEventDataRequestedMinutesStringInfinity  TimeOffRequestDeletedWebhookEventDataRequestedMinutesString = "Infinity"
+	TimeOffRequestDeletedWebhookEventDataRequestedMinutesStringInfinity2 TimeOffRequestDeletedWebhookEventDataRequestedMinutesString = "-Infinity"
+	TimeOffRequestDeletedWebhookEventDataRequestedMinutesStringNaN       TimeOffRequestDeletedWebhookEventDataRequestedMinutesString = "NaN"
+)
+
+func (r TimeOffRequestDeletedWebhookEventDataRequestedMinutesString) IsKnown() bool {
+	switch r {
+	case TimeOffRequestDeletedWebhookEventDataRequestedMinutesStringInfinity, TimeOffRequestDeletedWebhookEventDataRequestedMinutesStringInfinity2, TimeOffRequestDeletedWebhookEventDataRequestedMinutesStringNaN:
 		return true
 	}
 	return false

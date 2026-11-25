@@ -19,6 +19,7 @@ import (
 	"github.com/TeamWarp/warp-go-sdk/internal/param"
 	"github.com/TeamWarp/warp-go-sdk/internal/requestconfig"
 	"github.com/TeamWarp/warp-go-sdk/option"
+	"github.com/TeamWarp/warp-go-sdk/shared"
 )
 
 // PaySplitService contains methods and other services that help with interacting
@@ -305,9 +306,9 @@ func (r PublicBankAccountReferenceAccountType) IsKnown() bool {
 }
 
 type PublicPaySplitPercentage struct {
-	Display    string                       `json:"display" api:"required"`
-	Percentage interface{}                  `json:"percentage" api:"required"`
-	JSON       publicPaySplitPercentageJSON `json:"-"`
+	Display    string                                  `json:"display" api:"required"`
+	Percentage PublicPaySplitPercentagePercentageUnion `json:"percentage" api:"required"`
+	JSON       publicPaySplitPercentageJSON            `json:"-"`
 }
 
 // publicPaySplitPercentageJSON contains the JSON metadata for the struct [PublicPaySplitPercentage]
@@ -621,6 +622,29 @@ func (r paySplitListResponseJSON) RawJSON() string {
 	return r.raw
 }
 
+// Union satisfied by [shared.UnionFloat], [PublicPaySplitPercentagePercentageString].
+type PublicPaySplitPercentagePercentageUnion interface {
+	ImplementsPublicPaySplitPercentagePercentageUnion()
+}
+
+func (r PublicPaySplitPercentagePercentageString) ImplementsPublicPaySplitPercentagePercentageUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*PublicPaySplitPercentagePercentageUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(PublicPaySplitPercentagePercentageString("")),
+		},
+	)
+}
+
 type PublicPaySplitUnion interface {
 	implementsPublicPaySplit()
 }
@@ -758,6 +782,22 @@ const (
 func (r PublicPaySplitAllocationCurrency) IsKnown() bool {
 	switch r {
 	case PublicPaySplitAllocationCurrencyUsd, PublicPaySplitAllocationCurrencyAud, PublicPaySplitAllocationCurrencyBgn, PublicPaySplitAllocationCurrencyBrl, PublicPaySplitAllocationCurrencyCad, PublicPaySplitAllocationCurrencyChf, PublicPaySplitAllocationCurrencyCzk, PublicPaySplitAllocationCurrencyDkk, PublicPaySplitAllocationCurrencyEur, PublicPaySplitAllocationCurrencyGbp, PublicPaySplitAllocationCurrencyHkd, PublicPaySplitAllocationCurrencyHuf, PublicPaySplitAllocationCurrencyIdr, PublicPaySplitAllocationCurrencyInr, PublicPaySplitAllocationCurrencyJpy, PublicPaySplitAllocationCurrencyMyr, PublicPaySplitAllocationCurrencyNok, PublicPaySplitAllocationCurrencyNzd, PublicPaySplitAllocationCurrencyCny, PublicPaySplitAllocationCurrencyPln, PublicPaySplitAllocationCurrencyRon, PublicPaySplitAllocationCurrencyTry, PublicPaySplitAllocationCurrencySek, PublicPaySplitAllocationCurrencySgd, PublicPaySplitAllocationCurrencyAed, PublicPaySplitAllocationCurrencyArs, PublicPaySplitAllocationCurrencyBdt, PublicPaySplitAllocationCurrencyBwp, PublicPaySplitAllocationCurrencyClp, PublicPaySplitAllocationCurrencyCop, PublicPaySplitAllocationCurrencyCrc, PublicPaySplitAllocationCurrencyEgp, PublicPaySplitAllocationCurrencyFjd, PublicPaySplitAllocationCurrencyGel, PublicPaySplitAllocationCurrencyGhs, PublicPaySplitAllocationCurrencyIls, PublicPaySplitAllocationCurrencyKes, PublicPaySplitAllocationCurrencyKrw, PublicPaySplitAllocationCurrencyLkr, PublicPaySplitAllocationCurrencyMad, PublicPaySplitAllocationCurrencyMxn, PublicPaySplitAllocationCurrencyNpr, PublicPaySplitAllocationCurrencyPhp, PublicPaySplitAllocationCurrencyPkr, PublicPaySplitAllocationCurrencyThb, PublicPaySplitAllocationCurrencyUah, PublicPaySplitAllocationCurrencyUgx, PublicPaySplitAllocationCurrencyUyu, PublicPaySplitAllocationCurrencyVnd, PublicPaySplitAllocationCurrencyZar, PublicPaySplitAllocationCurrencyZmw, PublicPaySplitAllocationCurrencyTnd, PublicPaySplitAllocationCurrencyNgn, PublicPaySplitAllocationCurrencyRsd, PublicPaySplitAllocationCurrencyTwd, PublicPaySplitAllocationCurrencyGtq, PublicPaySplitAllocationCurrencyHnl, PublicPaySplitAllocationCurrencyDop, PublicPaySplitAllocationCurrencySar, PublicPaySplitAllocationCurrencyXaf, PublicPaySplitAllocationCurrencyPen:
+		return true
+	}
+	return false
+}
+
+type PublicPaySplitPercentagePercentageString string
+
+const (
+	PublicPaySplitPercentagePercentageStringInfinity  PublicPaySplitPercentagePercentageString = "Infinity"
+	PublicPaySplitPercentagePercentageStringInfinity2 PublicPaySplitPercentagePercentageString = "-Infinity"
+	PublicPaySplitPercentagePercentageStringNaN       PublicPaySplitPercentagePercentageString = "NaN"
+)
+
+func (r PublicPaySplitPercentagePercentageString) IsKnown() bool {
+	switch r {
+	case PublicPaySplitPercentagePercentageStringInfinity, PublicPaySplitPercentagePercentageStringInfinity2, PublicPaySplitPercentagePercentageStringNaN:
 		return true
 	}
 	return false
