@@ -742,6 +742,8 @@ type WorkerCreatedWebhookEventData struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerCreatedWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerCreatedWebhookEventDataLevel `json:"level" api:"nullable"`
@@ -754,39 +756,40 @@ type WorkerCreatedWebhookEventData struct {
 
 // workerCreatedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerCreatedWebhookEventData]
 type workerCreatedWebhookEventDataJSON struct {
-	ID                apijson.Field
-	Address           apijson.Field
-	BenefitEligible   apijson.Field
-	BiologicalSex     apijson.Field
-	BusinessName      apijson.Field
-	Compensation      apijson.Field
-	DateOfBirth       apijson.Field
-	Department        apijson.Field
-	DisplayName       apijson.Field
-	Email             apijson.Field
-	EndDate           apijson.Field
-	FirstName         apijson.Field
-	IsBusiness        apijson.Field
-	LastName          apijson.Field
-	LatestRehireDate  apijson.Field
-	MaritalStatus     apijson.Field
-	Phone             apijson.Field
-	Position          apijson.Field
-	PreferredName     apijson.Field
-	PrimaryWorkplace  apijson.Field
-	StartDate         apijson.Field
-	Status            apijson.Field
-	TerminationReason apijson.Field
-	TimeZone          apijson.Field
-	Type              apijson.Field
-	UpdatedAt         apijson.Field
-	WorkEmail         apijson.Field
-	CustomFields      apijson.Field
-	Level             apijson.Field
-	Manager           apijson.Field
-	TShirtSize        apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
+	ID                  apijson.Field
+	Address             apijson.Field
+	BenefitEligible     apijson.Field
+	BiologicalSex       apijson.Field
+	BusinessName        apijson.Field
+	Compensation        apijson.Field
+	DateOfBirth         apijson.Field
+	Department          apijson.Field
+	DisplayName         apijson.Field
+	Email               apijson.Field
+	EndDate             apijson.Field
+	FirstName           apijson.Field
+	IsBusiness          apijson.Field
+	LastName            apijson.Field
+	LatestRehireDate    apijson.Field
+	MaritalStatus       apijson.Field
+	Phone               apijson.Field
+	Position            apijson.Field
+	PreferredName       apijson.Field
+	PrimaryWorkplace    apijson.Field
+	StartDate           apijson.Field
+	Status              apijson.Field
+	TerminationReason   apijson.Field
+	TimeZone            apijson.Field
+	Type                apijson.Field
+	UpdatedAt           apijson.Field
+	WorkEmail           apijson.Field
+	CustomFields        apijson.Field
+	DietaryRestrictions apijson.Field
+	Level               apijson.Field
+	Manager             apijson.Field
+	TShirtSize          apijson.Field
+	raw                 string
+	ExtraFields         map[string]apijson.Field
 }
 
 func (r *WorkerCreatedWebhookEventData) UnmarshalJSON(data []byte) (err error) {
@@ -876,6 +879,36 @@ const (
 func (r WorkerCreatedWebhookEventDataTShirtSize) IsKnown() bool {
 	switch r {
 	case WorkerCreatedWebhookEventDataTShirtSizeXs, WorkerCreatedWebhookEventDataTShirtSizeS, WorkerCreatedWebhookEventDataTShirtSizeM, WorkerCreatedWebhookEventDataTShirtSizeL, WorkerCreatedWebhookEventDataTShirtSizeXl, WorkerCreatedWebhookEventDataTShirtSizeXxl, WorkerCreatedWebhookEventDataTShirtSizeXxxl:
+		return true
+	}
+	return false
+}
+
+type WorkerCreatedWebhookEventDataDietaryRestriction string
+
+const (
+	WorkerCreatedWebhookEventDataDietaryRestrictionVegetarian       WorkerCreatedWebhookEventDataDietaryRestriction = "vegetarian"
+	WorkerCreatedWebhookEventDataDietaryRestrictionVegan            WorkerCreatedWebhookEventDataDietaryRestriction = "vegan"
+	WorkerCreatedWebhookEventDataDietaryRestrictionPescatarian      WorkerCreatedWebhookEventDataDietaryRestriction = "pescatarian"
+	WorkerCreatedWebhookEventDataDietaryRestrictionHalal            WorkerCreatedWebhookEventDataDietaryRestriction = "halal"
+	WorkerCreatedWebhookEventDataDietaryRestrictionKosher           WorkerCreatedWebhookEventDataDietaryRestriction = "kosher"
+	WorkerCreatedWebhookEventDataDietaryRestrictionNoPork           WorkerCreatedWebhookEventDataDietaryRestriction = "no_pork"
+	WorkerCreatedWebhookEventDataDietaryRestrictionNoBeef           WorkerCreatedWebhookEventDataDietaryRestriction = "no_beef"
+	WorkerCreatedWebhookEventDataDietaryRestrictionNoRedMeat        WorkerCreatedWebhookEventDataDietaryRestriction = "no_red_meat"
+	WorkerCreatedWebhookEventDataDietaryRestrictionGlutenFree       WorkerCreatedWebhookEventDataDietaryRestriction = "gluten_free"
+	WorkerCreatedWebhookEventDataDietaryRestrictionDairyFree        WorkerCreatedWebhookEventDataDietaryRestriction = "dairy_free"
+	WorkerCreatedWebhookEventDataDietaryRestrictionLowCarb          WorkerCreatedWebhookEventDataDietaryRestriction = "low_carb"
+	WorkerCreatedWebhookEventDataDietaryRestrictionNutAllergy       WorkerCreatedWebhookEventDataDietaryRestriction = "nut_allergy"
+	WorkerCreatedWebhookEventDataDietaryRestrictionShellfishAllergy WorkerCreatedWebhookEventDataDietaryRestriction = "shellfish_allergy"
+	WorkerCreatedWebhookEventDataDietaryRestrictionFishAllergy      WorkerCreatedWebhookEventDataDietaryRestriction = "fish_allergy"
+	WorkerCreatedWebhookEventDataDietaryRestrictionEggAllergy       WorkerCreatedWebhookEventDataDietaryRestriction = "egg_allergy"
+	WorkerCreatedWebhookEventDataDietaryRestrictionSoyAllergy       WorkerCreatedWebhookEventDataDietaryRestriction = "soy_allergy"
+	WorkerCreatedWebhookEventDataDietaryRestrictionSesameAllergy    WorkerCreatedWebhookEventDataDietaryRestriction = "sesame_allergy"
+)
+
+func (r WorkerCreatedWebhookEventDataDietaryRestriction) IsKnown() bool {
+	switch r {
+	case WorkerCreatedWebhookEventDataDietaryRestrictionVegetarian, WorkerCreatedWebhookEventDataDietaryRestrictionVegan, WorkerCreatedWebhookEventDataDietaryRestrictionPescatarian, WorkerCreatedWebhookEventDataDietaryRestrictionHalal, WorkerCreatedWebhookEventDataDietaryRestrictionKosher, WorkerCreatedWebhookEventDataDietaryRestrictionNoPork, WorkerCreatedWebhookEventDataDietaryRestrictionNoBeef, WorkerCreatedWebhookEventDataDietaryRestrictionNoRedMeat, WorkerCreatedWebhookEventDataDietaryRestrictionGlutenFree, WorkerCreatedWebhookEventDataDietaryRestrictionDairyFree, WorkerCreatedWebhookEventDataDietaryRestrictionLowCarb, WorkerCreatedWebhookEventDataDietaryRestrictionNutAllergy, WorkerCreatedWebhookEventDataDietaryRestrictionShellfishAllergy, WorkerCreatedWebhookEventDataDietaryRestrictionFishAllergy, WorkerCreatedWebhookEventDataDietaryRestrictionEggAllergy, WorkerCreatedWebhookEventDataDietaryRestrictionSoyAllergy, WorkerCreatedWebhookEventDataDietaryRestrictionSesameAllergy:
 		return true
 	}
 	return false
@@ -1085,6 +1118,8 @@ type WorkerUpdatedWebhookEventData struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerUpdatedWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerUpdatedWebhookEventDataLevel `json:"level" api:"nullable"`
@@ -1097,39 +1132,40 @@ type WorkerUpdatedWebhookEventData struct {
 
 // workerUpdatedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerUpdatedWebhookEventData]
 type workerUpdatedWebhookEventDataJSON struct {
-	ID                apijson.Field
-	Address           apijson.Field
-	BenefitEligible   apijson.Field
-	BiologicalSex     apijson.Field
-	BusinessName      apijson.Field
-	Compensation      apijson.Field
-	DateOfBirth       apijson.Field
-	Department        apijson.Field
-	DisplayName       apijson.Field
-	Email             apijson.Field
-	EndDate           apijson.Field
-	FirstName         apijson.Field
-	IsBusiness        apijson.Field
-	LastName          apijson.Field
-	LatestRehireDate  apijson.Field
-	MaritalStatus     apijson.Field
-	Phone             apijson.Field
-	Position          apijson.Field
-	PreferredName     apijson.Field
-	PrimaryWorkplace  apijson.Field
-	StartDate         apijson.Field
-	Status            apijson.Field
-	TerminationReason apijson.Field
-	TimeZone          apijson.Field
-	Type              apijson.Field
-	UpdatedAt         apijson.Field
-	WorkEmail         apijson.Field
-	CustomFields      apijson.Field
-	Level             apijson.Field
-	Manager           apijson.Field
-	TShirtSize        apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
+	ID                  apijson.Field
+	Address             apijson.Field
+	BenefitEligible     apijson.Field
+	BiologicalSex       apijson.Field
+	BusinessName        apijson.Field
+	Compensation        apijson.Field
+	DateOfBirth         apijson.Field
+	Department          apijson.Field
+	DisplayName         apijson.Field
+	Email               apijson.Field
+	EndDate             apijson.Field
+	FirstName           apijson.Field
+	IsBusiness          apijson.Field
+	LastName            apijson.Field
+	LatestRehireDate    apijson.Field
+	MaritalStatus       apijson.Field
+	Phone               apijson.Field
+	Position            apijson.Field
+	PreferredName       apijson.Field
+	PrimaryWorkplace    apijson.Field
+	StartDate           apijson.Field
+	Status              apijson.Field
+	TerminationReason   apijson.Field
+	TimeZone            apijson.Field
+	Type                apijson.Field
+	UpdatedAt           apijson.Field
+	WorkEmail           apijson.Field
+	CustomFields        apijson.Field
+	DietaryRestrictions apijson.Field
+	Level               apijson.Field
+	Manager             apijson.Field
+	TShirtSize          apijson.Field
+	raw                 string
+	ExtraFields         map[string]apijson.Field
 }
 
 func (r *WorkerUpdatedWebhookEventData) UnmarshalJSON(data []byte) (err error) {
@@ -1219,6 +1255,36 @@ const (
 func (r WorkerUpdatedWebhookEventDataTShirtSize) IsKnown() bool {
 	switch r {
 	case WorkerUpdatedWebhookEventDataTShirtSizeXs, WorkerUpdatedWebhookEventDataTShirtSizeS, WorkerUpdatedWebhookEventDataTShirtSizeM, WorkerUpdatedWebhookEventDataTShirtSizeL, WorkerUpdatedWebhookEventDataTShirtSizeXl, WorkerUpdatedWebhookEventDataTShirtSizeXxl, WorkerUpdatedWebhookEventDataTShirtSizeXxxl:
+		return true
+	}
+	return false
+}
+
+type WorkerUpdatedWebhookEventDataDietaryRestriction string
+
+const (
+	WorkerUpdatedWebhookEventDataDietaryRestrictionVegetarian       WorkerUpdatedWebhookEventDataDietaryRestriction = "vegetarian"
+	WorkerUpdatedWebhookEventDataDietaryRestrictionVegan            WorkerUpdatedWebhookEventDataDietaryRestriction = "vegan"
+	WorkerUpdatedWebhookEventDataDietaryRestrictionPescatarian      WorkerUpdatedWebhookEventDataDietaryRestriction = "pescatarian"
+	WorkerUpdatedWebhookEventDataDietaryRestrictionHalal            WorkerUpdatedWebhookEventDataDietaryRestriction = "halal"
+	WorkerUpdatedWebhookEventDataDietaryRestrictionKosher           WorkerUpdatedWebhookEventDataDietaryRestriction = "kosher"
+	WorkerUpdatedWebhookEventDataDietaryRestrictionNoPork           WorkerUpdatedWebhookEventDataDietaryRestriction = "no_pork"
+	WorkerUpdatedWebhookEventDataDietaryRestrictionNoBeef           WorkerUpdatedWebhookEventDataDietaryRestriction = "no_beef"
+	WorkerUpdatedWebhookEventDataDietaryRestrictionNoRedMeat        WorkerUpdatedWebhookEventDataDietaryRestriction = "no_red_meat"
+	WorkerUpdatedWebhookEventDataDietaryRestrictionGlutenFree       WorkerUpdatedWebhookEventDataDietaryRestriction = "gluten_free"
+	WorkerUpdatedWebhookEventDataDietaryRestrictionDairyFree        WorkerUpdatedWebhookEventDataDietaryRestriction = "dairy_free"
+	WorkerUpdatedWebhookEventDataDietaryRestrictionLowCarb          WorkerUpdatedWebhookEventDataDietaryRestriction = "low_carb"
+	WorkerUpdatedWebhookEventDataDietaryRestrictionNutAllergy       WorkerUpdatedWebhookEventDataDietaryRestriction = "nut_allergy"
+	WorkerUpdatedWebhookEventDataDietaryRestrictionShellfishAllergy WorkerUpdatedWebhookEventDataDietaryRestriction = "shellfish_allergy"
+	WorkerUpdatedWebhookEventDataDietaryRestrictionFishAllergy      WorkerUpdatedWebhookEventDataDietaryRestriction = "fish_allergy"
+	WorkerUpdatedWebhookEventDataDietaryRestrictionEggAllergy       WorkerUpdatedWebhookEventDataDietaryRestriction = "egg_allergy"
+	WorkerUpdatedWebhookEventDataDietaryRestrictionSoyAllergy       WorkerUpdatedWebhookEventDataDietaryRestriction = "soy_allergy"
+	WorkerUpdatedWebhookEventDataDietaryRestrictionSesameAllergy    WorkerUpdatedWebhookEventDataDietaryRestriction = "sesame_allergy"
+)
+
+func (r WorkerUpdatedWebhookEventDataDietaryRestriction) IsKnown() bool {
+	switch r {
+	case WorkerUpdatedWebhookEventDataDietaryRestrictionVegetarian, WorkerUpdatedWebhookEventDataDietaryRestrictionVegan, WorkerUpdatedWebhookEventDataDietaryRestrictionPescatarian, WorkerUpdatedWebhookEventDataDietaryRestrictionHalal, WorkerUpdatedWebhookEventDataDietaryRestrictionKosher, WorkerUpdatedWebhookEventDataDietaryRestrictionNoPork, WorkerUpdatedWebhookEventDataDietaryRestrictionNoBeef, WorkerUpdatedWebhookEventDataDietaryRestrictionNoRedMeat, WorkerUpdatedWebhookEventDataDietaryRestrictionGlutenFree, WorkerUpdatedWebhookEventDataDietaryRestrictionDairyFree, WorkerUpdatedWebhookEventDataDietaryRestrictionLowCarb, WorkerUpdatedWebhookEventDataDietaryRestrictionNutAllergy, WorkerUpdatedWebhookEventDataDietaryRestrictionShellfishAllergy, WorkerUpdatedWebhookEventDataDietaryRestrictionFishAllergy, WorkerUpdatedWebhookEventDataDietaryRestrictionEggAllergy, WorkerUpdatedWebhookEventDataDietaryRestrictionSoyAllergy, WorkerUpdatedWebhookEventDataDietaryRestrictionSesameAllergy:
 		return true
 	}
 	return false
@@ -1428,6 +1494,8 @@ type WorkerDeletedWebhookEventData struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerDeletedWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerDeletedWebhookEventDataLevel `json:"level" api:"nullable"`
@@ -1440,39 +1508,40 @@ type WorkerDeletedWebhookEventData struct {
 
 // workerDeletedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerDeletedWebhookEventData]
 type workerDeletedWebhookEventDataJSON struct {
-	ID                apijson.Field
-	Address           apijson.Field
-	BenefitEligible   apijson.Field
-	BiologicalSex     apijson.Field
-	BusinessName      apijson.Field
-	Compensation      apijson.Field
-	DateOfBirth       apijson.Field
-	Department        apijson.Field
-	DisplayName       apijson.Field
-	Email             apijson.Field
-	EndDate           apijson.Field
-	FirstName         apijson.Field
-	IsBusiness        apijson.Field
-	LastName          apijson.Field
-	LatestRehireDate  apijson.Field
-	MaritalStatus     apijson.Field
-	Phone             apijson.Field
-	Position          apijson.Field
-	PreferredName     apijson.Field
-	PrimaryWorkplace  apijson.Field
-	StartDate         apijson.Field
-	Status            apijson.Field
-	TerminationReason apijson.Field
-	TimeZone          apijson.Field
-	Type              apijson.Field
-	UpdatedAt         apijson.Field
-	WorkEmail         apijson.Field
-	CustomFields      apijson.Field
-	Level             apijson.Field
-	Manager           apijson.Field
-	TShirtSize        apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
+	ID                  apijson.Field
+	Address             apijson.Field
+	BenefitEligible     apijson.Field
+	BiologicalSex       apijson.Field
+	BusinessName        apijson.Field
+	Compensation        apijson.Field
+	DateOfBirth         apijson.Field
+	Department          apijson.Field
+	DisplayName         apijson.Field
+	Email               apijson.Field
+	EndDate             apijson.Field
+	FirstName           apijson.Field
+	IsBusiness          apijson.Field
+	LastName            apijson.Field
+	LatestRehireDate    apijson.Field
+	MaritalStatus       apijson.Field
+	Phone               apijson.Field
+	Position            apijson.Field
+	PreferredName       apijson.Field
+	PrimaryWorkplace    apijson.Field
+	StartDate           apijson.Field
+	Status              apijson.Field
+	TerminationReason   apijson.Field
+	TimeZone            apijson.Field
+	Type                apijson.Field
+	UpdatedAt           apijson.Field
+	WorkEmail           apijson.Field
+	CustomFields        apijson.Field
+	DietaryRestrictions apijson.Field
+	Level               apijson.Field
+	Manager             apijson.Field
+	TShirtSize          apijson.Field
+	raw                 string
+	ExtraFields         map[string]apijson.Field
 }
 
 func (r *WorkerDeletedWebhookEventData) UnmarshalJSON(data []byte) (err error) {
@@ -1562,6 +1631,36 @@ const (
 func (r WorkerDeletedWebhookEventDataTShirtSize) IsKnown() bool {
 	switch r {
 	case WorkerDeletedWebhookEventDataTShirtSizeXs, WorkerDeletedWebhookEventDataTShirtSizeS, WorkerDeletedWebhookEventDataTShirtSizeM, WorkerDeletedWebhookEventDataTShirtSizeL, WorkerDeletedWebhookEventDataTShirtSizeXl, WorkerDeletedWebhookEventDataTShirtSizeXxl, WorkerDeletedWebhookEventDataTShirtSizeXxxl:
+		return true
+	}
+	return false
+}
+
+type WorkerDeletedWebhookEventDataDietaryRestriction string
+
+const (
+	WorkerDeletedWebhookEventDataDietaryRestrictionVegetarian       WorkerDeletedWebhookEventDataDietaryRestriction = "vegetarian"
+	WorkerDeletedWebhookEventDataDietaryRestrictionVegan            WorkerDeletedWebhookEventDataDietaryRestriction = "vegan"
+	WorkerDeletedWebhookEventDataDietaryRestrictionPescatarian      WorkerDeletedWebhookEventDataDietaryRestriction = "pescatarian"
+	WorkerDeletedWebhookEventDataDietaryRestrictionHalal            WorkerDeletedWebhookEventDataDietaryRestriction = "halal"
+	WorkerDeletedWebhookEventDataDietaryRestrictionKosher           WorkerDeletedWebhookEventDataDietaryRestriction = "kosher"
+	WorkerDeletedWebhookEventDataDietaryRestrictionNoPork           WorkerDeletedWebhookEventDataDietaryRestriction = "no_pork"
+	WorkerDeletedWebhookEventDataDietaryRestrictionNoBeef           WorkerDeletedWebhookEventDataDietaryRestriction = "no_beef"
+	WorkerDeletedWebhookEventDataDietaryRestrictionNoRedMeat        WorkerDeletedWebhookEventDataDietaryRestriction = "no_red_meat"
+	WorkerDeletedWebhookEventDataDietaryRestrictionGlutenFree       WorkerDeletedWebhookEventDataDietaryRestriction = "gluten_free"
+	WorkerDeletedWebhookEventDataDietaryRestrictionDairyFree        WorkerDeletedWebhookEventDataDietaryRestriction = "dairy_free"
+	WorkerDeletedWebhookEventDataDietaryRestrictionLowCarb          WorkerDeletedWebhookEventDataDietaryRestriction = "low_carb"
+	WorkerDeletedWebhookEventDataDietaryRestrictionNutAllergy       WorkerDeletedWebhookEventDataDietaryRestriction = "nut_allergy"
+	WorkerDeletedWebhookEventDataDietaryRestrictionShellfishAllergy WorkerDeletedWebhookEventDataDietaryRestriction = "shellfish_allergy"
+	WorkerDeletedWebhookEventDataDietaryRestrictionFishAllergy      WorkerDeletedWebhookEventDataDietaryRestriction = "fish_allergy"
+	WorkerDeletedWebhookEventDataDietaryRestrictionEggAllergy       WorkerDeletedWebhookEventDataDietaryRestriction = "egg_allergy"
+	WorkerDeletedWebhookEventDataDietaryRestrictionSoyAllergy       WorkerDeletedWebhookEventDataDietaryRestriction = "soy_allergy"
+	WorkerDeletedWebhookEventDataDietaryRestrictionSesameAllergy    WorkerDeletedWebhookEventDataDietaryRestriction = "sesame_allergy"
+)
+
+func (r WorkerDeletedWebhookEventDataDietaryRestriction) IsKnown() bool {
+	switch r {
+	case WorkerDeletedWebhookEventDataDietaryRestrictionVegetarian, WorkerDeletedWebhookEventDataDietaryRestrictionVegan, WorkerDeletedWebhookEventDataDietaryRestrictionPescatarian, WorkerDeletedWebhookEventDataDietaryRestrictionHalal, WorkerDeletedWebhookEventDataDietaryRestrictionKosher, WorkerDeletedWebhookEventDataDietaryRestrictionNoPork, WorkerDeletedWebhookEventDataDietaryRestrictionNoBeef, WorkerDeletedWebhookEventDataDietaryRestrictionNoRedMeat, WorkerDeletedWebhookEventDataDietaryRestrictionGlutenFree, WorkerDeletedWebhookEventDataDietaryRestrictionDairyFree, WorkerDeletedWebhookEventDataDietaryRestrictionLowCarb, WorkerDeletedWebhookEventDataDietaryRestrictionNutAllergy, WorkerDeletedWebhookEventDataDietaryRestrictionShellfishAllergy, WorkerDeletedWebhookEventDataDietaryRestrictionFishAllergy, WorkerDeletedWebhookEventDataDietaryRestrictionEggAllergy, WorkerDeletedWebhookEventDataDietaryRestrictionSoyAllergy, WorkerDeletedWebhookEventDataDietaryRestrictionSesameAllergy:
 		return true
 	}
 	return false
@@ -1771,6 +1870,8 @@ type WorkerInviteSentWebhookEventData struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerInviteSentWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerInviteSentWebhookEventDataLevel `json:"level" api:"nullable"`
@@ -1783,39 +1884,40 @@ type WorkerInviteSentWebhookEventData struct {
 
 // workerInviteSentWebhookEventDataJSON contains the JSON metadata for the struct [WorkerInviteSentWebhookEventData]
 type workerInviteSentWebhookEventDataJSON struct {
-	ID                apijson.Field
-	Address           apijson.Field
-	BenefitEligible   apijson.Field
-	BiologicalSex     apijson.Field
-	BusinessName      apijson.Field
-	Compensation      apijson.Field
-	DateOfBirth       apijson.Field
-	Department        apijson.Field
-	DisplayName       apijson.Field
-	Email             apijson.Field
-	EndDate           apijson.Field
-	FirstName         apijson.Field
-	IsBusiness        apijson.Field
-	LastName          apijson.Field
-	LatestRehireDate  apijson.Field
-	MaritalStatus     apijson.Field
-	Phone             apijson.Field
-	Position          apijson.Field
-	PreferredName     apijson.Field
-	PrimaryWorkplace  apijson.Field
-	StartDate         apijson.Field
-	Status            apijson.Field
-	TerminationReason apijson.Field
-	TimeZone          apijson.Field
-	Type              apijson.Field
-	UpdatedAt         apijson.Field
-	WorkEmail         apijson.Field
-	CustomFields      apijson.Field
-	Level             apijson.Field
-	Manager           apijson.Field
-	TShirtSize        apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
+	ID                  apijson.Field
+	Address             apijson.Field
+	BenefitEligible     apijson.Field
+	BiologicalSex       apijson.Field
+	BusinessName        apijson.Field
+	Compensation        apijson.Field
+	DateOfBirth         apijson.Field
+	Department          apijson.Field
+	DisplayName         apijson.Field
+	Email               apijson.Field
+	EndDate             apijson.Field
+	FirstName           apijson.Field
+	IsBusiness          apijson.Field
+	LastName            apijson.Field
+	LatestRehireDate    apijson.Field
+	MaritalStatus       apijson.Field
+	Phone               apijson.Field
+	Position            apijson.Field
+	PreferredName       apijson.Field
+	PrimaryWorkplace    apijson.Field
+	StartDate           apijson.Field
+	Status              apijson.Field
+	TerminationReason   apijson.Field
+	TimeZone            apijson.Field
+	Type                apijson.Field
+	UpdatedAt           apijson.Field
+	WorkEmail           apijson.Field
+	CustomFields        apijson.Field
+	DietaryRestrictions apijson.Field
+	Level               apijson.Field
+	Manager             apijson.Field
+	TShirtSize          apijson.Field
+	raw                 string
+	ExtraFields         map[string]apijson.Field
 }
 
 func (r *WorkerInviteSentWebhookEventData) UnmarshalJSON(data []byte) (err error) {
@@ -1905,6 +2007,36 @@ const (
 func (r WorkerInviteSentWebhookEventDataTShirtSize) IsKnown() bool {
 	switch r {
 	case WorkerInviteSentWebhookEventDataTShirtSizeXs, WorkerInviteSentWebhookEventDataTShirtSizeS, WorkerInviteSentWebhookEventDataTShirtSizeM, WorkerInviteSentWebhookEventDataTShirtSizeL, WorkerInviteSentWebhookEventDataTShirtSizeXl, WorkerInviteSentWebhookEventDataTShirtSizeXxl, WorkerInviteSentWebhookEventDataTShirtSizeXxxl:
+		return true
+	}
+	return false
+}
+
+type WorkerInviteSentWebhookEventDataDietaryRestriction string
+
+const (
+	WorkerInviteSentWebhookEventDataDietaryRestrictionVegetarian       WorkerInviteSentWebhookEventDataDietaryRestriction = "vegetarian"
+	WorkerInviteSentWebhookEventDataDietaryRestrictionVegan            WorkerInviteSentWebhookEventDataDietaryRestriction = "vegan"
+	WorkerInviteSentWebhookEventDataDietaryRestrictionPescatarian      WorkerInviteSentWebhookEventDataDietaryRestriction = "pescatarian"
+	WorkerInviteSentWebhookEventDataDietaryRestrictionHalal            WorkerInviteSentWebhookEventDataDietaryRestriction = "halal"
+	WorkerInviteSentWebhookEventDataDietaryRestrictionKosher           WorkerInviteSentWebhookEventDataDietaryRestriction = "kosher"
+	WorkerInviteSentWebhookEventDataDietaryRestrictionNoPork           WorkerInviteSentWebhookEventDataDietaryRestriction = "no_pork"
+	WorkerInviteSentWebhookEventDataDietaryRestrictionNoBeef           WorkerInviteSentWebhookEventDataDietaryRestriction = "no_beef"
+	WorkerInviteSentWebhookEventDataDietaryRestrictionNoRedMeat        WorkerInviteSentWebhookEventDataDietaryRestriction = "no_red_meat"
+	WorkerInviteSentWebhookEventDataDietaryRestrictionGlutenFree       WorkerInviteSentWebhookEventDataDietaryRestriction = "gluten_free"
+	WorkerInviteSentWebhookEventDataDietaryRestrictionDairyFree        WorkerInviteSentWebhookEventDataDietaryRestriction = "dairy_free"
+	WorkerInviteSentWebhookEventDataDietaryRestrictionLowCarb          WorkerInviteSentWebhookEventDataDietaryRestriction = "low_carb"
+	WorkerInviteSentWebhookEventDataDietaryRestrictionNutAllergy       WorkerInviteSentWebhookEventDataDietaryRestriction = "nut_allergy"
+	WorkerInviteSentWebhookEventDataDietaryRestrictionShellfishAllergy WorkerInviteSentWebhookEventDataDietaryRestriction = "shellfish_allergy"
+	WorkerInviteSentWebhookEventDataDietaryRestrictionFishAllergy      WorkerInviteSentWebhookEventDataDietaryRestriction = "fish_allergy"
+	WorkerInviteSentWebhookEventDataDietaryRestrictionEggAllergy       WorkerInviteSentWebhookEventDataDietaryRestriction = "egg_allergy"
+	WorkerInviteSentWebhookEventDataDietaryRestrictionSoyAllergy       WorkerInviteSentWebhookEventDataDietaryRestriction = "soy_allergy"
+	WorkerInviteSentWebhookEventDataDietaryRestrictionSesameAllergy    WorkerInviteSentWebhookEventDataDietaryRestriction = "sesame_allergy"
+)
+
+func (r WorkerInviteSentWebhookEventDataDietaryRestriction) IsKnown() bool {
+	switch r {
+	case WorkerInviteSentWebhookEventDataDietaryRestrictionVegetarian, WorkerInviteSentWebhookEventDataDietaryRestrictionVegan, WorkerInviteSentWebhookEventDataDietaryRestrictionPescatarian, WorkerInviteSentWebhookEventDataDietaryRestrictionHalal, WorkerInviteSentWebhookEventDataDietaryRestrictionKosher, WorkerInviteSentWebhookEventDataDietaryRestrictionNoPork, WorkerInviteSentWebhookEventDataDietaryRestrictionNoBeef, WorkerInviteSentWebhookEventDataDietaryRestrictionNoRedMeat, WorkerInviteSentWebhookEventDataDietaryRestrictionGlutenFree, WorkerInviteSentWebhookEventDataDietaryRestrictionDairyFree, WorkerInviteSentWebhookEventDataDietaryRestrictionLowCarb, WorkerInviteSentWebhookEventDataDietaryRestrictionNutAllergy, WorkerInviteSentWebhookEventDataDietaryRestrictionShellfishAllergy, WorkerInviteSentWebhookEventDataDietaryRestrictionFishAllergy, WorkerInviteSentWebhookEventDataDietaryRestrictionEggAllergy, WorkerInviteSentWebhookEventDataDietaryRestrictionSoyAllergy, WorkerInviteSentWebhookEventDataDietaryRestrictionSesameAllergy:
 		return true
 	}
 	return false
@@ -2114,6 +2246,8 @@ type WorkerInviteAcceptedWebhookEventData struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerInviteAcceptedWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerInviteAcceptedWebhookEventDataLevel `json:"level" api:"nullable"`
@@ -2126,39 +2260,40 @@ type WorkerInviteAcceptedWebhookEventData struct {
 
 // workerInviteAcceptedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerInviteAcceptedWebhookEventData]
 type workerInviteAcceptedWebhookEventDataJSON struct {
-	ID                apijson.Field
-	Address           apijson.Field
-	BenefitEligible   apijson.Field
-	BiologicalSex     apijson.Field
-	BusinessName      apijson.Field
-	Compensation      apijson.Field
-	DateOfBirth       apijson.Field
-	Department        apijson.Field
-	DisplayName       apijson.Field
-	Email             apijson.Field
-	EndDate           apijson.Field
-	FirstName         apijson.Field
-	IsBusiness        apijson.Field
-	LastName          apijson.Field
-	LatestRehireDate  apijson.Field
-	MaritalStatus     apijson.Field
-	Phone             apijson.Field
-	Position          apijson.Field
-	PreferredName     apijson.Field
-	PrimaryWorkplace  apijson.Field
-	StartDate         apijson.Field
-	Status            apijson.Field
-	TerminationReason apijson.Field
-	TimeZone          apijson.Field
-	Type              apijson.Field
-	UpdatedAt         apijson.Field
-	WorkEmail         apijson.Field
-	CustomFields      apijson.Field
-	Level             apijson.Field
-	Manager           apijson.Field
-	TShirtSize        apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
+	ID                  apijson.Field
+	Address             apijson.Field
+	BenefitEligible     apijson.Field
+	BiologicalSex       apijson.Field
+	BusinessName        apijson.Field
+	Compensation        apijson.Field
+	DateOfBirth         apijson.Field
+	Department          apijson.Field
+	DisplayName         apijson.Field
+	Email               apijson.Field
+	EndDate             apijson.Field
+	FirstName           apijson.Field
+	IsBusiness          apijson.Field
+	LastName            apijson.Field
+	LatestRehireDate    apijson.Field
+	MaritalStatus       apijson.Field
+	Phone               apijson.Field
+	Position            apijson.Field
+	PreferredName       apijson.Field
+	PrimaryWorkplace    apijson.Field
+	StartDate           apijson.Field
+	Status              apijson.Field
+	TerminationReason   apijson.Field
+	TimeZone            apijson.Field
+	Type                apijson.Field
+	UpdatedAt           apijson.Field
+	WorkEmail           apijson.Field
+	CustomFields        apijson.Field
+	DietaryRestrictions apijson.Field
+	Level               apijson.Field
+	Manager             apijson.Field
+	TShirtSize          apijson.Field
+	raw                 string
+	ExtraFields         map[string]apijson.Field
 }
 
 func (r *WorkerInviteAcceptedWebhookEventData) UnmarshalJSON(data []byte) (err error) {
@@ -2248,6 +2383,36 @@ const (
 func (r WorkerInviteAcceptedWebhookEventDataTShirtSize) IsKnown() bool {
 	switch r {
 	case WorkerInviteAcceptedWebhookEventDataTShirtSizeXs, WorkerInviteAcceptedWebhookEventDataTShirtSizeS, WorkerInviteAcceptedWebhookEventDataTShirtSizeM, WorkerInviteAcceptedWebhookEventDataTShirtSizeL, WorkerInviteAcceptedWebhookEventDataTShirtSizeXl, WorkerInviteAcceptedWebhookEventDataTShirtSizeXxl, WorkerInviteAcceptedWebhookEventDataTShirtSizeXxxl:
+		return true
+	}
+	return false
+}
+
+type WorkerInviteAcceptedWebhookEventDataDietaryRestriction string
+
+const (
+	WorkerInviteAcceptedWebhookEventDataDietaryRestrictionVegetarian       WorkerInviteAcceptedWebhookEventDataDietaryRestriction = "vegetarian"
+	WorkerInviteAcceptedWebhookEventDataDietaryRestrictionVegan            WorkerInviteAcceptedWebhookEventDataDietaryRestriction = "vegan"
+	WorkerInviteAcceptedWebhookEventDataDietaryRestrictionPescatarian      WorkerInviteAcceptedWebhookEventDataDietaryRestriction = "pescatarian"
+	WorkerInviteAcceptedWebhookEventDataDietaryRestrictionHalal            WorkerInviteAcceptedWebhookEventDataDietaryRestriction = "halal"
+	WorkerInviteAcceptedWebhookEventDataDietaryRestrictionKosher           WorkerInviteAcceptedWebhookEventDataDietaryRestriction = "kosher"
+	WorkerInviteAcceptedWebhookEventDataDietaryRestrictionNoPork           WorkerInviteAcceptedWebhookEventDataDietaryRestriction = "no_pork"
+	WorkerInviteAcceptedWebhookEventDataDietaryRestrictionNoBeef           WorkerInviteAcceptedWebhookEventDataDietaryRestriction = "no_beef"
+	WorkerInviteAcceptedWebhookEventDataDietaryRestrictionNoRedMeat        WorkerInviteAcceptedWebhookEventDataDietaryRestriction = "no_red_meat"
+	WorkerInviteAcceptedWebhookEventDataDietaryRestrictionGlutenFree       WorkerInviteAcceptedWebhookEventDataDietaryRestriction = "gluten_free"
+	WorkerInviteAcceptedWebhookEventDataDietaryRestrictionDairyFree        WorkerInviteAcceptedWebhookEventDataDietaryRestriction = "dairy_free"
+	WorkerInviteAcceptedWebhookEventDataDietaryRestrictionLowCarb          WorkerInviteAcceptedWebhookEventDataDietaryRestriction = "low_carb"
+	WorkerInviteAcceptedWebhookEventDataDietaryRestrictionNutAllergy       WorkerInviteAcceptedWebhookEventDataDietaryRestriction = "nut_allergy"
+	WorkerInviteAcceptedWebhookEventDataDietaryRestrictionShellfishAllergy WorkerInviteAcceptedWebhookEventDataDietaryRestriction = "shellfish_allergy"
+	WorkerInviteAcceptedWebhookEventDataDietaryRestrictionFishAllergy      WorkerInviteAcceptedWebhookEventDataDietaryRestriction = "fish_allergy"
+	WorkerInviteAcceptedWebhookEventDataDietaryRestrictionEggAllergy       WorkerInviteAcceptedWebhookEventDataDietaryRestriction = "egg_allergy"
+	WorkerInviteAcceptedWebhookEventDataDietaryRestrictionSoyAllergy       WorkerInviteAcceptedWebhookEventDataDietaryRestriction = "soy_allergy"
+	WorkerInviteAcceptedWebhookEventDataDietaryRestrictionSesameAllergy    WorkerInviteAcceptedWebhookEventDataDietaryRestriction = "sesame_allergy"
+)
+
+func (r WorkerInviteAcceptedWebhookEventDataDietaryRestriction) IsKnown() bool {
+	switch r {
+	case WorkerInviteAcceptedWebhookEventDataDietaryRestrictionVegetarian, WorkerInviteAcceptedWebhookEventDataDietaryRestrictionVegan, WorkerInviteAcceptedWebhookEventDataDietaryRestrictionPescatarian, WorkerInviteAcceptedWebhookEventDataDietaryRestrictionHalal, WorkerInviteAcceptedWebhookEventDataDietaryRestrictionKosher, WorkerInviteAcceptedWebhookEventDataDietaryRestrictionNoPork, WorkerInviteAcceptedWebhookEventDataDietaryRestrictionNoBeef, WorkerInviteAcceptedWebhookEventDataDietaryRestrictionNoRedMeat, WorkerInviteAcceptedWebhookEventDataDietaryRestrictionGlutenFree, WorkerInviteAcceptedWebhookEventDataDietaryRestrictionDairyFree, WorkerInviteAcceptedWebhookEventDataDietaryRestrictionLowCarb, WorkerInviteAcceptedWebhookEventDataDietaryRestrictionNutAllergy, WorkerInviteAcceptedWebhookEventDataDietaryRestrictionShellfishAllergy, WorkerInviteAcceptedWebhookEventDataDietaryRestrictionFishAllergy, WorkerInviteAcceptedWebhookEventDataDietaryRestrictionEggAllergy, WorkerInviteAcceptedWebhookEventDataDietaryRestrictionSoyAllergy, WorkerInviteAcceptedWebhookEventDataDietaryRestrictionSesameAllergy:
 		return true
 	}
 	return false
@@ -2457,6 +2622,8 @@ type WorkerOnboardingCompletedWebhookEventData struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerOnboardingCompletedWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerOnboardingCompletedWebhookEventDataLevel `json:"level" api:"nullable"`
@@ -2469,39 +2636,40 @@ type WorkerOnboardingCompletedWebhookEventData struct {
 
 // workerOnboardingCompletedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerOnboardingCompletedWebhookEventData]
 type workerOnboardingCompletedWebhookEventDataJSON struct {
-	ID                apijson.Field
-	Address           apijson.Field
-	BenefitEligible   apijson.Field
-	BiologicalSex     apijson.Field
-	BusinessName      apijson.Field
-	Compensation      apijson.Field
-	DateOfBirth       apijson.Field
-	Department        apijson.Field
-	DisplayName       apijson.Field
-	Email             apijson.Field
-	EndDate           apijson.Field
-	FirstName         apijson.Field
-	IsBusiness        apijson.Field
-	LastName          apijson.Field
-	LatestRehireDate  apijson.Field
-	MaritalStatus     apijson.Field
-	Phone             apijson.Field
-	Position          apijson.Field
-	PreferredName     apijson.Field
-	PrimaryWorkplace  apijson.Field
-	StartDate         apijson.Field
-	Status            apijson.Field
-	TerminationReason apijson.Field
-	TimeZone          apijson.Field
-	Type              apijson.Field
-	UpdatedAt         apijson.Field
-	WorkEmail         apijson.Field
-	CustomFields      apijson.Field
-	Level             apijson.Field
-	Manager           apijson.Field
-	TShirtSize        apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
+	ID                  apijson.Field
+	Address             apijson.Field
+	BenefitEligible     apijson.Field
+	BiologicalSex       apijson.Field
+	BusinessName        apijson.Field
+	Compensation        apijson.Field
+	DateOfBirth         apijson.Field
+	Department          apijson.Field
+	DisplayName         apijson.Field
+	Email               apijson.Field
+	EndDate             apijson.Field
+	FirstName           apijson.Field
+	IsBusiness          apijson.Field
+	LastName            apijson.Field
+	LatestRehireDate    apijson.Field
+	MaritalStatus       apijson.Field
+	Phone               apijson.Field
+	Position            apijson.Field
+	PreferredName       apijson.Field
+	PrimaryWorkplace    apijson.Field
+	StartDate           apijson.Field
+	Status              apijson.Field
+	TerminationReason   apijson.Field
+	TimeZone            apijson.Field
+	Type                apijson.Field
+	UpdatedAt           apijson.Field
+	WorkEmail           apijson.Field
+	CustomFields        apijson.Field
+	DietaryRestrictions apijson.Field
+	Level               apijson.Field
+	Manager             apijson.Field
+	TShirtSize          apijson.Field
+	raw                 string
+	ExtraFields         map[string]apijson.Field
 }
 
 func (r *WorkerOnboardingCompletedWebhookEventData) UnmarshalJSON(data []byte) (err error) {
@@ -2591,6 +2759,36 @@ const (
 func (r WorkerOnboardingCompletedWebhookEventDataTShirtSize) IsKnown() bool {
 	switch r {
 	case WorkerOnboardingCompletedWebhookEventDataTShirtSizeXs, WorkerOnboardingCompletedWebhookEventDataTShirtSizeS, WorkerOnboardingCompletedWebhookEventDataTShirtSizeM, WorkerOnboardingCompletedWebhookEventDataTShirtSizeL, WorkerOnboardingCompletedWebhookEventDataTShirtSizeXl, WorkerOnboardingCompletedWebhookEventDataTShirtSizeXxl, WorkerOnboardingCompletedWebhookEventDataTShirtSizeXxxl:
+		return true
+	}
+	return false
+}
+
+type WorkerOnboardingCompletedWebhookEventDataDietaryRestriction string
+
+const (
+	WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionVegetarian       WorkerOnboardingCompletedWebhookEventDataDietaryRestriction = "vegetarian"
+	WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionVegan            WorkerOnboardingCompletedWebhookEventDataDietaryRestriction = "vegan"
+	WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionPescatarian      WorkerOnboardingCompletedWebhookEventDataDietaryRestriction = "pescatarian"
+	WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionHalal            WorkerOnboardingCompletedWebhookEventDataDietaryRestriction = "halal"
+	WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionKosher           WorkerOnboardingCompletedWebhookEventDataDietaryRestriction = "kosher"
+	WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionNoPork           WorkerOnboardingCompletedWebhookEventDataDietaryRestriction = "no_pork"
+	WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionNoBeef           WorkerOnboardingCompletedWebhookEventDataDietaryRestriction = "no_beef"
+	WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionNoRedMeat        WorkerOnboardingCompletedWebhookEventDataDietaryRestriction = "no_red_meat"
+	WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionGlutenFree       WorkerOnboardingCompletedWebhookEventDataDietaryRestriction = "gluten_free"
+	WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionDairyFree        WorkerOnboardingCompletedWebhookEventDataDietaryRestriction = "dairy_free"
+	WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionLowCarb          WorkerOnboardingCompletedWebhookEventDataDietaryRestriction = "low_carb"
+	WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionNutAllergy       WorkerOnboardingCompletedWebhookEventDataDietaryRestriction = "nut_allergy"
+	WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionShellfishAllergy WorkerOnboardingCompletedWebhookEventDataDietaryRestriction = "shellfish_allergy"
+	WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionFishAllergy      WorkerOnboardingCompletedWebhookEventDataDietaryRestriction = "fish_allergy"
+	WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionEggAllergy       WorkerOnboardingCompletedWebhookEventDataDietaryRestriction = "egg_allergy"
+	WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionSoyAllergy       WorkerOnboardingCompletedWebhookEventDataDietaryRestriction = "soy_allergy"
+	WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionSesameAllergy    WorkerOnboardingCompletedWebhookEventDataDietaryRestriction = "sesame_allergy"
+)
+
+func (r WorkerOnboardingCompletedWebhookEventDataDietaryRestriction) IsKnown() bool {
+	switch r {
+	case WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionVegetarian, WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionVegan, WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionPescatarian, WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionHalal, WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionKosher, WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionNoPork, WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionNoBeef, WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionNoRedMeat, WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionGlutenFree, WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionDairyFree, WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionLowCarb, WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionNutAllergy, WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionShellfishAllergy, WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionFishAllergy, WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionEggAllergy, WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionSoyAllergy, WorkerOnboardingCompletedWebhookEventDataDietaryRestrictionSesameAllergy:
 		return true
 	}
 	return false
@@ -2800,6 +2998,8 @@ type WorkerOffboardingStartedWebhookEventData struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerOffboardingStartedWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerOffboardingStartedWebhookEventDataLevel `json:"level" api:"nullable"`
@@ -2812,39 +3012,40 @@ type WorkerOffboardingStartedWebhookEventData struct {
 
 // workerOffboardingStartedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerOffboardingStartedWebhookEventData]
 type workerOffboardingStartedWebhookEventDataJSON struct {
-	ID                apijson.Field
-	Address           apijson.Field
-	BenefitEligible   apijson.Field
-	BiologicalSex     apijson.Field
-	BusinessName      apijson.Field
-	Compensation      apijson.Field
-	DateOfBirth       apijson.Field
-	Department        apijson.Field
-	DisplayName       apijson.Field
-	Email             apijson.Field
-	EndDate           apijson.Field
-	FirstName         apijson.Field
-	IsBusiness        apijson.Field
-	LastName          apijson.Field
-	LatestRehireDate  apijson.Field
-	MaritalStatus     apijson.Field
-	Phone             apijson.Field
-	Position          apijson.Field
-	PreferredName     apijson.Field
-	PrimaryWorkplace  apijson.Field
-	StartDate         apijson.Field
-	Status            apijson.Field
-	TerminationReason apijson.Field
-	TimeZone          apijson.Field
-	Type              apijson.Field
-	UpdatedAt         apijson.Field
-	WorkEmail         apijson.Field
-	CustomFields      apijson.Field
-	Level             apijson.Field
-	Manager           apijson.Field
-	TShirtSize        apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
+	ID                  apijson.Field
+	Address             apijson.Field
+	BenefitEligible     apijson.Field
+	BiologicalSex       apijson.Field
+	BusinessName        apijson.Field
+	Compensation        apijson.Field
+	DateOfBirth         apijson.Field
+	Department          apijson.Field
+	DisplayName         apijson.Field
+	Email               apijson.Field
+	EndDate             apijson.Field
+	FirstName           apijson.Field
+	IsBusiness          apijson.Field
+	LastName            apijson.Field
+	LatestRehireDate    apijson.Field
+	MaritalStatus       apijson.Field
+	Phone               apijson.Field
+	Position            apijson.Field
+	PreferredName       apijson.Field
+	PrimaryWorkplace    apijson.Field
+	StartDate           apijson.Field
+	Status              apijson.Field
+	TerminationReason   apijson.Field
+	TimeZone            apijson.Field
+	Type                apijson.Field
+	UpdatedAt           apijson.Field
+	WorkEmail           apijson.Field
+	CustomFields        apijson.Field
+	DietaryRestrictions apijson.Field
+	Level               apijson.Field
+	Manager             apijson.Field
+	TShirtSize          apijson.Field
+	raw                 string
+	ExtraFields         map[string]apijson.Field
 }
 
 func (r *WorkerOffboardingStartedWebhookEventData) UnmarshalJSON(data []byte) (err error) {
@@ -2934,6 +3135,36 @@ const (
 func (r WorkerOffboardingStartedWebhookEventDataTShirtSize) IsKnown() bool {
 	switch r {
 	case WorkerOffboardingStartedWebhookEventDataTShirtSizeXs, WorkerOffboardingStartedWebhookEventDataTShirtSizeS, WorkerOffboardingStartedWebhookEventDataTShirtSizeM, WorkerOffboardingStartedWebhookEventDataTShirtSizeL, WorkerOffboardingStartedWebhookEventDataTShirtSizeXl, WorkerOffboardingStartedWebhookEventDataTShirtSizeXxl, WorkerOffboardingStartedWebhookEventDataTShirtSizeXxxl:
+		return true
+	}
+	return false
+}
+
+type WorkerOffboardingStartedWebhookEventDataDietaryRestriction string
+
+const (
+	WorkerOffboardingStartedWebhookEventDataDietaryRestrictionVegetarian       WorkerOffboardingStartedWebhookEventDataDietaryRestriction = "vegetarian"
+	WorkerOffboardingStartedWebhookEventDataDietaryRestrictionVegan            WorkerOffboardingStartedWebhookEventDataDietaryRestriction = "vegan"
+	WorkerOffboardingStartedWebhookEventDataDietaryRestrictionPescatarian      WorkerOffboardingStartedWebhookEventDataDietaryRestriction = "pescatarian"
+	WorkerOffboardingStartedWebhookEventDataDietaryRestrictionHalal            WorkerOffboardingStartedWebhookEventDataDietaryRestriction = "halal"
+	WorkerOffboardingStartedWebhookEventDataDietaryRestrictionKosher           WorkerOffboardingStartedWebhookEventDataDietaryRestriction = "kosher"
+	WorkerOffboardingStartedWebhookEventDataDietaryRestrictionNoPork           WorkerOffboardingStartedWebhookEventDataDietaryRestriction = "no_pork"
+	WorkerOffboardingStartedWebhookEventDataDietaryRestrictionNoBeef           WorkerOffboardingStartedWebhookEventDataDietaryRestriction = "no_beef"
+	WorkerOffboardingStartedWebhookEventDataDietaryRestrictionNoRedMeat        WorkerOffboardingStartedWebhookEventDataDietaryRestriction = "no_red_meat"
+	WorkerOffboardingStartedWebhookEventDataDietaryRestrictionGlutenFree       WorkerOffboardingStartedWebhookEventDataDietaryRestriction = "gluten_free"
+	WorkerOffboardingStartedWebhookEventDataDietaryRestrictionDairyFree        WorkerOffboardingStartedWebhookEventDataDietaryRestriction = "dairy_free"
+	WorkerOffboardingStartedWebhookEventDataDietaryRestrictionLowCarb          WorkerOffboardingStartedWebhookEventDataDietaryRestriction = "low_carb"
+	WorkerOffboardingStartedWebhookEventDataDietaryRestrictionNutAllergy       WorkerOffboardingStartedWebhookEventDataDietaryRestriction = "nut_allergy"
+	WorkerOffboardingStartedWebhookEventDataDietaryRestrictionShellfishAllergy WorkerOffboardingStartedWebhookEventDataDietaryRestriction = "shellfish_allergy"
+	WorkerOffboardingStartedWebhookEventDataDietaryRestrictionFishAllergy      WorkerOffboardingStartedWebhookEventDataDietaryRestriction = "fish_allergy"
+	WorkerOffboardingStartedWebhookEventDataDietaryRestrictionEggAllergy       WorkerOffboardingStartedWebhookEventDataDietaryRestriction = "egg_allergy"
+	WorkerOffboardingStartedWebhookEventDataDietaryRestrictionSoyAllergy       WorkerOffboardingStartedWebhookEventDataDietaryRestriction = "soy_allergy"
+	WorkerOffboardingStartedWebhookEventDataDietaryRestrictionSesameAllergy    WorkerOffboardingStartedWebhookEventDataDietaryRestriction = "sesame_allergy"
+)
+
+func (r WorkerOffboardingStartedWebhookEventDataDietaryRestriction) IsKnown() bool {
+	switch r {
+	case WorkerOffboardingStartedWebhookEventDataDietaryRestrictionVegetarian, WorkerOffboardingStartedWebhookEventDataDietaryRestrictionVegan, WorkerOffboardingStartedWebhookEventDataDietaryRestrictionPescatarian, WorkerOffboardingStartedWebhookEventDataDietaryRestrictionHalal, WorkerOffboardingStartedWebhookEventDataDietaryRestrictionKosher, WorkerOffboardingStartedWebhookEventDataDietaryRestrictionNoPork, WorkerOffboardingStartedWebhookEventDataDietaryRestrictionNoBeef, WorkerOffboardingStartedWebhookEventDataDietaryRestrictionNoRedMeat, WorkerOffboardingStartedWebhookEventDataDietaryRestrictionGlutenFree, WorkerOffboardingStartedWebhookEventDataDietaryRestrictionDairyFree, WorkerOffboardingStartedWebhookEventDataDietaryRestrictionLowCarb, WorkerOffboardingStartedWebhookEventDataDietaryRestrictionNutAllergy, WorkerOffboardingStartedWebhookEventDataDietaryRestrictionShellfishAllergy, WorkerOffboardingStartedWebhookEventDataDietaryRestrictionFishAllergy, WorkerOffboardingStartedWebhookEventDataDietaryRestrictionEggAllergy, WorkerOffboardingStartedWebhookEventDataDietaryRestrictionSoyAllergy, WorkerOffboardingStartedWebhookEventDataDietaryRestrictionSesameAllergy:
 		return true
 	}
 	return false
@@ -3143,6 +3374,8 @@ type WorkerOffboardedWebhookEventData struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerOffboardedWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerOffboardedWebhookEventDataLevel `json:"level" api:"nullable"`
@@ -3155,39 +3388,40 @@ type WorkerOffboardedWebhookEventData struct {
 
 // workerOffboardedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerOffboardedWebhookEventData]
 type workerOffboardedWebhookEventDataJSON struct {
-	ID                apijson.Field
-	Address           apijson.Field
-	BenefitEligible   apijson.Field
-	BiologicalSex     apijson.Field
-	BusinessName      apijson.Field
-	Compensation      apijson.Field
-	DateOfBirth       apijson.Field
-	Department        apijson.Field
-	DisplayName       apijson.Field
-	Email             apijson.Field
-	EndDate           apijson.Field
-	FirstName         apijson.Field
-	IsBusiness        apijson.Field
-	LastName          apijson.Field
-	LatestRehireDate  apijson.Field
-	MaritalStatus     apijson.Field
-	Phone             apijson.Field
-	Position          apijson.Field
-	PreferredName     apijson.Field
-	PrimaryWorkplace  apijson.Field
-	StartDate         apijson.Field
-	Status            apijson.Field
-	TerminationReason apijson.Field
-	TimeZone          apijson.Field
-	Type              apijson.Field
-	UpdatedAt         apijson.Field
-	WorkEmail         apijson.Field
-	CustomFields      apijson.Field
-	Level             apijson.Field
-	Manager           apijson.Field
-	TShirtSize        apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
+	ID                  apijson.Field
+	Address             apijson.Field
+	BenefitEligible     apijson.Field
+	BiologicalSex       apijson.Field
+	BusinessName        apijson.Field
+	Compensation        apijson.Field
+	DateOfBirth         apijson.Field
+	Department          apijson.Field
+	DisplayName         apijson.Field
+	Email               apijson.Field
+	EndDate             apijson.Field
+	FirstName           apijson.Field
+	IsBusiness          apijson.Field
+	LastName            apijson.Field
+	LatestRehireDate    apijson.Field
+	MaritalStatus       apijson.Field
+	Phone               apijson.Field
+	Position            apijson.Field
+	PreferredName       apijson.Field
+	PrimaryWorkplace    apijson.Field
+	StartDate           apijson.Field
+	Status              apijson.Field
+	TerminationReason   apijson.Field
+	TimeZone            apijson.Field
+	Type                apijson.Field
+	UpdatedAt           apijson.Field
+	WorkEmail           apijson.Field
+	CustomFields        apijson.Field
+	DietaryRestrictions apijson.Field
+	Level               apijson.Field
+	Manager             apijson.Field
+	TShirtSize          apijson.Field
+	raw                 string
+	ExtraFields         map[string]apijson.Field
 }
 
 func (r *WorkerOffboardedWebhookEventData) UnmarshalJSON(data []byte) (err error) {
@@ -3277,6 +3511,36 @@ const (
 func (r WorkerOffboardedWebhookEventDataTShirtSize) IsKnown() bool {
 	switch r {
 	case WorkerOffboardedWebhookEventDataTShirtSizeXs, WorkerOffboardedWebhookEventDataTShirtSizeS, WorkerOffboardedWebhookEventDataTShirtSizeM, WorkerOffboardedWebhookEventDataTShirtSizeL, WorkerOffboardedWebhookEventDataTShirtSizeXl, WorkerOffboardedWebhookEventDataTShirtSizeXxl, WorkerOffboardedWebhookEventDataTShirtSizeXxxl:
+		return true
+	}
+	return false
+}
+
+type WorkerOffboardedWebhookEventDataDietaryRestriction string
+
+const (
+	WorkerOffboardedWebhookEventDataDietaryRestrictionVegetarian       WorkerOffboardedWebhookEventDataDietaryRestriction = "vegetarian"
+	WorkerOffboardedWebhookEventDataDietaryRestrictionVegan            WorkerOffboardedWebhookEventDataDietaryRestriction = "vegan"
+	WorkerOffboardedWebhookEventDataDietaryRestrictionPescatarian      WorkerOffboardedWebhookEventDataDietaryRestriction = "pescatarian"
+	WorkerOffboardedWebhookEventDataDietaryRestrictionHalal            WorkerOffboardedWebhookEventDataDietaryRestriction = "halal"
+	WorkerOffboardedWebhookEventDataDietaryRestrictionKosher           WorkerOffboardedWebhookEventDataDietaryRestriction = "kosher"
+	WorkerOffboardedWebhookEventDataDietaryRestrictionNoPork           WorkerOffboardedWebhookEventDataDietaryRestriction = "no_pork"
+	WorkerOffboardedWebhookEventDataDietaryRestrictionNoBeef           WorkerOffboardedWebhookEventDataDietaryRestriction = "no_beef"
+	WorkerOffboardedWebhookEventDataDietaryRestrictionNoRedMeat        WorkerOffboardedWebhookEventDataDietaryRestriction = "no_red_meat"
+	WorkerOffboardedWebhookEventDataDietaryRestrictionGlutenFree       WorkerOffboardedWebhookEventDataDietaryRestriction = "gluten_free"
+	WorkerOffboardedWebhookEventDataDietaryRestrictionDairyFree        WorkerOffboardedWebhookEventDataDietaryRestriction = "dairy_free"
+	WorkerOffboardedWebhookEventDataDietaryRestrictionLowCarb          WorkerOffboardedWebhookEventDataDietaryRestriction = "low_carb"
+	WorkerOffboardedWebhookEventDataDietaryRestrictionNutAllergy       WorkerOffboardedWebhookEventDataDietaryRestriction = "nut_allergy"
+	WorkerOffboardedWebhookEventDataDietaryRestrictionShellfishAllergy WorkerOffboardedWebhookEventDataDietaryRestriction = "shellfish_allergy"
+	WorkerOffboardedWebhookEventDataDietaryRestrictionFishAllergy      WorkerOffboardedWebhookEventDataDietaryRestriction = "fish_allergy"
+	WorkerOffboardedWebhookEventDataDietaryRestrictionEggAllergy       WorkerOffboardedWebhookEventDataDietaryRestriction = "egg_allergy"
+	WorkerOffboardedWebhookEventDataDietaryRestrictionSoyAllergy       WorkerOffboardedWebhookEventDataDietaryRestriction = "soy_allergy"
+	WorkerOffboardedWebhookEventDataDietaryRestrictionSesameAllergy    WorkerOffboardedWebhookEventDataDietaryRestriction = "sesame_allergy"
+)
+
+func (r WorkerOffboardedWebhookEventDataDietaryRestriction) IsKnown() bool {
+	switch r {
+	case WorkerOffboardedWebhookEventDataDietaryRestrictionVegetarian, WorkerOffboardedWebhookEventDataDietaryRestrictionVegan, WorkerOffboardedWebhookEventDataDietaryRestrictionPescatarian, WorkerOffboardedWebhookEventDataDietaryRestrictionHalal, WorkerOffboardedWebhookEventDataDietaryRestrictionKosher, WorkerOffboardedWebhookEventDataDietaryRestrictionNoPork, WorkerOffboardedWebhookEventDataDietaryRestrictionNoBeef, WorkerOffboardedWebhookEventDataDietaryRestrictionNoRedMeat, WorkerOffboardedWebhookEventDataDietaryRestrictionGlutenFree, WorkerOffboardedWebhookEventDataDietaryRestrictionDairyFree, WorkerOffboardedWebhookEventDataDietaryRestrictionLowCarb, WorkerOffboardedWebhookEventDataDietaryRestrictionNutAllergy, WorkerOffboardedWebhookEventDataDietaryRestrictionShellfishAllergy, WorkerOffboardedWebhookEventDataDietaryRestrictionFishAllergy, WorkerOffboardedWebhookEventDataDietaryRestrictionEggAllergy, WorkerOffboardedWebhookEventDataDietaryRestrictionSoyAllergy, WorkerOffboardedWebhookEventDataDietaryRestrictionSesameAllergy:
 		return true
 	}
 	return false
@@ -3486,6 +3750,8 @@ type WorkerReactivatedWebhookEventData struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerReactivatedWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerReactivatedWebhookEventDataLevel `json:"level" api:"nullable"`
@@ -3498,39 +3764,40 @@ type WorkerReactivatedWebhookEventData struct {
 
 // workerReactivatedWebhookEventDataJSON contains the JSON metadata for the struct [WorkerReactivatedWebhookEventData]
 type workerReactivatedWebhookEventDataJSON struct {
-	ID                apijson.Field
-	Address           apijson.Field
-	BenefitEligible   apijson.Field
-	BiologicalSex     apijson.Field
-	BusinessName      apijson.Field
-	Compensation      apijson.Field
-	DateOfBirth       apijson.Field
-	Department        apijson.Field
-	DisplayName       apijson.Field
-	Email             apijson.Field
-	EndDate           apijson.Field
-	FirstName         apijson.Field
-	IsBusiness        apijson.Field
-	LastName          apijson.Field
-	LatestRehireDate  apijson.Field
-	MaritalStatus     apijson.Field
-	Phone             apijson.Field
-	Position          apijson.Field
-	PreferredName     apijson.Field
-	PrimaryWorkplace  apijson.Field
-	StartDate         apijson.Field
-	Status            apijson.Field
-	TerminationReason apijson.Field
-	TimeZone          apijson.Field
-	Type              apijson.Field
-	UpdatedAt         apijson.Field
-	WorkEmail         apijson.Field
-	CustomFields      apijson.Field
-	Level             apijson.Field
-	Manager           apijson.Field
-	TShirtSize        apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
+	ID                  apijson.Field
+	Address             apijson.Field
+	BenefitEligible     apijson.Field
+	BiologicalSex       apijson.Field
+	BusinessName        apijson.Field
+	Compensation        apijson.Field
+	DateOfBirth         apijson.Field
+	Department          apijson.Field
+	DisplayName         apijson.Field
+	Email               apijson.Field
+	EndDate             apijson.Field
+	FirstName           apijson.Field
+	IsBusiness          apijson.Field
+	LastName            apijson.Field
+	LatestRehireDate    apijson.Field
+	MaritalStatus       apijson.Field
+	Phone               apijson.Field
+	Position            apijson.Field
+	PreferredName       apijson.Field
+	PrimaryWorkplace    apijson.Field
+	StartDate           apijson.Field
+	Status              apijson.Field
+	TerminationReason   apijson.Field
+	TimeZone            apijson.Field
+	Type                apijson.Field
+	UpdatedAt           apijson.Field
+	WorkEmail           apijson.Field
+	CustomFields        apijson.Field
+	DietaryRestrictions apijson.Field
+	Level               apijson.Field
+	Manager             apijson.Field
+	TShirtSize          apijson.Field
+	raw                 string
+	ExtraFields         map[string]apijson.Field
 }
 
 func (r *WorkerReactivatedWebhookEventData) UnmarshalJSON(data []byte) (err error) {
@@ -3620,6 +3887,36 @@ const (
 func (r WorkerReactivatedWebhookEventDataTShirtSize) IsKnown() bool {
 	switch r {
 	case WorkerReactivatedWebhookEventDataTShirtSizeXs, WorkerReactivatedWebhookEventDataTShirtSizeS, WorkerReactivatedWebhookEventDataTShirtSizeM, WorkerReactivatedWebhookEventDataTShirtSizeL, WorkerReactivatedWebhookEventDataTShirtSizeXl, WorkerReactivatedWebhookEventDataTShirtSizeXxl, WorkerReactivatedWebhookEventDataTShirtSizeXxxl:
+		return true
+	}
+	return false
+}
+
+type WorkerReactivatedWebhookEventDataDietaryRestriction string
+
+const (
+	WorkerReactivatedWebhookEventDataDietaryRestrictionVegetarian       WorkerReactivatedWebhookEventDataDietaryRestriction = "vegetarian"
+	WorkerReactivatedWebhookEventDataDietaryRestrictionVegan            WorkerReactivatedWebhookEventDataDietaryRestriction = "vegan"
+	WorkerReactivatedWebhookEventDataDietaryRestrictionPescatarian      WorkerReactivatedWebhookEventDataDietaryRestriction = "pescatarian"
+	WorkerReactivatedWebhookEventDataDietaryRestrictionHalal            WorkerReactivatedWebhookEventDataDietaryRestriction = "halal"
+	WorkerReactivatedWebhookEventDataDietaryRestrictionKosher           WorkerReactivatedWebhookEventDataDietaryRestriction = "kosher"
+	WorkerReactivatedWebhookEventDataDietaryRestrictionNoPork           WorkerReactivatedWebhookEventDataDietaryRestriction = "no_pork"
+	WorkerReactivatedWebhookEventDataDietaryRestrictionNoBeef           WorkerReactivatedWebhookEventDataDietaryRestriction = "no_beef"
+	WorkerReactivatedWebhookEventDataDietaryRestrictionNoRedMeat        WorkerReactivatedWebhookEventDataDietaryRestriction = "no_red_meat"
+	WorkerReactivatedWebhookEventDataDietaryRestrictionGlutenFree       WorkerReactivatedWebhookEventDataDietaryRestriction = "gluten_free"
+	WorkerReactivatedWebhookEventDataDietaryRestrictionDairyFree        WorkerReactivatedWebhookEventDataDietaryRestriction = "dairy_free"
+	WorkerReactivatedWebhookEventDataDietaryRestrictionLowCarb          WorkerReactivatedWebhookEventDataDietaryRestriction = "low_carb"
+	WorkerReactivatedWebhookEventDataDietaryRestrictionNutAllergy       WorkerReactivatedWebhookEventDataDietaryRestriction = "nut_allergy"
+	WorkerReactivatedWebhookEventDataDietaryRestrictionShellfishAllergy WorkerReactivatedWebhookEventDataDietaryRestriction = "shellfish_allergy"
+	WorkerReactivatedWebhookEventDataDietaryRestrictionFishAllergy      WorkerReactivatedWebhookEventDataDietaryRestriction = "fish_allergy"
+	WorkerReactivatedWebhookEventDataDietaryRestrictionEggAllergy       WorkerReactivatedWebhookEventDataDietaryRestriction = "egg_allergy"
+	WorkerReactivatedWebhookEventDataDietaryRestrictionSoyAllergy       WorkerReactivatedWebhookEventDataDietaryRestriction = "soy_allergy"
+	WorkerReactivatedWebhookEventDataDietaryRestrictionSesameAllergy    WorkerReactivatedWebhookEventDataDietaryRestriction = "sesame_allergy"
+)
+
+func (r WorkerReactivatedWebhookEventDataDietaryRestriction) IsKnown() bool {
+	switch r {
+	case WorkerReactivatedWebhookEventDataDietaryRestrictionVegetarian, WorkerReactivatedWebhookEventDataDietaryRestrictionVegan, WorkerReactivatedWebhookEventDataDietaryRestrictionPescatarian, WorkerReactivatedWebhookEventDataDietaryRestrictionHalal, WorkerReactivatedWebhookEventDataDietaryRestrictionKosher, WorkerReactivatedWebhookEventDataDietaryRestrictionNoPork, WorkerReactivatedWebhookEventDataDietaryRestrictionNoBeef, WorkerReactivatedWebhookEventDataDietaryRestrictionNoRedMeat, WorkerReactivatedWebhookEventDataDietaryRestrictionGlutenFree, WorkerReactivatedWebhookEventDataDietaryRestrictionDairyFree, WorkerReactivatedWebhookEventDataDietaryRestrictionLowCarb, WorkerReactivatedWebhookEventDataDietaryRestrictionNutAllergy, WorkerReactivatedWebhookEventDataDietaryRestrictionShellfishAllergy, WorkerReactivatedWebhookEventDataDietaryRestrictionFishAllergy, WorkerReactivatedWebhookEventDataDietaryRestrictionEggAllergy, WorkerReactivatedWebhookEventDataDietaryRestrictionSoyAllergy, WorkerReactivatedWebhookEventDataDietaryRestrictionSesameAllergy:
 		return true
 	}
 	return false
