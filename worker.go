@@ -18,6 +18,7 @@ import (
 	"github.com/TeamWarp/warp-go-sdk/internal/param"
 	"github.com/TeamWarp/warp-go-sdk/internal/requestconfig"
 	"github.com/TeamWarp/warp-go-sdk/option"
+	"github.com/TeamWarp/warp-go-sdk/shared"
 )
 
 // WorkerService contains methods and other services that help with interacting
@@ -814,8 +815,8 @@ type PublicNumberWorkerCustomField struct {
 	Type     PublicNumberWorkerCustomFieldType `json:"type" api:"required"`
 	// The worker’s number; null when unset or when the field is redacted for this API
 	// key.
-	Value interface{}                       `json:"value" api:"required,nullable"`
-	JSON  publicNumberWorkerCustomFieldJSON `json:"-"`
+	Value PublicNumberWorkerCustomFieldValueUnion `json:"value" api:"required,nullable"`
+	JSON  publicNumberWorkerCustomFieldJSON       `json:"-"`
 }
 
 // publicNumberWorkerCustomFieldJSON contains the JSON metadata for the struct [PublicNumberWorkerCustomField]
@@ -1100,8 +1101,8 @@ type PublicPercentageWorkerCustomField struct {
 	Type     PublicPercentageWorkerCustomFieldType `json:"type" api:"required"`
 	// The worker’s percentage; null when unset or when the field is redacted for this
 	// API key.
-	Value interface{}                           `json:"value" api:"required,nullable"`
-	JSON  publicPercentageWorkerCustomFieldJSON `json:"-"`
+	Value PublicPercentageWorkerCustomFieldValueUnion `json:"value" api:"required,nullable"`
+	JSON  publicPercentageWorkerCustomFieldJSON       `json:"-"`
 }
 
 // publicPercentageWorkerCustomFieldJSON contains the JSON metadata for the struct [PublicPercentageWorkerCustomField]
@@ -1545,7 +1546,7 @@ type WorkerNewEmployeeParams struct {
 	// for Warp to handle registration on your behalf.
 	StateRegistration param.Field[WorkerNewEmployeeParamsStateRegistration] `json:"stateRegistration"`
 	// Number of stock options granted to this employee.
-	StockOptions param.Field[interface{}] `json:"stockOptions"`
+	StockOptions param.Field[WorkerNewEmployeeParamsStockOptionsUnion] `json:"stockOptions"`
 	// Company-issued email address, if applicable.
 	WorkEmail param.Field[string] `json:"workEmail" format:"email"`
 }
@@ -1564,6 +1565,30 @@ const (
 func (r WorkerNewEmployeeParamsStateRegistration) IsKnown() bool {
 	switch r {
 	case WorkerNewEmployeeParamsStateRegistrationSelfManaged, WorkerNewEmployeeParamsStateRegistrationWarpManaged:
+		return true
+	}
+	return false
+}
+
+// Union satisfied by [shared.UnionFloat], [WorkerNewEmployeeParamsStockOptionsString].
+type WorkerNewEmployeeParamsStockOptionsUnion interface {
+	ImplementsWorkerNewEmployeeParamsStockOptionsUnion()
+}
+
+func (r WorkerNewEmployeeParamsStockOptionsString) ImplementsWorkerNewEmployeeParamsStockOptionsUnion() {
+}
+
+type WorkerNewEmployeeParamsStockOptionsString string
+
+const (
+	WorkerNewEmployeeParamsStockOptionsStringInfinity  WorkerNewEmployeeParamsStockOptionsString = "Infinity"
+	WorkerNewEmployeeParamsStockOptionsStringInfinity2 WorkerNewEmployeeParamsStockOptionsString = "-Infinity"
+	WorkerNewEmployeeParamsStockOptionsStringNaN       WorkerNewEmployeeParamsStockOptionsString = "NaN"
+)
+
+func (r WorkerNewEmployeeParamsStockOptionsString) IsKnown() bool {
+	switch r {
+	case WorkerNewEmployeeParamsStockOptionsStringInfinity, WorkerNewEmployeeParamsStockOptionsStringInfinity2, WorkerNewEmployeeParamsStockOptionsStringNaN:
 		return true
 	}
 	return false
@@ -2801,15 +2826,61 @@ func (r workerInviteResponseJSON) RawJSON() string {
 	return r.raw
 }
 
+// Union satisfied by [shared.UnionFloat], [PublicNumberWorkerCustomFieldValueString].
+type PublicNumberWorkerCustomFieldValueUnion interface {
+	ImplementsPublicNumberWorkerCustomFieldValueUnion()
+}
+
+func (r PublicNumberWorkerCustomFieldValueString) ImplementsPublicNumberWorkerCustomFieldValueUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*PublicNumberWorkerCustomFieldValueUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(PublicNumberWorkerCustomFieldValueString("")),
+		},
+	)
+}
+
+// Union satisfied by [shared.UnionFloat], [PublicPercentageWorkerCustomFieldValueString].
+type PublicPercentageWorkerCustomFieldValueUnion interface {
+	ImplementsPublicPercentageWorkerCustomFieldValueUnion()
+}
+
+func (r PublicPercentageWorkerCustomFieldValueString) ImplementsPublicPercentageWorkerCustomFieldValueUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*PublicPercentageWorkerCustomFieldValueUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(PublicPercentageWorkerCustomFieldValueString("")),
+		},
+	)
+}
+
 type PublicSelectWorkerCustomFieldOption struct {
 	// The tag of a company custom worker field option.
-	ID        string                                    `json:"id" api:"required"`
-	CreatedAt string                                    `json:"createdAt" api:"required"`
-	Label     string                                    `json:"label" api:"required"`
-	SortOrder interface{}                               `json:"sortOrder" api:"required"`
-	Status    PublicSelectWorkerCustomFieldOptionStatus `json:"status" api:"required"`
-	Value     string                                    `json:"value" api:"required"`
-	JSON      publicSelectWorkerCustomFieldOptionJSON   `json:"-"`
+	ID        string                                            `json:"id" api:"required"`
+	CreatedAt string                                            `json:"createdAt" api:"required"`
+	Label     string                                            `json:"label" api:"required"`
+	SortOrder PublicSelectWorkerCustomFieldOptionSortOrderUnion `json:"sortOrder" api:"required"`
+	Status    PublicSelectWorkerCustomFieldOptionStatus         `json:"status" api:"required"`
+	Value     string                                            `json:"value" api:"required"`
+	JSON      publicSelectWorkerCustomFieldOptionJSON           `json:"-"`
 }
 
 // publicSelectWorkerCustomFieldOptionJSON contains the JSON metadata for the struct [PublicSelectWorkerCustomFieldOption]
@@ -2834,13 +2905,13 @@ func (r publicSelectWorkerCustomFieldOptionJSON) RawJSON() string {
 
 type PublicMultiSelectWorkerCustomFieldOption struct {
 	// The tag of a company custom worker field option.
-	ID        string                                          `json:"id" api:"required"`
-	CreatedAt string                                          `json:"createdAt" api:"required"`
-	Label     string                                          `json:"label" api:"required"`
-	SortOrder interface{}                                     `json:"sortOrder" api:"required"`
-	Status    PublicMultiSelectWorkerCustomFieldOptionsStatus `json:"status" api:"required"`
-	Value     string                                          `json:"value" api:"required"`
-	JSON      publicMultiSelectWorkerCustomFieldOptionJSON    `json:"-"`
+	ID        string                                                  `json:"id" api:"required"`
+	CreatedAt string                                                  `json:"createdAt" api:"required"`
+	Label     string                                                  `json:"label" api:"required"`
+	SortOrder PublicMultiSelectWorkerCustomFieldOptionsSortOrderUnion `json:"sortOrder" api:"required"`
+	Status    PublicMultiSelectWorkerCustomFieldOptionsStatus         `json:"status" api:"required"`
+	Value     string                                                  `json:"value" api:"required"`
+	JSON      publicMultiSelectWorkerCustomFieldOptionJSON            `json:"-"`
 }
 
 // publicMultiSelectWorkerCustomFieldOptionJSON contains the JSON metadata for the struct [PublicMultiSelectWorkerCustomFieldOption]
@@ -3904,6 +3975,38 @@ func (r workerInviteResponseLevelJSON) RawJSON() string {
 	return r.raw
 }
 
+type PublicNumberWorkerCustomFieldValueString string
+
+const (
+	PublicNumberWorkerCustomFieldValueStringInfinity  PublicNumberWorkerCustomFieldValueString = "Infinity"
+	PublicNumberWorkerCustomFieldValueStringInfinity2 PublicNumberWorkerCustomFieldValueString = "-Infinity"
+	PublicNumberWorkerCustomFieldValueStringNaN       PublicNumberWorkerCustomFieldValueString = "NaN"
+)
+
+func (r PublicNumberWorkerCustomFieldValueString) IsKnown() bool {
+	switch r {
+	case PublicNumberWorkerCustomFieldValueStringInfinity, PublicNumberWorkerCustomFieldValueStringInfinity2, PublicNumberWorkerCustomFieldValueStringNaN:
+		return true
+	}
+	return false
+}
+
+type PublicPercentageWorkerCustomFieldValueString string
+
+const (
+	PublicPercentageWorkerCustomFieldValueStringInfinity  PublicPercentageWorkerCustomFieldValueString = "Infinity"
+	PublicPercentageWorkerCustomFieldValueStringInfinity2 PublicPercentageWorkerCustomFieldValueString = "-Infinity"
+	PublicPercentageWorkerCustomFieldValueStringNaN       PublicPercentageWorkerCustomFieldValueString = "NaN"
+)
+
+func (r PublicPercentageWorkerCustomFieldValueString) IsKnown() bool {
+	switch r {
+	case PublicPercentageWorkerCustomFieldValueStringInfinity, PublicPercentageWorkerCustomFieldValueStringInfinity2, PublicPercentageWorkerCustomFieldValueStringNaN:
+		return true
+	}
+	return false
+}
+
 type PublicSelectWorkerCustomFieldOptionStatus string
 
 const (
@@ -3919,6 +4022,29 @@ func (r PublicSelectWorkerCustomFieldOptionStatus) IsKnown() bool {
 	return false
 }
 
+// Union satisfied by [shared.UnionFloat], [PublicSelectWorkerCustomFieldOptionSortOrderString].
+type PublicSelectWorkerCustomFieldOptionSortOrderUnion interface {
+	ImplementsPublicSelectWorkerCustomFieldOptionSortOrderUnion()
+}
+
+func (r PublicSelectWorkerCustomFieldOptionSortOrderString) ImplementsPublicSelectWorkerCustomFieldOptionSortOrderUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*PublicSelectWorkerCustomFieldOptionSortOrderUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(PublicSelectWorkerCustomFieldOptionSortOrderString("")),
+		},
+	)
+}
+
 type PublicMultiSelectWorkerCustomFieldOptionsStatus string
 
 const (
@@ -3932,6 +4058,29 @@ func (r PublicMultiSelectWorkerCustomFieldOptionsStatus) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+// Union satisfied by [shared.UnionFloat], [PublicMultiSelectWorkerCustomFieldOptionsSortOrderString].
+type PublicMultiSelectWorkerCustomFieldOptionsSortOrderUnion interface {
+	ImplementsPublicMultiSelectWorkerCustomFieldOptionsSortOrderUnion()
+}
+
+func (r PublicMultiSelectWorkerCustomFieldOptionsSortOrderString) ImplementsPublicMultiSelectWorkerCustomFieldOptionsSortOrderUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*PublicMultiSelectWorkerCustomFieldOptionsSortOrderUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(PublicMultiSelectWorkerCustomFieldOptionsSortOrderString("")),
+		},
+	)
 }
 
 func (r PublicTextWorkerCustomField) implementsPublicWorkerCustomField() {}
@@ -4259,6 +4408,38 @@ const (
 func (r WorkerInviteResponseLevelTrack) IsKnown() bool {
 	switch r {
 	case WorkerInviteResponseLevelTrackIc, WorkerInviteResponseLevelTrackManager, WorkerInviteResponseLevelTrackExecutive:
+		return true
+	}
+	return false
+}
+
+type PublicSelectWorkerCustomFieldOptionSortOrderString string
+
+const (
+	PublicSelectWorkerCustomFieldOptionSortOrderStringInfinity  PublicSelectWorkerCustomFieldOptionSortOrderString = "Infinity"
+	PublicSelectWorkerCustomFieldOptionSortOrderStringInfinity2 PublicSelectWorkerCustomFieldOptionSortOrderString = "-Infinity"
+	PublicSelectWorkerCustomFieldOptionSortOrderStringNaN       PublicSelectWorkerCustomFieldOptionSortOrderString = "NaN"
+)
+
+func (r PublicSelectWorkerCustomFieldOptionSortOrderString) IsKnown() bool {
+	switch r {
+	case PublicSelectWorkerCustomFieldOptionSortOrderStringInfinity, PublicSelectWorkerCustomFieldOptionSortOrderStringInfinity2, PublicSelectWorkerCustomFieldOptionSortOrderStringNaN:
+		return true
+	}
+	return false
+}
+
+type PublicMultiSelectWorkerCustomFieldOptionsSortOrderString string
+
+const (
+	PublicMultiSelectWorkerCustomFieldOptionsSortOrderStringInfinity  PublicMultiSelectWorkerCustomFieldOptionsSortOrderString = "Infinity"
+	PublicMultiSelectWorkerCustomFieldOptionsSortOrderStringInfinity2 PublicMultiSelectWorkerCustomFieldOptionsSortOrderString = "-Infinity"
+	PublicMultiSelectWorkerCustomFieldOptionsSortOrderStringNaN       PublicMultiSelectWorkerCustomFieldOptionsSortOrderString = "NaN"
+)
+
+func (r PublicMultiSelectWorkerCustomFieldOptionsSortOrderString) IsKnown() bool {
+	switch r {
+	case PublicMultiSelectWorkerCustomFieldOptionsSortOrderStringInfinity, PublicMultiSelectWorkerCustomFieldOptionsSortOrderStringInfinity2, PublicMultiSelectWorkerCustomFieldOptionsSortOrderStringNaN:
 		return true
 	}
 	return false

@@ -18,6 +18,7 @@ import (
 	"github.com/TeamWarp/warp-go-sdk/internal/param"
 	"github.com/TeamWarp/warp-go-sdk/internal/requestconfig"
 	"github.com/TeamWarp/warp-go-sdk/option"
+	"github.com/TeamWarp/warp-go-sdk/shared"
 )
 
 // BenefitDeductionService contains methods and other services that help with interacting
@@ -229,43 +230,44 @@ func (r publicBenefitDeductionJSON) RawJSON() string {
 type PublicBenefitDeductionType string
 
 const (
-	PublicBenefitDeductionTypeMedical             PublicBenefitDeductionType = "medical"
-	PublicBenefitDeductionTypeDental              PublicBenefitDeductionType = "dental"
-	PublicBenefitDeductionTypeVision              PublicBenefitDeductionType = "vision"
-	PublicBenefitDeductionTypeLife                PublicBenefitDeductionType = "life"
-	PublicBenefitDeductionTypeShortTermDisability PublicBenefitDeductionType = "short_term_disability"
-	PublicBenefitDeductionTypeLongTermDisability  PublicBenefitDeductionType = "long_term_disability"
-	PublicBenefitDeductionType401k                PublicBenefitDeductionType = "401k"
-	PublicBenefitDeductionTypeRoth401k            PublicBenefitDeductionType = "roth_401k"
-	PublicBenefitDeductionType403b                PublicBenefitDeductionType = "403b"
-	PublicBenefitDeductionTypeRoth403b            PublicBenefitDeductionType = "roth_403b"
-	PublicBenefitDeductionType457                 PublicBenefitDeductionType = "457"
-	PublicBenefitDeductionTypeRoth457             PublicBenefitDeductionType = "roth_457"
-	PublicBenefitDeductionTypeHsa                 PublicBenefitDeductionType = "hsa"
-	PublicBenefitDeductionTypeFsaMedical          PublicBenefitDeductionType = "fsa_medical"
-	PublicBenefitDeductionTypeFsaDependentCare    PublicBenefitDeductionType = "fsa_dependent_care"
-	PublicBenefitDeductionTypeTransit             PublicBenefitDeductionType = "transit"
-	PublicBenefitDeductionTypeParking             PublicBenefitDeductionType = "parking"
-	PublicBenefitDeductionTypeAccident            PublicBenefitDeductionType = "accident"
-	PublicBenefitDeductionTypeCancer              PublicBenefitDeductionType = "cancer"
-	PublicBenefitDeductionTypeCriticalIllness     PublicBenefitDeductionType = "critical_illness"
-	PublicBenefitDeductionTypeHospital            PublicBenefitDeductionType = "hospital"
-	PublicBenefitDeductionTypeMedicalOther        PublicBenefitDeductionType = "medical_other"
-	PublicBenefitDeductionTypeSimpleIra           PublicBenefitDeductionType = "simple_ira"
-	PublicBenefitDeductionTypeRothSimpleIra       PublicBenefitDeductionType = "roth_simple_ira"
-	PublicBenefitDeductionTypeNqdc                PublicBenefitDeductionType = "nqdc"
-	PublicBenefitDeductionTypeNontaxableFringe    PublicBenefitDeductionType = "nontaxable_fringe"
-	PublicBenefitDeductionTypePucc                PublicBenefitDeductionType = "pucc"
-	PublicBenefitDeductionTypeVoluntary           PublicBenefitDeductionType = "voluntary"
-	PublicBenefitDeductionTypePostTax             PublicBenefitDeductionType = "post_tax"
-	PublicBenefitDeductionTypeOther               PublicBenefitDeductionType = "other"
-	PublicBenefitDeductionTypeVoluntaryLife       PublicBenefitDeductionType = "voluntary_life"
-	PublicBenefitDeductionTypeMiscellaneous       PublicBenefitDeductionType = "miscellaneous"
+	PublicBenefitDeductionTypeMedical                 PublicBenefitDeductionType = "medical"
+	PublicBenefitDeductionTypeDental                  PublicBenefitDeductionType = "dental"
+	PublicBenefitDeductionTypeVision                  PublicBenefitDeductionType = "vision"
+	PublicBenefitDeductionTypeLife                    PublicBenefitDeductionType = "life"
+	PublicBenefitDeductionTypeShortTermDisability     PublicBenefitDeductionType = "short_term_disability"
+	PublicBenefitDeductionTypeLongTermDisability      PublicBenefitDeductionType = "long_term_disability"
+	PublicBenefitDeductionType401k                    PublicBenefitDeductionType = "401k"
+	PublicBenefitDeductionTypeRoth401k                PublicBenefitDeductionType = "roth_401k"
+	PublicBenefitDeductionType403b                    PublicBenefitDeductionType = "403b"
+	PublicBenefitDeductionTypeRoth403b                PublicBenefitDeductionType = "roth_403b"
+	PublicBenefitDeductionType457                     PublicBenefitDeductionType = "457"
+	PublicBenefitDeductionTypeRoth457                 PublicBenefitDeductionType = "roth_457"
+	PublicBenefitDeductionTypeHsa                     PublicBenefitDeductionType = "hsa"
+	PublicBenefitDeductionTypeFsaMedical              PublicBenefitDeductionType = "fsa_medical"
+	PublicBenefitDeductionTypeFsaDependentCare        PublicBenefitDeductionType = "fsa_dependent_care"
+	PublicBenefitDeductionTypeTransit                 PublicBenefitDeductionType = "transit"
+	PublicBenefitDeductionTypeParking                 PublicBenefitDeductionType = "parking"
+	PublicBenefitDeductionTypeAccident                PublicBenefitDeductionType = "accident"
+	PublicBenefitDeductionTypeCancer                  PublicBenefitDeductionType = "cancer"
+	PublicBenefitDeductionTypeCriticalIllness         PublicBenefitDeductionType = "critical_illness"
+	PublicBenefitDeductionTypeHospital                PublicBenefitDeductionType = "hospital"
+	PublicBenefitDeductionTypeMedicalOther            PublicBenefitDeductionType = "medical_other"
+	PublicBenefitDeductionTypeSimpleIra               PublicBenefitDeductionType = "simple_ira"
+	PublicBenefitDeductionTypeRothSimpleIra           PublicBenefitDeductionType = "roth_simple_ira"
+	PublicBenefitDeductionTypeNqdc                    PublicBenefitDeductionType = "nqdc"
+	PublicBenefitDeductionTypeNontaxableFringe        PublicBenefitDeductionType = "nontaxable_fringe"
+	PublicBenefitDeductionTypePucc                    PublicBenefitDeductionType = "pucc"
+	PublicBenefitDeductionTypeVoluntary               PublicBenefitDeductionType = "voluntary"
+	PublicBenefitDeductionTypePostTax                 PublicBenefitDeductionType = "post_tax"
+	PublicBenefitDeductionTypeOther                   PublicBenefitDeductionType = "other"
+	PublicBenefitDeductionTypeVoluntaryLife           PublicBenefitDeductionType = "voluntary_life"
+	PublicBenefitDeductionTypeMiscellaneous           PublicBenefitDeductionType = "miscellaneous"
+	PublicBenefitDeductionTypeRetirementLoanRepayment PublicBenefitDeductionType = "retirement_loan_repayment"
 )
 
 func (r PublicBenefitDeductionType) IsKnown() bool {
 	switch r {
-	case PublicBenefitDeductionTypeMedical, PublicBenefitDeductionTypeDental, PublicBenefitDeductionTypeVision, PublicBenefitDeductionTypeLife, PublicBenefitDeductionTypeShortTermDisability, PublicBenefitDeductionTypeLongTermDisability, PublicBenefitDeductionType401k, PublicBenefitDeductionTypeRoth401k, PublicBenefitDeductionType403b, PublicBenefitDeductionTypeRoth403b, PublicBenefitDeductionType457, PublicBenefitDeductionTypeRoth457, PublicBenefitDeductionTypeHsa, PublicBenefitDeductionTypeFsaMedical, PublicBenefitDeductionTypeFsaDependentCare, PublicBenefitDeductionTypeTransit, PublicBenefitDeductionTypeParking, PublicBenefitDeductionTypeAccident, PublicBenefitDeductionTypeCancer, PublicBenefitDeductionTypeCriticalIllness, PublicBenefitDeductionTypeHospital, PublicBenefitDeductionTypeMedicalOther, PublicBenefitDeductionTypeSimpleIra, PublicBenefitDeductionTypeRothSimpleIra, PublicBenefitDeductionTypeNqdc, PublicBenefitDeductionTypeNontaxableFringe, PublicBenefitDeductionTypePucc, PublicBenefitDeductionTypeVoluntary, PublicBenefitDeductionTypePostTax, PublicBenefitDeductionTypeOther, PublicBenefitDeductionTypeVoluntaryLife, PublicBenefitDeductionTypeMiscellaneous:
+	case PublicBenefitDeductionTypeMedical, PublicBenefitDeductionTypeDental, PublicBenefitDeductionTypeVision, PublicBenefitDeductionTypeLife, PublicBenefitDeductionTypeShortTermDisability, PublicBenefitDeductionTypeLongTermDisability, PublicBenefitDeductionType401k, PublicBenefitDeductionTypeRoth401k, PublicBenefitDeductionType403b, PublicBenefitDeductionTypeRoth403b, PublicBenefitDeductionType457, PublicBenefitDeductionTypeRoth457, PublicBenefitDeductionTypeHsa, PublicBenefitDeductionTypeFsaMedical, PublicBenefitDeductionTypeFsaDependentCare, PublicBenefitDeductionTypeTransit, PublicBenefitDeductionTypeParking, PublicBenefitDeductionTypeAccident, PublicBenefitDeductionTypeCancer, PublicBenefitDeductionTypeCriticalIllness, PublicBenefitDeductionTypeHospital, PublicBenefitDeductionTypeMedicalOther, PublicBenefitDeductionTypeSimpleIra, PublicBenefitDeductionTypeRothSimpleIra, PublicBenefitDeductionTypeNqdc, PublicBenefitDeductionTypeNontaxableFringe, PublicBenefitDeductionTypePucc, PublicBenefitDeductionTypeVoluntary, PublicBenefitDeductionTypePostTax, PublicBenefitDeductionTypeOther, PublicBenefitDeductionTypeVoluntaryLife, PublicBenefitDeductionTypeMiscellaneous, PublicBenefitDeductionTypeRetirementLoanRepayment:
 		return true
 	}
 	return false
@@ -343,43 +345,44 @@ func (r publicBenefitDeduction1JSON) RawJSON() string {
 type PublicBenefitDeduction1Type string
 
 const (
-	PublicBenefitDeduction1TypeMedical             PublicBenefitDeduction1Type = "medical"
-	PublicBenefitDeduction1TypeDental              PublicBenefitDeduction1Type = "dental"
-	PublicBenefitDeduction1TypeVision              PublicBenefitDeduction1Type = "vision"
-	PublicBenefitDeduction1TypeLife                PublicBenefitDeduction1Type = "life"
-	PublicBenefitDeduction1TypeShortTermDisability PublicBenefitDeduction1Type = "short_term_disability"
-	PublicBenefitDeduction1TypeLongTermDisability  PublicBenefitDeduction1Type = "long_term_disability"
-	PublicBenefitDeduction1Type401k                PublicBenefitDeduction1Type = "401k"
-	PublicBenefitDeduction1TypeRoth401k            PublicBenefitDeduction1Type = "roth_401k"
-	PublicBenefitDeduction1Type403b                PublicBenefitDeduction1Type = "403b"
-	PublicBenefitDeduction1TypeRoth403b            PublicBenefitDeduction1Type = "roth_403b"
-	PublicBenefitDeduction1Type457                 PublicBenefitDeduction1Type = "457"
-	PublicBenefitDeduction1TypeRoth457             PublicBenefitDeduction1Type = "roth_457"
-	PublicBenefitDeduction1TypeHsa                 PublicBenefitDeduction1Type = "hsa"
-	PublicBenefitDeduction1TypeFsaMedical          PublicBenefitDeduction1Type = "fsa_medical"
-	PublicBenefitDeduction1TypeFsaDependentCare    PublicBenefitDeduction1Type = "fsa_dependent_care"
-	PublicBenefitDeduction1TypeTransit             PublicBenefitDeduction1Type = "transit"
-	PublicBenefitDeduction1TypeParking             PublicBenefitDeduction1Type = "parking"
-	PublicBenefitDeduction1TypeAccident            PublicBenefitDeduction1Type = "accident"
-	PublicBenefitDeduction1TypeCancer              PublicBenefitDeduction1Type = "cancer"
-	PublicBenefitDeduction1TypeCriticalIllness     PublicBenefitDeduction1Type = "critical_illness"
-	PublicBenefitDeduction1TypeHospital            PublicBenefitDeduction1Type = "hospital"
-	PublicBenefitDeduction1TypeMedicalOther        PublicBenefitDeduction1Type = "medical_other"
-	PublicBenefitDeduction1TypeSimpleIra           PublicBenefitDeduction1Type = "simple_ira"
-	PublicBenefitDeduction1TypeRothSimpleIra       PublicBenefitDeduction1Type = "roth_simple_ira"
-	PublicBenefitDeduction1TypeNqdc                PublicBenefitDeduction1Type = "nqdc"
-	PublicBenefitDeduction1TypeNontaxableFringe    PublicBenefitDeduction1Type = "nontaxable_fringe"
-	PublicBenefitDeduction1TypePucc                PublicBenefitDeduction1Type = "pucc"
-	PublicBenefitDeduction1TypeVoluntary           PublicBenefitDeduction1Type = "voluntary"
-	PublicBenefitDeduction1TypePostTax             PublicBenefitDeduction1Type = "post_tax"
-	PublicBenefitDeduction1TypeOther               PublicBenefitDeduction1Type = "other"
-	PublicBenefitDeduction1TypeVoluntaryLife       PublicBenefitDeduction1Type = "voluntary_life"
-	PublicBenefitDeduction1TypeMiscellaneous       PublicBenefitDeduction1Type = "miscellaneous"
+	PublicBenefitDeduction1TypeMedical                 PublicBenefitDeduction1Type = "medical"
+	PublicBenefitDeduction1TypeDental                  PublicBenefitDeduction1Type = "dental"
+	PublicBenefitDeduction1TypeVision                  PublicBenefitDeduction1Type = "vision"
+	PublicBenefitDeduction1TypeLife                    PublicBenefitDeduction1Type = "life"
+	PublicBenefitDeduction1TypeShortTermDisability     PublicBenefitDeduction1Type = "short_term_disability"
+	PublicBenefitDeduction1TypeLongTermDisability      PublicBenefitDeduction1Type = "long_term_disability"
+	PublicBenefitDeduction1Type401k                    PublicBenefitDeduction1Type = "401k"
+	PublicBenefitDeduction1TypeRoth401k                PublicBenefitDeduction1Type = "roth_401k"
+	PublicBenefitDeduction1Type403b                    PublicBenefitDeduction1Type = "403b"
+	PublicBenefitDeduction1TypeRoth403b                PublicBenefitDeduction1Type = "roth_403b"
+	PublicBenefitDeduction1Type457                     PublicBenefitDeduction1Type = "457"
+	PublicBenefitDeduction1TypeRoth457                 PublicBenefitDeduction1Type = "roth_457"
+	PublicBenefitDeduction1TypeHsa                     PublicBenefitDeduction1Type = "hsa"
+	PublicBenefitDeduction1TypeFsaMedical              PublicBenefitDeduction1Type = "fsa_medical"
+	PublicBenefitDeduction1TypeFsaDependentCare        PublicBenefitDeduction1Type = "fsa_dependent_care"
+	PublicBenefitDeduction1TypeTransit                 PublicBenefitDeduction1Type = "transit"
+	PublicBenefitDeduction1TypeParking                 PublicBenefitDeduction1Type = "parking"
+	PublicBenefitDeduction1TypeAccident                PublicBenefitDeduction1Type = "accident"
+	PublicBenefitDeduction1TypeCancer                  PublicBenefitDeduction1Type = "cancer"
+	PublicBenefitDeduction1TypeCriticalIllness         PublicBenefitDeduction1Type = "critical_illness"
+	PublicBenefitDeduction1TypeHospital                PublicBenefitDeduction1Type = "hospital"
+	PublicBenefitDeduction1TypeMedicalOther            PublicBenefitDeduction1Type = "medical_other"
+	PublicBenefitDeduction1TypeSimpleIra               PublicBenefitDeduction1Type = "simple_ira"
+	PublicBenefitDeduction1TypeRothSimpleIra           PublicBenefitDeduction1Type = "roth_simple_ira"
+	PublicBenefitDeduction1TypeNqdc                    PublicBenefitDeduction1Type = "nqdc"
+	PublicBenefitDeduction1TypeNontaxableFringe        PublicBenefitDeduction1Type = "nontaxable_fringe"
+	PublicBenefitDeduction1TypePucc                    PublicBenefitDeduction1Type = "pucc"
+	PublicBenefitDeduction1TypeVoluntary               PublicBenefitDeduction1Type = "voluntary"
+	PublicBenefitDeduction1TypePostTax                 PublicBenefitDeduction1Type = "post_tax"
+	PublicBenefitDeduction1TypeOther                   PublicBenefitDeduction1Type = "other"
+	PublicBenefitDeduction1TypeVoluntaryLife           PublicBenefitDeduction1Type = "voluntary_life"
+	PublicBenefitDeduction1TypeMiscellaneous           PublicBenefitDeduction1Type = "miscellaneous"
+	PublicBenefitDeduction1TypeRetirementLoanRepayment PublicBenefitDeduction1Type = "retirement_loan_repayment"
 )
 
 func (r PublicBenefitDeduction1Type) IsKnown() bool {
 	switch r {
-	case PublicBenefitDeduction1TypeMedical, PublicBenefitDeduction1TypeDental, PublicBenefitDeduction1TypeVision, PublicBenefitDeduction1TypeLife, PublicBenefitDeduction1TypeShortTermDisability, PublicBenefitDeduction1TypeLongTermDisability, PublicBenefitDeduction1Type401k, PublicBenefitDeduction1TypeRoth401k, PublicBenefitDeduction1Type403b, PublicBenefitDeduction1TypeRoth403b, PublicBenefitDeduction1Type457, PublicBenefitDeduction1TypeRoth457, PublicBenefitDeduction1TypeHsa, PublicBenefitDeduction1TypeFsaMedical, PublicBenefitDeduction1TypeFsaDependentCare, PublicBenefitDeduction1TypeTransit, PublicBenefitDeduction1TypeParking, PublicBenefitDeduction1TypeAccident, PublicBenefitDeduction1TypeCancer, PublicBenefitDeduction1TypeCriticalIllness, PublicBenefitDeduction1TypeHospital, PublicBenefitDeduction1TypeMedicalOther, PublicBenefitDeduction1TypeSimpleIra, PublicBenefitDeduction1TypeRothSimpleIra, PublicBenefitDeduction1TypeNqdc, PublicBenefitDeduction1TypeNontaxableFringe, PublicBenefitDeduction1TypePucc, PublicBenefitDeduction1TypeVoluntary, PublicBenefitDeduction1TypePostTax, PublicBenefitDeduction1TypeOther, PublicBenefitDeduction1TypeVoluntaryLife, PublicBenefitDeduction1TypeMiscellaneous:
+	case PublicBenefitDeduction1TypeMedical, PublicBenefitDeduction1TypeDental, PublicBenefitDeduction1TypeVision, PublicBenefitDeduction1TypeLife, PublicBenefitDeduction1TypeShortTermDisability, PublicBenefitDeduction1TypeLongTermDisability, PublicBenefitDeduction1Type401k, PublicBenefitDeduction1TypeRoth401k, PublicBenefitDeduction1Type403b, PublicBenefitDeduction1TypeRoth403b, PublicBenefitDeduction1Type457, PublicBenefitDeduction1TypeRoth457, PublicBenefitDeduction1TypeHsa, PublicBenefitDeduction1TypeFsaMedical, PublicBenefitDeduction1TypeFsaDependentCare, PublicBenefitDeduction1TypeTransit, PublicBenefitDeduction1TypeParking, PublicBenefitDeduction1TypeAccident, PublicBenefitDeduction1TypeCancer, PublicBenefitDeduction1TypeCriticalIllness, PublicBenefitDeduction1TypeHospital, PublicBenefitDeduction1TypeMedicalOther, PublicBenefitDeduction1TypeSimpleIra, PublicBenefitDeduction1TypeRothSimpleIra, PublicBenefitDeduction1TypeNqdc, PublicBenefitDeduction1TypeNontaxableFringe, PublicBenefitDeduction1TypePucc, PublicBenefitDeduction1TypeVoluntary, PublicBenefitDeduction1TypePostTax, PublicBenefitDeduction1TypeOther, PublicBenefitDeduction1TypeVoluntaryLife, PublicBenefitDeduction1TypeMiscellaneous, PublicBenefitDeduction1TypeRetirementLoanRepayment:
 		return true
 	}
 	return false
@@ -644,9 +647,9 @@ func (r PercentageBenefitCalculationType) IsKnown() bool {
 
 type PercentageContribution struct {
 	// The server-formatted percentage, for example "3%".
-	Display    string                     `json:"display" api:"required"`
-	Percentage interface{}                `json:"percentage" api:"required"`
-	JSON       percentageContributionJSON `json:"-"`
+	Display    string                                `json:"display" api:"required"`
+	Percentage PercentageContributionPercentageUnion `json:"percentage" api:"required"`
+	JSON       percentageContributionJSON            `json:"-"`
 }
 
 // percentageContributionJSON contains the JSON metadata for the struct [PercentageContribution]
@@ -756,43 +759,44 @@ func (r BenefitDeductionListParams) URLQuery() (v url.Values) {
 type BenefitDeductionListParamsType string
 
 const (
-	BenefitDeductionListParamsTypeMedical             BenefitDeductionListParamsType = "medical"
-	BenefitDeductionListParamsTypeDental              BenefitDeductionListParamsType = "dental"
-	BenefitDeductionListParamsTypeVision              BenefitDeductionListParamsType = "vision"
-	BenefitDeductionListParamsTypeLife                BenefitDeductionListParamsType = "life"
-	BenefitDeductionListParamsTypeShortTermDisability BenefitDeductionListParamsType = "short_term_disability"
-	BenefitDeductionListParamsTypeLongTermDisability  BenefitDeductionListParamsType = "long_term_disability"
-	BenefitDeductionListParamsType401k                BenefitDeductionListParamsType = "401k"
-	BenefitDeductionListParamsTypeRoth401k            BenefitDeductionListParamsType = "roth_401k"
-	BenefitDeductionListParamsType403b                BenefitDeductionListParamsType = "403b"
-	BenefitDeductionListParamsTypeRoth403b            BenefitDeductionListParamsType = "roth_403b"
-	BenefitDeductionListParamsType457                 BenefitDeductionListParamsType = "457"
-	BenefitDeductionListParamsTypeRoth457             BenefitDeductionListParamsType = "roth_457"
-	BenefitDeductionListParamsTypeHsa                 BenefitDeductionListParamsType = "hsa"
-	BenefitDeductionListParamsTypeFsaMedical          BenefitDeductionListParamsType = "fsa_medical"
-	BenefitDeductionListParamsTypeFsaDependentCare    BenefitDeductionListParamsType = "fsa_dependent_care"
-	BenefitDeductionListParamsTypeTransit             BenefitDeductionListParamsType = "transit"
-	BenefitDeductionListParamsTypeParking             BenefitDeductionListParamsType = "parking"
-	BenefitDeductionListParamsTypeAccident            BenefitDeductionListParamsType = "accident"
-	BenefitDeductionListParamsTypeCancer              BenefitDeductionListParamsType = "cancer"
-	BenefitDeductionListParamsTypeCriticalIllness     BenefitDeductionListParamsType = "critical_illness"
-	BenefitDeductionListParamsTypeHospital            BenefitDeductionListParamsType = "hospital"
-	BenefitDeductionListParamsTypeMedicalOther        BenefitDeductionListParamsType = "medical_other"
-	BenefitDeductionListParamsTypeSimpleIra           BenefitDeductionListParamsType = "simple_ira"
-	BenefitDeductionListParamsTypeRothSimpleIra       BenefitDeductionListParamsType = "roth_simple_ira"
-	BenefitDeductionListParamsTypeNqdc                BenefitDeductionListParamsType = "nqdc"
-	BenefitDeductionListParamsTypeNontaxableFringe    BenefitDeductionListParamsType = "nontaxable_fringe"
-	BenefitDeductionListParamsTypePucc                BenefitDeductionListParamsType = "pucc"
-	BenefitDeductionListParamsTypeVoluntary           BenefitDeductionListParamsType = "voluntary"
-	BenefitDeductionListParamsTypePostTax             BenefitDeductionListParamsType = "post_tax"
-	BenefitDeductionListParamsTypeOther               BenefitDeductionListParamsType = "other"
-	BenefitDeductionListParamsTypeVoluntaryLife       BenefitDeductionListParamsType = "voluntary_life"
-	BenefitDeductionListParamsTypeMiscellaneous       BenefitDeductionListParamsType = "miscellaneous"
+	BenefitDeductionListParamsTypeMedical                 BenefitDeductionListParamsType = "medical"
+	BenefitDeductionListParamsTypeDental                  BenefitDeductionListParamsType = "dental"
+	BenefitDeductionListParamsTypeVision                  BenefitDeductionListParamsType = "vision"
+	BenefitDeductionListParamsTypeLife                    BenefitDeductionListParamsType = "life"
+	BenefitDeductionListParamsTypeShortTermDisability     BenefitDeductionListParamsType = "short_term_disability"
+	BenefitDeductionListParamsTypeLongTermDisability      BenefitDeductionListParamsType = "long_term_disability"
+	BenefitDeductionListParamsType401k                    BenefitDeductionListParamsType = "401k"
+	BenefitDeductionListParamsTypeRoth401k                BenefitDeductionListParamsType = "roth_401k"
+	BenefitDeductionListParamsType403b                    BenefitDeductionListParamsType = "403b"
+	BenefitDeductionListParamsTypeRoth403b                BenefitDeductionListParamsType = "roth_403b"
+	BenefitDeductionListParamsType457                     BenefitDeductionListParamsType = "457"
+	BenefitDeductionListParamsTypeRoth457                 BenefitDeductionListParamsType = "roth_457"
+	BenefitDeductionListParamsTypeHsa                     BenefitDeductionListParamsType = "hsa"
+	BenefitDeductionListParamsTypeFsaMedical              BenefitDeductionListParamsType = "fsa_medical"
+	BenefitDeductionListParamsTypeFsaDependentCare        BenefitDeductionListParamsType = "fsa_dependent_care"
+	BenefitDeductionListParamsTypeTransit                 BenefitDeductionListParamsType = "transit"
+	BenefitDeductionListParamsTypeParking                 BenefitDeductionListParamsType = "parking"
+	BenefitDeductionListParamsTypeAccident                BenefitDeductionListParamsType = "accident"
+	BenefitDeductionListParamsTypeCancer                  BenefitDeductionListParamsType = "cancer"
+	BenefitDeductionListParamsTypeCriticalIllness         BenefitDeductionListParamsType = "critical_illness"
+	BenefitDeductionListParamsTypeHospital                BenefitDeductionListParamsType = "hospital"
+	BenefitDeductionListParamsTypeMedicalOther            BenefitDeductionListParamsType = "medical_other"
+	BenefitDeductionListParamsTypeSimpleIra               BenefitDeductionListParamsType = "simple_ira"
+	BenefitDeductionListParamsTypeRothSimpleIra           BenefitDeductionListParamsType = "roth_simple_ira"
+	BenefitDeductionListParamsTypeNqdc                    BenefitDeductionListParamsType = "nqdc"
+	BenefitDeductionListParamsTypeNontaxableFringe        BenefitDeductionListParamsType = "nontaxable_fringe"
+	BenefitDeductionListParamsTypePucc                    BenefitDeductionListParamsType = "pucc"
+	BenefitDeductionListParamsTypeVoluntary               BenefitDeductionListParamsType = "voluntary"
+	BenefitDeductionListParamsTypePostTax                 BenefitDeductionListParamsType = "post_tax"
+	BenefitDeductionListParamsTypeOther                   BenefitDeductionListParamsType = "other"
+	BenefitDeductionListParamsTypeVoluntaryLife           BenefitDeductionListParamsType = "voluntary_life"
+	BenefitDeductionListParamsTypeMiscellaneous           BenefitDeductionListParamsType = "miscellaneous"
+	BenefitDeductionListParamsTypeRetirementLoanRepayment BenefitDeductionListParamsType = "retirement_loan_repayment"
 )
 
 func (r BenefitDeductionListParamsType) IsKnown() bool {
 	switch r {
-	case BenefitDeductionListParamsTypeMedical, BenefitDeductionListParamsTypeDental, BenefitDeductionListParamsTypeVision, BenefitDeductionListParamsTypeLife, BenefitDeductionListParamsTypeShortTermDisability, BenefitDeductionListParamsTypeLongTermDisability, BenefitDeductionListParamsType401k, BenefitDeductionListParamsTypeRoth401k, BenefitDeductionListParamsType403b, BenefitDeductionListParamsTypeRoth403b, BenefitDeductionListParamsType457, BenefitDeductionListParamsTypeRoth457, BenefitDeductionListParamsTypeHsa, BenefitDeductionListParamsTypeFsaMedical, BenefitDeductionListParamsTypeFsaDependentCare, BenefitDeductionListParamsTypeTransit, BenefitDeductionListParamsTypeParking, BenefitDeductionListParamsTypeAccident, BenefitDeductionListParamsTypeCancer, BenefitDeductionListParamsTypeCriticalIllness, BenefitDeductionListParamsTypeHospital, BenefitDeductionListParamsTypeMedicalOther, BenefitDeductionListParamsTypeSimpleIra, BenefitDeductionListParamsTypeRothSimpleIra, BenefitDeductionListParamsTypeNqdc, BenefitDeductionListParamsTypeNontaxableFringe, BenefitDeductionListParamsTypePucc, BenefitDeductionListParamsTypeVoluntary, BenefitDeductionListParamsTypePostTax, BenefitDeductionListParamsTypeOther, BenefitDeductionListParamsTypeVoluntaryLife, BenefitDeductionListParamsTypeMiscellaneous:
+	case BenefitDeductionListParamsTypeMedical, BenefitDeductionListParamsTypeDental, BenefitDeductionListParamsTypeVision, BenefitDeductionListParamsTypeLife, BenefitDeductionListParamsTypeShortTermDisability, BenefitDeductionListParamsTypeLongTermDisability, BenefitDeductionListParamsType401k, BenefitDeductionListParamsTypeRoth401k, BenefitDeductionListParamsType403b, BenefitDeductionListParamsTypeRoth403b, BenefitDeductionListParamsType457, BenefitDeductionListParamsTypeRoth457, BenefitDeductionListParamsTypeHsa, BenefitDeductionListParamsTypeFsaMedical, BenefitDeductionListParamsTypeFsaDependentCare, BenefitDeductionListParamsTypeTransit, BenefitDeductionListParamsTypeParking, BenefitDeductionListParamsTypeAccident, BenefitDeductionListParamsTypeCancer, BenefitDeductionListParamsTypeCriticalIllness, BenefitDeductionListParamsTypeHospital, BenefitDeductionListParamsTypeMedicalOther, BenefitDeductionListParamsTypeSimpleIra, BenefitDeductionListParamsTypeRothSimpleIra, BenefitDeductionListParamsTypeNqdc, BenefitDeductionListParamsTypeNontaxableFringe, BenefitDeductionListParamsTypePucc, BenefitDeductionListParamsTypeVoluntary, BenefitDeductionListParamsTypePostTax, BenefitDeductionListParamsTypeOther, BenefitDeductionListParamsTypeVoluntaryLife, BenefitDeductionListParamsTypeMiscellaneous, BenefitDeductionListParamsTypeRetirementLoanRepayment:
 		return true
 	}
 	return false
@@ -802,7 +806,8 @@ type BenefitDeductionNewParams struct {
 	// Both contributions must be supplied.
 	Calculation        param.Field[BenefitDeductionNewParamsCalculationUnion] `json:"calculation" api:"required"`
 	EffectiveStartDate param.Field[string]                                    `json:"effectiveStartDate" api:"required"`
-	// The payroll deduction type to create.
+	// The payroll deduction type to create. Use retirement_loan_repayment when a
+	// worker repays a retirement plan loan, such as a 401(k) loan, through payroll.
 	Type param.Field[BenefitDeductionNewParamsType] `json:"type" api:"required"`
 	// The id of the worker.
 	WorkerID         param.Field[string] `json:"workerId" api:"required"`
@@ -820,37 +825,38 @@ func (r BenefitDeductionNewParams) MarshalJSON() (data []byte, err error) {
 type BenefitDeductionNewParamsType string
 
 const (
-	BenefitDeductionNewParamsTypeMedical             BenefitDeductionNewParamsType = "medical"
-	BenefitDeductionNewParamsTypeDental              BenefitDeductionNewParamsType = "dental"
-	BenefitDeductionNewParamsTypeVision              BenefitDeductionNewParamsType = "vision"
-	BenefitDeductionNewParamsTypeLife                BenefitDeductionNewParamsType = "life"
-	BenefitDeductionNewParamsTypeShortTermDisability BenefitDeductionNewParamsType = "short_term_disability"
-	BenefitDeductionNewParamsTypeLongTermDisability  BenefitDeductionNewParamsType = "long_term_disability"
-	BenefitDeductionNewParamsType401k                BenefitDeductionNewParamsType = "401k"
-	BenefitDeductionNewParamsTypeRoth401k            BenefitDeductionNewParamsType = "roth_401k"
-	BenefitDeductionNewParamsType403b                BenefitDeductionNewParamsType = "403b"
-	BenefitDeductionNewParamsTypeRoth403b            BenefitDeductionNewParamsType = "roth_403b"
-	BenefitDeductionNewParamsType457                 BenefitDeductionNewParamsType = "457"
-	BenefitDeductionNewParamsTypeRoth457             BenefitDeductionNewParamsType = "roth_457"
-	BenefitDeductionNewParamsTypeSimpleIra           BenefitDeductionNewParamsType = "simple_ira"
-	BenefitDeductionNewParamsTypeRothSimpleIra       BenefitDeductionNewParamsType = "roth_simple_ira"
-	BenefitDeductionNewParamsTypeHsa                 BenefitDeductionNewParamsType = "hsa"
-	BenefitDeductionNewParamsTypeFsaMedical          BenefitDeductionNewParamsType = "fsa_medical"
-	BenefitDeductionNewParamsTypeFsaDependentCare    BenefitDeductionNewParamsType = "fsa_dependent_care"
-	BenefitDeductionNewParamsTypeTransit             BenefitDeductionNewParamsType = "transit"
-	BenefitDeductionNewParamsTypeParking             BenefitDeductionNewParamsType = "parking"
-	BenefitDeductionNewParamsTypeAccident            BenefitDeductionNewParamsType = "accident"
-	BenefitDeductionNewParamsTypeCancer              BenefitDeductionNewParamsType = "cancer"
-	BenefitDeductionNewParamsTypeCriticalIllness     BenefitDeductionNewParamsType = "critical_illness"
-	BenefitDeductionNewParamsTypeHospital            BenefitDeductionNewParamsType = "hospital"
-	BenefitDeductionNewParamsTypeMedicalOther        BenefitDeductionNewParamsType = "medical_other"
-	BenefitDeductionNewParamsTypeNqdc                BenefitDeductionNewParamsType = "nqdc"
-	BenefitDeductionNewParamsTypeNontaxableFringe    BenefitDeductionNewParamsType = "nontaxable_fringe"
+	BenefitDeductionNewParamsTypeMedical                 BenefitDeductionNewParamsType = "medical"
+	BenefitDeductionNewParamsTypeDental                  BenefitDeductionNewParamsType = "dental"
+	BenefitDeductionNewParamsTypeVision                  BenefitDeductionNewParamsType = "vision"
+	BenefitDeductionNewParamsTypeLife                    BenefitDeductionNewParamsType = "life"
+	BenefitDeductionNewParamsTypeShortTermDisability     BenefitDeductionNewParamsType = "short_term_disability"
+	BenefitDeductionNewParamsTypeLongTermDisability      BenefitDeductionNewParamsType = "long_term_disability"
+	BenefitDeductionNewParamsType401k                    BenefitDeductionNewParamsType = "401k"
+	BenefitDeductionNewParamsTypeRoth401k                BenefitDeductionNewParamsType = "roth_401k"
+	BenefitDeductionNewParamsType403b                    BenefitDeductionNewParamsType = "403b"
+	BenefitDeductionNewParamsTypeRoth403b                BenefitDeductionNewParamsType = "roth_403b"
+	BenefitDeductionNewParamsType457                     BenefitDeductionNewParamsType = "457"
+	BenefitDeductionNewParamsTypeRoth457                 BenefitDeductionNewParamsType = "roth_457"
+	BenefitDeductionNewParamsTypeSimpleIra               BenefitDeductionNewParamsType = "simple_ira"
+	BenefitDeductionNewParamsTypeRothSimpleIra           BenefitDeductionNewParamsType = "roth_simple_ira"
+	BenefitDeductionNewParamsTypeHsa                     BenefitDeductionNewParamsType = "hsa"
+	BenefitDeductionNewParamsTypeFsaMedical              BenefitDeductionNewParamsType = "fsa_medical"
+	BenefitDeductionNewParamsTypeFsaDependentCare        BenefitDeductionNewParamsType = "fsa_dependent_care"
+	BenefitDeductionNewParamsTypeTransit                 BenefitDeductionNewParamsType = "transit"
+	BenefitDeductionNewParamsTypeParking                 BenefitDeductionNewParamsType = "parking"
+	BenefitDeductionNewParamsTypeAccident                BenefitDeductionNewParamsType = "accident"
+	BenefitDeductionNewParamsTypeCancer                  BenefitDeductionNewParamsType = "cancer"
+	BenefitDeductionNewParamsTypeCriticalIllness         BenefitDeductionNewParamsType = "critical_illness"
+	BenefitDeductionNewParamsTypeHospital                BenefitDeductionNewParamsType = "hospital"
+	BenefitDeductionNewParamsTypeMedicalOther            BenefitDeductionNewParamsType = "medical_other"
+	BenefitDeductionNewParamsTypeNqdc                    BenefitDeductionNewParamsType = "nqdc"
+	BenefitDeductionNewParamsTypeNontaxableFringe        BenefitDeductionNewParamsType = "nontaxable_fringe"
+	BenefitDeductionNewParamsTypeRetirementLoanRepayment BenefitDeductionNewParamsType = "retirement_loan_repayment"
 )
 
 func (r BenefitDeductionNewParamsType) IsKnown() bool {
 	switch r {
-	case BenefitDeductionNewParamsTypeMedical, BenefitDeductionNewParamsTypeDental, BenefitDeductionNewParamsTypeVision, BenefitDeductionNewParamsTypeLife, BenefitDeductionNewParamsTypeShortTermDisability, BenefitDeductionNewParamsTypeLongTermDisability, BenefitDeductionNewParamsType401k, BenefitDeductionNewParamsTypeRoth401k, BenefitDeductionNewParamsType403b, BenefitDeductionNewParamsTypeRoth403b, BenefitDeductionNewParamsType457, BenefitDeductionNewParamsTypeRoth457, BenefitDeductionNewParamsTypeSimpleIra, BenefitDeductionNewParamsTypeRothSimpleIra, BenefitDeductionNewParamsTypeHsa, BenefitDeductionNewParamsTypeFsaMedical, BenefitDeductionNewParamsTypeFsaDependentCare, BenefitDeductionNewParamsTypeTransit, BenefitDeductionNewParamsTypeParking, BenefitDeductionNewParamsTypeAccident, BenefitDeductionNewParamsTypeCancer, BenefitDeductionNewParamsTypeCriticalIllness, BenefitDeductionNewParamsTypeHospital, BenefitDeductionNewParamsTypeMedicalOther, BenefitDeductionNewParamsTypeNqdc, BenefitDeductionNewParamsTypeNontaxableFringe:
+	case BenefitDeductionNewParamsTypeMedical, BenefitDeductionNewParamsTypeDental, BenefitDeductionNewParamsTypeVision, BenefitDeductionNewParamsTypeLife, BenefitDeductionNewParamsTypeShortTermDisability, BenefitDeductionNewParamsTypeLongTermDisability, BenefitDeductionNewParamsType401k, BenefitDeductionNewParamsTypeRoth401k, BenefitDeductionNewParamsType403b, BenefitDeductionNewParamsTypeRoth403b, BenefitDeductionNewParamsType457, BenefitDeductionNewParamsTypeRoth457, BenefitDeductionNewParamsTypeSimpleIra, BenefitDeductionNewParamsTypeRothSimpleIra, BenefitDeductionNewParamsTypeHsa, BenefitDeductionNewParamsTypeFsaMedical, BenefitDeductionNewParamsTypeFsaDependentCare, BenefitDeductionNewParamsTypeTransit, BenefitDeductionNewParamsTypeParking, BenefitDeductionNewParamsTypeAccident, BenefitDeductionNewParamsTypeCancer, BenefitDeductionNewParamsTypeCriticalIllness, BenefitDeductionNewParamsTypeHospital, BenefitDeductionNewParamsTypeMedicalOther, BenefitDeductionNewParamsTypeNqdc, BenefitDeductionNewParamsTypeNontaxableFringe, BenefitDeductionNewParamsTypeRetirementLoanRepayment:
 		return true
 	}
 	return false
@@ -1206,19 +1212,67 @@ func (r BenefitDeductionNewParamsCalculationPercentageBenefitInputType) IsKnown(
 }
 
 type BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployeeContribution struct {
-	Percentage param.Field[interface{}] `json:"percentage" api:"required"`
+	Percentage param.Field[BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployeeContributionPercentageUnion] `json:"percentage" api:"required"`
 }
 
 func (r BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployeeContribution) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
+// Union satisfied by [shared.UnionFloat], [BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployeeContributionPercentageString].
+type BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployeeContributionPercentageUnion interface {
+	ImplementsBenefitDeductionNewParamsCalculationPercentageBenefitInputEmployeeContributionPercentageUnion()
+}
+
+func (r BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployeeContributionPercentageString) ImplementsBenefitDeductionNewParamsCalculationPercentageBenefitInputEmployeeContributionPercentageUnion() {
+}
+
+type BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployeeContributionPercentageString string
+
+const (
+	BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployeeContributionPercentageStringInfinity  BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployeeContributionPercentageString = "Infinity"
+	BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployeeContributionPercentageStringInfinity2 BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployeeContributionPercentageString = "-Infinity"
+	BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployeeContributionPercentageStringNaN       BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployeeContributionPercentageString = "NaN"
+)
+
+func (r BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployeeContributionPercentageString) IsKnown() bool {
+	switch r {
+	case BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployeeContributionPercentageStringInfinity, BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployeeContributionPercentageStringInfinity2, BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployeeContributionPercentageStringNaN:
+		return true
+	}
+	return false
+}
+
 type BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployerContribution struct {
-	Percentage param.Field[interface{}] `json:"percentage" api:"required"`
+	Percentage param.Field[BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployerContributionPercentageUnion] `json:"percentage" api:"required"`
 }
 
 func (r BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployerContribution) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+// Union satisfied by [shared.UnionFloat], [BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployerContributionPercentageString].
+type BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployerContributionPercentageUnion interface {
+	ImplementsBenefitDeductionNewParamsCalculationPercentageBenefitInputEmployerContributionPercentageUnion()
+}
+
+func (r BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployerContributionPercentageString) ImplementsBenefitDeductionNewParamsCalculationPercentageBenefitInputEmployerContributionPercentageUnion() {
+}
+
+type BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployerContributionPercentageString string
+
+const (
+	BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployerContributionPercentageStringInfinity  BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployerContributionPercentageString = "Infinity"
+	BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployerContributionPercentageStringInfinity2 BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployerContributionPercentageString = "-Infinity"
+	BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployerContributionPercentageStringNaN       BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployerContributionPercentageString = "NaN"
+)
+
+func (r BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployerContributionPercentageString) IsKnown() bool {
+	switch r {
+	case BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployerContributionPercentageStringInfinity, BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployerContributionPercentageStringInfinity2, BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployerContributionPercentageStringNaN:
+		return true
+	}
+	return false
 }
 
 type BenefitDeductionNewParamsRecurrence string
@@ -1539,7 +1593,7 @@ func (r BenefitDeductionUpdateParamsCalculationPercentageBenefitInputType) IsKno
 }
 
 type BenefitDeductionUpdateParamsCalculationPercentageBenefitInputEmployeeContribution struct {
-	Percentage param.Field[interface{}] `json:"percentage" api:"required"`
+	Percentage param.Field[BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployeeContributionPercentageUnion] `json:"percentage" api:"required"`
 }
 
 func (r BenefitDeductionUpdateParamsCalculationPercentageBenefitInputEmployeeContribution) MarshalJSON() (data []byte, err error) {
@@ -1547,7 +1601,7 @@ func (r BenefitDeductionUpdateParamsCalculationPercentageBenefitInputEmployeeCon
 }
 
 type BenefitDeductionUpdateParamsCalculationPercentageBenefitInputEmployerContribution struct {
-	Percentage param.Field[interface{}] `json:"percentage" api:"required"`
+	Percentage param.Field[BenefitDeductionNewParamsCalculationPercentageBenefitInputEmployerContributionPercentageUnion] `json:"percentage" api:"required"`
 }
 
 func (r BenefitDeductionUpdateParamsCalculationPercentageBenefitInputEmployerContribution) MarshalJSON() (data []byte, err error) {
@@ -1683,6 +1737,28 @@ func (r benefitDeductionListResponseJSON) RawJSON() string {
 	return r.raw
 }
 
+// Union satisfied by [shared.UnionFloat], [PercentageContributionPercentageString].
+type PercentageContributionPercentageUnion interface {
+	ImplementsPercentageContributionPercentageUnion()
+}
+
+func (r PercentageContributionPercentageString) ImplementsPercentageContributionPercentageUnion() {}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*PercentageContributionPercentageUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(PercentageContributionPercentageString("")),
+		},
+	)
+}
+
 type PublicBenefitDeductionPlanUnion interface {
 	implementsPublicBenefitDeductionPlan()
 }
@@ -1761,6 +1837,22 @@ const (
 func (r PublicBenefitDeductionCalculationFrequency) IsKnown() bool {
 	switch r {
 	case PublicBenefitDeductionCalculationFrequencyPerPaycheck, PublicBenefitDeductionCalculationFrequencyMonthly:
+		return true
+	}
+	return false
+}
+
+type PercentageContributionPercentageString string
+
+const (
+	PercentageContributionPercentageStringInfinity  PercentageContributionPercentageString = "Infinity"
+	PercentageContributionPercentageStringInfinity2 PercentageContributionPercentageString = "-Infinity"
+	PercentageContributionPercentageStringNaN       PercentageContributionPercentageString = "NaN"
+)
+
+func (r PercentageContributionPercentageString) IsKnown() bool {
+	switch r {
+	case PercentageContributionPercentageStringInfinity, PercentageContributionPercentageStringInfinity2, PercentageContributionPercentageStringNaN:
 		return true
 	}
 	return false

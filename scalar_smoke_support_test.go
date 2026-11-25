@@ -34,7 +34,7 @@ import (
 // scalarSmokeCaseListDigest fingerprints the case list the generator's smoke runner checks this
 // suite against (written only for generator tooling). The runner refuses a list whose digest
 // differs, so a list left by an earlier generation is never trusted.
-const scalarSmokeCaseListDigest = "2639c2f6470a319c"
+const scalarSmokeCaseListDigest = "34d361e19ddbb7d5"
 
 // scalarSmokeCaseBound is how long one case may take, all retries included, before it is recorded
 // as failed.
