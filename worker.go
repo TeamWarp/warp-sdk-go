@@ -1360,7 +1360,8 @@ type WorkerUpdateParams struct {
 	BiologicalSex param.Field[WorkerUpdateParamsBiologicalSex] `json:"biologicalSex"`
 	DateOfBirth   param.Field[string]                          `json:"dateOfBirth"`
 	// The unique public id of the department
-	DepartmentID param.Field[string] `json:"departmentId"`
+	DepartmentID        param.Field[string]      `json:"departmentId"`
+	DietaryRestrictions param.Field[interface{}] `json:"dietaryRestrictions"`
 	// An email with a reasonably valid regex (based on RFC 5321 atext characters)
 	Email     param.Field[string] `json:"email" format:"email"`
 	FirstName param.Field[string] `json:"firstName"`
@@ -2315,6 +2316,8 @@ type WorkerUpdateResponse struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerUpdateResponseDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerUpdateResponseLevel `json:"level" api:"nullable"`
@@ -2327,39 +2330,40 @@ type WorkerUpdateResponse struct {
 
 // workerUpdateResponseJSON contains the JSON metadata for the struct [WorkerUpdateResponse]
 type workerUpdateResponseJSON struct {
-	ID                apijson.Field
-	Address           apijson.Field
-	BenefitEligible   apijson.Field
-	BiologicalSex     apijson.Field
-	BusinessName      apijson.Field
-	Compensation      apijson.Field
-	DateOfBirth       apijson.Field
-	Department        apijson.Field
-	DisplayName       apijson.Field
-	Email             apijson.Field
-	EndDate           apijson.Field
-	FirstName         apijson.Field
-	IsBusiness        apijson.Field
-	LastName          apijson.Field
-	LatestRehireDate  apijson.Field
-	MaritalStatus     apijson.Field
-	Phone             apijson.Field
-	Position          apijson.Field
-	PreferredName     apijson.Field
-	PrimaryWorkplace  apijson.Field
-	StartDate         apijson.Field
-	Status            apijson.Field
-	TerminationReason apijson.Field
-	TimeZone          apijson.Field
-	Type              apijson.Field
-	UpdatedAt         apijson.Field
-	WorkEmail         apijson.Field
-	CustomFields      apijson.Field
-	Level             apijson.Field
-	Manager           apijson.Field
-	TShirtSize        apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
+	ID                  apijson.Field
+	Address             apijson.Field
+	BenefitEligible     apijson.Field
+	BiologicalSex       apijson.Field
+	BusinessName        apijson.Field
+	Compensation        apijson.Field
+	DateOfBirth         apijson.Field
+	Department          apijson.Field
+	DisplayName         apijson.Field
+	Email               apijson.Field
+	EndDate             apijson.Field
+	FirstName           apijson.Field
+	IsBusiness          apijson.Field
+	LastName            apijson.Field
+	LatestRehireDate    apijson.Field
+	MaritalStatus       apijson.Field
+	Phone               apijson.Field
+	Position            apijson.Field
+	PreferredName       apijson.Field
+	PrimaryWorkplace    apijson.Field
+	StartDate           apijson.Field
+	Status              apijson.Field
+	TerminationReason   apijson.Field
+	TimeZone            apijson.Field
+	Type                apijson.Field
+	UpdatedAt           apijson.Field
+	WorkEmail           apijson.Field
+	CustomFields        apijson.Field
+	DietaryRestrictions apijson.Field
+	Level               apijson.Field
+	Manager             apijson.Field
+	TShirtSize          apijson.Field
+	raw                 string
+	ExtraFields         map[string]apijson.Field
 }
 
 func (r *WorkerUpdateResponse) UnmarshalJSON(data []byte) (err error) {
@@ -2423,6 +2427,8 @@ type WorkerGetResponse struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerGetResponseDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerGetResponseLevel `json:"level" api:"nullable"`
@@ -2435,39 +2441,40 @@ type WorkerGetResponse struct {
 
 // workerGetResponseJSON contains the JSON metadata for the struct [WorkerGetResponse]
 type workerGetResponseJSON struct {
-	ID                apijson.Field
-	Address           apijson.Field
-	BenefitEligible   apijson.Field
-	BiologicalSex     apijson.Field
-	BusinessName      apijson.Field
-	Compensation      apijson.Field
-	DateOfBirth       apijson.Field
-	Department        apijson.Field
-	DisplayName       apijson.Field
-	Email             apijson.Field
-	EndDate           apijson.Field
-	FirstName         apijson.Field
-	IsBusiness        apijson.Field
-	LastName          apijson.Field
-	LatestRehireDate  apijson.Field
-	MaritalStatus     apijson.Field
-	Phone             apijson.Field
-	Position          apijson.Field
-	PreferredName     apijson.Field
-	PrimaryWorkplace  apijson.Field
-	StartDate         apijson.Field
-	Status            apijson.Field
-	TerminationReason apijson.Field
-	TimeZone          apijson.Field
-	Type              apijson.Field
-	UpdatedAt         apijson.Field
-	WorkEmail         apijson.Field
-	CustomFields      apijson.Field
-	Level             apijson.Field
-	Manager           apijson.Field
-	TShirtSize        apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
+	ID                  apijson.Field
+	Address             apijson.Field
+	BenefitEligible     apijson.Field
+	BiologicalSex       apijson.Field
+	BusinessName        apijson.Field
+	Compensation        apijson.Field
+	DateOfBirth         apijson.Field
+	Department          apijson.Field
+	DisplayName         apijson.Field
+	Email               apijson.Field
+	EndDate             apijson.Field
+	FirstName           apijson.Field
+	IsBusiness          apijson.Field
+	LastName            apijson.Field
+	LatestRehireDate    apijson.Field
+	MaritalStatus       apijson.Field
+	Phone               apijson.Field
+	Position            apijson.Field
+	PreferredName       apijson.Field
+	PrimaryWorkplace    apijson.Field
+	StartDate           apijson.Field
+	Status              apijson.Field
+	TerminationReason   apijson.Field
+	TimeZone            apijson.Field
+	Type                apijson.Field
+	UpdatedAt           apijson.Field
+	WorkEmail           apijson.Field
+	CustomFields        apijson.Field
+	DietaryRestrictions apijson.Field
+	Level               apijson.Field
+	Manager             apijson.Field
+	TShirtSize          apijson.Field
+	raw                 string
+	ExtraFields         map[string]apijson.Field
 }
 
 func (r *WorkerGetResponse) UnmarshalJSON(data []byte) (err error) {
@@ -2555,6 +2562,8 @@ type WorkerNewEmployeeResponse struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerNewEmployeeResponseDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerNewEmployeeResponseLevel `json:"level" api:"nullable"`
@@ -2567,39 +2576,40 @@ type WorkerNewEmployeeResponse struct {
 
 // workerNewEmployeeResponseJSON contains the JSON metadata for the struct [WorkerNewEmployeeResponse]
 type workerNewEmployeeResponseJSON struct {
-	ID                apijson.Field
-	Address           apijson.Field
-	BenefitEligible   apijson.Field
-	BiologicalSex     apijson.Field
-	BusinessName      apijson.Field
-	Compensation      apijson.Field
-	DateOfBirth       apijson.Field
-	Department        apijson.Field
-	DisplayName       apijson.Field
-	Email             apijson.Field
-	EndDate           apijson.Field
-	FirstName         apijson.Field
-	IsBusiness        apijson.Field
-	LastName          apijson.Field
-	LatestRehireDate  apijson.Field
-	MaritalStatus     apijson.Field
-	Phone             apijson.Field
-	Position          apijson.Field
-	PreferredName     apijson.Field
-	PrimaryWorkplace  apijson.Field
-	StartDate         apijson.Field
-	Status            apijson.Field
-	TerminationReason apijson.Field
-	TimeZone          apijson.Field
-	Type              apijson.Field
-	UpdatedAt         apijson.Field
-	WorkEmail         apijson.Field
-	CustomFields      apijson.Field
-	Level             apijson.Field
-	Manager           apijson.Field
-	TShirtSize        apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
+	ID                  apijson.Field
+	Address             apijson.Field
+	BenefitEligible     apijson.Field
+	BiologicalSex       apijson.Field
+	BusinessName        apijson.Field
+	Compensation        apijson.Field
+	DateOfBirth         apijson.Field
+	Department          apijson.Field
+	DisplayName         apijson.Field
+	Email               apijson.Field
+	EndDate             apijson.Field
+	FirstName           apijson.Field
+	IsBusiness          apijson.Field
+	LastName            apijson.Field
+	LatestRehireDate    apijson.Field
+	MaritalStatus       apijson.Field
+	Phone               apijson.Field
+	Position            apijson.Field
+	PreferredName       apijson.Field
+	PrimaryWorkplace    apijson.Field
+	StartDate           apijson.Field
+	Status              apijson.Field
+	TerminationReason   apijson.Field
+	TimeZone            apijson.Field
+	Type                apijson.Field
+	UpdatedAt           apijson.Field
+	WorkEmail           apijson.Field
+	CustomFields        apijson.Field
+	DietaryRestrictions apijson.Field
+	Level               apijson.Field
+	Manager             apijson.Field
+	TShirtSize          apijson.Field
+	raw                 string
+	ExtraFields         map[string]apijson.Field
 }
 
 func (r *WorkerNewEmployeeResponse) UnmarshalJSON(data []byte) (err error) {
@@ -2663,6 +2673,8 @@ type WorkerNewContractorResponse struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerNewContractorResponseDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerNewContractorResponseLevel `json:"level" api:"nullable"`
@@ -2675,39 +2687,40 @@ type WorkerNewContractorResponse struct {
 
 // workerNewContractorResponseJSON contains the JSON metadata for the struct [WorkerNewContractorResponse]
 type workerNewContractorResponseJSON struct {
-	ID                apijson.Field
-	Address           apijson.Field
-	BenefitEligible   apijson.Field
-	BiologicalSex     apijson.Field
-	BusinessName      apijson.Field
-	Compensation      apijson.Field
-	DateOfBirth       apijson.Field
-	Department        apijson.Field
-	DisplayName       apijson.Field
-	Email             apijson.Field
-	EndDate           apijson.Field
-	FirstName         apijson.Field
-	IsBusiness        apijson.Field
-	LastName          apijson.Field
-	LatestRehireDate  apijson.Field
-	MaritalStatus     apijson.Field
-	Phone             apijson.Field
-	Position          apijson.Field
-	PreferredName     apijson.Field
-	PrimaryWorkplace  apijson.Field
-	StartDate         apijson.Field
-	Status            apijson.Field
-	TerminationReason apijson.Field
-	TimeZone          apijson.Field
-	Type              apijson.Field
-	UpdatedAt         apijson.Field
-	WorkEmail         apijson.Field
-	CustomFields      apijson.Field
-	Level             apijson.Field
-	Manager           apijson.Field
-	TShirtSize        apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
+	ID                  apijson.Field
+	Address             apijson.Field
+	BenefitEligible     apijson.Field
+	BiologicalSex       apijson.Field
+	BusinessName        apijson.Field
+	Compensation        apijson.Field
+	DateOfBirth         apijson.Field
+	Department          apijson.Field
+	DisplayName         apijson.Field
+	Email               apijson.Field
+	EndDate             apijson.Field
+	FirstName           apijson.Field
+	IsBusiness          apijson.Field
+	LastName            apijson.Field
+	LatestRehireDate    apijson.Field
+	MaritalStatus       apijson.Field
+	Phone               apijson.Field
+	Position            apijson.Field
+	PreferredName       apijson.Field
+	PrimaryWorkplace    apijson.Field
+	StartDate           apijson.Field
+	Status              apijson.Field
+	TerminationReason   apijson.Field
+	TimeZone            apijson.Field
+	Type                apijson.Field
+	UpdatedAt           apijson.Field
+	WorkEmail           apijson.Field
+	CustomFields        apijson.Field
+	DietaryRestrictions apijson.Field
+	Level               apijson.Field
+	Manager             apijson.Field
+	TShirtSize          apijson.Field
+	raw                 string
+	ExtraFields         map[string]apijson.Field
 }
 
 func (r *WorkerNewContractorResponse) UnmarshalJSON(data []byte) (err error) {
@@ -2771,6 +2784,8 @@ type WorkerInviteResponse struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerInviteResponseDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerInviteResponseLevel `json:"level" api:"nullable"`
@@ -2783,39 +2798,40 @@ type WorkerInviteResponse struct {
 
 // workerInviteResponseJSON contains the JSON metadata for the struct [WorkerInviteResponse]
 type workerInviteResponseJSON struct {
-	ID                apijson.Field
-	Address           apijson.Field
-	BenefitEligible   apijson.Field
-	BiologicalSex     apijson.Field
-	BusinessName      apijson.Field
-	Compensation      apijson.Field
-	DateOfBirth       apijson.Field
-	Department        apijson.Field
-	DisplayName       apijson.Field
-	Email             apijson.Field
-	EndDate           apijson.Field
-	FirstName         apijson.Field
-	IsBusiness        apijson.Field
-	LastName          apijson.Field
-	LatestRehireDate  apijson.Field
-	MaritalStatus     apijson.Field
-	Phone             apijson.Field
-	Position          apijson.Field
-	PreferredName     apijson.Field
-	PrimaryWorkplace  apijson.Field
-	StartDate         apijson.Field
-	Status            apijson.Field
-	TerminationReason apijson.Field
-	TimeZone          apijson.Field
-	Type              apijson.Field
-	UpdatedAt         apijson.Field
-	WorkEmail         apijson.Field
-	CustomFields      apijson.Field
-	Level             apijson.Field
-	Manager           apijson.Field
-	TShirtSize        apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
+	ID                  apijson.Field
+	Address             apijson.Field
+	BenefitEligible     apijson.Field
+	BiologicalSex       apijson.Field
+	BusinessName        apijson.Field
+	Compensation        apijson.Field
+	DateOfBirth         apijson.Field
+	Department          apijson.Field
+	DisplayName         apijson.Field
+	Email               apijson.Field
+	EndDate             apijson.Field
+	FirstName           apijson.Field
+	IsBusiness          apijson.Field
+	LastName            apijson.Field
+	LatestRehireDate    apijson.Field
+	MaritalStatus       apijson.Field
+	Phone               apijson.Field
+	Position            apijson.Field
+	PreferredName       apijson.Field
+	PrimaryWorkplace    apijson.Field
+	StartDate           apijson.Field
+	Status              apijson.Field
+	TerminationReason   apijson.Field
+	TimeZone            apijson.Field
+	Type                apijson.Field
+	UpdatedAt           apijson.Field
+	WorkEmail           apijson.Field
+	CustomFields        apijson.Field
+	DietaryRestrictions apijson.Field
+	Level               apijson.Field
+	Manager             apijson.Field
+	TShirtSize          apijson.Field
+	raw                 string
+	ExtraFields         map[string]apijson.Field
 }
 
 func (r *WorkerInviteResponse) UnmarshalJSON(data []byte) (err error) {
@@ -3156,6 +3172,36 @@ func (r WorkerUpdateResponseTShirtSize) IsKnown() bool {
 	return false
 }
 
+type WorkerUpdateResponseDietaryRestriction string
+
+const (
+	WorkerUpdateResponseDietaryRestrictionVegetarian       WorkerUpdateResponseDietaryRestriction = "vegetarian"
+	WorkerUpdateResponseDietaryRestrictionVegan            WorkerUpdateResponseDietaryRestriction = "vegan"
+	WorkerUpdateResponseDietaryRestrictionPescatarian      WorkerUpdateResponseDietaryRestriction = "pescatarian"
+	WorkerUpdateResponseDietaryRestrictionHalal            WorkerUpdateResponseDietaryRestriction = "halal"
+	WorkerUpdateResponseDietaryRestrictionKosher           WorkerUpdateResponseDietaryRestriction = "kosher"
+	WorkerUpdateResponseDietaryRestrictionNoPork           WorkerUpdateResponseDietaryRestriction = "no_pork"
+	WorkerUpdateResponseDietaryRestrictionNoBeef           WorkerUpdateResponseDietaryRestriction = "no_beef"
+	WorkerUpdateResponseDietaryRestrictionNoRedMeat        WorkerUpdateResponseDietaryRestriction = "no_red_meat"
+	WorkerUpdateResponseDietaryRestrictionGlutenFree       WorkerUpdateResponseDietaryRestriction = "gluten_free"
+	WorkerUpdateResponseDietaryRestrictionDairyFree        WorkerUpdateResponseDietaryRestriction = "dairy_free"
+	WorkerUpdateResponseDietaryRestrictionLowCarb          WorkerUpdateResponseDietaryRestriction = "low_carb"
+	WorkerUpdateResponseDietaryRestrictionNutAllergy       WorkerUpdateResponseDietaryRestriction = "nut_allergy"
+	WorkerUpdateResponseDietaryRestrictionShellfishAllergy WorkerUpdateResponseDietaryRestriction = "shellfish_allergy"
+	WorkerUpdateResponseDietaryRestrictionFishAllergy      WorkerUpdateResponseDietaryRestriction = "fish_allergy"
+	WorkerUpdateResponseDietaryRestrictionEggAllergy       WorkerUpdateResponseDietaryRestriction = "egg_allergy"
+	WorkerUpdateResponseDietaryRestrictionSoyAllergy       WorkerUpdateResponseDietaryRestriction = "soy_allergy"
+	WorkerUpdateResponseDietaryRestrictionSesameAllergy    WorkerUpdateResponseDietaryRestriction = "sesame_allergy"
+)
+
+func (r WorkerUpdateResponseDietaryRestriction) IsKnown() bool {
+	switch r {
+	case WorkerUpdateResponseDietaryRestrictionVegetarian, WorkerUpdateResponseDietaryRestrictionVegan, WorkerUpdateResponseDietaryRestrictionPescatarian, WorkerUpdateResponseDietaryRestrictionHalal, WorkerUpdateResponseDietaryRestrictionKosher, WorkerUpdateResponseDietaryRestrictionNoPork, WorkerUpdateResponseDietaryRestrictionNoBeef, WorkerUpdateResponseDietaryRestrictionNoRedMeat, WorkerUpdateResponseDietaryRestrictionGlutenFree, WorkerUpdateResponseDietaryRestrictionDairyFree, WorkerUpdateResponseDietaryRestrictionLowCarb, WorkerUpdateResponseDietaryRestrictionNutAllergy, WorkerUpdateResponseDietaryRestrictionShellfishAllergy, WorkerUpdateResponseDietaryRestrictionFishAllergy, WorkerUpdateResponseDietaryRestrictionEggAllergy, WorkerUpdateResponseDietaryRestrictionSoyAllergy, WorkerUpdateResponseDietaryRestrictionSesameAllergy:
+		return true
+	}
+	return false
+}
+
 type WorkerUpdateResponseDepartment struct {
 	// The unique public id of the department
 	ID   string                             `json:"id" api:"required"`
@@ -3315,6 +3361,36 @@ func (r WorkerGetResponseTShirtSize) IsKnown() bool {
 	return false
 }
 
+type WorkerGetResponseDietaryRestriction string
+
+const (
+	WorkerGetResponseDietaryRestrictionVegetarian       WorkerGetResponseDietaryRestriction = "vegetarian"
+	WorkerGetResponseDietaryRestrictionVegan            WorkerGetResponseDietaryRestriction = "vegan"
+	WorkerGetResponseDietaryRestrictionPescatarian      WorkerGetResponseDietaryRestriction = "pescatarian"
+	WorkerGetResponseDietaryRestrictionHalal            WorkerGetResponseDietaryRestriction = "halal"
+	WorkerGetResponseDietaryRestrictionKosher           WorkerGetResponseDietaryRestriction = "kosher"
+	WorkerGetResponseDietaryRestrictionNoPork           WorkerGetResponseDietaryRestriction = "no_pork"
+	WorkerGetResponseDietaryRestrictionNoBeef           WorkerGetResponseDietaryRestriction = "no_beef"
+	WorkerGetResponseDietaryRestrictionNoRedMeat        WorkerGetResponseDietaryRestriction = "no_red_meat"
+	WorkerGetResponseDietaryRestrictionGlutenFree       WorkerGetResponseDietaryRestriction = "gluten_free"
+	WorkerGetResponseDietaryRestrictionDairyFree        WorkerGetResponseDietaryRestriction = "dairy_free"
+	WorkerGetResponseDietaryRestrictionLowCarb          WorkerGetResponseDietaryRestriction = "low_carb"
+	WorkerGetResponseDietaryRestrictionNutAllergy       WorkerGetResponseDietaryRestriction = "nut_allergy"
+	WorkerGetResponseDietaryRestrictionShellfishAllergy WorkerGetResponseDietaryRestriction = "shellfish_allergy"
+	WorkerGetResponseDietaryRestrictionFishAllergy      WorkerGetResponseDietaryRestriction = "fish_allergy"
+	WorkerGetResponseDietaryRestrictionEggAllergy       WorkerGetResponseDietaryRestriction = "egg_allergy"
+	WorkerGetResponseDietaryRestrictionSoyAllergy       WorkerGetResponseDietaryRestriction = "soy_allergy"
+	WorkerGetResponseDietaryRestrictionSesameAllergy    WorkerGetResponseDietaryRestriction = "sesame_allergy"
+)
+
+func (r WorkerGetResponseDietaryRestriction) IsKnown() bool {
+	switch r {
+	case WorkerGetResponseDietaryRestrictionVegetarian, WorkerGetResponseDietaryRestrictionVegan, WorkerGetResponseDietaryRestrictionPescatarian, WorkerGetResponseDietaryRestrictionHalal, WorkerGetResponseDietaryRestrictionKosher, WorkerGetResponseDietaryRestrictionNoPork, WorkerGetResponseDietaryRestrictionNoBeef, WorkerGetResponseDietaryRestrictionNoRedMeat, WorkerGetResponseDietaryRestrictionGlutenFree, WorkerGetResponseDietaryRestrictionDairyFree, WorkerGetResponseDietaryRestrictionLowCarb, WorkerGetResponseDietaryRestrictionNutAllergy, WorkerGetResponseDietaryRestrictionShellfishAllergy, WorkerGetResponseDietaryRestrictionFishAllergy, WorkerGetResponseDietaryRestrictionEggAllergy, WorkerGetResponseDietaryRestrictionSoyAllergy, WorkerGetResponseDietaryRestrictionSesameAllergy:
+		return true
+	}
+	return false
+}
+
 type WorkerGetResponseDepartment struct {
 	// The unique public id of the department
 	ID   string                          `json:"id" api:"required"`
@@ -3443,6 +3519,8 @@ type WorkerListResponseData struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerListResponseDataDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerListResponseDataLevel `json:"level" api:"nullable"`
@@ -3455,39 +3533,40 @@ type WorkerListResponseData struct {
 
 // workerListResponseDataJSON contains the JSON metadata for the struct [WorkerListResponseData]
 type workerListResponseDataJSON struct {
-	ID                apijson.Field
-	Address           apijson.Field
-	BenefitEligible   apijson.Field
-	BiologicalSex     apijson.Field
-	BusinessName      apijson.Field
-	Compensation      apijson.Field
-	DateOfBirth       apijson.Field
-	Department        apijson.Field
-	DisplayName       apijson.Field
-	Email             apijson.Field
-	EndDate           apijson.Field
-	FirstName         apijson.Field
-	IsBusiness        apijson.Field
-	LastName          apijson.Field
-	LatestRehireDate  apijson.Field
-	MaritalStatus     apijson.Field
-	Phone             apijson.Field
-	Position          apijson.Field
-	PreferredName     apijson.Field
-	PrimaryWorkplace  apijson.Field
-	StartDate         apijson.Field
-	Status            apijson.Field
-	TerminationReason apijson.Field
-	TimeZone          apijson.Field
-	Type              apijson.Field
-	UpdatedAt         apijson.Field
-	WorkEmail         apijson.Field
-	CustomFields      apijson.Field
-	Level             apijson.Field
-	Manager           apijson.Field
-	TShirtSize        apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
+	ID                  apijson.Field
+	Address             apijson.Field
+	BenefitEligible     apijson.Field
+	BiologicalSex       apijson.Field
+	BusinessName        apijson.Field
+	Compensation        apijson.Field
+	DateOfBirth         apijson.Field
+	Department          apijson.Field
+	DisplayName         apijson.Field
+	Email               apijson.Field
+	EndDate             apijson.Field
+	FirstName           apijson.Field
+	IsBusiness          apijson.Field
+	LastName            apijson.Field
+	LatestRehireDate    apijson.Field
+	MaritalStatus       apijson.Field
+	Phone               apijson.Field
+	Position            apijson.Field
+	PreferredName       apijson.Field
+	PrimaryWorkplace    apijson.Field
+	StartDate           apijson.Field
+	Status              apijson.Field
+	TerminationReason   apijson.Field
+	TimeZone            apijson.Field
+	Type                apijson.Field
+	UpdatedAt           apijson.Field
+	WorkEmail           apijson.Field
+	CustomFields        apijson.Field
+	DietaryRestrictions apijson.Field
+	Level               apijson.Field
+	Manager             apijson.Field
+	TShirtSize          apijson.Field
+	raw                 string
+	ExtraFields         map[string]apijson.Field
 }
 
 func (r *WorkerListResponseData) UnmarshalJSON(data []byte) (err error) {
@@ -3577,6 +3656,36 @@ const (
 func (r WorkerNewEmployeeResponseTShirtSize) IsKnown() bool {
 	switch r {
 	case WorkerNewEmployeeResponseTShirtSizeXs, WorkerNewEmployeeResponseTShirtSizeS, WorkerNewEmployeeResponseTShirtSizeM, WorkerNewEmployeeResponseTShirtSizeL, WorkerNewEmployeeResponseTShirtSizeXl, WorkerNewEmployeeResponseTShirtSizeXxl, WorkerNewEmployeeResponseTShirtSizeXxxl:
+		return true
+	}
+	return false
+}
+
+type WorkerNewEmployeeResponseDietaryRestriction string
+
+const (
+	WorkerNewEmployeeResponseDietaryRestrictionVegetarian       WorkerNewEmployeeResponseDietaryRestriction = "vegetarian"
+	WorkerNewEmployeeResponseDietaryRestrictionVegan            WorkerNewEmployeeResponseDietaryRestriction = "vegan"
+	WorkerNewEmployeeResponseDietaryRestrictionPescatarian      WorkerNewEmployeeResponseDietaryRestriction = "pescatarian"
+	WorkerNewEmployeeResponseDietaryRestrictionHalal            WorkerNewEmployeeResponseDietaryRestriction = "halal"
+	WorkerNewEmployeeResponseDietaryRestrictionKosher           WorkerNewEmployeeResponseDietaryRestriction = "kosher"
+	WorkerNewEmployeeResponseDietaryRestrictionNoPork           WorkerNewEmployeeResponseDietaryRestriction = "no_pork"
+	WorkerNewEmployeeResponseDietaryRestrictionNoBeef           WorkerNewEmployeeResponseDietaryRestriction = "no_beef"
+	WorkerNewEmployeeResponseDietaryRestrictionNoRedMeat        WorkerNewEmployeeResponseDietaryRestriction = "no_red_meat"
+	WorkerNewEmployeeResponseDietaryRestrictionGlutenFree       WorkerNewEmployeeResponseDietaryRestriction = "gluten_free"
+	WorkerNewEmployeeResponseDietaryRestrictionDairyFree        WorkerNewEmployeeResponseDietaryRestriction = "dairy_free"
+	WorkerNewEmployeeResponseDietaryRestrictionLowCarb          WorkerNewEmployeeResponseDietaryRestriction = "low_carb"
+	WorkerNewEmployeeResponseDietaryRestrictionNutAllergy       WorkerNewEmployeeResponseDietaryRestriction = "nut_allergy"
+	WorkerNewEmployeeResponseDietaryRestrictionShellfishAllergy WorkerNewEmployeeResponseDietaryRestriction = "shellfish_allergy"
+	WorkerNewEmployeeResponseDietaryRestrictionFishAllergy      WorkerNewEmployeeResponseDietaryRestriction = "fish_allergy"
+	WorkerNewEmployeeResponseDietaryRestrictionEggAllergy       WorkerNewEmployeeResponseDietaryRestriction = "egg_allergy"
+	WorkerNewEmployeeResponseDietaryRestrictionSoyAllergy       WorkerNewEmployeeResponseDietaryRestriction = "soy_allergy"
+	WorkerNewEmployeeResponseDietaryRestrictionSesameAllergy    WorkerNewEmployeeResponseDietaryRestriction = "sesame_allergy"
+)
+
+func (r WorkerNewEmployeeResponseDietaryRestriction) IsKnown() bool {
+	switch r {
+	case WorkerNewEmployeeResponseDietaryRestrictionVegetarian, WorkerNewEmployeeResponseDietaryRestrictionVegan, WorkerNewEmployeeResponseDietaryRestrictionPescatarian, WorkerNewEmployeeResponseDietaryRestrictionHalal, WorkerNewEmployeeResponseDietaryRestrictionKosher, WorkerNewEmployeeResponseDietaryRestrictionNoPork, WorkerNewEmployeeResponseDietaryRestrictionNoBeef, WorkerNewEmployeeResponseDietaryRestrictionNoRedMeat, WorkerNewEmployeeResponseDietaryRestrictionGlutenFree, WorkerNewEmployeeResponseDietaryRestrictionDairyFree, WorkerNewEmployeeResponseDietaryRestrictionLowCarb, WorkerNewEmployeeResponseDietaryRestrictionNutAllergy, WorkerNewEmployeeResponseDietaryRestrictionShellfishAllergy, WorkerNewEmployeeResponseDietaryRestrictionFishAllergy, WorkerNewEmployeeResponseDietaryRestrictionEggAllergy, WorkerNewEmployeeResponseDietaryRestrictionSoyAllergy, WorkerNewEmployeeResponseDietaryRestrictionSesameAllergy:
 		return true
 	}
 	return false
@@ -3741,6 +3850,36 @@ func (r WorkerNewContractorResponseTShirtSize) IsKnown() bool {
 	return false
 }
 
+type WorkerNewContractorResponseDietaryRestriction string
+
+const (
+	WorkerNewContractorResponseDietaryRestrictionVegetarian       WorkerNewContractorResponseDietaryRestriction = "vegetarian"
+	WorkerNewContractorResponseDietaryRestrictionVegan            WorkerNewContractorResponseDietaryRestriction = "vegan"
+	WorkerNewContractorResponseDietaryRestrictionPescatarian      WorkerNewContractorResponseDietaryRestriction = "pescatarian"
+	WorkerNewContractorResponseDietaryRestrictionHalal            WorkerNewContractorResponseDietaryRestriction = "halal"
+	WorkerNewContractorResponseDietaryRestrictionKosher           WorkerNewContractorResponseDietaryRestriction = "kosher"
+	WorkerNewContractorResponseDietaryRestrictionNoPork           WorkerNewContractorResponseDietaryRestriction = "no_pork"
+	WorkerNewContractorResponseDietaryRestrictionNoBeef           WorkerNewContractorResponseDietaryRestriction = "no_beef"
+	WorkerNewContractorResponseDietaryRestrictionNoRedMeat        WorkerNewContractorResponseDietaryRestriction = "no_red_meat"
+	WorkerNewContractorResponseDietaryRestrictionGlutenFree       WorkerNewContractorResponseDietaryRestriction = "gluten_free"
+	WorkerNewContractorResponseDietaryRestrictionDairyFree        WorkerNewContractorResponseDietaryRestriction = "dairy_free"
+	WorkerNewContractorResponseDietaryRestrictionLowCarb          WorkerNewContractorResponseDietaryRestriction = "low_carb"
+	WorkerNewContractorResponseDietaryRestrictionNutAllergy       WorkerNewContractorResponseDietaryRestriction = "nut_allergy"
+	WorkerNewContractorResponseDietaryRestrictionShellfishAllergy WorkerNewContractorResponseDietaryRestriction = "shellfish_allergy"
+	WorkerNewContractorResponseDietaryRestrictionFishAllergy      WorkerNewContractorResponseDietaryRestriction = "fish_allergy"
+	WorkerNewContractorResponseDietaryRestrictionEggAllergy       WorkerNewContractorResponseDietaryRestriction = "egg_allergy"
+	WorkerNewContractorResponseDietaryRestrictionSoyAllergy       WorkerNewContractorResponseDietaryRestriction = "soy_allergy"
+	WorkerNewContractorResponseDietaryRestrictionSesameAllergy    WorkerNewContractorResponseDietaryRestriction = "sesame_allergy"
+)
+
+func (r WorkerNewContractorResponseDietaryRestriction) IsKnown() bool {
+	switch r {
+	case WorkerNewContractorResponseDietaryRestrictionVegetarian, WorkerNewContractorResponseDietaryRestrictionVegan, WorkerNewContractorResponseDietaryRestrictionPescatarian, WorkerNewContractorResponseDietaryRestrictionHalal, WorkerNewContractorResponseDietaryRestrictionKosher, WorkerNewContractorResponseDietaryRestrictionNoPork, WorkerNewContractorResponseDietaryRestrictionNoBeef, WorkerNewContractorResponseDietaryRestrictionNoRedMeat, WorkerNewContractorResponseDietaryRestrictionGlutenFree, WorkerNewContractorResponseDietaryRestrictionDairyFree, WorkerNewContractorResponseDietaryRestrictionLowCarb, WorkerNewContractorResponseDietaryRestrictionNutAllergy, WorkerNewContractorResponseDietaryRestrictionShellfishAllergy, WorkerNewContractorResponseDietaryRestrictionFishAllergy, WorkerNewContractorResponseDietaryRestrictionEggAllergy, WorkerNewContractorResponseDietaryRestrictionSoyAllergy, WorkerNewContractorResponseDietaryRestrictionSesameAllergy:
+		return true
+	}
+	return false
+}
+
 type WorkerNewContractorResponseDepartment struct {
 	// The unique public id of the department
 	ID   string                                    `json:"id" api:"required"`
@@ -3895,6 +4034,36 @@ const (
 func (r WorkerInviteResponseTShirtSize) IsKnown() bool {
 	switch r {
 	case WorkerInviteResponseTShirtSizeXs, WorkerInviteResponseTShirtSizeS, WorkerInviteResponseTShirtSizeM, WorkerInviteResponseTShirtSizeL, WorkerInviteResponseTShirtSizeXl, WorkerInviteResponseTShirtSizeXxl, WorkerInviteResponseTShirtSizeXxxl:
+		return true
+	}
+	return false
+}
+
+type WorkerInviteResponseDietaryRestriction string
+
+const (
+	WorkerInviteResponseDietaryRestrictionVegetarian       WorkerInviteResponseDietaryRestriction = "vegetarian"
+	WorkerInviteResponseDietaryRestrictionVegan            WorkerInviteResponseDietaryRestriction = "vegan"
+	WorkerInviteResponseDietaryRestrictionPescatarian      WorkerInviteResponseDietaryRestriction = "pescatarian"
+	WorkerInviteResponseDietaryRestrictionHalal            WorkerInviteResponseDietaryRestriction = "halal"
+	WorkerInviteResponseDietaryRestrictionKosher           WorkerInviteResponseDietaryRestriction = "kosher"
+	WorkerInviteResponseDietaryRestrictionNoPork           WorkerInviteResponseDietaryRestriction = "no_pork"
+	WorkerInviteResponseDietaryRestrictionNoBeef           WorkerInviteResponseDietaryRestriction = "no_beef"
+	WorkerInviteResponseDietaryRestrictionNoRedMeat        WorkerInviteResponseDietaryRestriction = "no_red_meat"
+	WorkerInviteResponseDietaryRestrictionGlutenFree       WorkerInviteResponseDietaryRestriction = "gluten_free"
+	WorkerInviteResponseDietaryRestrictionDairyFree        WorkerInviteResponseDietaryRestriction = "dairy_free"
+	WorkerInviteResponseDietaryRestrictionLowCarb          WorkerInviteResponseDietaryRestriction = "low_carb"
+	WorkerInviteResponseDietaryRestrictionNutAllergy       WorkerInviteResponseDietaryRestriction = "nut_allergy"
+	WorkerInviteResponseDietaryRestrictionShellfishAllergy WorkerInviteResponseDietaryRestriction = "shellfish_allergy"
+	WorkerInviteResponseDietaryRestrictionFishAllergy      WorkerInviteResponseDietaryRestriction = "fish_allergy"
+	WorkerInviteResponseDietaryRestrictionEggAllergy       WorkerInviteResponseDietaryRestriction = "egg_allergy"
+	WorkerInviteResponseDietaryRestrictionSoyAllergy       WorkerInviteResponseDietaryRestriction = "soy_allergy"
+	WorkerInviteResponseDietaryRestrictionSesameAllergy    WorkerInviteResponseDietaryRestriction = "sesame_allergy"
+)
+
+func (r WorkerInviteResponseDietaryRestriction) IsKnown() bool {
+	switch r {
+	case WorkerInviteResponseDietaryRestrictionVegetarian, WorkerInviteResponseDietaryRestrictionVegan, WorkerInviteResponseDietaryRestrictionPescatarian, WorkerInviteResponseDietaryRestrictionHalal, WorkerInviteResponseDietaryRestrictionKosher, WorkerInviteResponseDietaryRestrictionNoPork, WorkerInviteResponseDietaryRestrictionNoBeef, WorkerInviteResponseDietaryRestrictionNoRedMeat, WorkerInviteResponseDietaryRestrictionGlutenFree, WorkerInviteResponseDietaryRestrictionDairyFree, WorkerInviteResponseDietaryRestrictionLowCarb, WorkerInviteResponseDietaryRestrictionNutAllergy, WorkerInviteResponseDietaryRestrictionShellfishAllergy, WorkerInviteResponseDietaryRestrictionFishAllergy, WorkerInviteResponseDietaryRestrictionEggAllergy, WorkerInviteResponseDietaryRestrictionSoyAllergy, WorkerInviteResponseDietaryRestrictionSesameAllergy:
 		return true
 	}
 	return false
@@ -4240,6 +4409,36 @@ const (
 func (r WorkerListResponseDataTShirtSize) IsKnown() bool {
 	switch r {
 	case WorkerListResponseDataTShirtSizeXs, WorkerListResponseDataTShirtSizeS, WorkerListResponseDataTShirtSizeM, WorkerListResponseDataTShirtSizeL, WorkerListResponseDataTShirtSizeXl, WorkerListResponseDataTShirtSizeXxl, WorkerListResponseDataTShirtSizeXxxl:
+		return true
+	}
+	return false
+}
+
+type WorkerListResponseDataDietaryRestriction string
+
+const (
+	WorkerListResponseDataDietaryRestrictionVegetarian       WorkerListResponseDataDietaryRestriction = "vegetarian"
+	WorkerListResponseDataDietaryRestrictionVegan            WorkerListResponseDataDietaryRestriction = "vegan"
+	WorkerListResponseDataDietaryRestrictionPescatarian      WorkerListResponseDataDietaryRestriction = "pescatarian"
+	WorkerListResponseDataDietaryRestrictionHalal            WorkerListResponseDataDietaryRestriction = "halal"
+	WorkerListResponseDataDietaryRestrictionKosher           WorkerListResponseDataDietaryRestriction = "kosher"
+	WorkerListResponseDataDietaryRestrictionNoPork           WorkerListResponseDataDietaryRestriction = "no_pork"
+	WorkerListResponseDataDietaryRestrictionNoBeef           WorkerListResponseDataDietaryRestriction = "no_beef"
+	WorkerListResponseDataDietaryRestrictionNoRedMeat        WorkerListResponseDataDietaryRestriction = "no_red_meat"
+	WorkerListResponseDataDietaryRestrictionGlutenFree       WorkerListResponseDataDietaryRestriction = "gluten_free"
+	WorkerListResponseDataDietaryRestrictionDairyFree        WorkerListResponseDataDietaryRestriction = "dairy_free"
+	WorkerListResponseDataDietaryRestrictionLowCarb          WorkerListResponseDataDietaryRestriction = "low_carb"
+	WorkerListResponseDataDietaryRestrictionNutAllergy       WorkerListResponseDataDietaryRestriction = "nut_allergy"
+	WorkerListResponseDataDietaryRestrictionShellfishAllergy WorkerListResponseDataDietaryRestriction = "shellfish_allergy"
+	WorkerListResponseDataDietaryRestrictionFishAllergy      WorkerListResponseDataDietaryRestriction = "fish_allergy"
+	WorkerListResponseDataDietaryRestrictionEggAllergy       WorkerListResponseDataDietaryRestriction = "egg_allergy"
+	WorkerListResponseDataDietaryRestrictionSoyAllergy       WorkerListResponseDataDietaryRestriction = "soy_allergy"
+	WorkerListResponseDataDietaryRestrictionSesameAllergy    WorkerListResponseDataDietaryRestriction = "sesame_allergy"
+)
+
+func (r WorkerListResponseDataDietaryRestriction) IsKnown() bool {
+	switch r {
+	case WorkerListResponseDataDietaryRestrictionVegetarian, WorkerListResponseDataDietaryRestrictionVegan, WorkerListResponseDataDietaryRestrictionPescatarian, WorkerListResponseDataDietaryRestrictionHalal, WorkerListResponseDataDietaryRestrictionKosher, WorkerListResponseDataDietaryRestrictionNoPork, WorkerListResponseDataDietaryRestrictionNoBeef, WorkerListResponseDataDietaryRestrictionNoRedMeat, WorkerListResponseDataDietaryRestrictionGlutenFree, WorkerListResponseDataDietaryRestrictionDairyFree, WorkerListResponseDataDietaryRestrictionLowCarb, WorkerListResponseDataDietaryRestrictionNutAllergy, WorkerListResponseDataDietaryRestrictionShellfishAllergy, WorkerListResponseDataDietaryRestrictionFishAllergy, WorkerListResponseDataDietaryRestrictionEggAllergy, WorkerListResponseDataDietaryRestrictionSoyAllergy, WorkerListResponseDataDietaryRestrictionSesameAllergy:
 		return true
 	}
 	return false
