@@ -6,13 +6,17 @@ import (
 	"context"
 	"net/http"
 	"net/url"
+	"reflect"
 	"slices"
+
+	"github.com/tidwall/gjson"
 
 	"github.com/TeamWarp/warp-go-sdk/internal/apijson"
 	"github.com/TeamWarp/warp-go-sdk/internal/apiquery"
 	"github.com/TeamWarp/warp-go-sdk/internal/param"
 	"github.com/TeamWarp/warp-go-sdk/internal/requestconfig"
 	"github.com/TeamWarp/warp-go-sdk/option"
+	"github.com/TeamWarp/warp-go-sdk/shared"
 )
 
 // TimeOffService contains methods and other services that help with interacting
@@ -121,8 +125,10 @@ func (r *TimeOffService) ListRequests(ctx context.Context, query TimeOffListRequ
 }
 
 type TimeOffListAssignmentsParams struct {
-	Limit     param.Field[string]   `query:"limit" api:"required"`
-	AfterID   param.Field[string]   `query:"afterId"`
+	Limit param.Field[string] `query:"limit" api:"required"`
+	// The external-facing id of the worker assignment.
+	AfterID param.Field[string] `query:"afterId"`
+	// The external-facing id of the worker assignment.
 	BeforeID  param.Field[string]   `query:"beforeId"`
 	PolicyIDs param.Field[[]string] `query:"policyIds"`
 	WorkerIDs param.Field[[]string] `query:"workerIds"`
@@ -131,14 +137,16 @@ type TimeOffListAssignmentsParams struct {
 // URLQuery serializes [TimeOffListAssignmentsParams]'s query parameters as `url.Values`.
 func (r TimeOffListAssignmentsParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
 
 type TimeOffListBalancesParams struct {
-	Limit     param.Field[string]   `query:"limit" api:"required"`
-	AfterID   param.Field[string]   `query:"afterId"`
+	Limit param.Field[string] `query:"limit" api:"required"`
+	// The external-facing id of the worker assignment.
+	AfterID param.Field[string] `query:"afterId"`
+	// The external-facing id of the worker assignment.
 	BeforeID  param.Field[string]   `query:"beforeId"`
 	EndDate   param.Field[string]   `query:"endDate"`
 	PolicyIDs param.Field[[]string] `query:"policyIds"`
@@ -149,7 +157,7 @@ type TimeOffListBalancesParams struct {
 // URLQuery serializes [TimeOffListBalancesParams]'s query parameters as `url.Values`.
 func (r TimeOffListBalancesParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -170,7 +178,7 @@ type TimeOffListRequestsParams struct {
 // URLQuery serializes [TimeOffListRequestsParams]'s query parameters as `url.Values`.
 func (r TimeOffListRequestsParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -192,17 +200,17 @@ func (r TimeOffListRequestsParamsStatus) IsKnown() bool {
 }
 
 type TimeOffListAssignmentsResponse struct {
-	HasMore bool                                 `json:"hasMore" api:"required"`
 	Count   int64                                `json:"count" api:"required"`
 	Data    []TimeOffListAssignmentsResponseData `json:"data" api:"required"`
+	HasMore bool                                 `json:"hasMore" api:"required"`
 	JSON    timeOffListAssignmentsResponseJSON   `json:"-"`
 }
 
 // timeOffListAssignmentsResponseJSON contains the JSON metadata for the struct [TimeOffListAssignmentsResponse]
 type timeOffListAssignmentsResponseJSON struct {
-	HasMore     apijson.Field
 	Count       apijson.Field
 	Data        apijson.Field
+	HasMore     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -216,17 +224,17 @@ func (r timeOffListAssignmentsResponseJSON) RawJSON() string {
 }
 
 type TimeOffListBalancesResponse struct {
-	HasMore bool                              `json:"hasMore" api:"required"`
 	Count   int64                             `json:"count" api:"required"`
 	Data    []TimeOffListBalancesResponseData `json:"data" api:"required"`
+	HasMore bool                              `json:"hasMore" api:"required"`
 	JSON    timeOffListBalancesResponseJSON   `json:"-"`
 }
 
 // timeOffListBalancesResponseJSON contains the JSON metadata for the struct [TimeOffListBalancesResponse]
 type timeOffListBalancesResponseJSON struct {
-	HasMore     apijson.Field
 	Count       apijson.Field
 	Data        apijson.Field
+	HasMore     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -240,17 +248,17 @@ func (r timeOffListBalancesResponseJSON) RawJSON() string {
 }
 
 type TimeOffListRequestsResponse struct {
-	HasMore bool                              `json:"hasMore" api:"required"`
 	Count   int64                             `json:"count" api:"required"`
 	Data    []TimeOffListRequestsResponseData `json:"data" api:"required"`
+	HasMore bool                              `json:"hasMore" api:"required"`
 	JSON    timeOffListRequestsResponseJSON   `json:"-"`
 }
 
 // timeOffListRequestsResponseJSON contains the JSON metadata for the struct [TimeOffListRequestsResponse]
 type timeOffListRequestsResponseJSON struct {
-	HasMore     apijson.Field
 	Count       apijson.Field
 	Data        apijson.Field
+	HasMore     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -265,20 +273,20 @@ func (r timeOffListRequestsResponseJSON) RawJSON() string {
 
 type TimeOffListAssignmentsResponseData struct {
 	// The external-facing id of the worker assignment.
-	ID       string `json:"id" api:"required"`
-	PolicyID string `json:"policyId" api:"required"`
+	ID         string `json:"id" api:"required"`
+	AssignedAt string `json:"assignedAt" api:"required"`
+	PolicyID   string `json:"policyId" api:"required"`
 	// The id of the worker.
-	WorkerID   string                                 `json:"workerId" api:"required"`
-	AssignedAt string                                 `json:"assignedAt" api:"required"`
-	JSON       timeOffListAssignmentsResponseDataJSON `json:"-"`
+	WorkerID string                                 `json:"workerId" api:"required"`
+	JSON     timeOffListAssignmentsResponseDataJSON `json:"-"`
 }
 
 // timeOffListAssignmentsResponseDataJSON contains the JSON metadata for the struct [TimeOffListAssignmentsResponseData]
 type timeOffListAssignmentsResponseDataJSON struct {
 	ID          apijson.Field
+	AssignedAt  apijson.Field
 	PolicyID    apijson.Field
 	WorkerID    apijson.Field
-	AssignedAt  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -293,27 +301,27 @@ func (r timeOffListAssignmentsResponseDataJSON) RawJSON() string {
 
 type TimeOffListBalancesResponseData struct {
 	// The external-facing id of the worker assignment.
-	ID              string                              `json:"id" api:"required"`
-	PolicyID        string                              `json:"policyId" api:"required"`
-	LegacyWorkerID  string                              `json:"legacyWorkerId" api:"required"`
-	AccruedUnlocked interface{}                         `json:"accruedUnlocked" api:"required"`
-	AccruedLocked   interface{}                         `json:"accruedLocked" api:"required"`
-	Used            interface{}                         `json:"used" api:"required"`
-	Holds           interface{}                         `json:"holds" api:"required"`
-	Available       interface{}                         `json:"available" api:"required"`
-	JSON            timeOffListBalancesResponseDataJSON `json:"-"`
+	ID              string                                              `json:"id" api:"required"`
+	AccruedLocked   TimeOffListBalancesResponseDataAccruedLockedUnion   `json:"accruedLocked" api:"required"`
+	AccruedUnlocked TimeOffListBalancesResponseDataAccruedUnlockedUnion `json:"accruedUnlocked" api:"required"`
+	Available       TimeOffListBalancesResponseDataAvailableUnion       `json:"available" api:"required"`
+	Holds           TimeOffListBalancesResponseDataHoldsUnion           `json:"holds" api:"required"`
+	LegacyWorkerID  string                                              `json:"legacyWorkerId" api:"required"`
+	PolicyID        string                                              `json:"policyId" api:"required"`
+	Used            TimeOffListBalancesResponseDataUsedUnion            `json:"used" api:"required"`
+	JSON            timeOffListBalancesResponseDataJSON                 `json:"-"`
 }
 
 // timeOffListBalancesResponseDataJSON contains the JSON metadata for the struct [TimeOffListBalancesResponseData]
 type timeOffListBalancesResponseDataJSON struct {
 	ID              apijson.Field
-	PolicyID        apijson.Field
-	LegacyWorkerID  apijson.Field
-	AccruedUnlocked apijson.Field
 	AccruedLocked   apijson.Field
-	Used            apijson.Field
-	Holds           apijson.Field
+	AccruedUnlocked apijson.Field
 	Available       apijson.Field
+	Holds           apijson.Field
+	LegacyWorkerID  apijson.Field
+	PolicyID        apijson.Field
+	Used            apijson.Field
 	raw             string
 	ExtraFields     map[string]apijson.Field
 }
@@ -327,37 +335,37 @@ func (r timeOffListBalancesResponseDataJSON) RawJSON() string {
 }
 
 type TimeOffListRequestsResponseData struct {
-	ID              string `json:"id" api:"required"`
-	TimeOffPolicyID string `json:"timeOffPolicyId" api:"required"`
-	// The id of the worker.
-	WorkerID         string                                        `json:"workerId" api:"required"`
-	Status           TimeOffListRequestsResponseDataStatus         `json:"status" api:"required"`
-	StartAt          string                                        `json:"startAt" api:"required"`
-	StartRangeType   TimeOffListRequestsResponseDataStartRangeType `json:"startRangeType" api:"required"`
-	EndAt            string                                        `json:"endAt" api:"required"`
-	EndRangeType     TimeOffListRequestsResponseDataEndRangeType   `json:"endRangeType" api:"required"`
-	Reason           string                                        `json:"reason" api:"required,nullable"`
-	CreatedAt        string                                        `json:"createdAt" api:"required"`
-	RequestedMinutes interface{}                                   `json:"requestedMinutes" api:"required"`
+	ID               string                                               `json:"id" api:"required"`
+	CreatedAt        string                                               `json:"createdAt" api:"required"`
+	EndAt            string                                               `json:"endAt" api:"required"`
+	EndRangeType     TimeOffListRequestsResponseDataEndRangeType          `json:"endRangeType" api:"required"`
+	Reason           string                                               `json:"reason" api:"required,nullable"`
+	RequestedMinutes TimeOffListRequestsResponseDataRequestedMinutesUnion `json:"requestedMinutes" api:"required"`
+	StartAt          string                                               `json:"startAt" api:"required"`
+	StartRangeType   TimeOffListRequestsResponseDataStartRangeType        `json:"startRangeType" api:"required"`
+	Status           TimeOffListRequestsResponseDataStatus                `json:"status" api:"required"`
+	TimeOffPolicyID  string                                               `json:"timeOffPolicyId" api:"required"`
 	// The time zone that the worker is requesting time off in.
-	TimeZone string                              `json:"timeZone" api:"required,nullable"`
+	TimeZone string `json:"timeZone" api:"required,nullable"`
+	// The id of the worker.
+	WorkerID string                              `json:"workerId" api:"required"`
 	JSON     timeOffListRequestsResponseDataJSON `json:"-"`
 }
 
 // timeOffListRequestsResponseDataJSON contains the JSON metadata for the struct [TimeOffListRequestsResponseData]
 type timeOffListRequestsResponseDataJSON struct {
 	ID               apijson.Field
-	TimeOffPolicyID  apijson.Field
-	WorkerID         apijson.Field
-	Status           apijson.Field
-	StartAt          apijson.Field
-	StartRangeType   apijson.Field
+	CreatedAt        apijson.Field
 	EndAt            apijson.Field
 	EndRangeType     apijson.Field
 	Reason           apijson.Field
-	CreatedAt        apijson.Field
 	RequestedMinutes apijson.Field
+	StartAt          apijson.Field
+	StartRangeType   apijson.Field
+	Status           apijson.Field
+	TimeOffPolicyID  apijson.Field
 	TimeZone         apijson.Field
+	WorkerID         apijson.Field
 	raw              string
 	ExtraFields      map[string]apijson.Field
 }
@@ -368,6 +376,121 @@ func (r *TimeOffListRequestsResponseData) UnmarshalJSON(data []byte) (err error)
 
 func (r timeOffListRequestsResponseDataJSON) RawJSON() string {
 	return r.raw
+}
+
+// Union satisfied by [shared.UnionFloat], [TimeOffListBalancesResponseDataAccruedUnlockedString].
+type TimeOffListBalancesResponseDataAccruedUnlockedUnion interface {
+	ImplementsTimeOffListBalancesResponseDataAccruedUnlockedUnion()
+}
+
+func (r TimeOffListBalancesResponseDataAccruedUnlockedString) ImplementsTimeOffListBalancesResponseDataAccruedUnlockedUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*TimeOffListBalancesResponseDataAccruedUnlockedUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(TimeOffListBalancesResponseDataAccruedUnlockedString("")),
+		},
+	)
+}
+
+// Union satisfied by [shared.UnionFloat], [TimeOffListBalancesResponseDataAccruedLockedString].
+type TimeOffListBalancesResponseDataAccruedLockedUnion interface {
+	ImplementsTimeOffListBalancesResponseDataAccruedLockedUnion()
+}
+
+func (r TimeOffListBalancesResponseDataAccruedLockedString) ImplementsTimeOffListBalancesResponseDataAccruedLockedUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*TimeOffListBalancesResponseDataAccruedLockedUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(TimeOffListBalancesResponseDataAccruedLockedString("")),
+		},
+	)
+}
+
+// Union satisfied by [shared.UnionFloat], [TimeOffListBalancesResponseDataUsedString].
+type TimeOffListBalancesResponseDataUsedUnion interface {
+	ImplementsTimeOffListBalancesResponseDataUsedUnion()
+}
+
+func (r TimeOffListBalancesResponseDataUsedString) ImplementsTimeOffListBalancesResponseDataUsedUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*TimeOffListBalancesResponseDataUsedUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(TimeOffListBalancesResponseDataUsedString("")),
+		},
+	)
+}
+
+// Union satisfied by [shared.UnionFloat], [TimeOffListBalancesResponseDataHoldsString].
+type TimeOffListBalancesResponseDataHoldsUnion interface {
+	ImplementsTimeOffListBalancesResponseDataHoldsUnion()
+}
+
+func (r TimeOffListBalancesResponseDataHoldsString) ImplementsTimeOffListBalancesResponseDataHoldsUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*TimeOffListBalancesResponseDataHoldsUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(TimeOffListBalancesResponseDataHoldsString("")),
+		},
+	)
+}
+
+// Union satisfied by [shared.UnionFloat], [TimeOffListBalancesResponseDataAvailableString].
+type TimeOffListBalancesResponseDataAvailableUnion interface {
+	ImplementsTimeOffListBalancesResponseDataAvailableUnion()
+}
+
+func (r TimeOffListBalancesResponseDataAvailableString) ImplementsTimeOffListBalancesResponseDataAvailableUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*TimeOffListBalancesResponseDataAvailableUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(TimeOffListBalancesResponseDataAvailableString("")),
+		},
+	)
 }
 
 type TimeOffListRequestsResponseDataStatus string
@@ -411,6 +534,125 @@ const (
 func (r TimeOffListRequestsResponseDataEndRangeType) IsKnown() bool {
 	switch r {
 	case TimeOffListRequestsResponseDataEndRangeTypeDate, TimeOffListRequestsResponseDataEndRangeTypeDatetime:
+		return true
+	}
+	return false
+}
+
+// Union satisfied by [shared.UnionFloat], [TimeOffListRequestsResponseDataRequestedMinutesString].
+type TimeOffListRequestsResponseDataRequestedMinutesUnion interface {
+	ImplementsTimeOffListRequestsResponseDataRequestedMinutesUnion()
+}
+
+func (r TimeOffListRequestsResponseDataRequestedMinutesString) ImplementsTimeOffListRequestsResponseDataRequestedMinutesUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*TimeOffListRequestsResponseDataRequestedMinutesUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(TimeOffListRequestsResponseDataRequestedMinutesString("")),
+		},
+	)
+}
+
+type TimeOffListBalancesResponseDataAccruedUnlockedString string
+
+const (
+	TimeOffListBalancesResponseDataAccruedUnlockedStringInfinity  TimeOffListBalancesResponseDataAccruedUnlockedString = "Infinity"
+	TimeOffListBalancesResponseDataAccruedUnlockedStringInfinity2 TimeOffListBalancesResponseDataAccruedUnlockedString = "-Infinity"
+	TimeOffListBalancesResponseDataAccruedUnlockedStringNaN       TimeOffListBalancesResponseDataAccruedUnlockedString = "NaN"
+)
+
+func (r TimeOffListBalancesResponseDataAccruedUnlockedString) IsKnown() bool {
+	switch r {
+	case TimeOffListBalancesResponseDataAccruedUnlockedStringInfinity, TimeOffListBalancesResponseDataAccruedUnlockedStringInfinity2, TimeOffListBalancesResponseDataAccruedUnlockedStringNaN:
+		return true
+	}
+	return false
+}
+
+type TimeOffListBalancesResponseDataAccruedLockedString string
+
+const (
+	TimeOffListBalancesResponseDataAccruedLockedStringInfinity  TimeOffListBalancesResponseDataAccruedLockedString = "Infinity"
+	TimeOffListBalancesResponseDataAccruedLockedStringInfinity2 TimeOffListBalancesResponseDataAccruedLockedString = "-Infinity"
+	TimeOffListBalancesResponseDataAccruedLockedStringNaN       TimeOffListBalancesResponseDataAccruedLockedString = "NaN"
+)
+
+func (r TimeOffListBalancesResponseDataAccruedLockedString) IsKnown() bool {
+	switch r {
+	case TimeOffListBalancesResponseDataAccruedLockedStringInfinity, TimeOffListBalancesResponseDataAccruedLockedStringInfinity2, TimeOffListBalancesResponseDataAccruedLockedStringNaN:
+		return true
+	}
+	return false
+}
+
+type TimeOffListBalancesResponseDataUsedString string
+
+const (
+	TimeOffListBalancesResponseDataUsedStringInfinity  TimeOffListBalancesResponseDataUsedString = "Infinity"
+	TimeOffListBalancesResponseDataUsedStringInfinity2 TimeOffListBalancesResponseDataUsedString = "-Infinity"
+	TimeOffListBalancesResponseDataUsedStringNaN       TimeOffListBalancesResponseDataUsedString = "NaN"
+)
+
+func (r TimeOffListBalancesResponseDataUsedString) IsKnown() bool {
+	switch r {
+	case TimeOffListBalancesResponseDataUsedStringInfinity, TimeOffListBalancesResponseDataUsedStringInfinity2, TimeOffListBalancesResponseDataUsedStringNaN:
+		return true
+	}
+	return false
+}
+
+type TimeOffListBalancesResponseDataHoldsString string
+
+const (
+	TimeOffListBalancesResponseDataHoldsStringInfinity  TimeOffListBalancesResponseDataHoldsString = "Infinity"
+	TimeOffListBalancesResponseDataHoldsStringInfinity2 TimeOffListBalancesResponseDataHoldsString = "-Infinity"
+	TimeOffListBalancesResponseDataHoldsStringNaN       TimeOffListBalancesResponseDataHoldsString = "NaN"
+)
+
+func (r TimeOffListBalancesResponseDataHoldsString) IsKnown() bool {
+	switch r {
+	case TimeOffListBalancesResponseDataHoldsStringInfinity, TimeOffListBalancesResponseDataHoldsStringInfinity2, TimeOffListBalancesResponseDataHoldsStringNaN:
+		return true
+	}
+	return false
+}
+
+type TimeOffListBalancesResponseDataAvailableString string
+
+const (
+	TimeOffListBalancesResponseDataAvailableStringInfinity  TimeOffListBalancesResponseDataAvailableString = "Infinity"
+	TimeOffListBalancesResponseDataAvailableStringInfinity2 TimeOffListBalancesResponseDataAvailableString = "-Infinity"
+	TimeOffListBalancesResponseDataAvailableStringNaN       TimeOffListBalancesResponseDataAvailableString = "NaN"
+)
+
+func (r TimeOffListBalancesResponseDataAvailableString) IsKnown() bool {
+	switch r {
+	case TimeOffListBalancesResponseDataAvailableStringInfinity, TimeOffListBalancesResponseDataAvailableStringInfinity2, TimeOffListBalancesResponseDataAvailableStringNaN:
+		return true
+	}
+	return false
+}
+
+type TimeOffListRequestsResponseDataRequestedMinutesString string
+
+const (
+	TimeOffListRequestsResponseDataRequestedMinutesStringInfinity  TimeOffListRequestsResponseDataRequestedMinutesString = "Infinity"
+	TimeOffListRequestsResponseDataRequestedMinutesStringInfinity2 TimeOffListRequestsResponseDataRequestedMinutesString = "-Infinity"
+	TimeOffListRequestsResponseDataRequestedMinutesStringNaN       TimeOffListRequestsResponseDataRequestedMinutesString = "NaN"
+)
+
+func (r TimeOffListRequestsResponseDataRequestedMinutesString) IsKnown() bool {
+	switch r {
+	case TimeOffListRequestsResponseDataRequestedMinutesStringInfinity, TimeOffListRequestsResponseDataRequestedMinutesStringInfinity2, TimeOffListRequestsResponseDataRequestedMinutesStringNaN:
 		return true
 	}
 	return false

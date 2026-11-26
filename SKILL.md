@@ -75,7 +75,7 @@ healthPlan, err := client.Benefits.HealthPlans.List(context.Background(), sdk.Be
 if err != nil {
 	var apiErr *sdk.Error
 	if errors.As(err, &apiErr) {
-		fmt.Println(apiErr.StatusCode, apiErr.RawJSON())
+		fmt.Println(apiErr.StatusCode, apiErr.JSON.RawJSON())
 	}
 	panic(err)
 }
@@ -89,5 +89,5 @@ if err != nil {
 
 ## Reference files
 
-- [README.md](./README.md) — full feature tour: client options, request options, retries and timeouts, logging.
+- [README.md](./README.md) — full feature tour: client options, request options, retries and timeouts, webhooks, logging.
 - [api.md](./api.md) — complete catalogue of every operation with request and response types.

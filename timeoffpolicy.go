@@ -8,13 +8,17 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"reflect"
 	"slices"
+
+	"github.com/tidwall/gjson"
 
 	"github.com/TeamWarp/warp-go-sdk/internal/apijson"
 	"github.com/TeamWarp/warp-go-sdk/internal/apiquery"
 	"github.com/TeamWarp/warp-go-sdk/internal/param"
 	"github.com/TeamWarp/warp-go-sdk/internal/requestconfig"
 	"github.com/TeamWarp/warp-go-sdk/option"
+	"github.com/TeamWarp/warp-go-sdk/shared"
 )
 
 // TimeOffPolicyService contains methods and other services that help with interacting
@@ -102,23 +106,23 @@ type TimeOffPolicyListParams struct {
 // URLQuery serializes [TimeOffPolicyListParams]'s query parameters as `url.Values`.
 func (r TimeOffPolicyListParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
 
 type TimeOffPolicyListResponse struct {
-	HasMore bool                            `json:"hasMore" api:"required"`
 	Count   int64                           `json:"count" api:"required"`
 	Data    []TimeOffPolicyListResponseData `json:"data" api:"required"`
+	HasMore bool                            `json:"hasMore" api:"required"`
 	JSON    timeOffPolicyListResponseJSON   `json:"-"`
 }
 
 // timeOffPolicyListResponseJSON contains the JSON metadata for the struct [TimeOffPolicyListResponse]
 type timeOffPolicyListResponseJSON struct {
-	HasMore     apijson.Field
 	Count       apijson.Field
 	Data        apijson.Field
+	HasMore     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -132,35 +136,35 @@ func (r timeOffPolicyListResponseJSON) RawJSON() string {
 }
 
 type TimeOffPolicyGetResponse struct {
-	ID                  string                           `json:"id" api:"required"`
-	TimeOffTypeID       string                           `json:"timeOffTypeId" api:"required"`
-	TimeOffTypeName     string                           `json:"timeOffTypeName" api:"required"`
-	Paid                bool                             `json:"paid" api:"required"`
-	IsUnlimited         bool                             `json:"isUnlimited" api:"required"`
-	Schedule            TimeOffPolicyGetResponseSchedule `json:"schedule" api:"required"`
-	Unit                TimeOffPolicyGetResponseUnit     `json:"unit" api:"required"`
-	Name                string                           `json:"name" api:"required"`
-	Description         string                           `json:"description" api:"required,nullable"`
-	HoursWorkedPerChunk interface{}                      `json:"hoursWorkedPerChunk" api:"required,nullable"`
-	MinutesPerChunk     interface{}                      `json:"minutesPerChunk" api:"required,nullable"`
-	MinutesPerPeriod    interface{}                      `json:"minutesPerPeriod" api:"required,nullable"`
-	JSON                timeOffPolicyGetResponseJSON     `json:"-"`
+	ID                  string                                           `json:"id" api:"required"`
+	Description         string                                           `json:"description" api:"required,nullable"`
+	HoursWorkedPerChunk TimeOffPolicyGetResponseHoursWorkedPerChunkUnion `json:"hoursWorkedPerChunk" api:"required,nullable"`
+	IsUnlimited         bool                                             `json:"isUnlimited" api:"required"`
+	MinutesPerChunk     TimeOffPolicyGetResponseMinutesPerChunkUnion     `json:"minutesPerChunk" api:"required,nullable"`
+	MinutesPerPeriod    TimeOffPolicyGetResponseMinutesPerPeriodUnion    `json:"minutesPerPeriod" api:"required,nullable"`
+	Name                string                                           `json:"name" api:"required"`
+	Paid                bool                                             `json:"paid" api:"required"`
+	Schedule            TimeOffPolicyGetResponseSchedule                 `json:"schedule" api:"required"`
+	TimeOffTypeID       string                                           `json:"timeOffTypeId" api:"required"`
+	TimeOffTypeName     string                                           `json:"timeOffTypeName" api:"required"`
+	Unit                TimeOffPolicyGetResponseUnit                     `json:"unit" api:"required"`
+	JSON                timeOffPolicyGetResponseJSON                     `json:"-"`
 }
 
 // timeOffPolicyGetResponseJSON contains the JSON metadata for the struct [TimeOffPolicyGetResponse]
 type timeOffPolicyGetResponseJSON struct {
 	ID                  apijson.Field
-	TimeOffTypeID       apijson.Field
-	TimeOffTypeName     apijson.Field
-	Paid                apijson.Field
-	IsUnlimited         apijson.Field
-	Schedule            apijson.Field
-	Unit                apijson.Field
-	Name                apijson.Field
 	Description         apijson.Field
 	HoursWorkedPerChunk apijson.Field
+	IsUnlimited         apijson.Field
 	MinutesPerChunk     apijson.Field
 	MinutesPerPeriod    apijson.Field
+	Name                apijson.Field
+	Paid                apijson.Field
+	Schedule            apijson.Field
+	TimeOffTypeID       apijson.Field
+	TimeOffTypeName     apijson.Field
+	Unit                apijson.Field
 	raw                 string
 	ExtraFields         map[string]apijson.Field
 }
@@ -174,35 +178,35 @@ func (r timeOffPolicyGetResponseJSON) RawJSON() string {
 }
 
 type TimeOffPolicyListResponseData struct {
-	ID                  string                                `json:"id" api:"required"`
-	TimeOffTypeID       string                                `json:"timeOffTypeId" api:"required"`
-	TimeOffTypeName     string                                `json:"timeOffTypeName" api:"required"`
-	Paid                bool                                  `json:"paid" api:"required"`
-	IsUnlimited         bool                                  `json:"isUnlimited" api:"required"`
-	Schedule            TimeOffPolicyListResponseDataSchedule `json:"schedule" api:"required"`
-	Unit                TimeOffPolicyListResponseDataUnit     `json:"unit" api:"required"`
-	Name                string                                `json:"name" api:"required"`
-	Description         string                                `json:"description" api:"required,nullable"`
-	HoursWorkedPerChunk interface{}                           `json:"hoursWorkedPerChunk" api:"required,nullable"`
-	MinutesPerChunk     interface{}                           `json:"minutesPerChunk" api:"required,nullable"`
-	MinutesPerPeriod    interface{}                           `json:"minutesPerPeriod" api:"required,nullable"`
-	JSON                timeOffPolicyListResponseDataJSON     `json:"-"`
+	ID                  string                                                `json:"id" api:"required"`
+	Description         string                                                `json:"description" api:"required,nullable"`
+	HoursWorkedPerChunk TimeOffPolicyListResponseDataHoursWorkedPerChunkUnion `json:"hoursWorkedPerChunk" api:"required,nullable"`
+	IsUnlimited         bool                                                  `json:"isUnlimited" api:"required"`
+	MinutesPerChunk     TimeOffPolicyListResponseDataMinutesPerChunkUnion     `json:"minutesPerChunk" api:"required,nullable"`
+	MinutesPerPeriod    TimeOffPolicyListResponseDataMinutesPerPeriodUnion    `json:"minutesPerPeriod" api:"required,nullable"`
+	Name                string                                                `json:"name" api:"required"`
+	Paid                bool                                                  `json:"paid" api:"required"`
+	Schedule            TimeOffPolicyListResponseDataSchedule                 `json:"schedule" api:"required"`
+	TimeOffTypeID       string                                                `json:"timeOffTypeId" api:"required"`
+	TimeOffTypeName     string                                                `json:"timeOffTypeName" api:"required"`
+	Unit                TimeOffPolicyListResponseDataUnit                     `json:"unit" api:"required"`
+	JSON                timeOffPolicyListResponseDataJSON                     `json:"-"`
 }
 
 // timeOffPolicyListResponseDataJSON contains the JSON metadata for the struct [TimeOffPolicyListResponseData]
 type timeOffPolicyListResponseDataJSON struct {
 	ID                  apijson.Field
-	TimeOffTypeID       apijson.Field
-	TimeOffTypeName     apijson.Field
-	Paid                apijson.Field
-	IsUnlimited         apijson.Field
-	Schedule            apijson.Field
-	Unit                apijson.Field
-	Name                apijson.Field
 	Description         apijson.Field
 	HoursWorkedPerChunk apijson.Field
+	IsUnlimited         apijson.Field
 	MinutesPerChunk     apijson.Field
 	MinutesPerPeriod    apijson.Field
+	Name                apijson.Field
+	Paid                apijson.Field
+	Schedule            apijson.Field
+	TimeOffTypeID       apijson.Field
+	TimeOffTypeName     apijson.Field
+	Unit                apijson.Field
 	raw                 string
 	ExtraFields         map[string]apijson.Field
 }
@@ -247,6 +251,75 @@ func (r TimeOffPolicyGetResponseUnit) IsKnown() bool {
 	return false
 }
 
+// Union satisfied by [shared.UnionFloat], [TimeOffPolicyGetResponseHoursWorkedPerChunkString].
+type TimeOffPolicyGetResponseHoursWorkedPerChunkUnion interface {
+	ImplementsTimeOffPolicyGetResponseHoursWorkedPerChunkUnion()
+}
+
+func (r TimeOffPolicyGetResponseHoursWorkedPerChunkString) ImplementsTimeOffPolicyGetResponseHoursWorkedPerChunkUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*TimeOffPolicyGetResponseHoursWorkedPerChunkUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(TimeOffPolicyGetResponseHoursWorkedPerChunkString("")),
+		},
+	)
+}
+
+// Union satisfied by [shared.UnionFloat], [TimeOffPolicyGetResponseMinutesPerChunkString].
+type TimeOffPolicyGetResponseMinutesPerChunkUnion interface {
+	ImplementsTimeOffPolicyGetResponseMinutesPerChunkUnion()
+}
+
+func (r TimeOffPolicyGetResponseMinutesPerChunkString) ImplementsTimeOffPolicyGetResponseMinutesPerChunkUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*TimeOffPolicyGetResponseMinutesPerChunkUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(TimeOffPolicyGetResponseMinutesPerChunkString("")),
+		},
+	)
+}
+
+// Union satisfied by [shared.UnionFloat], [TimeOffPolicyGetResponseMinutesPerPeriodString].
+type TimeOffPolicyGetResponseMinutesPerPeriodUnion interface {
+	ImplementsTimeOffPolicyGetResponseMinutesPerPeriodUnion()
+}
+
+func (r TimeOffPolicyGetResponseMinutesPerPeriodString) ImplementsTimeOffPolicyGetResponseMinutesPerPeriodUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*TimeOffPolicyGetResponseMinutesPerPeriodUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(TimeOffPolicyGetResponseMinutesPerPeriodString("")),
+		},
+	)
+}
+
 type TimeOffPolicyListResponseDataSchedule string
 
 const (
@@ -274,6 +347,171 @@ const (
 func (r TimeOffPolicyListResponseDataUnit) IsKnown() bool {
 	switch r {
 	case TimeOffPolicyListResponseDataUnitHour, TimeOffPolicyListResponseDataUnitDay:
+		return true
+	}
+	return false
+}
+
+// Union satisfied by [shared.UnionFloat], [TimeOffPolicyListResponseDataHoursWorkedPerChunkString].
+type TimeOffPolicyListResponseDataHoursWorkedPerChunkUnion interface {
+	ImplementsTimeOffPolicyListResponseDataHoursWorkedPerChunkUnion()
+}
+
+func (r TimeOffPolicyListResponseDataHoursWorkedPerChunkString) ImplementsTimeOffPolicyListResponseDataHoursWorkedPerChunkUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*TimeOffPolicyListResponseDataHoursWorkedPerChunkUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(TimeOffPolicyListResponseDataHoursWorkedPerChunkString("")),
+		},
+	)
+}
+
+// Union satisfied by [shared.UnionFloat], [TimeOffPolicyListResponseDataMinutesPerChunkString].
+type TimeOffPolicyListResponseDataMinutesPerChunkUnion interface {
+	ImplementsTimeOffPolicyListResponseDataMinutesPerChunkUnion()
+}
+
+func (r TimeOffPolicyListResponseDataMinutesPerChunkString) ImplementsTimeOffPolicyListResponseDataMinutesPerChunkUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*TimeOffPolicyListResponseDataMinutesPerChunkUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(TimeOffPolicyListResponseDataMinutesPerChunkString("")),
+		},
+	)
+}
+
+// Union satisfied by [shared.UnionFloat], [TimeOffPolicyListResponseDataMinutesPerPeriodString].
+type TimeOffPolicyListResponseDataMinutesPerPeriodUnion interface {
+	ImplementsTimeOffPolicyListResponseDataMinutesPerPeriodUnion()
+}
+
+func (r TimeOffPolicyListResponseDataMinutesPerPeriodString) ImplementsTimeOffPolicyListResponseDataMinutesPerPeriodUnion() {
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*TimeOffPolicyListResponseDataMinutesPerPeriodUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeOf(shared.UnionFloat(0)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(TimeOffPolicyListResponseDataMinutesPerPeriodString("")),
+		},
+	)
+}
+
+type TimeOffPolicyGetResponseHoursWorkedPerChunkString string
+
+const (
+	TimeOffPolicyGetResponseHoursWorkedPerChunkStringInfinity  TimeOffPolicyGetResponseHoursWorkedPerChunkString = "Infinity"
+	TimeOffPolicyGetResponseHoursWorkedPerChunkStringInfinity2 TimeOffPolicyGetResponseHoursWorkedPerChunkString = "-Infinity"
+	TimeOffPolicyGetResponseHoursWorkedPerChunkStringNaN       TimeOffPolicyGetResponseHoursWorkedPerChunkString = "NaN"
+)
+
+func (r TimeOffPolicyGetResponseHoursWorkedPerChunkString) IsKnown() bool {
+	switch r {
+	case TimeOffPolicyGetResponseHoursWorkedPerChunkStringInfinity, TimeOffPolicyGetResponseHoursWorkedPerChunkStringInfinity2, TimeOffPolicyGetResponseHoursWorkedPerChunkStringNaN:
+		return true
+	}
+	return false
+}
+
+type TimeOffPolicyGetResponseMinutesPerChunkString string
+
+const (
+	TimeOffPolicyGetResponseMinutesPerChunkStringInfinity  TimeOffPolicyGetResponseMinutesPerChunkString = "Infinity"
+	TimeOffPolicyGetResponseMinutesPerChunkStringInfinity2 TimeOffPolicyGetResponseMinutesPerChunkString = "-Infinity"
+	TimeOffPolicyGetResponseMinutesPerChunkStringNaN       TimeOffPolicyGetResponseMinutesPerChunkString = "NaN"
+)
+
+func (r TimeOffPolicyGetResponseMinutesPerChunkString) IsKnown() bool {
+	switch r {
+	case TimeOffPolicyGetResponseMinutesPerChunkStringInfinity, TimeOffPolicyGetResponseMinutesPerChunkStringInfinity2, TimeOffPolicyGetResponseMinutesPerChunkStringNaN:
+		return true
+	}
+	return false
+}
+
+type TimeOffPolicyGetResponseMinutesPerPeriodString string
+
+const (
+	TimeOffPolicyGetResponseMinutesPerPeriodStringInfinity  TimeOffPolicyGetResponseMinutesPerPeriodString = "Infinity"
+	TimeOffPolicyGetResponseMinutesPerPeriodStringInfinity2 TimeOffPolicyGetResponseMinutesPerPeriodString = "-Infinity"
+	TimeOffPolicyGetResponseMinutesPerPeriodStringNaN       TimeOffPolicyGetResponseMinutesPerPeriodString = "NaN"
+)
+
+func (r TimeOffPolicyGetResponseMinutesPerPeriodString) IsKnown() bool {
+	switch r {
+	case TimeOffPolicyGetResponseMinutesPerPeriodStringInfinity, TimeOffPolicyGetResponseMinutesPerPeriodStringInfinity2, TimeOffPolicyGetResponseMinutesPerPeriodStringNaN:
+		return true
+	}
+	return false
+}
+
+type TimeOffPolicyListResponseDataHoursWorkedPerChunkString string
+
+const (
+	TimeOffPolicyListResponseDataHoursWorkedPerChunkStringInfinity  TimeOffPolicyListResponseDataHoursWorkedPerChunkString = "Infinity"
+	TimeOffPolicyListResponseDataHoursWorkedPerChunkStringInfinity2 TimeOffPolicyListResponseDataHoursWorkedPerChunkString = "-Infinity"
+	TimeOffPolicyListResponseDataHoursWorkedPerChunkStringNaN       TimeOffPolicyListResponseDataHoursWorkedPerChunkString = "NaN"
+)
+
+func (r TimeOffPolicyListResponseDataHoursWorkedPerChunkString) IsKnown() bool {
+	switch r {
+	case TimeOffPolicyListResponseDataHoursWorkedPerChunkStringInfinity, TimeOffPolicyListResponseDataHoursWorkedPerChunkStringInfinity2, TimeOffPolicyListResponseDataHoursWorkedPerChunkStringNaN:
+		return true
+	}
+	return false
+}
+
+type TimeOffPolicyListResponseDataMinutesPerChunkString string
+
+const (
+	TimeOffPolicyListResponseDataMinutesPerChunkStringInfinity  TimeOffPolicyListResponseDataMinutesPerChunkString = "Infinity"
+	TimeOffPolicyListResponseDataMinutesPerChunkStringInfinity2 TimeOffPolicyListResponseDataMinutesPerChunkString = "-Infinity"
+	TimeOffPolicyListResponseDataMinutesPerChunkStringNaN       TimeOffPolicyListResponseDataMinutesPerChunkString = "NaN"
+)
+
+func (r TimeOffPolicyListResponseDataMinutesPerChunkString) IsKnown() bool {
+	switch r {
+	case TimeOffPolicyListResponseDataMinutesPerChunkStringInfinity, TimeOffPolicyListResponseDataMinutesPerChunkStringInfinity2, TimeOffPolicyListResponseDataMinutesPerChunkStringNaN:
+		return true
+	}
+	return false
+}
+
+type TimeOffPolicyListResponseDataMinutesPerPeriodString string
+
+const (
+	TimeOffPolicyListResponseDataMinutesPerPeriodStringInfinity  TimeOffPolicyListResponseDataMinutesPerPeriodString = "Infinity"
+	TimeOffPolicyListResponseDataMinutesPerPeriodStringInfinity2 TimeOffPolicyListResponseDataMinutesPerPeriodString = "-Infinity"
+	TimeOffPolicyListResponseDataMinutesPerPeriodStringNaN       TimeOffPolicyListResponseDataMinutesPerPeriodString = "NaN"
+)
+
+func (r TimeOffPolicyListResponseDataMinutesPerPeriodString) IsKnown() bool {
+	switch r {
+	case TimeOffPolicyListResponseDataMinutesPerPeriodStringInfinity, TimeOffPolicyListResponseDataMinutesPerPeriodStringInfinity2, TimeOffPolicyListResponseDataMinutesPerPeriodStringNaN:
 		return true
 	}
 	return false
