@@ -706,6 +706,8 @@ type WorkerCreatedWebhookEventData struct {
 	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
 	// The department the worker belongs to, or null if unassigned.
 	Department WorkerCreatedWebhookEventDataDepartment `json:"department" api:"required,nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerCreatedWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"required"`
 	// The "ui" name of a worker. If it's a business contractor business name is used.
 	// Otherwise we default to preferred name, then first-last.
 	DisplayName string `json:"displayName" api:"required"`
@@ -742,8 +744,6 @@ type WorkerCreatedWebhookEventData struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
-	// The worker's dietary restrictions. Empty when none are recorded.
-	DietaryRestrictions []WorkerCreatedWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerCreatedWebhookEventDataLevel `json:"level" api:"nullable"`
@@ -764,6 +764,7 @@ type workerCreatedWebhookEventDataJSON struct {
 	Compensation        apijson.Field
 	DateOfBirth         apijson.Field
 	Department          apijson.Field
+	DietaryRestrictions apijson.Field
 	DisplayName         apijson.Field
 	Email               apijson.Field
 	EndDate             apijson.Field
@@ -784,7 +785,6 @@ type workerCreatedWebhookEventDataJSON struct {
 	UpdatedAt           apijson.Field
 	WorkEmail           apijson.Field
 	CustomFields        apijson.Field
-	DietaryRestrictions apijson.Field
 	Level               apijson.Field
 	Manager             apijson.Field
 	TShirtSize          apijson.Field
@@ -1082,6 +1082,8 @@ type WorkerUpdatedWebhookEventData struct {
 	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
 	// The department the worker belongs to, or null if unassigned.
 	Department WorkerUpdatedWebhookEventDataDepartment `json:"department" api:"required,nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerUpdatedWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"required"`
 	// The "ui" name of a worker. If it's a business contractor business name is used.
 	// Otherwise we default to preferred name, then first-last.
 	DisplayName string `json:"displayName" api:"required"`
@@ -1118,8 +1120,6 @@ type WorkerUpdatedWebhookEventData struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
-	// The worker's dietary restrictions. Empty when none are recorded.
-	DietaryRestrictions []WorkerUpdatedWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerUpdatedWebhookEventDataLevel `json:"level" api:"nullable"`
@@ -1140,6 +1140,7 @@ type workerUpdatedWebhookEventDataJSON struct {
 	Compensation        apijson.Field
 	DateOfBirth         apijson.Field
 	Department          apijson.Field
+	DietaryRestrictions apijson.Field
 	DisplayName         apijson.Field
 	Email               apijson.Field
 	EndDate             apijson.Field
@@ -1160,7 +1161,6 @@ type workerUpdatedWebhookEventDataJSON struct {
 	UpdatedAt           apijson.Field
 	WorkEmail           apijson.Field
 	CustomFields        apijson.Field
-	DietaryRestrictions apijson.Field
 	Level               apijson.Field
 	Manager             apijson.Field
 	TShirtSize          apijson.Field
@@ -1458,6 +1458,8 @@ type WorkerDeletedWebhookEventData struct {
 	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
 	// The department the worker belongs to, or null if unassigned.
 	Department WorkerDeletedWebhookEventDataDepartment `json:"department" api:"required,nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerDeletedWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"required"`
 	// The "ui" name of a worker. If it's a business contractor business name is used.
 	// Otherwise we default to preferred name, then first-last.
 	DisplayName string `json:"displayName" api:"required"`
@@ -1494,8 +1496,6 @@ type WorkerDeletedWebhookEventData struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
-	// The worker's dietary restrictions. Empty when none are recorded.
-	DietaryRestrictions []WorkerDeletedWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerDeletedWebhookEventDataLevel `json:"level" api:"nullable"`
@@ -1516,6 +1516,7 @@ type workerDeletedWebhookEventDataJSON struct {
 	Compensation        apijson.Field
 	DateOfBirth         apijson.Field
 	Department          apijson.Field
+	DietaryRestrictions apijson.Field
 	DisplayName         apijson.Field
 	Email               apijson.Field
 	EndDate             apijson.Field
@@ -1536,7 +1537,6 @@ type workerDeletedWebhookEventDataJSON struct {
 	UpdatedAt           apijson.Field
 	WorkEmail           apijson.Field
 	CustomFields        apijson.Field
-	DietaryRestrictions apijson.Field
 	Level               apijson.Field
 	Manager             apijson.Field
 	TShirtSize          apijson.Field
@@ -1834,6 +1834,8 @@ type WorkerInviteSentWebhookEventData struct {
 	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
 	// The department the worker belongs to, or null if unassigned.
 	Department WorkerInviteSentWebhookEventDataDepartment `json:"department" api:"required,nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerInviteSentWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"required"`
 	// The "ui" name of a worker. If it's a business contractor business name is used.
 	// Otherwise we default to preferred name, then first-last.
 	DisplayName string `json:"displayName" api:"required"`
@@ -1870,8 +1872,6 @@ type WorkerInviteSentWebhookEventData struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
-	// The worker's dietary restrictions. Empty when none are recorded.
-	DietaryRestrictions []WorkerInviteSentWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerInviteSentWebhookEventDataLevel `json:"level" api:"nullable"`
@@ -1892,6 +1892,7 @@ type workerInviteSentWebhookEventDataJSON struct {
 	Compensation        apijson.Field
 	DateOfBirth         apijson.Field
 	Department          apijson.Field
+	DietaryRestrictions apijson.Field
 	DisplayName         apijson.Field
 	Email               apijson.Field
 	EndDate             apijson.Field
@@ -1912,7 +1913,6 @@ type workerInviteSentWebhookEventDataJSON struct {
 	UpdatedAt           apijson.Field
 	WorkEmail           apijson.Field
 	CustomFields        apijson.Field
-	DietaryRestrictions apijson.Field
 	Level               apijson.Field
 	Manager             apijson.Field
 	TShirtSize          apijson.Field
@@ -2210,6 +2210,8 @@ type WorkerInviteAcceptedWebhookEventData struct {
 	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
 	// The department the worker belongs to, or null if unassigned.
 	Department WorkerInviteAcceptedWebhookEventDataDepartment `json:"department" api:"required,nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerInviteAcceptedWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"required"`
 	// The "ui" name of a worker. If it's a business contractor business name is used.
 	// Otherwise we default to preferred name, then first-last.
 	DisplayName string `json:"displayName" api:"required"`
@@ -2246,8 +2248,6 @@ type WorkerInviteAcceptedWebhookEventData struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
-	// The worker's dietary restrictions. Empty when none are recorded.
-	DietaryRestrictions []WorkerInviteAcceptedWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerInviteAcceptedWebhookEventDataLevel `json:"level" api:"nullable"`
@@ -2268,6 +2268,7 @@ type workerInviteAcceptedWebhookEventDataJSON struct {
 	Compensation        apijson.Field
 	DateOfBirth         apijson.Field
 	Department          apijson.Field
+	DietaryRestrictions apijson.Field
 	DisplayName         apijson.Field
 	Email               apijson.Field
 	EndDate             apijson.Field
@@ -2288,7 +2289,6 @@ type workerInviteAcceptedWebhookEventDataJSON struct {
 	UpdatedAt           apijson.Field
 	WorkEmail           apijson.Field
 	CustomFields        apijson.Field
-	DietaryRestrictions apijson.Field
 	Level               apijson.Field
 	Manager             apijson.Field
 	TShirtSize          apijson.Field
@@ -2586,6 +2586,8 @@ type WorkerOnboardingCompletedWebhookEventData struct {
 	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
 	// The department the worker belongs to, or null if unassigned.
 	Department WorkerOnboardingCompletedWebhookEventDataDepartment `json:"department" api:"required,nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerOnboardingCompletedWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"required"`
 	// The "ui" name of a worker. If it's a business contractor business name is used.
 	// Otherwise we default to preferred name, then first-last.
 	DisplayName string `json:"displayName" api:"required"`
@@ -2622,8 +2624,6 @@ type WorkerOnboardingCompletedWebhookEventData struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
-	// The worker's dietary restrictions. Empty when none are recorded.
-	DietaryRestrictions []WorkerOnboardingCompletedWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerOnboardingCompletedWebhookEventDataLevel `json:"level" api:"nullable"`
@@ -2644,6 +2644,7 @@ type workerOnboardingCompletedWebhookEventDataJSON struct {
 	Compensation        apijson.Field
 	DateOfBirth         apijson.Field
 	Department          apijson.Field
+	DietaryRestrictions apijson.Field
 	DisplayName         apijson.Field
 	Email               apijson.Field
 	EndDate             apijson.Field
@@ -2664,7 +2665,6 @@ type workerOnboardingCompletedWebhookEventDataJSON struct {
 	UpdatedAt           apijson.Field
 	WorkEmail           apijson.Field
 	CustomFields        apijson.Field
-	DietaryRestrictions apijson.Field
 	Level               apijson.Field
 	Manager             apijson.Field
 	TShirtSize          apijson.Field
@@ -2962,6 +2962,8 @@ type WorkerOffboardingStartedWebhookEventData struct {
 	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
 	// The department the worker belongs to, or null if unassigned.
 	Department WorkerOffboardingStartedWebhookEventDataDepartment `json:"department" api:"required,nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerOffboardingStartedWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"required"`
 	// The "ui" name of a worker. If it's a business contractor business name is used.
 	// Otherwise we default to preferred name, then first-last.
 	DisplayName string `json:"displayName" api:"required"`
@@ -2998,8 +3000,6 @@ type WorkerOffboardingStartedWebhookEventData struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
-	// The worker's dietary restrictions. Empty when none are recorded.
-	DietaryRestrictions []WorkerOffboardingStartedWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerOffboardingStartedWebhookEventDataLevel `json:"level" api:"nullable"`
@@ -3020,6 +3020,7 @@ type workerOffboardingStartedWebhookEventDataJSON struct {
 	Compensation        apijson.Field
 	DateOfBirth         apijson.Field
 	Department          apijson.Field
+	DietaryRestrictions apijson.Field
 	DisplayName         apijson.Field
 	Email               apijson.Field
 	EndDate             apijson.Field
@@ -3040,7 +3041,6 @@ type workerOffboardingStartedWebhookEventDataJSON struct {
 	UpdatedAt           apijson.Field
 	WorkEmail           apijson.Field
 	CustomFields        apijson.Field
-	DietaryRestrictions apijson.Field
 	Level               apijson.Field
 	Manager             apijson.Field
 	TShirtSize          apijson.Field
@@ -3338,6 +3338,8 @@ type WorkerOffboardedWebhookEventData struct {
 	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
 	// The department the worker belongs to, or null if unassigned.
 	Department WorkerOffboardedWebhookEventDataDepartment `json:"department" api:"required,nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerOffboardedWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"required"`
 	// The "ui" name of a worker. If it's a business contractor business name is used.
 	// Otherwise we default to preferred name, then first-last.
 	DisplayName string `json:"displayName" api:"required"`
@@ -3374,8 +3376,6 @@ type WorkerOffboardedWebhookEventData struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
-	// The worker's dietary restrictions. Empty when none are recorded.
-	DietaryRestrictions []WorkerOffboardedWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerOffboardedWebhookEventDataLevel `json:"level" api:"nullable"`
@@ -3396,6 +3396,7 @@ type workerOffboardedWebhookEventDataJSON struct {
 	Compensation        apijson.Field
 	DateOfBirth         apijson.Field
 	Department          apijson.Field
+	DietaryRestrictions apijson.Field
 	DisplayName         apijson.Field
 	Email               apijson.Field
 	EndDate             apijson.Field
@@ -3416,7 +3417,6 @@ type workerOffboardedWebhookEventDataJSON struct {
 	UpdatedAt           apijson.Field
 	WorkEmail           apijson.Field
 	CustomFields        apijson.Field
-	DietaryRestrictions apijson.Field
 	Level               apijson.Field
 	Manager             apijson.Field
 	TShirtSize          apijson.Field
@@ -3714,6 +3714,8 @@ type WorkerReactivatedWebhookEventData struct {
 	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
 	// The department the worker belongs to, or null if unassigned.
 	Department WorkerReactivatedWebhookEventDataDepartment `json:"department" api:"required,nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerReactivatedWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"required"`
 	// The "ui" name of a worker. If it's a business contractor business name is used.
 	// Otherwise we default to preferred name, then first-last.
 	DisplayName string `json:"displayName" api:"required"`
@@ -3750,8 +3752,6 @@ type WorkerReactivatedWebhookEventData struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
-	// The worker's dietary restrictions. Empty when none are recorded.
-	DietaryRestrictions []WorkerReactivatedWebhookEventDataDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerReactivatedWebhookEventDataLevel `json:"level" api:"nullable"`
@@ -3772,6 +3772,7 @@ type workerReactivatedWebhookEventDataJSON struct {
 	Compensation        apijson.Field
 	DateOfBirth         apijson.Field
 	Department          apijson.Field
+	DietaryRestrictions apijson.Field
 	DisplayName         apijson.Field
 	Email               apijson.Field
 	EndDate             apijson.Field
@@ -3792,7 +3793,6 @@ type workerReactivatedWebhookEventDataJSON struct {
 	UpdatedAt           apijson.Field
 	WorkEmail           apijson.Field
 	CustomFields        apijson.Field
-	DietaryRestrictions apijson.Field
 	Level               apijson.Field
 	Manager             apijson.Field
 	TShirtSize          apijson.Field

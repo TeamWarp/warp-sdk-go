@@ -2280,6 +2280,8 @@ type WorkerUpdateResponse struct {
 	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
 	// The department the worker belongs to, or null if unassigned.
 	Department WorkerUpdateResponseDepartment `json:"department" api:"required,nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerUpdateResponseDietaryRestriction `json:"dietaryRestrictions" api:"required"`
 	// The "ui" name of a worker. If it's a business contractor business name is used.
 	// Otherwise we default to preferred name, then first-last.
 	DisplayName string `json:"displayName" api:"required"`
@@ -2316,8 +2318,6 @@ type WorkerUpdateResponse struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
-	// The worker's dietary restrictions. Empty when none are recorded.
-	DietaryRestrictions []WorkerUpdateResponseDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerUpdateResponseLevel `json:"level" api:"nullable"`
@@ -2338,6 +2338,7 @@ type workerUpdateResponseJSON struct {
 	Compensation        apijson.Field
 	DateOfBirth         apijson.Field
 	Department          apijson.Field
+	DietaryRestrictions apijson.Field
 	DisplayName         apijson.Field
 	Email               apijson.Field
 	EndDate             apijson.Field
@@ -2358,7 +2359,6 @@ type workerUpdateResponseJSON struct {
 	UpdatedAt           apijson.Field
 	WorkEmail           apijson.Field
 	CustomFields        apijson.Field
-	DietaryRestrictions apijson.Field
 	Level               apijson.Field
 	Manager             apijson.Field
 	TShirtSize          apijson.Field
@@ -2391,6 +2391,8 @@ type WorkerGetResponse struct {
 	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
 	// The department the worker belongs to, or null if unassigned.
 	Department WorkerGetResponseDepartment `json:"department" api:"required,nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerGetResponseDietaryRestriction `json:"dietaryRestrictions" api:"required"`
 	// The "ui" name of a worker. If it's a business contractor business name is used.
 	// Otherwise we default to preferred name, then first-last.
 	DisplayName string `json:"displayName" api:"required"`
@@ -2427,8 +2429,6 @@ type WorkerGetResponse struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
-	// The worker's dietary restrictions. Empty when none are recorded.
-	DietaryRestrictions []WorkerGetResponseDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerGetResponseLevel `json:"level" api:"nullable"`
@@ -2449,6 +2449,7 @@ type workerGetResponseJSON struct {
 	Compensation        apijson.Field
 	DateOfBirth         apijson.Field
 	Department          apijson.Field
+	DietaryRestrictions apijson.Field
 	DisplayName         apijson.Field
 	Email               apijson.Field
 	EndDate             apijson.Field
@@ -2469,7 +2470,6 @@ type workerGetResponseJSON struct {
 	UpdatedAt           apijson.Field
 	WorkEmail           apijson.Field
 	CustomFields        apijson.Field
-	DietaryRestrictions apijson.Field
 	Level               apijson.Field
 	Manager             apijson.Field
 	TShirtSize          apijson.Field
@@ -2526,6 +2526,8 @@ type WorkerNewEmployeeResponse struct {
 	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
 	// The department the worker belongs to, or null if unassigned.
 	Department WorkerNewEmployeeResponseDepartment `json:"department" api:"required,nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerNewEmployeeResponseDietaryRestriction `json:"dietaryRestrictions" api:"required"`
 	// The "ui" name of a worker. If it's a business contractor business name is used.
 	// Otherwise we default to preferred name, then first-last.
 	DisplayName string `json:"displayName" api:"required"`
@@ -2562,8 +2564,6 @@ type WorkerNewEmployeeResponse struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
-	// The worker's dietary restrictions. Empty when none are recorded.
-	DietaryRestrictions []WorkerNewEmployeeResponseDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerNewEmployeeResponseLevel `json:"level" api:"nullable"`
@@ -2584,6 +2584,7 @@ type workerNewEmployeeResponseJSON struct {
 	Compensation        apijson.Field
 	DateOfBirth         apijson.Field
 	Department          apijson.Field
+	DietaryRestrictions apijson.Field
 	DisplayName         apijson.Field
 	Email               apijson.Field
 	EndDate             apijson.Field
@@ -2604,7 +2605,6 @@ type workerNewEmployeeResponseJSON struct {
 	UpdatedAt           apijson.Field
 	WorkEmail           apijson.Field
 	CustomFields        apijson.Field
-	DietaryRestrictions apijson.Field
 	Level               apijson.Field
 	Manager             apijson.Field
 	TShirtSize          apijson.Field
@@ -2637,6 +2637,8 @@ type WorkerNewContractorResponse struct {
 	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
 	// The department the worker belongs to, or null if unassigned.
 	Department WorkerNewContractorResponseDepartment `json:"department" api:"required,nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerNewContractorResponseDietaryRestriction `json:"dietaryRestrictions" api:"required"`
 	// The "ui" name of a worker. If it's a business contractor business name is used.
 	// Otherwise we default to preferred name, then first-last.
 	DisplayName string `json:"displayName" api:"required"`
@@ -2673,8 +2675,6 @@ type WorkerNewContractorResponse struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
-	// The worker's dietary restrictions. Empty when none are recorded.
-	DietaryRestrictions []WorkerNewContractorResponseDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerNewContractorResponseLevel `json:"level" api:"nullable"`
@@ -2695,6 +2695,7 @@ type workerNewContractorResponseJSON struct {
 	Compensation        apijson.Field
 	DateOfBirth         apijson.Field
 	Department          apijson.Field
+	DietaryRestrictions apijson.Field
 	DisplayName         apijson.Field
 	Email               apijson.Field
 	EndDate             apijson.Field
@@ -2715,7 +2716,6 @@ type workerNewContractorResponseJSON struct {
 	UpdatedAt           apijson.Field
 	WorkEmail           apijson.Field
 	CustomFields        apijson.Field
-	DietaryRestrictions apijson.Field
 	Level               apijson.Field
 	Manager             apijson.Field
 	TShirtSize          apijson.Field
@@ -2748,6 +2748,8 @@ type WorkerInviteResponse struct {
 	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
 	// The department the worker belongs to, or null if unassigned.
 	Department WorkerInviteResponseDepartment `json:"department" api:"required,nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerInviteResponseDietaryRestriction `json:"dietaryRestrictions" api:"required"`
 	// The "ui" name of a worker. If it's a business contractor business name is used.
 	// Otherwise we default to preferred name, then first-last.
 	DisplayName string `json:"displayName" api:"required"`
@@ -2784,8 +2786,6 @@ type WorkerInviteResponse struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
-	// The worker's dietary restrictions. Empty when none are recorded.
-	DietaryRestrictions []WorkerInviteResponseDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerInviteResponseLevel `json:"level" api:"nullable"`
@@ -2806,6 +2806,7 @@ type workerInviteResponseJSON struct {
 	Compensation        apijson.Field
 	DateOfBirth         apijson.Field
 	Department          apijson.Field
+	DietaryRestrictions apijson.Field
 	DisplayName         apijson.Field
 	Email               apijson.Field
 	EndDate             apijson.Field
@@ -2826,7 +2827,6 @@ type workerInviteResponseJSON struct {
 	UpdatedAt           apijson.Field
 	WorkEmail           apijson.Field
 	CustomFields        apijson.Field
-	DietaryRestrictions apijson.Field
 	Level               apijson.Field
 	Manager             apijson.Field
 	TShirtSize          apijson.Field
@@ -3483,6 +3483,8 @@ type WorkerListResponseData struct {
 	DateOfBirth string `json:"dateOfBirth" api:"required,nullable"`
 	// The department the worker belongs to, or null if unassigned.
 	Department WorkerListResponseDataDepartment `json:"department" api:"required,nullable"`
+	// The worker's dietary restrictions. Empty when none are recorded.
+	DietaryRestrictions []WorkerListResponseDataDietaryRestriction `json:"dietaryRestrictions" api:"required"`
 	// The "ui" name of a worker. If it's a business contractor business name is used.
 	// Otherwise we default to preferred name, then first-last.
 	DisplayName string `json:"displayName" api:"required"`
@@ -3519,8 +3521,6 @@ type WorkerListResponseData struct {
 	// redacted true) rather than omitted, so the list is identical across keys. Empty
 	// when the company has no custom fields.
 	CustomFields []PublicWorkerCustomField `json:"customFields" api:"nullable"`
-	// The worker's dietary restrictions. Empty when none are recorded.
-	DietaryRestrictions []WorkerListResponseDataDietaryRestriction `json:"dietaryRestrictions" api:"nullable"`
 	// The worker's assigned job level, or null if unassigned. Omitted when job levels
 	// are not enabled.
 	Level WorkerListResponseDataLevel `json:"level" api:"nullable"`
@@ -3541,6 +3541,7 @@ type workerListResponseDataJSON struct {
 	Compensation        apijson.Field
 	DateOfBirth         apijson.Field
 	Department          apijson.Field
+	DietaryRestrictions apijson.Field
 	DisplayName         apijson.Field
 	Email               apijson.Field
 	EndDate             apijson.Field
@@ -3561,7 +3562,6 @@ type workerListResponseDataJSON struct {
 	UpdatedAt           apijson.Field
 	WorkEmail           apijson.Field
 	CustomFields        apijson.Field
-	DietaryRestrictions apijson.Field
 	Level               apijson.Field
 	Manager             apijson.Field
 	TShirtSize          apijson.Field
